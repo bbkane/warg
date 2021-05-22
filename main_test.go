@@ -6,14 +6,14 @@ import (
 	"testing"
 )
 
-func TestRootCommand_Parse(t *testing.T) {
+func TestApp_Parse(t *testing.T) {
 
 	type args struct {
 		args []string
 	}
 	tests := []struct {
 		name              string
-		command           App
+		app               App
 		args              []string
 		passedCommandWant []string
 		passedFlagsWant   FlagMap
@@ -21,13 +21,13 @@ func TestRootCommand_Parse(t *testing.T) {
 	}{
 		{
 			name: "from main",
-			command: App{
-				Name: "rc",
-				Flags: FlagMap{
-					"--rcf1": Flag{},
-				},
-				Commands: CommandMap{},
-				Categories: CategoryMap{
+			app: func() App {
+				app, _ := NewApp(
+					"app",
+					AppFlag("af1", Flag{}),
+				)
+				app.Commands = CommandMap{}
+				app.Categories = CategoryMap{
 					"sc1": Category{
 						Flags: FlagMap{},
 						Commands: CommandMap{
@@ -38,8 +38,9 @@ func TestRootCommand_Parse(t *testing.T) {
 							},
 						},
 					},
-				},
-			},
+				}
+				return *app
+			}(),
 			args:              []string{"rc", "sc1", "lc1", "--lc1f1", "flagarg"},
 			passedCommandWant: []string{"sc1", "lc1"},
 			passedFlagsWant:   FlagMap{"--lc1f1": Flag{Value: "flagarg"}},
@@ -49,7 +50,7 @@ func TestRootCommand_Parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			got, got1, err := tt.command.Parse(tt.args)
+			got, got1, err := tt.app.Parse(tt.args)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("RootCommand.Parse() error = %v, wantErr %v", err, tt.wantErr)
 				return

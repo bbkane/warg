@@ -32,10 +32,32 @@ type App struct {
 	Categories CategoryMap
 }
 
-func NewApp(name string, opts ...func(*App)) (*App, error) {
-	rootCmd := App{Name: name}
+type AppOpt = func(*App) error
+
+func AppFlag(name string, value Flag) AppOpt {
+	return func(app *App) error {
+		if _, alreadyThere := app.Flags[name]; !alreadyThere {
+			app.Flags[name] = value
+			return nil
+		} else {
+			return fmt.Errorf("flag already entered: %#v\n", name)
+		}
+
+	}
+}
+
+func NewApp(name string, opts ...AppOpt) (*App, error) {
+	rootCmd := App{
+		Name:       name,
+		Flags:      make(map[string]Flag),
+		Categories: make(map[string]Category),
+		Commands:   make(map[string]Command),
+	}
 	for _, opt := range opts {
-		opt(&rootCmd)
+		err := opt(&rootCmd)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &rootCmd, nil
 }
@@ -69,37 +91,4 @@ func (app *App) Parse(args []string) ([]string, FlagMap, error) {
 		}
 	}
 	return passedCommand, passedFlags, nil
-}
-
-func main() {
-
-	app := App{
-		Name: "rc",
-		Flags: FlagMap{
-			"--rcf1": Flag{},
-		},
-		Commands: CommandMap{},
-		Categories: CategoryMap{
-			"sc1": Category{
-				Flags: FlagMap{},
-				Commands: CommandMap{
-					"lc1": Command{
-						Flags: FlagMap{
-							"--lc1f1": Flag{},
-						},
-					},
-				},
-			},
-		},
-	}
-
-	args := []string{"rc", "sc1", "lc1", "--lc1f1", "flagarg"}
-	// args = []string{"rc", "--unexpected", "sc1", "lc1", "--lc1f1", "flagarg"}
-
-	passedCommand, passedFlags, err := app.Parse(args)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%#v\n", passedCommand)
-	fmt.Printf("%#v\n", passedFlags)
 }
