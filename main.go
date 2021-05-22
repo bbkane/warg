@@ -3,7 +3,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 )
 
 type FlagMap = map[string]Flag
@@ -11,7 +10,8 @@ type LeafCommandMap = map[string]LeafCommand
 type SubCommandMap = map[string]SubCommand
 
 type Flag struct {
-	Value string // what's stored it the flag
+	// Value holds what gets passed to the flag: --myflag value
+	Value string
 }
 
 type LeafCommand struct {
@@ -31,28 +31,7 @@ type RootCommand struct {
 	SubCommands  SubCommandMap
 }
 
-func main() {
-	command := RootCommand{
-		Value: "rc",
-		Flags: FlagMap{
-			"--rcf1": Flag{},
-		},
-		LeafCommands: map[string]LeafCommand{},
-		SubCommands: map[string]SubCommand{
-			"sc1": SubCommand{
-				Flags: nil,
-				LeafCommands: map[string]LeafCommand{
-					"lc1": LeafCommand{
-						Flags: map[string]Flag{
-							"--lc1f1": Flag{},
-						},
-					},
-				},
-			},
-		},
-	}
-	args := []string{"rc", "sc1", "lc1", "--lc1f1", "flagarg"}
-	// args = []string{"rc", "--unexpected", "sc1", "lc1", "--lc1f1", "flagarg"}
+func (command *RootCommand) Parse(args []string) ([]string, FlagMap, error) {
 
 	// TODO: I'd like flags to be callable in any order after their command is called
 	// so instead of reassigning allowedFlags, merge it with the new one
@@ -77,8 +56,40 @@ func main() {
 			allowedLeafCommands = subCommand.LeafCommands
 			allowedSubCommands = subCommand.SubCommands
 		} else {
-			log.Fatalf("unexpected string: %#v\n", val)
+			return nil, nil, fmt.Errorf("unexpected string: %#v\n", val)
 		}
+	}
+	return passedCommand, passedFlags, nil
+}
+
+func main() {
+
+	command := RootCommand{
+		Value: "rc",
+		Flags: FlagMap{
+			"--rcf1": Flag{},
+		},
+		LeafCommands: LeafCommandMap{},
+		SubCommands: SubCommandMap{
+			"sc1": SubCommand{
+				Flags: FlagMap{},
+				LeafCommands: LeafCommandMap{
+					"lc1": LeafCommand{
+						Flags: FlagMap{
+							"--lc1f1": Flag{},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	args := []string{"rc", "sc1", "lc1", "--lc1f1", "flagarg"}
+	// args = []string{"rc", "--unexpected", "sc1", "lc1", "--lc1f1", "flagarg"}
+
+	passedCommand, passedFlags, err := command.Parse(args)
+	if err != nil {
+		panic(err)
 	}
 	fmt.Printf("%#v\n", passedCommand)
 	fmt.Printf("%#v\n", passedFlags)
