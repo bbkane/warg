@@ -13,7 +13,7 @@ func TestRootCommand_Parse(t *testing.T) {
 	}
 	tests := []struct {
 		name              string
-		command           RootCommand
+		command           App
 		args              []string
 		passedCommandWant []string
 		passedFlagsWant   FlagMap
@@ -21,17 +21,17 @@ func TestRootCommand_Parse(t *testing.T) {
 	}{
 		{
 			name: "from main",
-			command: RootCommand{
-				Value: "rc",
+			command: App{
+				Name: "rc",
 				Flags: FlagMap{
 					"--rcf1": Flag{},
 				},
-				LeafCommands: LeafCommandMap{},
-				SubCommands: SubCommandMap{
-					"sc1": SubCommand{
+				Commands: CommandMap{},
+				Categories: CategoryMap{
+					"sc1": Category{
 						Flags: FlagMap{},
-						LeafCommands: LeafCommandMap{
-							"lc1": LeafCommand{
+						Commands: CommandMap{
+							"lc1": Command{
 								Flags: FlagMap{
 									"--lc1f1": Flag{},
 								},

@@ -1,3 +1,4 @@
+///usr/bin/true; exec /usr/bin/env go test ./...
 ///usr/bin/true; exec /usr/bin/env go run "$0" .
 package main
 
@@ -6,38 +7,46 @@ import (
 )
 
 type FlagMap = map[string]Flag
-type LeafCommandMap = map[string]LeafCommand
-type SubCommandMap = map[string]SubCommand
+type CommandMap = map[string]Command
+type CategoryMap = map[string]Category
 
 type Flag struct {
 	// Value holds what gets passed to the flag: --myflag value
 	Value string
 }
 
-type LeafCommand struct {
+type Command struct {
 	Flags FlagMap
 }
 
-type SubCommand struct {
-	Flags        FlagMap // Do subcommands need flags? leaf commands are the ones that do work....
-	LeafCommands LeafCommandMap
-	SubCommands  SubCommandMap
+type Category struct {
+	Flags      FlagMap // Do subcommands need flags? leaf commands are the ones that do work....
+	Commands   CommandMap
+	Categories CategoryMap
 }
 
-type RootCommand struct {
-	Value        string
-	Flags        FlagMap
-	LeafCommands LeafCommandMap
-	SubCommands  SubCommandMap
+type App struct {
+	Name       string
+	Flags      FlagMap
+	Commands   CommandMap
+	Categories CategoryMap
 }
 
-func (command *RootCommand) Parse(args []string) ([]string, FlagMap, error) {
+func NewApp(name string, opts ...func(*App)) (*App, error) {
+	rootCmd := App{Name: name}
+	for _, opt := range opts {
+		opt(&rootCmd)
+	}
+	return &rootCmd, nil
+}
+
+func (app *App) Parse(args []string) ([]string, FlagMap, error) {
 
 	// TODO: I'd like flags to be callable in any order after their command is called
 	// so instead of reassigning allowedFlags, merge it with the new one
-	allowedFlags := command.Flags
-	allowedLeafCommands := command.LeafCommands
-	allowedSubCommands := command.SubCommands
+	allowedFlags := app.Flags
+	allowedCommands := app.Commands
+	allowedCategories := app.Categories
 	passedFlags := make(FlagMap)
 	passedCommand := make([]string, 0, len(args)-1)
 	for i := 1; i < len(args); i = i + 1 {
@@ -45,16 +54,16 @@ func (command *RootCommand) Parse(args []string) ([]string, FlagMap, error) {
 		if _, ok := allowedFlags[val]; ok {
 			passedFlags[val] = Flag{Value: args[i+1]} // TODO: what if someone passes a flag without a value
 			i += 1
-		} else if leafCommand, ok := allowedLeafCommands[val]; ok {
+		} else if command, ok := allowedCommands[val]; ok {
 			passedCommand = append(passedCommand, val)
-			allowedFlags = leafCommand.Flags
-			allowedLeafCommands = nil
-			allowedSubCommands = nil
-		} else if subCommand, ok := allowedSubCommands[val]; ok {
+			allowedFlags = command.Flags
+			allowedCommands = nil
+			allowedCategories = nil
+		} else if category, ok := allowedCategories[val]; ok {
 			passedCommand = append(passedCommand, val)
-			allowedFlags = subCommand.Flags
-			allowedLeafCommands = subCommand.LeafCommands
-			allowedSubCommands = subCommand.SubCommands
+			allowedFlags = category.Flags
+			allowedCommands = category.Commands
+			allowedCategories = category.Categories
 		} else {
 			return nil, nil, fmt.Errorf("unexpected string: %#v\n", val)
 		}
@@ -64,17 +73,17 @@ func (command *RootCommand) Parse(args []string) ([]string, FlagMap, error) {
 
 func main() {
 
-	command := RootCommand{
-		Value: "rc",
+	app := App{
+		Name: "rc",
 		Flags: FlagMap{
 			"--rcf1": Flag{},
 		},
-		LeafCommands: LeafCommandMap{},
-		SubCommands: SubCommandMap{
-			"sc1": SubCommand{
+		Commands: CommandMap{},
+		Categories: CategoryMap{
+			"sc1": Category{
 				Flags: FlagMap{},
-				LeafCommands: LeafCommandMap{
-					"lc1": LeafCommand{
+				Commands: CommandMap{
+					"lc1": Command{
 						Flags: FlagMap{
 							"--lc1f1": Flag{},
 						},
@@ -87,7 +96,7 @@ func main() {
 	args := []string{"rc", "sc1", "lc1", "--lc1f1", "flagarg"}
 	// args = []string{"rc", "--unexpected", "sc1", "lc1", "--lc1f1", "flagarg"}
 
-	passedCommand, passedFlags, err := command.Parse(args)
+	passedCommand, passedFlags, err := app.Parse(args)
 	if err != nil {
 		panic(err)
 	}

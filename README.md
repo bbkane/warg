@@ -11,4 +11,12 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 # Other names
 
 - clinch
-- argumeant
+- argyoumeant
+
+# Links
+
+- https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
+- https://dave.cheney.net/2016/11/13/do-not-fear-first-class-functions
+- https://commandcenter.blogspot.com/2014/01/self-referential-functions-and-design.html
+
+# Scratch
