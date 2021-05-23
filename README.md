@@ -2,8 +2,7 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # Next Steps
 
-- use panics instead of errors in tree creation - No clean way to deal with
-  errors and the tree should always be constructed correctly anyway
+- Try to reduce nesting by removing most "New" functions and bake them into the caller
 - Get function creation
 - Start help pages?
 - Web form

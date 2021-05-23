@@ -21,29 +21,28 @@ func TestApp_Parse(t *testing.T) {
 	}{
 		{
 			name: "from main",
-			app: func() App {
-				app, err := NewApp(
-					"app",
-					AppFlag("--af1", Flag{}),
-					AppCategory("cat1",
-						Category{
-							Flags: FlagMap{},
-							Commands: CommandMap{
-								"com1": Command{
-									Flags: FlagMap{
-										"--com1f1": Flag{},
-									},
-								},
-							},
-						},
+			app: NewApp(
+				"app",
+				AppFlag(
+					"--af1",
+					Flag{},
+				),
+				AppCategory(
+					"cat1",
+					NewCategory(
+						CategoryCommand(
+							"com1",
+							NewCommand(
+								CommandFlag(
+									"--com1f1",
+									Flag{},
+								),
+							),
+						),
 					),
-				)
+				),
+			),
 
-				if err != nil {
-					t.Fatalf("App setup error: err = %#v\n", err)
-				}
-				return *app
-			}(),
 			args:              []string{"app", "cat1", "com1", "--com1f1", "flagarg"},
 			passedCommandWant: []string{"cat1", "com1"},
 			passedFlagsWant:   FlagMap{"--com1f1": Flag{Value: "flagarg"}},
