@@ -21,25 +21,26 @@ func TestApp_Parse(t *testing.T) {
 	}{
 		{
 			name: "from main",
-			app: NewApp(
-				"app",
-				AppFlag(
-					"--af1",
-					FlagValue{},
-				),
-				AppCategoryWith(
-					"cat1",
-					CategoryCommand(
-						"com1",
-						NewCommand(
-							CommandFlag(
+
+			app: App{
+				Name: "app",
+				RootCategory: NewCategory(
+					AddCategoryFlag(
+						"--af1",
+						FlagValue{},
+					),
+					WithCategory(
+						"cat1",
+						WithCommand(
+							"com1",
+							AddCommandFlag(
 								"--com1f1",
 								FlagValue{},
 							),
 						),
 					),
 				),
-			),
+			},
 
 			args:              []string{"app", "cat1", "com1", "--com1f1", "flagarg"},
 			passedCommandWant: []string{"cat1", "com1"},
@@ -50,7 +51,7 @@ func TestApp_Parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			got, got1, err := tt.app.Parse(tt.args)
+			got, got1, err := tt.app.RootCategory.Parse(tt.args)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("RootCommand.Parse() error = %v, wantErr %v", err, tt.wantErr)
 				return

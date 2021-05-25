@@ -27,17 +27,14 @@ type CategoryValue struct {
 }
 
 type App struct {
-	Name       string
-	Flags      FlagMap
-	Commands   CommandMap
-	Categories CategoryMap
+	Name         string
+	RootCategory CategoryValue
 }
 
-type AppOpt = func(*App)
 type CategoryOpt = func(*CategoryValue)
 type CommandOpt = func(*CommandValue)
 
-func CommandFlag(name string, value FlagValue) CommandOpt {
+func AddCommandFlag(name string, value FlagValue) CommandOpt {
 	return func(app *CommandValue) {
 		if _, alreadyThere := app.Flags[name]; !alreadyThere {
 			app.Flags[name] = value
@@ -47,7 +44,7 @@ func CommandFlag(name string, value FlagValue) CommandOpt {
 	}
 }
 
-func CategoryFlag(name string, value FlagValue) CategoryOpt {
+func AddCategoryFlag(name string, value FlagValue) CategoryOpt {
 	return func(app *CategoryValue) {
 		if _, alreadyThere := app.Flags[name]; !alreadyThere {
 			app.Flags[name] = value
@@ -58,18 +55,11 @@ func CategoryFlag(name string, value FlagValue) CategoryOpt {
 	}
 }
 
-func AppFlag(name string, value FlagValue) AppOpt {
-	return func(app *App) {
-		if _, alreadyThere := app.Flags[name]; !alreadyThere {
-			app.Flags[name] = value
-		} else {
-			log.Fatalf("flag already exists: %#v\n", name)
-		}
-
-	}
+func WithCategory(name string, opts ...CategoryOpt) CategoryOpt {
+	return AddCategory(name, NewCategory(opts...))
 }
 
-func CategoryCategory(name string, value CategoryValue) CategoryOpt {
+func AddCategory(name string, value CategoryValue) CategoryOpt {
 	return func(app *CategoryValue) {
 		if _, alreadyThere := app.Categories[name]; !alreadyThere {
 			app.Categories[name] = value
@@ -79,36 +69,12 @@ func CategoryCategory(name string, value CategoryValue) CategoryOpt {
 	}
 }
 
-func AppCategoryWith(name string, opts ...CategoryOpt) AppOpt {
-	return AppCategory(name, NewCategory(opts...))
+func WithCommand(name string, opts ...CommandOpt) CategoryOpt {
+	return AddCommand(name, NewCommand(opts...))
 }
 
-func AppCategory(name string, value CategoryValue) AppOpt {
-	return func(app *App) {
-		if _, alreadyThere := app.Categories[name]; !alreadyThere {
-			app.Categories[name] = value
-		} else {
-			log.Fatalf("category already exists: %#v\n", name)
-		}
-	}
-}
-
-func CategoryCommand(name string, value CommandValue) CategoryOpt {
+func AddCommand(name string, value CommandValue) CategoryOpt {
 	return func(app *CategoryValue) {
-		if _, alreadyThere := app.Commands[name]; !alreadyThere {
-			app.Commands[name] = value
-		} else {
-			log.Fatalf("command already exists: %#v\n", name)
-		}
-	}
-}
-
-func AppCommandWith(name string, opts ...CommandOpt) AppOpt {
-	return AppCommand(name, NewCommand(opts...))
-}
-
-func AppCommand(name string, value CommandValue) AppOpt {
-	return func(app *App) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
 		} else {
@@ -139,20 +105,7 @@ func NewCategory(opts ...CategoryOpt) CategoryValue {
 	return category
 }
 
-func NewApp(name string, opts ...AppOpt) App {
-	app := App{
-		Name:       name,
-		Flags:      make(map[string]FlagValue),
-		Categories: make(map[string]CategoryValue),
-		Commands:   make(map[string]CommandValue),
-	}
-	for _, opt := range opts {
-		opt(&app)
-	}
-	return app
-}
-
-func (app *App) Parse(args []string) ([]string, FlagMap, error) {
+func (app *CategoryValue) Parse(args []string) ([]string, FlagMap, error) {
 
 	// TODO: I'd like flags to be callable in any order after their command is called
 	// so instead of reassigning allowedFlags, merge it with the new one
