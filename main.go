@@ -7,17 +7,16 @@ import (
 	"log"
 )
 
-type FlagMap = map[string]FlagValue
-type CommandMap = map[string]CommandValue
 type CategoryMap = map[string]CategoryValue
+type CommandMap = map[string]CommandValue
+type FlagMap = map[string]FlagValue
 
-type FlagValue struct {
-	// Value holds what gets passed to the flag: --myflag value
-	Value string
-}
+type CategoryOpt = func(*CategoryValue)
+type CommandOpt = func(*CommandValue)
 
-type CommandValue struct {
-	Flags FlagMap
+type App struct {
+	Name         string
+	RootCategory CategoryValue
 }
 
 type CategoryValue struct {
@@ -25,21 +24,30 @@ type CategoryValue struct {
 	Commands   CommandMap
 	Categories CategoryMap
 }
-
-type App struct {
-	Name         string
-	RootCategory CategoryValue
+type CommandValue struct {
+	Flags FlagMap
+}
+type FlagValue struct {
+	// Value holds what gets passed to the flag: --myflag value
+	Value string
 }
 
-type CategoryOpt = func(*CategoryValue)
-type CommandOpt = func(*CommandValue)
-
-func AddCommandFlag(name string, value FlagValue) CommandOpt {
-	return func(app *CommandValue) {
-		if _, alreadyThere := app.Flags[name]; !alreadyThere {
-			app.Flags[name] = value
+func AddCategory(name string, value CategoryValue) CategoryOpt {
+	return func(app *CategoryValue) {
+		if _, alreadyThere := app.Categories[name]; !alreadyThere {
+			app.Categories[name] = value
 		} else {
-			log.Fatalf("flag already exists: %#v\n", name)
+			log.Fatalf("category already exists: %#v\n", name)
+		}
+	}
+}
+
+func AddCommand(name string, value CommandValue) CategoryOpt {
+	return func(app *CategoryValue) {
+		if _, alreadyThere := app.Commands[name]; !alreadyThere {
+			app.Commands[name] = value
+		} else {
+			log.Fatalf("command already exists: %#v\n", name)
 		}
 	}
 }
@@ -55,42 +63,22 @@ func AddCategoryFlag(name string, value FlagValue) CategoryOpt {
 	}
 }
 
+func AddCommandFlag(name string, value FlagValue) CommandOpt {
+	return func(app *CommandValue) {
+		if _, alreadyThere := app.Flags[name]; !alreadyThere {
+			app.Flags[name] = value
+		} else {
+			log.Fatalf("flag already exists: %#v\n", name)
+		}
+	}
+}
+
 func WithCategory(name string, opts ...CategoryOpt) CategoryOpt {
 	return AddCategory(name, NewCategory(opts...))
 }
 
-func AddCategory(name string, value CategoryValue) CategoryOpt {
-	return func(app *CategoryValue) {
-		if _, alreadyThere := app.Categories[name]; !alreadyThere {
-			app.Categories[name] = value
-		} else {
-			log.Fatalf("category already exists: %#v\n", name)
-		}
-	}
-}
-
 func WithCommand(name string, opts ...CommandOpt) CategoryOpt {
 	return AddCommand(name, NewCommand(opts...))
-}
-
-func AddCommand(name string, value CommandValue) CategoryOpt {
-	return func(app *CategoryValue) {
-		if _, alreadyThere := app.Commands[name]; !alreadyThere {
-			app.Commands[name] = value
-		} else {
-			log.Fatalf("command already exists: %#v\n", name)
-		}
-	}
-}
-
-func NewCommand(opts ...CommandOpt) CommandValue {
-	category := CommandValue{
-		Flags: make(map[string]FlagValue),
-	}
-	for _, opt := range opts {
-		opt(&category)
-	}
-	return category
 }
 
 func NewCategory(opts ...CategoryOpt) CategoryValue {
@@ -98,6 +86,16 @@ func NewCategory(opts ...CategoryOpt) CategoryValue {
 		Flags:      make(map[string]FlagValue),
 		Categories: make(map[string]CategoryValue),
 		Commands:   make(map[string]CommandValue),
+	}
+	for _, opt := range opts {
+		opt(&category)
+	}
+	return category
+}
+
+func NewCommand(opts ...CommandOpt) CommandValue {
+	category := CommandValue{
+		Flags: make(map[string]FlagValue),
 	}
 	for _, opt := range opts {
 		opt(&category)

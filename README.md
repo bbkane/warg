@@ -1,5 +1,11 @@
 See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
+# Naming Conventions
+
+- `NewXXX`: Create an `XXX` from options
+- `AddXXX`: Add a created `XXX` to your tree
+- `WithXXX`: Create and add and `XXX` to your tree
+
 # Next Steps
 
 - Try to reduce nesting by removing most "New" functions and bake them into the caller
