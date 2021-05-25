@@ -25,18 +25,16 @@ func TestApp_Parse(t *testing.T) {
 				"app",
 				AppFlag(
 					"--af1",
-					Flag{},
+					FlagValue{},
 				),
-				AppCategory(
+				AppCategoryWith(
 					"cat1",
-					NewCategory(
-						CategoryCommand(
-							"com1",
-							NewCommand(
-								CommandFlag(
-									"--com1f1",
-									Flag{},
-								),
+					CategoryCommand(
+						"com1",
+						NewCommand(
+							CommandFlag(
+								"--com1f1",
+								FlagValue{},
 							),
 						),
 					),
@@ -45,7 +43,7 @@ func TestApp_Parse(t *testing.T) {
 
 			args:              []string{"app", "cat1", "com1", "--com1f1", "flagarg"},
 			passedCommandWant: []string{"cat1", "com1"},
-			passedFlagsWant:   FlagMap{"--com1f1": Flag{Value: "flagarg"}},
+			passedFlagsWant:   FlagMap{"--com1f1": FlagValue{Value: "flagarg"}},
 			wantErr:           false,
 		},
 	}
