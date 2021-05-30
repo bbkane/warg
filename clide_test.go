@@ -1,41 +1,40 @@
 ///usr/bin/true; exec /usr/bin/env go run "$0" .
-package main
+package clide_test
 
 import (
 	"reflect"
 	"testing"
+
+	c "github.com/bbkane/clide"
 )
 
 func TestApp_Parse(t *testing.T) {
 
-	type args struct {
-		args []string
-	}
 	tests := []struct {
 		name              string
-		app               App
+		app               c.App
 		args              []string
 		passedCommandWant []string
-		passedFlagsWant   FlagMap
+		passedFlagsWant   c.FlagMap
 		wantErr           bool
 	}{
 		{
 			name: "from main",
 
-			app: App{
+			app: c.App{
 				Name: "app",
-				RootCategory: NewCategory(
-					AddCategoryFlag(
+				RootCategory: c.NewCategory(
+					c.AddCategoryFlag(
 						"--af1",
-						FlagValue{},
+						c.FlagValue{},
 					),
-					WithCategory(
+					c.WithCategory(
 						"cat1",
-						WithCommand(
+						c.WithCommand(
 							"com1",
-							AddCommandFlag(
+							c.AddCommandFlag(
 								"--com1f1",
-								FlagValue{},
+								c.FlagValue{},
 							),
 						),
 					),
@@ -44,7 +43,7 @@ func TestApp_Parse(t *testing.T) {
 
 			args:              []string{"app", "cat1", "com1", "--com1f1", "flagarg"},
 			passedCommandWant: []string{"cat1", "com1"},
-			passedFlagsWant:   FlagMap{"--com1f1": FlagValue{Value: "flagarg"}},
+			passedFlagsWant:   c.FlagMap{"--com1f1": c.FlagValue{Value: "flagarg"}},
 			wantErr:           false,
 		},
 	}

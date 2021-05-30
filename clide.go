@@ -1,6 +1,4 @@
-///usr/bin/true; exec /usr/bin/env go test ./...
-///usr/bin/true; exec /usr/bin/env go run "$0" .
-package main
+package clide
 
 import (
 	"fmt"
