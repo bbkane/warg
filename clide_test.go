@@ -15,7 +15,7 @@ func TestApp_Parse(t *testing.T) {
 		app               c.App
 		args              []string
 		passedCommandWant []string
-		passedFlagsWant   c.FlagMap
+		passedValuesWant  c.ValueMap
 		wantErr           bool
 	}{
 		{
@@ -26,7 +26,9 @@ func TestApp_Parse(t *testing.T) {
 				RootCategory: c.NewCategory(
 					c.AddCategoryFlag(
 						"--af1",
-						c.FlagValue{},
+						c.Flag{
+							Value: c.NewIntValue(0),
+						},
 					),
 					c.WithCategory(
 						"cat1",
@@ -34,16 +36,18 @@ func TestApp_Parse(t *testing.T) {
 							"com1",
 							c.AddCommandFlag(
 								"--com1f1",
-								c.FlagValue{},
+								c.Flag{
+									Value: c.NewIntValue(0),
+								},
 							),
 						),
 					),
 				),
 			},
 
-			args:              []string{"app", "cat1", "com1", "--com1f1", "flagarg"},
+			args:              []string{"app", "cat1", "com1", "--com1f1", "1"},
 			passedCommandWant: []string{"cat1", "com1"},
-			passedFlagsWant:   c.FlagMap{"--com1f1": c.FlagValue{Value: "flagarg"}},
+			passedValuesWant:  c.ValueMap{"--com1f1": c.NewIntValue(1)},
 			wantErr:           false,
 		},
 	}
@@ -58,8 +62,8 @@ func TestApp_Parse(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.passedCommandWant) {
 				t.Errorf("RootCommand.Parse() got = %v, want %v", got, tt.passedCommandWant)
 			}
-			if !reflect.DeepEqual(got1, tt.passedFlagsWant) {
-				t.Errorf("RootCommand.Parse() got1 = %v, want %v", got1, tt.passedFlagsWant)
+			if !reflect.DeepEqual(got1, tt.passedValuesWant) {
+				t.Errorf("RootCommand.Parse() got1 = %v, want %v", got1, tt.passedValuesWant)
 			}
 		})
 	}

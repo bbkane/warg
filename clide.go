@@ -5,33 +5,41 @@ import (
 	"log"
 )
 
-type CategoryMap = map[string]CategoryValue
-type CommandMap = map[string]CommandValue
-type FlagMap = map[string]FlagValue
+type CategoryMap = map[string]Category
+type CommandMap = map[string]Command
+type FlagMap = map[string]Flag
+type ValueMap = map[string]Value
 
-type CategoryOpt = func(*CategoryValue)
-type CommandOpt = func(*CommandValue)
+type CategoryOpt = func(*Category)
+type CommandOpt = func(*Command)
 
 type App struct {
 	Name         string
-	RootCategory CategoryValue
+	RootCategory Category
 }
 
-type CategoryValue struct {
+type Category struct {
 	Flags      FlagMap // Do subcommands need flags? leaf commands are the ones that do work....
 	Commands   CommandMap
 	Categories CategoryMap
 }
-type CommandValue struct {
+type Command struct {
 	Flags FlagMap
 }
-type FlagValue struct {
+type Flag struct {
 	// Value holds what gets passed to the flag: --myflag value
-	Value string
+	// and should be initialized to the empty value
+	Value Value
+	// Default will be shoved into Value if needed
+	// can be nil
+	// TODO: actually use this
+	Default Value
+	// IsSet should be set when the flag is set so defaults don't override something
+	IsSet bool
 }
 
-func AddCategory(name string, value CategoryValue) CategoryOpt {
-	return func(app *CategoryValue) {
+func AddCategory(name string, value Category) CategoryOpt {
+	return func(app *Category) {
 		if _, alreadyThere := app.Categories[name]; !alreadyThere {
 			app.Categories[name] = value
 		} else {
@@ -40,8 +48,8 @@ func AddCategory(name string, value CategoryValue) CategoryOpt {
 	}
 }
 
-func AddCommand(name string, value CommandValue) CategoryOpt {
-	return func(app *CategoryValue) {
+func AddCommand(name string, value Command) CategoryOpt {
+	return func(app *Category) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
 		} else {
@@ -50,8 +58,8 @@ func AddCommand(name string, value CommandValue) CategoryOpt {
 	}
 }
 
-func AddCategoryFlag(name string, value FlagValue) CategoryOpt {
-	return func(app *CategoryValue) {
+func AddCategoryFlag(name string, value Flag) CategoryOpt {
+	return func(app *Category) {
 		if _, alreadyThere := app.Flags[name]; !alreadyThere {
 			app.Flags[name] = value
 		} else {
@@ -61,8 +69,8 @@ func AddCategoryFlag(name string, value FlagValue) CategoryOpt {
 	}
 }
 
-func AddCommandFlag(name string, value FlagValue) CommandOpt {
-	return func(app *CommandValue) {
+func AddCommandFlag(name string, value Flag) CommandOpt {
+	return func(app *Command) {
 		if _, alreadyThere := app.Flags[name]; !alreadyThere {
 			app.Flags[name] = value
 		} else {
@@ -79,11 +87,11 @@ func WithCommand(name string, opts ...CommandOpt) CategoryOpt {
 	return AddCommand(name, NewCommand(opts...))
 }
 
-func NewCategory(opts ...CategoryOpt) CategoryValue {
-	category := CategoryValue{
-		Flags:      make(map[string]FlagValue),
-		Categories: make(map[string]CategoryValue),
-		Commands:   make(map[string]CommandValue),
+func NewCategory(opts ...CategoryOpt) Category {
+	category := Category{
+		Flags:      make(map[string]Flag),
+		Categories: make(map[string]Category),
+		Commands:   make(map[string]Command),
 	}
 	for _, opt := range opts {
 		opt(&category)
@@ -91,9 +99,9 @@ func NewCategory(opts ...CategoryOpt) CategoryValue {
 	return category
 }
 
-func NewCommand(opts ...CommandOpt) CommandValue {
-	category := CommandValue{
-		Flags: make(map[string]FlagValue),
+func NewCommand(opts ...CommandOpt) Command {
+	category := Command{
+		Flags: make(map[string]Flag),
 	}
 	for _, opt := range opts {
 		opt(&category)
@@ -101,33 +109,43 @@ func NewCommand(opts ...CommandOpt) CommandValue {
 	return category
 }
 
-func (app *CategoryValue) Parse(args []string) ([]string, FlagMap, error) {
+func (app *Category) Parse(args []string) ([]string, ValueMap, error) {
 
 	// TODO: I'd like flags to be callable in any order after their command is called
 	// so instead of reassigning allowedFlags, merge it with the new one
 	allowedFlags := app.Flags
 	allowedCommands := app.Commands
 	allowedCategories := app.Categories
-	passedFlags := make(FlagMap)
+	passedFlagValues := make(ValueMap)
 	passedCommand := make([]string, 0, len(args)-1)
 	for i := 1; i < len(args); i = i + 1 {
-		val := args[i]
-		if _, ok := allowedFlags[val]; ok {
-			passedFlags[val] = FlagValue{Value: args[i+1]} // TODO: what if someone passes a flag without a value
+		str := args[i]
+		if currFlag, ok := allowedFlags[str]; ok {
+			passedFlagValues[str] = currFlag.Value
+			valueToParse := args[i+1] // TODO: gracefully handle someone passing a flag without a value
+			err := currFlag.Value.Update(valueToParse)
+			if err != nil {
+				return nil, nil, fmt.Errorf(
+					"flag: %#v: flag parse error for value : %#v: %#v\n",
+					str,
+					valueToParse,
+					err,
+				)
+			}
 			i += 1
-		} else if command, ok := allowedCommands[val]; ok {
-			passedCommand = append(passedCommand, val)
+		} else if command, ok := allowedCommands[str]; ok {
+			passedCommand = append(passedCommand, str)
 			allowedFlags = command.Flags
 			allowedCommands = nil
 			allowedCategories = nil
-		} else if category, ok := allowedCategories[val]; ok {
-			passedCommand = append(passedCommand, val)
+		} else if category, ok := allowedCategories[str]; ok {
+			passedCommand = append(passedCommand, str)
 			allowedFlags = category.Flags
 			allowedCommands = category.Commands
 			allowedCategories = category.Categories
 		} else {
-			return nil, nil, fmt.Errorf("unexpected string: %#v\n", val)
+			return nil, nil, fmt.Errorf("unexpected string: %#v\n", str)
 		}
 	}
-	return passedCommand, passedFlags, nil
+	return passedCommand, passedFlagValues, nil
 }

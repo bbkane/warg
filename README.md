@@ -8,18 +8,29 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # Next Steps
 
-- Start help pages?
+- function actions - see below
+- --help
 - Web form
 - Config parsing
-- functions with context?
 
 # Other names
 
-- clinch
 - argyoumeant
-- targpit
-- yaargparse
+- chronicli
+- clinch
+- embargo
+- gargle
+- miracli
+- monocli
+- motorcycli
+- oracli
+- periclis
+- receptacli
 - target
+- targpit
+- tentacli
+- warg
+- yaargparse
 
 # Links
 
