@@ -5,6 +5,8 @@ import (
 	"log"
 )
 
+type Action = func(ValueMap) error
+
 type CategoryMap = map[string]Category
 type CommandMap = map[string]Command
 type FlagMap = map[string]Flag
@@ -24,18 +26,27 @@ type Category struct {
 	Categories CategoryMap
 }
 type Command struct {
+	Action Action
+
 	Flags FlagMap
 }
+
 type Flag struct {
-	// Value holds what gets passed to the flag: --myflag value
-	// and should be initialized to the empty value
-	Value Value
 	// Default will be shoved into Value if needed
 	// can be nil
 	// TODO: actually use this
 	Default Value
 	// IsSet should be set when the flag is set so defaults don't override something
 	IsSet bool
+	// Value holds what gets passed to the flag: --myflag value
+	// and should be initialized to the empty value
+	Value Value
+}
+
+func WithAction(action Action) CommandOpt {
+	return func(cmd *Command) {
+		cmd.Action = action
+	}
 }
 
 func AddCategory(name string, value Category) CategoryOpt {
@@ -109,23 +120,33 @@ func NewCommand(opts ...CommandOpt) Command {
 	return category
 }
 
-func (app *Category) Parse(args []string) ([]string, ValueMap, error) {
+type ParseResult struct {
+	PassedCmd   []string
+	PassedFlags ValueMap
+	Action      Action
+}
+
+func (app *Category) Parse(args []string) (*ParseResult, error) {
 
 	// TODO: I'd like flags to be callable in any order after their command is called
 	// so instead of reassigning allowedFlags, merge it with the new one
 	allowedFlags := app.Flags
 	allowedCommands := app.Commands
 	allowedCategories := app.Categories
-	passedFlagValues := make(ValueMap)
-	passedCommand := make([]string, 0, len(args)-1)
+	pr := ParseResult{
+		PassedCmd:   make([]string, 0, len(args)-1),
+		PassedFlags: make(ValueMap),
+		Action:      nil,
+	}
+
 	for i := 1; i < len(args); i = i + 1 {
 		str := args[i]
 		if currFlag, ok := allowedFlags[str]; ok {
-			passedFlagValues[str] = currFlag.Value
+			pr.PassedFlags[str] = currFlag.Value
 			valueToParse := args[i+1] // TODO: gracefully handle someone passing a flag without a value
 			err := currFlag.Value.Update(valueToParse)
 			if err != nil {
-				return nil, nil, fmt.Errorf(
+				return nil, fmt.Errorf(
 					"flag: %#v: flag parse error for value : %#v: %#v\n",
 					str,
 					valueToParse,
@@ -134,18 +155,21 @@ func (app *Category) Parse(args []string) ([]string, ValueMap, error) {
 			}
 			i += 1
 		} else if command, ok := allowedCommands[str]; ok {
-			passedCommand = append(passedCommand, str)
+			pr.PassedCmd = append(pr.PassedCmd, str)
+			pr.Action = command.Action
 			allowedFlags = command.Flags
 			allowedCommands = nil
 			allowedCategories = nil
 		} else if category, ok := allowedCategories[str]; ok {
-			passedCommand = append(passedCommand, str)
+			pr.PassedCmd = append(pr.PassedCmd, str)
 			allowedFlags = category.Flags
 			allowedCommands = category.Commands
 			allowedCategories = category.Categories
 		} else {
-			return nil, nil, fmt.Errorf("unexpected string: %#v\n", str)
+			return nil, fmt.Errorf("unexpected string: %#v\n", str)
 		}
+		// done with the current word. add flags with default values to passedFlags
+		// TODO: make scalar values return an error if already set
 	}
-	return passedCommand, passedFlagValues, nil
+	return &pr, nil
 }

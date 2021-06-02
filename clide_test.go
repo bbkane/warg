@@ -54,16 +54,16 @@ func TestApp_Parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			got, got1, err := tt.app.RootCategory.Parse(tt.args)
+			pr, err := tt.app.RootCategory.Parse(tt.args)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("RootCommand.Parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.passedCommandWant) {
-				t.Errorf("RootCommand.Parse() got = %v, want %v", got, tt.passedCommandWant)
+			if !reflect.DeepEqual(pr.PassedCmd, tt.passedCommandWant) {
+				t.Errorf("RootCommand.Parse() got = %v, want %v", pr.PassedCmd, tt.passedCommandWant)
 			}
-			if !reflect.DeepEqual(got1, tt.passedValuesWant) {
-				t.Errorf("RootCommand.Parse() got1 = %v, want %v", got1, tt.passedValuesWant)
+			if !reflect.DeepEqual(pr.PassedFlags, tt.passedValuesWant) {
+				t.Errorf("RootCommand.Parse() got1 = %v, want %v", pr.PassedFlags, tt.passedValuesWant)
 			}
 		})
 	}

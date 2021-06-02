@@ -31,6 +31,7 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 - tentacli
 - warg
 - yaargparse
+- clide
 
 # Links
 
