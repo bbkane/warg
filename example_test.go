@@ -32,7 +32,7 @@ func Example() {
 		),
 	}
 	args := []string{"example", "cat", "com", "--flag", "3"}
-	pr, err := parser.RootCategory.Parse(args)
+	pr, err := parser.Parse(args)
 	if err != nil {
 		fmt.Printf("Parse Error: %#v\n", err)
 		return

@@ -13,7 +13,7 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 - Web form
 - Config parsing
 
-# Other names
+# Other library names
 
 - argyoumeant
 - chronicli
@@ -32,6 +32,14 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 - warg
 - yaargparse
 - clide
+
+# Other category names
+
+- category
+- namespace
+- module
+- commandgroup (az calls them groups)
+- noun (with command -> verb rename too)
 
 # Links
 

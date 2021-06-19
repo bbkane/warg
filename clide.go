@@ -3,6 +3,7 @@ package clide
 import (
 	"fmt"
 	"log"
+	"strings"
 )
 
 type Action = func(ValueMap) error
@@ -120,56 +121,144 @@ func NewCommand(opts ...CommandOpt) Command {
 	return category
 }
 
-type ParseResult struct {
-	PassedCmd   []string
-	PassedFlags ValueMap
-	Action      Action
+type gatherArgsResult struct {
+	// Appname holds os.Args[0]
+	AppName string
+	// CommandPath holds the path to the current command
+	CommandPath []string
+	// FlagStrings is a map of all flags to their values
+	FlagStrs map[string][]string
 }
 
-func (app *Category) Parse(args []string) (*ParseResult, error) {
+// gatherArgs "parses" os.Argv into commands and flags. It's a 'lowering' function,
+// simplifying os.Args as much as possible before needing knowledge of this particular app
+// TODO: test this! Also, --help and --version do NOT require values
+func gatherArgs(osArgs []string) (*gatherArgsResult, error) {
+	res := &gatherArgsResult{
+		FlagStrs: make(map[string][]string),
+	}
+	res.AppName = osArgs[0]
 
-	// TODO: I'd like flags to be callable in any order after their command is called
-	// so instead of reassigning allowedFlags, merge it with the new one
-	allowedFlags := app.Flags
-	allowedCommands := app.Commands
-	allowedCategories := app.Categories
-	pr := ParseResult{
-		PassedCmd:   make([]string, 0, len(args)-1),
+	// let's declare some states with an "enum"...
+	expectingAnything := "expectingAnything"
+	expectingFlagValue := "expectingFlagValue"
+	// currentFlagName is only valid when expectingFlagValue
+	// I miss ADTs in go
+	var currentFlagName string
+
+	// set up initial conditions
+	currentFlagName = ""
+	expecting := expectingAnything
+	// fucking gooooooo!!!
+	for _, word := range osArgs[1:] {
+		switch expecting {
+		case expectingAnything:
+			// TODO: search for --help,--version here
+			if strings.HasPrefix(word, "-") {
+				currentFlagName = word
+				expecting = expectingFlagValue
+			} else {
+				// command case
+				res.CommandPath = append(res.CommandPath, word)
+			}
+		case expectingFlagValue:
+			// TODO: initialize map if needed - test not passing :)
+			res.FlagStrs[currentFlagName] = append(res.FlagStrs[currentFlagName], word)
+			expecting = expectingAnything
+		default:
+			return nil, fmt.Errorf("Internal Error: not expecting state: %#v\n", expecting)
+		}
+	}
+	if expecting == expectingFlagValue {
+		return nil, fmt.Errorf("Flag passed without value. All flags must have one value passed. Flags can be repeated to accumulate values. Example: --flag value")
+	}
+	return res, nil
+}
+
+func (app *App) Parse(osArgs []string) (*ParseResult, error) {
+	gatherArgsResult, err := gatherArgs(osArgs)
+	if err != nil {
+		return nil, err
+	}
+
+	pr := &ParseResult{
+		PassedCmd:   gatherArgsResult.CommandPath,
 		PassedFlags: make(ValueMap),
 		Action:      nil,
 	}
 
-	for i := 1; i < len(args); i = i + 1 {
-		str := args[i]
-		if currFlag, ok := allowedFlags[str]; ok {
-			pr.PassedFlags[str] = currFlag.Value
-			valueToParse := args[i+1] // TODO: gracefully handle someone passing a flag without a value
-			err := currFlag.Value.Update(valueToParse)
-			if err != nil {
-				return nil, fmt.Errorf(
-					"flag: %#v: flag parse error for value : %#v: %#v\n",
-					str,
-					valueToParse,
-					err,
-				)
-			}
-			i += 1
-		} else if command, ok := allowedCommands[str]; ok {
-			pr.PassedCmd = append(pr.PassedCmd, str)
+	// TODO: set action to print --version if needed and return
+
+	// validate passed command and get available flags
+	current := app.RootCategory
+	allowedFlags := current.Flags
+	allowedCommands := current.Commands
+	allowedCategories := current.Categories
+	for _, word := range gatherArgsResult.CommandPath {
+		if command, exists := allowedCommands[word]; exists {
 			pr.Action = command.Action
-			allowedFlags = command.Flags
-			allowedCommands = nil
-			allowedCategories = nil
-		} else if category, ok := allowedCategories[str]; ok {
-			pr.PassedCmd = append(pr.PassedCmd, str)
-			allowedFlags = category.Flags
+			allowedCommands = nil   // commands terminate
+			allowedCategories = nil // categories terminiate
+			for k, v := range command.Flags {
+				// TODO: check if key exists already
+				allowedFlags[k] = v
+			}
+		} else if category, exists := allowedCategories[word]; exists {
 			allowedCommands = category.Commands
 			allowedCategories = category.Categories
+			for k, v := range command.Flags {
+				// TODO: check if key exists already
+				allowedFlags[k] = v
+			}
 		} else {
-			return nil, fmt.Errorf("unexpected string: %#v\n", str)
+			return nil, fmt.Errorf("unexpected string: %#v\n", word)
 		}
-		// done with the current word. add flags with default values to passedFlags
-		// TODO: make scalar values return an error if already set
 	}
-	return &pr, nil
+
+	// fmt.Printf("allowed flags: %#v\n", allowedFlags)
+
+	// update flags with passed values and ensure that no extra flags were passed
+	// TODO: ensure passed flags match available flags, only aggregrate flags passed multiple times, required flags make it
+	for name, passed := range gatherArgsResult.FlagStrs {
+		flag, exists := allowedFlags[name]
+		if !exists {
+			return nil, fmt.Errorf("Unrecognized flag: %#v\n", name)
+		}
+		// TODO: check for repeated flags that aren't supposed to be repeated
+		for _, str := range passed {
+			flag.Value.Update(str)
+		}
+		flag.IsSet = true
+		// I would think this woudn't be necessary...
+		// I think because this isn't explicitly a pointer its passed by value? I'm too used to Python...
+		// TODO: look into this more :)
+		allowedFlags[name] = flag
+	}
+	// fmt.Printf("allowed flags: %#v\n", allowedFlags)
+
+	// update unset flags backup values
+	for name, flag := range allowedFlags {
+		// update from default value
+		if flag.IsSet == false && flag.Default != nil {
+			flag.Value = flag.Default
+			flag.IsSet = true
+			allowedFlags[name] = flag
+		}
+	}
+
+	// TODO: set action to print --help if needed and return
+
+	// make some values!
+	for name, flag := range allowedFlags {
+		if flag.IsSet == true {
+			pr.PassedFlags[name] = flag.Value
+		}
+	}
+	return pr, nil
+}
+
+type ParseResult struct {
+	PassedCmd   []string
+	PassedFlags ValueMap
+	Action      Action
 }
