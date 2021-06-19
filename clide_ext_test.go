@@ -22,26 +22,23 @@ func TestApp_Parse(t *testing.T) {
 			name: "from main",
 			app: c.NewApp(
 				c.AppRootCategory(
-					c.AddCategoryFlag(
+					c.WithCategoryFlag(
 						"--af1",
-						c.Flag{
-							Value: c.NewIntValue(0),
-						},
+						c.NewIntValue(0),
 					),
 					c.WithCategory(
 						"cat1",
 						c.WithCommand(
 							"com1",
-							c.AddCommandFlag(
+							c.WithCommandFlag(
 								"--com1f1",
-								c.Flag{
-									Value: c.NewIntValue(0),
-								},
+								c.NewIntValue(0),
 							),
 						),
 					),
 				),
 			),
+
 			args:              []string{"app", "cat1", "com1", "--com1f1", "1"},
 			passedCommandWant: []string{"cat1", "com1"},
 			passedValuesWant:  c.ValueMap{"--com1f1": c.NewIntValue(1)},

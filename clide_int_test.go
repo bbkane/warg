@@ -1,12 +1,11 @@
 package clide
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestGatherArgs(t *testing.T) {
-	res, err := gatherArgs(
+	_, err := gatherArgs(
 		[]string{"app", "cat", "--flag", "value", "--flag", "value2"},
 		[]string{},
 		[]string{},
@@ -14,5 +13,5 @@ func TestGatherArgs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Print(res)
+	// fmt.Print(res)
 }

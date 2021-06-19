@@ -7,24 +7,24 @@ import (
 )
 
 func Example_parse() {
+
+	comAction := func(vm c.ValueMap) error {
+		action := vm["--flag"].Get().(int)
+		fmt.Printf("Action Output: %v\n", action)
+		return nil
+	}
+
 	app := c.NewApp(
 		c.AppRootCategory(
 			c.WithCategory(
 				"cat",
 				c.WithCommand(
 					"com",
-					c.WithAction(
-						func(vm c.ValueMap) error {
-							action := vm["--flag"].Get().(int)
-							fmt.Printf("Action Output: %v\n", action)
-							return nil
-						},
-					),
-					c.AddCommandFlag(
+					c.WithAction(comAction),
+					c.WithCommandFlag(
 						"--flag",
-						c.Flag{
-							Value: c.NewIntValue(0),
-						},
+						c.NewIntValue(0),
+						c.WithDefault(c.NewIntValue(10)),
 					),
 				),
 			),
@@ -54,7 +54,7 @@ func Example_parse() {
 
 func Example_version() {
 	app := c.NewApp(
-		c.AppVersion(
+		c.EnableVersionFlag(
 			[]string{"--version"},
 			"v0.0.0",
 		),
@@ -71,3 +71,24 @@ func Example_version() {
 	// Output:
 	// v0.0.0
 }
+
+// func Example_help() {
+// 	app := c.NewApp(
+// 		c.EnableHelpFlag(
+// 			[]string{"-h", "--help"},
+// 			"example",
+// 		),
+// 		c.AppRootCategory(),
+// 	)
+// 	args := []string{"example", "--version"}
+// 	pr, err := app.Parse(args)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	err = pr.Action(pr.PassedFlags)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	// Output:
+// 	// v0.0.0
+// }
