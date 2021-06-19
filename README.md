@@ -4,7 +4,7 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 - `NewXXX`: Create an `XXX` from options
 - `AddXXX`: Add a created `XXX` to your tree
-- `WithXXX`: Create and add and `XXX` to your tree
+- `WithXXX`: Create and add an `XXX` to your tree
 
 # Next Steps
 
@@ -129,3 +129,35 @@ for command in parser.AllCommands():
 ```
 
 The action thing is easier so I'mma run with that for now :)
+
+# Working towards
+
+```go
+parser := c.NewApp(
+    "example",
+    c.HelpFlag(["-h", "--help"], c.DefaultHelpTemplate),
+    c.VersionFlag(["--version"], "v1.0.0"),
+    c.ConfigFlag(["-c", "--config"], "~/.config/example.json", c.JSONDecode), // bytes -> map[string]{interface{}}
+    c.NewCategory(
+        c.WithCategory(
+            "cat",
+            c.WithCommand(
+                "com",
+                c.WithAction(catCom),
+                c.WithCommandFlag(
+                    "--flag",
+                    c.NewEmptyIntValue(),
+                    c.ConfigPath("path.to.int", IntValueFromInterface), // interface -> value
+                    c.DefaultValue(NewIntValue(10)),
+                    c.Help("Example help"),
+                    c.Required(),
+                )
+            ),
+            c.WithCategory(
+                "cat1",
+
+            ),
+        ),
+    ),
+)
+```

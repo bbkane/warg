@@ -20,10 +20,8 @@ func TestApp_Parse(t *testing.T) {
 	}{
 		{
 			name: "from main",
-
-			app: c.App{
-				Name: "app",
-				RootCategory: c.NewCategory(
+			app: c.NewApp(
+				c.AppRootCategory(
 					c.AddCategoryFlag(
 						"--af1",
 						c.Flag{
@@ -43,8 +41,7 @@ func TestApp_Parse(t *testing.T) {
 						),
 					),
 				),
-			},
-
+			),
 			args:              []string{"app", "cat1", "com1", "--com1f1", "1"},
 			passedCommandWant: []string{"cat1", "com1"},
 			passedValuesWant:  c.ValueMap{"--com1f1": c.NewIntValue(1)},

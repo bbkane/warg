@@ -13,12 +13,20 @@ type CommandMap = map[string]Command
 type FlagMap = map[string]Flag
 type ValueMap = map[string]Value
 
+type AppOpt = func(*App)
 type CategoryOpt = func(*Category)
 type CommandOpt = func(*Command)
 
 type App struct {
-	Name         string
-	RootCategory Category
+	// Help()
+	name          string
+	description   string
+	helpFlagNames []string
+	// Version()
+	version          string
+	versionFlagNames []string
+	// Categories
+	rootCategory Category
 }
 
 type Category struct {
@@ -42,12 +50,6 @@ type Flag struct {
 	// Value holds what gets passed to the flag: --myflag value
 	// and should be initialized to the empty value
 	Value Value
-}
-
-func WithAction(action Action) CommandOpt {
-	return func(cmd *Command) {
-		cmd.Action = action
-	}
 }
 
 func AddCategory(name string, value Category) CategoryOpt {
@@ -91,12 +93,53 @@ func AddCommandFlag(name string, value Flag) CommandOpt {
 	}
 }
 
+func WithAction(action Action) CommandOpt {
+	return func(cmd *Command) {
+		cmd.Action = action
+	}
+}
+
 func WithCategory(name string, opts ...CategoryOpt) CategoryOpt {
 	return AddCategory(name, NewCategory(opts...))
 }
 
 func WithCommand(name string, opts ...CommandOpt) CategoryOpt {
 	return AddCommand(name, NewCommand(opts...))
+}
+
+func AppHelp(helpFlagNames []string, appName string, appDescription string) AppOpt {
+	return func(app *App) {
+		app.name = appName
+		app.description = appDescription
+		app.helpFlagNames = helpFlagNames
+		for _, n := range helpFlagNames {
+			if !strings.HasPrefix(n, "-") {
+				log.Panicf("helpFlags should start with '-': %#v\n", n)
+			}
+		}
+	}
+}
+
+func AppVersion(versionFlagNames []string, version string) AppOpt {
+	return func(app *App) {
+		app.versionFlagNames = versionFlagNames
+		app.version = version
+	}
+}
+
+func AppRootCategory(opts ...CategoryOpt) AppOpt {
+	return func(app *App) {
+		app.rootCategory = NewCategory(opts...)
+	}
+}
+
+func NewApp(opts ...AppOpt) App {
+	app := App{}
+	for _, opt := range opts {
+		opt(&app)
+	}
+	// TODO: will it panic if we try to Parse an empty category?
+	return app
 }
 
 func NewCategory(opts ...CategoryOpt) Category {
@@ -127,13 +170,24 @@ type gatherArgsResult struct {
 	// CommandPath holds the path to the current command
 	CommandPath []string
 	// FlagStrings is a map of all flags to their values
-	FlagStrs map[string][]string
+	FlagStrs      map[string][]string
+	VersionPassed bool
+	HelpPassed    bool
+}
+
+func containsString(haystack []string, needle string) bool {
+	for _, w := range haystack {
+		if w == needle {
+			return true
+		}
+	}
+	return false
 }
 
 // gatherArgs "parses" os.Argv into commands and flags. It's a 'lowering' function,
 // simplifying os.Args as much as possible before needing knowledge of this particular app
 // TODO: test this! Also, --help and --version do NOT require values
-func gatherArgs(osArgs []string) (*gatherArgsResult, error) {
+func gatherArgs(osArgs []string, helpFlagNames []string, versionFlagNames []string) (*gatherArgsResult, error) {
 	res := &gatherArgsResult{
 		FlagStrs: make(map[string][]string),
 	}
@@ -149,11 +203,17 @@ func gatherArgs(osArgs []string) (*gatherArgsResult, error) {
 	// set up initial conditions
 	currentFlagName = ""
 	expecting := expectingAnything
-	// fucking gooooooo!!!
 	for _, word := range osArgs[1:] {
 		switch expecting {
 		case expectingAnything:
-			// TODO: search for --help,--version here
+			// TODO: search for --help
+
+			if containsString(versionFlagNames, word) {
+				res.VersionPassed = true
+				// No need to do any more processing. Let's get out of here
+				// NOTE: as is, this means that any number of categories can be passed. Not sure if I care...
+				return res, nil
+			}
 			if strings.HasPrefix(word, "-") {
 				currentFlagName = word
 				expecting = expectingFlagValue
@@ -162,7 +222,6 @@ func gatherArgs(osArgs []string) (*gatherArgsResult, error) {
 				res.CommandPath = append(res.CommandPath, word)
 			}
 		case expectingFlagValue:
-			// TODO: initialize map if needed - test not passing :)
 			res.FlagStrs[currentFlagName] = append(res.FlagStrs[currentFlagName], word)
 			expecting = expectingAnything
 		default:
@@ -176,7 +235,7 @@ func gatherArgs(osArgs []string) (*gatherArgsResult, error) {
 }
 
 func (app *App) Parse(osArgs []string) (*ParseResult, error) {
-	gatherArgsResult, err := gatherArgs(osArgs)
+	gatherArgsResult, err := gatherArgs(osArgs, app.helpFlagNames, app.versionFlagNames)
 	if err != nil {
 		return nil, err
 	}
@@ -187,10 +246,17 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		Action:      nil,
 	}
 
-	// TODO: set action to print --version if needed and return
+	// special case versionFlag
+	if gatherArgsResult.VersionPassed {
+		pr.Action = func(_ map[string]Value) error {
+			fmt.Print(app.version)
+			return nil
+		}
+		return pr, nil
+	}
 
 	// validate passed command and get available flags
-	current := app.RootCategory
+	current := app.rootCategory
 	allowedFlags := current.Flags
 	allowedCommands := current.Commands
 	allowedCategories := current.Categories
