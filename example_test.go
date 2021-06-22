@@ -1,9 +1,9 @@
-package clide_test
+package warg_test
 
 import (
 	"fmt"
 
-	c "github.com/bbkane/clide"
+	c "github.com/bbkane/warg"
 )
 
 func Example_parse() {

@@ -1,9 +1,9 @@
-package clide_test
+package warg_test
 
 import (
 	"testing"
 
-	c "github.com/bbkane/clide"
+	c "github.com/bbkane/warg"
 	"github.com/stretchr/testify/assert"
 )
 

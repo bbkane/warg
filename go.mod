@@ -1,4 +1,4 @@
-module github.com/bbkane/clide
+module github.com/bbkane/warg
 
 go 1.16
 

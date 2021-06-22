@@ -1,4 +1,4 @@
-package clide
+package warg
 
 import (
 	"testing"

@@ -1,11 +1,11 @@
 ///usr/bin/true; exec /usr/bin/env go run "$0" .
-package clide_test
+package warg_test
 
 import (
 	"reflect"
 	"testing"
 
-	c "github.com/bbkane/clide"
+	c "github.com/bbkane/warg"
 )
 
 func TestApp_Parse(t *testing.T) {
