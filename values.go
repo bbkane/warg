@@ -1,6 +1,9 @@
 package clide
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 // Value is a "generic" type that lets me store different types into flags
 //  ~Stolen from~ "Inspired" by https://golang.org/src/flag/flag.go?#L138
@@ -11,10 +14,18 @@ type Value interface {
 	// Update updates the underlying value from a string
 	// It replaces single values and appends to list values
 	Update(string) error
+
+	// Make it printable!
+	String() string
 }
 
-// IntValue
+// --
+
 type IntValue int
+
+func NewEmptyIntValue() *IntValue {
+	return NewIntValue(0)
+}
 
 func NewIntValue(val int) *IntValue {
 	return (*IntValue)(&val)
@@ -33,7 +44,17 @@ func (i *IntValue) Update(s string) error {
 	return nil
 }
 
+func (i *IntValue) String() string {
+	return fmt.Sprint(int(*i))
+}
+
+// --
+
 type StringSliceValue []string
+
+func NewEmptyStringSliceValue() *StringSliceValue {
+	return NewStringSliceValue(nil)
+}
 
 func NewStringSliceValue(vals []string) *StringSliceValue {
 	return (*StringSliceValue)(&vals)
@@ -46,4 +67,8 @@ func (ss *StringSliceValue) Get() interface{} {
 func (ss *StringSliceValue) Update(val string) error {
 	*ss = append(*ss, val)
 	return nil
+}
+
+func (ss *StringSliceValue) String() string {
+	return fmt.Sprint([]string(*ss))
 }

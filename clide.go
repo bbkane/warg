@@ -19,19 +19,24 @@ type Category struct {
 	Flags      FlagMap // Do subcommands need flags? leaf commands are the ones that do work....
 	Commands   CommandMap
 	Categories CategoryMap
+	HelpLong   string
+	HelpShort  string
 }
 type Command struct {
-	Action Action
-
-	Flags FlagMap
+	Action    Action
+	Flags     FlagMap
+	HelpLong  string
+	HelpShort string
 }
 
 type Flag struct {
 	// Default will be shoved into Value if needed
 	// can be nil
-	// TODO: actually use this
-	Default Value
-	SetBy   string
+	Default   Value
+	HelpLong  string
+	HelpShort string
+	// SetBy holds where a flag is initialized. Is empty if not initialized
+	SetBy string
 	// Value holds what gets passed to the flag: --myflag value
 	// and should be initialized to the empty value
 	Value Value
@@ -115,6 +120,18 @@ func WithCommand(name string, opts ...CommandOpt) CategoryOpt {
 	return AddCommand(name, NewCommand(opts...))
 }
 
+func WithCategoryHelpLong(helpLong string) CategoryOpt {
+	return func(cat *Category) {
+		cat.HelpLong = helpLong
+	}
+}
+
+func WithCategoryHelpShort(helpShort string) CategoryOpt {
+	return func(cat *Category) {
+		cat.HelpShort = helpShort
+	}
+}
+
 // CommandOpt
 
 func AddCommandFlag(name string, value Flag) CommandOpt {
@@ -137,10 +154,34 @@ func WithCommandFlag(name string, empty Value, opts ...FlagOpt) CommandOpt {
 	return AddCommandFlag(name, NewFlag(empty, opts...))
 }
 
+func WithCommandHelpLong(helpLong string) CommandOpt {
+	return func(cat *Command) {
+		cat.HelpLong = helpLong
+	}
+}
+
+func WithCommandHelpShort(helpShort string) CommandOpt {
+	return func(cat *Command) {
+		cat.HelpShort = helpShort
+	}
+}
+
 // FlagOpt
 
 func WithDefault(value Value) FlagOpt {
 	return func(flag *Flag) {
 		flag.Default = value
+	}
+}
+
+func WithFlagHelpLong(helpLong string) FlagOpt {
+	return func(cat *Flag) {
+		cat.HelpLong = helpLong
+	}
+}
+
+func WithFlagHelpShort(helpShort string) FlagOpt {
+	return func(cat *Flag) {
+		cat.HelpShort = helpShort
 	}
 }

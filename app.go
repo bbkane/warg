@@ -1,8 +1,10 @@
 package clide
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -96,8 +98,10 @@ func gatherArgs(osArgs []string, helpFlagNames []string, versionFlagNames []stri
 	for _, word := range osArgs[1:] {
 		switch expecting {
 		case expectingAnything:
-			// TODO: search for --help
-
+			if containsString(helpFlagNames, word) {
+				res.HelpPassed = true
+				continue
+			}
 			if containsString(versionFlagNames, word) {
 				res.VersionPassed = true
 				// No need to do any more processing. Let's get out of here
@@ -146,12 +150,15 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	}
 
 	// validate passed command and get available flags
-	current := app.rootCategory
-	allowedFlags := current.Flags
-	allowedCommands := current.Commands
-	allowedCategories := current.Categories
+	currentCategory := &(app.rootCategory)
+	var currentCommand *Command = nil
+	allowedFlags := currentCategory.Flags
+	allowedCommands := currentCategory.Commands
+	allowedCategories := currentCategory.Categories
 	for _, word := range gatherArgsResult.CommandPath {
 		if command, exists := allowedCommands[word]; exists {
+			currentCommand = &command
+			currentCategory = nil
 			pr.Action = command.Action
 			allowedCommands = nil   // commands terminate
 			allowedCategories = nil // categories terminiate
@@ -160,6 +167,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 				allowedFlags[k] = v
 			}
 		} else if category, exists := allowedCategories[word]; exists {
+			currentCategory = &category
 			allowedCommands = category.Commands
 			allowedCategories = category.Categories
 			for k, v := range command.Flags {
@@ -202,7 +210,38 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		}
 	}
 
-	// TODO: set action to print --help if needed and return
+	if gatherArgsResult.HelpPassed {
+		if currentCategory != nil && currentCommand == nil {
+			pr.Action = func(_ ValueMap) error {
+				f := bufio.NewWriter(os.Stdout)
+				defer f.Flush()
+				// let's assume that HelpLong doesn't exist
+				fmt.Fprintf(f, "Current Category:\n")
+				fmt.Fprintf(f, "  %s: %s\n", gatherArgsResult.CommandPath, currentCategory.HelpShort)
+				fmt.Fprintf(f, "Subcategories:\n")
+				// TODO: sort these :)
+				for name, value := range currentCategory.Categories {
+					fmt.Fprintf(f, "  %s: %s\n", name, value.HelpShort)
+				}
+				// TODO: sort these too :)
+				fmt.Fprintf(f, "Commands:\n")
+				for name, value := range currentCategory.Commands {
+					fmt.Fprintf(f, "  %s: %s\n", name, value.HelpShort)
+				}
+				return nil
+			}
+		} else if currentCommand != nil && currentCategory == nil {
+			pr.Action = func(_ ValueMap) error {
+				// TODO
+				fmt.Printf("TODO :)")
+				return nil
+			}
+		} else {
+			return nil, fmt.Errorf("Internal Error: invalid help state: currentCategory == %v, currentCommand == %v\n", currentCategory, currentCommand)
+		}
+
+		return pr, nil
+	}
 
 	// make some values!
 	for name, flag := range allowedFlags {

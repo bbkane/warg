@@ -72,23 +72,32 @@ func Example_version() {
 	// v0.0.0
 }
 
-// func Example_help() {
-// 	app := c.NewApp(
-// 		c.EnableHelpFlag(
-// 			[]string{"-h", "--help"},
-// 			"example",
-// 		),
-// 		c.AppRootCategory(),
-// 	)
-// 	args := []string{"example", "--version"}
-// 	pr, err := app.Parse(args)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	err = pr.Action(pr.PassedFlags)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	// Output:
-// 	// v0.0.0
-// }
+func Example_help() {
+	app := c.NewApp(
+		c.EnableHelpFlag(
+			[]string{"-h", "--help"},
+			"example",
+		),
+		c.AppRootCategory(
+			c.WithCategoryHelpShort("example help!"),
+			c.WithCategory(
+				"cat",
+				c.WithCategoryHelpShort("cat help!"),
+			),
+			c.WithCommand(
+				"com",
+				c.WithCommandHelpShort("com help!!"),
+			),
+		),
+	)
+	args := []string{"example", "--help"}
+	pr, err := app.Parse(args)
+	if err != nil {
+		panic(err)
+	}
+	err = pr.Action(pr.PassedFlags)
+	if err != nil {
+		panic(err)
+	}
+	// Output:
+}
