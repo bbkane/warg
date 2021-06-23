@@ -36,10 +36,12 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 # Other category names
 
 - category
-- namespace
-- module
 - commandgroup (az calls them groups)
+- module
+- namespace
 - noun (with command -> verb rename too)
+- section
+- selection
 
 # Links
 
