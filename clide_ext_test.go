@@ -5,34 +5,34 @@ import (
 	"reflect"
 	"testing"
 
-	c "github.com/bbkane/warg"
+	w "github.com/bbkane/warg"
 )
 
 func TestApp_Parse(t *testing.T) {
 
 	tests := []struct {
 		name              string
-		app               c.App
+		app               w.App
 		args              []string
 		passedCommandWant []string
-		passedValuesWant  c.ValueMap
+		passedValuesWant  w.ValueMap
 		wantErr           bool
 	}{
 		{
 			name: "from main",
-			app: c.NewApp(
-				c.AppRootCategory(
-					c.WithCategoryFlag(
+			app: w.NewApp(
+				w.AppRootCategory(
+					w.WithCategoryFlag(
 						"--af1",
-						c.NewIntValue(0),
+						w.NewIntValue(0),
 					),
-					c.WithCategory(
+					w.WithCategory(
 						"cat1",
-						c.WithCommand(
+						w.WithCommand(
 							"com1",
-							c.WithCommandFlag(
+							w.WithCommandFlag(
 								"--com1f1",
-								c.NewIntValue(0),
+								w.NewIntValue(0),
 							),
 						),
 					),
@@ -41,7 +41,7 @@ func TestApp_Parse(t *testing.T) {
 
 			args:              []string{"app", "cat1", "com1", "--com1f1", "1"},
 			passedCommandWant: []string{"cat1", "com1"},
-			passedValuesWant:  c.ValueMap{"--com1f1": c.NewIntValue(1)},
+			passedValuesWant:  w.ValueMap{"--com1f1": w.NewIntValue(1)},
 			wantErr:           false,
 		},
 	}

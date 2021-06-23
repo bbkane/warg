@@ -3,28 +3,29 @@ package warg_test
 import (
 	"fmt"
 
-	c "github.com/bbkane/warg"
+	"github.com/bbkane/warg"
+	w "github.com/bbkane/warg"
 )
 
 func Example_parse() {
 
-	comAction := func(vm c.ValueMap) error {
+	comAction := func(vm w.ValueMap) error {
 		action := vm["--flag"].Get().(int)
 		fmt.Printf("Action Output: %v\n", action)
 		return nil
 	}
 
-	app := c.NewApp(
-		c.AppRootCategory(
-			c.WithCategory(
+	app := w.NewApp(
+		w.AppRootCategory(
+			w.WithCategory(
 				"cat",
-				c.WithCommand(
+				w.WithCommand(
 					"com",
-					c.WithAction(comAction),
-					c.WithCommandFlag(
+					w.WithAction(comAction),
+					w.WithCommandFlag(
 						"--flag",
-						c.NewIntValue(0),
-						c.WithDefault(c.NewIntValue(10)),
+						w.NewIntValue(0),
+						w.WithDefault(w.NewIntValue(10)),
 					),
 				),
 			),
@@ -53,8 +54,8 @@ func Example_parse() {
 }
 
 func Example_version() {
-	app := c.NewApp(
-		c.EnableVersionFlag(
+	app := w.NewApp(
+		w.EnableVersionFlag(
 			[]string{"--version"},
 			"v0.0.0",
 		),
@@ -73,20 +74,20 @@ func Example_version() {
 }
 
 func Example_help() {
-	app := c.NewApp(
-		c.EnableHelpFlag(
+	app := w.NewApp(
+		w.EnableHelpFlag(
 			[]string{"-h", "--help"},
 			"example",
 		),
-		c.AppRootCategory(
-			c.WithCategoryHelpShort("example help!"),
-			c.WithCategory(
+		w.AppRootCategory(
+			w.WithCategoryHelpShort("example help!"),
+			w.WithCategory(
 				"cat",
-				c.WithCategoryHelpShort("cat help!"),
+				w.WithCategoryHelpShort("cat help!"),
 			),
-			c.WithCommand(
+			w.WithCommand(
 				"com",
-				c.WithCommandHelpShort("com help!!"),
+				w.WithCommandHelpShort("com help!!"),
 			),
 		),
 	)
@@ -100,4 +101,36 @@ func Example_help() {
 		panic(err)
 	}
 	// Output:
+}
+
+func Example_grabbit() {
+	_ = w.NewApp2(
+		[]w.AppOpt{
+			w.EnableHelpFlag([]string{"--help", "-h"}, "grabbit"),
+			w.EnableVersionFlag([]string{"--version"}, "v.0.0.1"),
+		},
+		w.WithCategoryHelpShort("grab pics from reddit!"),
+		w.WithCategory(
+			"config",
+			w.WithCategoryHelpShort("work with the config"),
+			w.WithCommand(
+				"edit",
+				w.WithCommandHelpShort("edit the config"),
+				w.WithCommandFlag(
+					"--editor",
+					w.NewEmptyStringValue(),
+					w.WithDefault(w.NewStringValue("vi")),
+					w.WithFlagHelpShort("path to editor"),
+				),
+			),
+		),
+		w.WithCommand(
+			"grab",
+			w.WithAction(
+				func(vm warg.ValueMap) error {
+					return nil
+				},
+			),
+		),
+	)
 }

@@ -56,6 +56,15 @@ func NewApp(opts ...AppOpt) App {
 	return app
 }
 
+func NewApp2(appOpts []AppOpt, rootCategoryOpts ...CategoryOpt) App {
+	app := App{}
+	for _, opt := range appOpts {
+		opt(&app)
+	}
+	app.rootCategory = NewCategory(rootCategoryOpts...)
+	return app
+}
+
 type gatherArgsResult struct {
 	// Appname holds os.Args[0]
 	AppName string
