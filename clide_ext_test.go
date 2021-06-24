@@ -24,17 +24,17 @@ func TestApp_Parse(t *testing.T) {
 	}{
 		{
 			name: "from main",
-			app: a.NewApp(
-				a.AppRootCategory(
-					s.WithCategoryFlag(
+			app: a.New(
+				a.RootSection(
+					s.WithFlag(
 						"--af1",
 						v.NewEmptyIntValue(),
 					),
-					s.WithCategory(
+					s.WithSection(
 						"cat1",
 						s.WithCommand(
 							"com1",
-							c.WithCommandFlag(
+							c.WithFlag(
 								"--com1f1",
 								v.NewEmptyIntValue(),
 								f.WithDefault(v.NewIntValue(10)),

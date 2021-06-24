@@ -8,25 +8,23 @@ import (
 	v "github.com/bbkane/warg/value"
 )
 
-type CategoryMap = map[string]Category
+type SectionMap = map[string]Section
 
-type CategoryOpt = func(*Category)
+type SectionOpt = func(*Section)
 
-type Category struct {
-	Flags      f.FlagMap // Do subcommands need flags? leaf commands are the ones that do work....
-	Commands   c.CommandMap
-	Categories CategoryMap
-	HelpLong   string
-	HelpShort  string
+type Section struct {
+	Flags     f.FlagMap // Do subcommands need flags? leaf commands are the ones that do work....
+	Commands  c.CommandMap
+	Sections  SectionMap
+	HelpLong  string
+	HelpShort string
 }
 
-// New
-
-func NewCategory(opts ...CategoryOpt) Category {
-	category := Category{
-		Flags:      make(map[string]f.Flag),
-		Categories: make(map[string]Category),
-		Commands:   make(map[string]c.Command),
+func NewSection(opts ...SectionOpt) Section {
+	category := Section{
+		Flags:    make(map[string]f.Flag),
+		Sections: make(map[string]Section),
+		Commands: make(map[string]c.Command),
 	}
 	for _, opt := range opts {
 		opt(&category)
@@ -34,20 +32,18 @@ func NewCategory(opts ...CategoryOpt) Category {
 	return category
 }
 
-// CategoryOpt functions
-
-func AddCategory(name string, value Category) CategoryOpt {
-	return func(app *Category) {
-		if _, alreadyThere := app.Categories[name]; !alreadyThere {
-			app.Categories[name] = value
+func AddSection(name string, value Section) SectionOpt {
+	return func(app *Section) {
+		if _, alreadyThere := app.Sections[name]; !alreadyThere {
+			app.Sections[name] = value
 		} else {
 			log.Fatalf("category already exists: %#v\n", name)
 		}
 	}
 }
 
-func AddCommand(name string, value c.Command) CategoryOpt {
-	return func(app *Category) {
+func AddCommand(name string, value c.Command) SectionOpt {
+	return func(app *Section) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
 		} else {
@@ -56,8 +52,8 @@ func AddCommand(name string, value c.Command) CategoryOpt {
 	}
 }
 
-func AddCategoryFlag(name string, value f.Flag) CategoryOpt {
-	return func(app *Category) {
+func AddFlag(name string, value f.Flag) SectionOpt {
+	return func(app *Section) {
 		if _, alreadyThere := app.Flags[name]; !alreadyThere {
 			app.Flags[name] = value
 		} else {
@@ -67,26 +63,26 @@ func AddCategoryFlag(name string, value f.Flag) CategoryOpt {
 	}
 }
 
-func WithCategory(name string, opts ...CategoryOpt) CategoryOpt {
-	return AddCategory(name, NewCategory(opts...))
+func WithSection(name string, opts ...SectionOpt) SectionOpt {
+	return AddSection(name, NewSection(opts...))
 }
 
-func WithCategoryFlag(name string, empty v.Value, opts ...f.FlagOpt) CategoryOpt {
-	return AddCategoryFlag(name, f.NewFlag(empty, opts...))
+func WithFlag(name string, empty v.Value, opts ...f.FlagOpt) SectionOpt {
+	return AddFlag(name, f.NewFlag(empty, opts...))
 }
 
-func WithCommand(name string, opts ...c.CommandOpt) CategoryOpt {
+func WithCommand(name string, opts ...c.CommandOpt) SectionOpt {
 	return AddCommand(name, c.NewCommand(opts...))
 }
 
-func WithCategoryHelpLong(helpLong string) CategoryOpt {
-	return func(cat *Category) {
+func HelpLong(helpLong string) SectionOpt {
+	return func(cat *Section) {
 		cat.HelpLong = helpLong
 	}
 }
 
-func WithCategoryHelpShort(helpShort string) CategoryOpt {
-	return func(cat *Category) {
+func HelpShort(helpShort string) SectionOpt {
+	return func(cat *Section) {
 		cat.HelpShort = helpShort
 	}
 }

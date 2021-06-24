@@ -18,14 +18,14 @@ func Example_parse() {
 		return nil
 	}
 
-	app := a.NewApp(
-		a.AppRootCategory(
-			s.WithCategory(
+	app := a.New(
+		a.RootSection(
+			s.WithSection(
 				"cat",
 				s.WithCommand(
 					"com",
 					c.WithAction(comAction),
-					c.WithCommandFlag(
+					c.WithFlag(
 						"--flag",
 						v.NewIntValue(0),
 						f.WithDefault(v.NewIntValue(10)),
@@ -57,7 +57,7 @@ func Example_parse() {
 }
 
 func Example_version() {
-	app := a.NewApp(
+	app := a.New(
 		a.EnableVersionFlag(
 			[]string{"--version"},
 			"v0.0.0",
@@ -77,20 +77,20 @@ func Example_version() {
 }
 
 func Example_help() {
-	app := a.NewApp(
+	app := a.New(
 		a.EnableHelpFlag(
 			[]string{"-h", "--help"},
 			"example",
 		),
-		a.AppRootCategory(
-			s.WithCategoryHelpShort("example help!"),
-			s.WithCategory(
+		a.RootSection(
+			s.HelpShort("example help!"),
+			s.WithSection(
 				"cat",
-				s.WithCategoryHelpShort("cat help!"),
+				s.HelpShort("cat help!"),
 			),
 			s.WithCommand(
 				"com",
-				c.WithCommandHelpShort("com help!!"),
+				c.HelpShort("com help!!"),
 			),
 		),
 	)
@@ -104,22 +104,28 @@ func Example_help() {
 		panic(err)
 	}
 	// Output:
+	// Current Category:
+	//   example : example help!
+	// Subcategories:
+	//   cat: cat help!
+	// Commands:
+	//   com: com help!!
 }
 
 func Example_grabbit() {
-	_ = a.NewApp2(
+	_ = a.New2(
 		[]a.AppOpt{
 			a.EnableHelpFlag([]string{"--help", "-h"}, "grabbit"),
 			a.EnableVersionFlag([]string{"--version"}, "v.0.0.1"),
 		},
-		s.WithCategoryHelpShort("grab pics from reddit!"),
-		s.WithCategory(
+		s.HelpShort("grab pics from reddit!"),
+		s.WithSection(
 			"config",
-			s.WithCategoryHelpShort("work with the config"),
+			s.HelpShort("work with the config"),
 			s.WithCommand(
 				"edit",
-				c.WithCommandHelpShort("edit the config"),
-				c.WithCommandFlag(
+				c.HelpShort("edit the config"),
+				c.WithFlag(
 					"--editor",
 					v.NewEmptyStringValue(),
 					f.WithDefault(v.NewStringValue("vi")),

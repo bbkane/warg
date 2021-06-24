@@ -22,7 +22,7 @@ type App struct {
 	version          string
 	versionFlagNames []string
 	// Categories
-	rootCategory s.Category
+	rootCategory s.Section
 }
 
 func EnableHelpFlag(helpFlagNames []string, appName string) AppOpt {
@@ -45,13 +45,13 @@ func EnableVersionFlag(versionFlagNames []string, version string) AppOpt {
 	}
 }
 
-func AppRootCategory(opts ...s.CategoryOpt) AppOpt {
+func RootSection(opts ...s.SectionOpt) AppOpt {
 	return func(app *App) {
-		app.rootCategory = s.NewCategory(opts...)
+		app.rootCategory = s.NewSection(opts...)
 	}
 }
 
-func NewApp(opts ...AppOpt) App {
+func New(opts ...AppOpt) App {
 	app := App{}
 	for _, opt := range opts {
 		opt(&app)
@@ -60,20 +60,20 @@ func NewApp(opts ...AppOpt) App {
 	return app
 }
 
-func NewApp2(appOpts []AppOpt, rootCategoryOpts ...s.CategoryOpt) App {
+func New2(appOpts []AppOpt, rootCategoryOpts ...s.SectionOpt) App {
 	app := App{}
 	for _, opt := range appOpts {
 		opt(&app)
 	}
-	app.rootCategory = s.NewCategory(rootCategoryOpts...)
+	app.rootCategory = s.NewSection(rootCategoryOpts...)
 	return app
 }
 
 type gatherArgsResult struct {
 	// Appname holds os.Args[0]
 	AppName string
-	// CommandPath holds the path to the current command
-	CommandPath []string
+	// Path holds the path to the current command/section
+	Path []string
 	// FlagStrings is a map of all flags to their values
 	FlagStrs      map[string][]string
 	VersionPassed bool
@@ -126,7 +126,7 @@ func gatherArgs(osArgs []string, helpFlagNames []string, versionFlagNames []stri
 				expecting = expectingFlagValue
 			} else {
 				// command case
-				res.CommandPath = append(res.CommandPath, word)
+				res.Path = append(res.Path, word)
 			}
 		case expectingFlagValue:
 			res.FlagStrs[currentFlagName] = append(res.FlagStrs[currentFlagName], word)
@@ -148,7 +148,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	}
 
 	pr := &ParseResult{
-		PassedCmd:   gatherArgsResult.CommandPath,
+		PassedCmd:   gatherArgsResult.Path,
 		PassedFlags: make(v.ValueMap),
 		Action:      nil,
 	}
@@ -167,8 +167,8 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	var currentCommand *c.Command = nil
 	allowedFlags := currentCategory.Flags
 	allowedCommands := currentCategory.Commands
-	allowedCategories := currentCategory.Categories
-	for _, word := range gatherArgsResult.CommandPath {
+	allowedCategories := currentCategory.Sections
+	for _, word := range gatherArgsResult.Path {
 		if command, exists := allowedCommands[word]; exists {
 			currentCommand = &command
 			currentCategory = nil
@@ -182,7 +182,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		} else if category, exists := allowedCategories[word]; exists {
 			currentCategory = &category
 			allowedCommands = category.Commands
-			allowedCategories = category.Categories
+			allowedCategories = category.Sections
 			for k, v := range command.Flags {
 				// TODO: check if key exists already
 				allowedFlags[k] = v
@@ -225,24 +225,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 
 	if gatherArgsResult.HelpPassed {
 		if currentCategory != nil && currentCommand == nil {
-			pr.Action = func(_ v.ValueMap) error {
-				f := bufio.NewWriter(os.Stdout)
-				defer f.Flush()
-				// let's assume that HelpLong doesn't exist
-				fmt.Fprintf(f, "Current Category:\n")
-				fmt.Fprintf(f, "  %s: %s\n", gatherArgsResult.CommandPath, currentCategory.HelpShort)
-				fmt.Fprintf(f, "Subcategories:\n")
-				// TODO: sort these :)
-				for name, value := range currentCategory.Categories {
-					fmt.Fprintf(f, "  %s: %s\n", name, value.HelpShort)
-				}
-				// TODO: sort these too :)
-				fmt.Fprintf(f, "Commands:\n")
-				for name, value := range currentCategory.Commands {
-					fmt.Fprintf(f, "  %s: %s\n", name, value.HelpShort)
-				}
-				return nil
-			}
+			pr.Action = DefaultCategoryHelp(app.name, gatherArgsResult.Path, *currentCategory)
 		} else if currentCommand != nil && currentCategory == nil {
 			pr.Action = func(_ v.ValueMap) error {
 				// TODO
@@ -263,6 +246,32 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		}
 	}
 	return pr, nil
+}
+
+func DefaultCategoryHelp(
+	appName string,
+	path []string,
+	currentCategory s.Section,
+) c.Action {
+	return func(vm v.ValueMap) error {
+		f := bufio.NewWriter(os.Stdout)
+		defer f.Flush()
+		// let's assume that HelpLong doesn't exist
+		fmt.Fprintf(f, "Current Category:\n")
+		totalPath := appName + " " + strings.Join(path, " ")
+		fmt.Fprintf(f, "  %s: %s\n", totalPath, currentCategory.HelpShort)
+		fmt.Fprintf(f, "Subcategories:\n")
+		// TODO: sort these :)
+		for name, value := range currentCategory.Sections {
+			fmt.Fprintf(f, "  %s: %s\n", name, value.HelpShort)
+		}
+		// TODO: sort these too :)
+		fmt.Fprintf(f, "Commands:\n")
+		for name, value := range currentCategory.Commands {
+			fmt.Fprintf(f, "  %s: %s\n", name, value.HelpShort)
+		}
+		return nil
+	}
 }
 
 type ParseResult struct {

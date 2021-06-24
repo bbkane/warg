@@ -28,7 +28,7 @@ func NewCommand(opts ...CommandOpt) Command {
 	return category
 }
 
-func AddCommandFlag(name string, value f.Flag) CommandOpt {
+func AddFlag(name string, value f.Flag) CommandOpt {
 	return func(app *Command) {
 		if _, alreadyThere := app.Flags[name]; !alreadyThere {
 			app.Flags[name] = value
@@ -44,17 +44,17 @@ func WithAction(action Action) CommandOpt {
 	}
 }
 
-func WithCommandFlag(name string, empty v.Value, opts ...f.FlagOpt) CommandOpt {
-	return AddCommandFlag(name, f.NewFlag(empty, opts...))
+func WithFlag(name string, empty v.Value, opts ...f.FlagOpt) CommandOpt {
+	return AddFlag(name, f.NewFlag(empty, opts...))
 }
 
-func WithCommandHelpLong(helpLong string) CommandOpt {
+func HelpLong(helpLong string) CommandOpt {
 	return func(cat *Command) {
 		cat.HelpLong = helpLong
 	}
 }
 
-func WithCommandHelpShort(helpShort string) CommandOpt {
+func HelpShort(helpShort string) CommandOpt {
 	return func(cat *Command) {
 		cat.HelpShort = helpShort
 	}
