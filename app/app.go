@@ -1,4 +1,4 @@
-package warg
+package app
 
 import (
 	"bufio"
@@ -6,6 +6,10 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	c "github.com/bbkane/warg/command"
+	s "github.com/bbkane/warg/section"
+	v "github.com/bbkane/warg/value"
 )
 
 type AppOpt = func(*App)
@@ -18,7 +22,7 @@ type App struct {
 	version          string
 	versionFlagNames []string
 	// Categories
-	rootCategory Category
+	rootCategory s.Category
 }
 
 func EnableHelpFlag(helpFlagNames []string, appName string) AppOpt {
@@ -41,9 +45,9 @@ func EnableVersionFlag(versionFlagNames []string, version string) AppOpt {
 	}
 }
 
-func AppRootCategory(opts ...CategoryOpt) AppOpt {
+func AppRootCategory(opts ...s.CategoryOpt) AppOpt {
 	return func(app *App) {
-		app.rootCategory = NewCategory(opts...)
+		app.rootCategory = s.NewCategory(opts...)
 	}
 }
 
@@ -56,12 +60,12 @@ func NewApp(opts ...AppOpt) App {
 	return app
 }
 
-func NewApp2(appOpts []AppOpt, rootCategoryOpts ...CategoryOpt) App {
+func NewApp2(appOpts []AppOpt, rootCategoryOpts ...s.CategoryOpt) App {
 	app := App{}
 	for _, opt := range appOpts {
 		opt(&app)
 	}
-	app.rootCategory = NewCategory(rootCategoryOpts...)
+	app.rootCategory = s.NewCategory(rootCategoryOpts...)
 	return app
 }
 
@@ -145,13 +149,13 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 
 	pr := &ParseResult{
 		PassedCmd:   gatherArgsResult.CommandPath,
-		PassedFlags: make(ValueMap),
+		PassedFlags: make(v.ValueMap),
 		Action:      nil,
 	}
 
 	// special case versionFlag
 	if gatherArgsResult.VersionPassed {
-		pr.Action = func(_ map[string]Value) error {
+		pr.Action = func(_ map[string]v.Value) error {
 			fmt.Print(app.version)
 			return nil
 		}
@@ -160,7 +164,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 
 	// validate passed command and get available flags
 	currentCategory := &(app.rootCategory)
-	var currentCommand *Command = nil
+	var currentCommand *c.Command = nil
 	allowedFlags := currentCategory.Flags
 	allowedCommands := currentCategory.Commands
 	allowedCategories := currentCategory.Categories
@@ -221,7 +225,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 
 	if gatherArgsResult.HelpPassed {
 		if currentCategory != nil && currentCommand == nil {
-			pr.Action = func(_ ValueMap) error {
+			pr.Action = func(_ v.ValueMap) error {
 				f := bufio.NewWriter(os.Stdout)
 				defer f.Flush()
 				// let's assume that HelpLong doesn't exist
@@ -240,7 +244,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 				return nil
 			}
 		} else if currentCommand != nil && currentCategory == nil {
-			pr.Action = func(_ ValueMap) error {
+			pr.Action = func(_ v.ValueMap) error {
 				// TODO
 				fmt.Printf("TODO :)")
 				return nil
@@ -263,6 +267,6 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 
 type ParseResult struct {
 	PassedCmd   []string
-	PassedFlags ValueMap
-	Action      Action
+	PassedFlags v.ValueMap
+	Action      c.Action
 }

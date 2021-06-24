@@ -1,9 +1,9 @@
-package warg_test
+package value_test
 
 import (
 	"testing"
 
-	w "github.com/bbkane/warg"
+	w "github.com/bbkane/warg/value"
 	"github.com/stretchr/testify/assert"
 )
 

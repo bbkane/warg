@@ -1,4 +1,4 @@
-package warg
+package app
 
 import (
 	"testing"

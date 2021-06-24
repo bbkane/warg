@@ -3,29 +3,32 @@ package warg_test
 import (
 	"fmt"
 
-	"github.com/bbkane/warg"
-	w "github.com/bbkane/warg"
+	a "github.com/bbkane/warg/app"
+	c "github.com/bbkane/warg/command"
+	f "github.com/bbkane/warg/flag"
+	s "github.com/bbkane/warg/section"
+	v "github.com/bbkane/warg/value"
 )
 
 func Example_parse() {
 
-	comAction := func(vm w.ValueMap) error {
+	comAction := func(vm v.ValueMap) error {
 		action := vm["--flag"].Get().(int)
 		fmt.Printf("Action Output: %v\n", action)
 		return nil
 	}
 
-	app := w.NewApp(
-		w.AppRootCategory(
-			w.WithCategory(
+	app := a.NewApp(
+		a.AppRootCategory(
+			s.WithCategory(
 				"cat",
-				w.WithCommand(
+				s.WithCommand(
 					"com",
-					w.WithAction(comAction),
-					w.WithCommandFlag(
+					c.WithAction(comAction),
+					c.WithCommandFlag(
 						"--flag",
-						w.NewIntValue(0),
-						w.WithDefault(w.NewIntValue(10)),
+						v.NewIntValue(0),
+						f.WithDefault(v.NewIntValue(10)),
 					),
 				),
 			),
@@ -54,8 +57,8 @@ func Example_parse() {
 }
 
 func Example_version() {
-	app := w.NewApp(
-		w.EnableVersionFlag(
+	app := a.NewApp(
+		a.EnableVersionFlag(
 			[]string{"--version"},
 			"v0.0.0",
 		),
@@ -74,20 +77,20 @@ func Example_version() {
 }
 
 func Example_help() {
-	app := w.NewApp(
-		w.EnableHelpFlag(
+	app := a.NewApp(
+		a.EnableHelpFlag(
 			[]string{"-h", "--help"},
 			"example",
 		),
-		w.AppRootCategory(
-			w.WithCategoryHelpShort("example help!"),
-			w.WithCategory(
+		a.AppRootCategory(
+			s.WithCategoryHelpShort("example help!"),
+			s.WithCategory(
 				"cat",
-				w.WithCategoryHelpShort("cat help!"),
+				s.WithCategoryHelpShort("cat help!"),
 			),
-			w.WithCommand(
+			s.WithCommand(
 				"com",
-				w.WithCommandHelpShort("com help!!"),
+				c.WithCommandHelpShort("com help!!"),
 			),
 		),
 	)
@@ -104,30 +107,30 @@ func Example_help() {
 }
 
 func Example_grabbit() {
-	_ = w.NewApp2(
-		[]w.AppOpt{
-			w.EnableHelpFlag([]string{"--help", "-h"}, "grabbit"),
-			w.EnableVersionFlag([]string{"--version"}, "v.0.0.1"),
+	_ = a.NewApp2(
+		[]a.AppOpt{
+			a.EnableHelpFlag([]string{"--help", "-h"}, "grabbit"),
+			a.EnableVersionFlag([]string{"--version"}, "v.0.0.1"),
 		},
-		w.WithCategoryHelpShort("grab pics from reddit!"),
-		w.WithCategory(
+		s.WithCategoryHelpShort("grab pics from reddit!"),
+		s.WithCategory(
 			"config",
-			w.WithCategoryHelpShort("work with the config"),
-			w.WithCommand(
+			s.WithCategoryHelpShort("work with the config"),
+			s.WithCommand(
 				"edit",
-				w.WithCommandHelpShort("edit the config"),
-				w.WithCommandFlag(
+				c.WithCommandHelpShort("edit the config"),
+				c.WithCommandFlag(
 					"--editor",
-					w.NewEmptyStringValue(),
-					w.WithDefault(w.NewStringValue("vi")),
-					w.WithFlagHelpShort("path to editor"),
+					v.NewEmptyStringValue(),
+					f.WithDefault(v.NewStringValue("vi")),
+					f.WithFlagHelpShort("path to editor"),
 				),
 			),
 		),
-		w.WithCommand(
+		s.WithCommand(
 			"grab",
-			w.WithAction(
-				func(vm warg.ValueMap) error {
+			c.WithAction(
+				func(vm v.ValueMap) error {
 					return nil
 				},
 			),
