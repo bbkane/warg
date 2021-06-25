@@ -21,8 +21,8 @@ type App struct {
 	// Version()
 	version          string
 	versionFlagNames []string
-	// Categories
-	rootCategory s.Section
+	// RootSection holds the good stuff!
+	RootSection s.Section
 }
 
 func EnableHelpFlag(helpFlagNames []string, appName string) AppOpt {
@@ -47,7 +47,7 @@ func EnableVersionFlag(versionFlagNames []string, version string) AppOpt {
 
 func RootSection(opts ...s.SectionOpt) AppOpt {
 	return func(app *App) {
-		app.rootCategory = s.NewSection(opts...)
+		app.RootSection = s.NewSection(opts...)
 	}
 }
 
@@ -65,7 +65,7 @@ func New2(appOpts []AppOpt, rootCategoryOpts ...s.SectionOpt) App {
 	for _, opt := range appOpts {
 		opt(&app)
 	}
-	app.rootCategory = s.NewSection(rootCategoryOpts...)
+	app.RootSection = s.NewSection(rootCategoryOpts...)
 	return app
 }
 
@@ -163,7 +163,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	}
 
 	// validate passed command and get available flags
-	currentCategory := &(app.rootCategory)
+	currentCategory := &(app.RootSection)
 	var currentCommand *c.Command = nil
 	allowedFlags := currentCategory.Flags
 	allowedCommands := currentCategory.Commands

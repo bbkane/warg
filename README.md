@@ -135,31 +135,73 @@ The action thing is easier so I'mma run with that for now :)
 # Working towards
 
 ```go
-parser := c.NewApp(
-    "example",
-    c.HelpFlag(["-h", "--help"], c.DefaultHelpTemplate),
-    c.VersionFlag(["--version"], "v1.0.0"),
-    c.ConfigFlag(["-c", "--config"], "~/.config/example.json", c.JSONDecode), // bytes -> map[string]{interface{}}
-    c.NewCategory(
-        c.WithCategory(
-            "cat",
-            c.WithCommand(
-                "com",
-                c.WithAction(catCom),
-                c.WithCommandFlag(
-                    "--flag",
-                    c.NewEmptyIntValue(),
-                    c.ConfigPath("path.to.int", IntValueFromInterface), // interface -> value
-                    c.DefaultValue(NewIntValue(10)),
-                    c.Help("Example help"),
-                    c.Required(),
-                )
+root := NewSection(
+    "help for example"
+    s.HelpLong("example is an app that does x, y, z")
+    s.WithFlag(
+        "--sflag",
+        "help for --sflag",
+        v.NewEmptyStringValue(),
+        f.Alias("-s"),
+        f.ConfigPath("sflag", NewStringValueFromInterface), // interface[] -> (Value, error)
+        f.Default(NewStringValue("hi")),
+        f.EnvVar("example_sflag"),
+        f.Examples([]string{"hola", "hello, governer!"})
+        f.Required(),
+    ),
+    s.WithSection(
+        "sec",
+        "sec help",
+        s.WithCommand(
+            "com",
+            "com help",
+            func(vm ValueMap) error {
+                cflag := vm["--cflag"].Get().(int)
+                fmt.Println(cflag)
+            }
+            c.WithFlag(
+                "--cflag",
+                "help for --cflag",
+                v.NewEmptyIntValue(),
             ),
-            c.WithCategory(
-                "cat1",
-
-            ),
+            c.Examples(
+                "do the thing: example sec com --cflag 2",
+            )
         ),
     ),
 )
+
+type Unmarshaller = func(string) (map[string]interface{}, error)
+
+parser := a.NewApp(
+    "example",
+    "v0.0.0",
+    a.Config(
+       "--config",
+       map[string]Unmarshaller{
+        ".json": a.JSONUnmarshaller,
+        ".yaml": warg_yaml.YAMLUnmarshaller,
+        ".yml": warg_yaml.YAMLUnmarshaller,
+       },
+       f.NewFlag(
+           "path to config",
+           v.NewEmptyStringValue(),
+           f.Default(v.NewStringValue("config.yml")),
+       )
+
+    ),
+    a.Help([]string{"-h", "--help"}, a.DefaultSectionHelp, a.DefaultCommandHelp),
+    a.Version([]string{"--version"}),
+    a.AddRootSection(root),
+)
 ```
+
+## Cases for config:
+
+config not passed -> flag not set
+config passed, file doesn't exist -> flag not set  # command should error if a flag isn't set properly
+config passed, file exists, can't unmarshall -> ERROR
+config passed, file exists, can unmarshall, path error -> ERROR
+config passed, file exists, can unmarshall, path success, path not in config -> flag not set
+config passed, file exists, can unmarshall, path success, path in config, value error -> ERROR
+config passed, file exists, can unmarshall, path success, path in config, value created -> flag set
