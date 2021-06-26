@@ -184,7 +184,10 @@ parser := a.NewApp(
         },
        f.Default(v.NewStringValue("config.yml")),
     ),
-    a.Help([]string{"-h", "--help"}, a.DefaultSectionHelp, a.DefaultCommandHelp),
+    a.Help(
+        []string{"-h", "--help"},
+        a.DefaultSectionHelp,
+        a.DefaultCommandHelp),
     a.Version([]string{"--version"}),
     a.AddRootSection(root),  // alternative to a.WithRootSection(s.SectionOpt...)
 )

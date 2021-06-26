@@ -20,11 +20,12 @@ type Section struct {
 	HelpShort string
 }
 
-func NewSection(opts ...SectionOpt) Section {
+func NewSection(helpShort string, opts ...SectionOpt) Section {
 	category := Section{
-		Flags:    make(map[string]f.Flag),
-		Sections: make(map[string]Section),
-		Commands: make(map[string]c.Command),
+		HelpShort: helpShort,
+		Flags:     make(map[string]f.Flag),
+		Sections:  make(map[string]Section),
+		Commands:  make(map[string]c.Command),
 	}
 	for _, opt := range opts {
 		opt(&category)
@@ -63,26 +64,20 @@ func AddFlag(name string, value f.Flag) SectionOpt {
 	}
 }
 
-func WithSection(name string, opts ...SectionOpt) SectionOpt {
-	return AddSection(name, NewSection(opts...))
+func WithSection(name string, helpShort string, opts ...SectionOpt) SectionOpt {
+	return AddSection(name, NewSection(helpShort, opts...))
 }
 
-func WithFlag(name string, empty v.Value, opts ...f.FlagOpt) SectionOpt {
-	return AddFlag(name, f.NewFlag(empty, opts...))
+func WithFlag(name string, helpShort string, empty v.Value, opts ...f.FlagOpt) SectionOpt {
+	return AddFlag(name, f.NewFlag(helpShort, empty, opts...))
 }
 
-func WithCommand(name string, opts ...c.CommandOpt) SectionOpt {
-	return AddCommand(name, c.NewCommand(opts...))
+func WithCommand(name string, helpShort string, action c.Action, opts ...c.CommandOpt) SectionOpt {
+	return AddCommand(name, c.NewCommand(helpShort, action, opts...))
 }
 
 func HelpLong(helpLong string) SectionOpt {
 	return func(cat *Section) {
 		cat.HelpLong = helpLong
-	}
-}
-
-func HelpShort(helpShort string) SectionOpt {
-	return func(cat *Section) {
-		cat.HelpShort = helpShort
 	}
 }

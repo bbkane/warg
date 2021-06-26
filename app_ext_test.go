@@ -25,17 +25,25 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "from main",
 			app: a.New(
-				a.RootSection(
+				"test",
+				"v0.0.0",
+				a.WithRootSection(
+					"help for test",
 					s.WithFlag(
 						"--af1",
+						"flag help",
 						v.NewEmptyIntValue(),
 					),
 					s.WithSection(
 						"cat1",
+						"help for cat1",
 						s.WithCommand(
 							"com1",
+							"help for com1",
+							c.DoNothing,
 							c.WithFlag(
 								"--com1f1",
+								"flag help",
 								v.NewEmptyIntValue(),
 								f.WithDefault(v.NewIntValue(10)),
 							),
@@ -52,9 +60,13 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "no category",
 			app: a.New(
-				a.RootSection(
+				"test",
+				"v0.0.0",
+				a.WithRootSection(
+					"help for test",
 					s.WithFlag(
 						"--af1",
+						"flag help",
 						v.NewEmptyIntValue(),
 					),
 				),
@@ -68,11 +80,17 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "flag default",
 			app: a.New(
-				a.RootSection(
+				"test",
+				"v0.0.0",
+				a.WithRootSection(
+					"help for test",
 					s.WithCommand(
 						"com",
+						"com help",
+						c.DoNothing,
 						c.WithFlag(
 							"--flag",
+							"flag help",
 							v.NewEmptyStringValue(),
 							f.WithDefault(v.NewStringValue("hi")),
 						),

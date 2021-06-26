@@ -47,13 +47,12 @@ type App struct {
 	// Version()
 	version          string
 	versionFlagNames []string
-	// RootSection holds the good stuff!
-	RootSection s.Section
+	// rootSection holds the good stuff!
+	rootSection s.Section
 }
 
-func EnableHelpFlag(helpFlagNames []string, appName string) AppOpt {
+func OverrideHelp(helpFlagNames []string) AppOpt {
 	return func(app *App) {
-		app.name = appName
 
 		app.helpFlagNames = helpFlagNames
 		for _, n := range helpFlagNames {
@@ -64,58 +63,65 @@ func EnableHelpFlag(helpFlagNames []string, appName string) AppOpt {
 	}
 }
 
-func EnableVersionFlag(versionFlagNames []string, version string) AppOpt {
+func OverrideVersion(versionFlagNames []string) AppOpt {
 	return func(app *App) {
 		app.versionFlagNames = versionFlagNames
-		app.version = version
 	}
 }
 
-func RootSection(opts ...s.SectionOpt) AppOpt {
+func AddRootSection(rootSection s.Section) AppOpt {
 	return func(app *App) {
-		app.RootSection = s.NewSection(opts...)
+		app.rootSection = rootSection
+	}
+}
+
+func WithRootSection(helpShort string, opts ...s.SectionOpt) AppOpt {
+	return func(app *App) {
+		app.rootSection = s.NewSection(helpShort, opts...)
 	}
 }
 
 func Config(
 	configFlagName string,
 	unmarshallers map[string]Unmarshaller,
+	helpShort string,
 	flagOpts ...f.FlagOpt,
 ) AppOpt {
 	return func(app *App) {
 		app.configFlagName = configFlagName
 		app.unmarshallers = unmarshallers
-		configFlag := f.NewFlag(v.NewEmptyStringValue(), flagOpts...)
+		configFlag := f.NewFlag(helpShort, v.NewEmptyStringValue(), flagOpts...)
 		app.configFlag = &configFlag
 	}
 }
 
-func New(opts ...AppOpt) App {
-	app := App{}
+func New(name string, version string, opts ...AppOpt) App {
+	app := App{
+		name:    name,
+		version: version,
+	}
 	for _, opt := range opts {
 		opt(&app)
 	}
 	// stitch up some "optional" parameters I'm expecting
 	// RootSection
-	if app.RootSection.Commands == nil {
-		app.RootSection = s.NewSection()
+	if app.rootSection.Commands == nil {
+		app.rootSection = s.NewSection("")
 	}
 	// Config - if passed, add to flags
 	if app.configFlag != nil {
-		app.RootSection.Flags[app.configFlagName] = *app.configFlag
+		app.rootSection.Flags[app.configFlagName] = *app.configFlag
 	}
-	// Help - TODO
-	// Version - TODO
-	return app
-}
 
-// TODO: get rid of this
-func New2(appOpts []AppOpt, rootCategoryOpts ...s.SectionOpt) App {
-	app := App{}
-	for _, opt := range appOpts {
-		opt(&app)
+	// Help
+	if len(app.helpFlagNames) == 0 {
+		app.helpFlagNames = []string{"--help", "-h"}
+		// TODO: custom help functions
 	}
-	app.RootSection = s.NewSection(rootCategoryOpts...)
+	// Version
+	if len(app.versionFlagNames) == 0 {
+		app.versionFlagNames = []string{"--version"}
+	}
 	return app
 }
 
@@ -213,7 +219,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	}
 
 	// validate passed command and get available flags
-	currentCategory := &(app.RootSection)
+	currentCategory := &(app.rootSection)
 	var currentCommand *c.Command = nil
 	allowedFlags := currentCategory.Flags
 	allowedCommands := currentCategory.Commands

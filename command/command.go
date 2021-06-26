@@ -18,9 +18,15 @@ type Command struct {
 	HelpShort string
 }
 
-func NewCommand(opts ...CommandOpt) Command {
+func DoNothing(_ v.ValueMap) error {
+	return nil
+}
+
+func NewCommand(helpShort string, action Action, opts ...CommandOpt) Command {
 	category := Command{
-		Flags: make(map[string]f.Flag),
+		HelpShort: helpShort,
+		Action:    action,
+		Flags:     make(map[string]f.Flag),
 	}
 	for _, opt := range opts {
 		opt(&category)
@@ -38,24 +44,12 @@ func AddFlag(name string, value f.Flag) CommandOpt {
 	}
 }
 
-func WithAction(action Action) CommandOpt {
-	return func(cmd *Command) {
-		cmd.Action = action
-	}
-}
-
-func WithFlag(name string, empty v.Value, opts ...f.FlagOpt) CommandOpt {
-	return AddFlag(name, f.NewFlag(empty, opts...))
+func WithFlag(name string, helpShort string, empty v.Value, opts ...f.FlagOpt) CommandOpt {
+	return AddFlag(name, f.NewFlag(helpShort, empty, opts...))
 }
 
 func HelpLong(helpLong string) CommandOpt {
 	return func(cat *Command) {
 		cat.HelpLong = helpLong
-	}
-}
-
-func HelpShort(helpShort string) CommandOpt {
-	return func(cat *Command) {
-		cat.HelpShort = helpShort
 	}
 }

@@ -19,14 +19,20 @@ func Example_parse() {
 	}
 
 	app := a.New(
-		a.RootSection(
+		"test",
+		"v0.0.0",
+		a.WithRootSection(
+			"help for test",
 			s.WithSection(
 				"cat",
+				"help for cat",
 				s.WithCommand(
 					"com",
-					c.WithAction(comAction),
+					"help for com",
+					comAction,
 					c.WithFlag(
 						"--flag",
+						"flag help",
 						v.NewIntValue(0),
 						f.WithDefault(v.NewIntValue(10)),
 					),
@@ -58,9 +64,10 @@ func Example_parse() {
 
 func Example_version() {
 	app := a.New(
-		a.EnableVersionFlag(
+		"test",
+		"v0.0.0",
+		a.OverrideVersion(
 			[]string{"--version"},
-			"v0.0.0",
 		),
 	)
 	args := []string{"example", "--version"}
@@ -78,19 +85,21 @@ func Example_version() {
 
 func Example_help() {
 	app := a.New(
-		a.EnableHelpFlag(
+		"example",
+		"v0.0.0",
+		a.OverrideHelp(
 			[]string{"-h", "--help"},
-			"example",
 		),
-		a.RootSection(
-			s.HelpShort("example help!"),
+		a.WithRootSection(
+			"example help!",
 			s.WithSection(
 				"cat",
-				s.HelpShort("cat help!"),
+				"cat help!",
 			),
 			s.WithCommand(
 				"com",
-				c.HelpShort("com help!!"),
+				"com help!!",
+				c.DoNothing,
 			),
 		),
 	)
@@ -113,32 +122,33 @@ func Example_help() {
 }
 
 func Example_grabbit() {
-	_ = a.New2(
-		[]a.AppOpt{
-			a.EnableHelpFlag([]string{"--help", "-h"}, "grabbit"),
-			a.EnableVersionFlag([]string{"--version"}, "v.0.0.1"),
-		},
-		s.HelpShort("grab pics from reddit!"),
-		s.WithSection(
-			"config",
-			s.HelpShort("work with the config"),
-			s.WithCommand(
-				"edit",
-				c.HelpShort("edit the config"),
-				c.WithFlag(
-					"--editor",
-					v.NewEmptyStringValue(),
-					f.WithDefault(v.NewStringValue("vi")),
-					f.WithFlagHelpShort("path to editor"),
+	_ = a.New(
+		"test",
+		"v0.0.0",
+		a.OverrideHelp([]string{"--help", "-h"}),
+		a.OverrideVersion([]string{"--version"}),
+
+		a.WithRootSection(
+			"grab pics from reddit!",
+			s.WithSection(
+				"config",
+				"work with the config",
+				s.WithCommand(
+					"edit",
+					"edit the config",
+					c.DoNothing,
+					c.WithFlag(
+						"--editor",
+						"path to editor",
+						v.NewEmptyStringValue(),
+						f.WithDefault(v.NewStringValue("vi")),
+					),
 				),
 			),
-		),
-		s.WithCommand(
-			"grab",
-			c.WithAction(
-				func(vm v.ValueMap) error {
-					return nil
-				},
+			s.WithCommand(
+				"grab",
+				"download the images!",
+				c.DoNothing,
 			),
 		),
 	)

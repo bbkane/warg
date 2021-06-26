@@ -20,9 +20,11 @@ type Flag struct {
 	Value v.Value
 }
 
-func NewFlag(empty v.Value, opts ...FlagOpt) Flag {
-	flag := Flag{}
-	flag.Value = empty
+func NewFlag(helpShort string, empty v.Value, opts ...FlagOpt) Flag {
+	flag := Flag{
+		HelpShort: helpShort,
+		Value:     empty,
+	}
 	for _, opt := range opts {
 		opt(&flag)
 	}
@@ -35,14 +37,8 @@ func WithDefault(value v.Value) FlagOpt {
 	}
 }
 
-func WithFlagHelpLong(helpLong string) FlagOpt {
+func HelpLong(helpLong string) FlagOpt {
 	return func(cat *Flag) {
 		cat.HelpLong = helpLong
-	}
-}
-
-func WithFlagHelpShort(helpShort string) FlagOpt {
-	return func(cat *Flag) {
-		cat.HelpShort = helpShort
 	}
 }
