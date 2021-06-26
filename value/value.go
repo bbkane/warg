@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+type FromInterface = func(interface{}) (Value, error)
 type ValueMap = map[string]Value
 
 // Value is a "generic" type that lets me store different types into flags
@@ -20,6 +21,8 @@ type Value interface {
 	// Make it printable!
 	String() string
 }
+
+// TODO: should I be returning pointers?
 
 type IntValue int
 
@@ -40,9 +43,16 @@ func (i *IntValue) Update(s string) error {
 type StringValue string
 
 func NewStringValue(val string) *StringValue { return (*StringValue)(&val) }
-func NewEmptyStringValue() *StringValue      { return NewStringValue("") }
-func (v *StringValue) Get() interface{}      { return string(*v) }
-func (v *StringValue) String() string        { return fmt.Sprint(string(*v)) }
+func NewStringValueFromInterface(val interface{}) (*StringValue, error) {
+	under, ok := val.(string)
+	if !ok {
+		return nil, fmt.Errorf("Can't create StringValue. Expected: string, got: %#v\n", val)
+	}
+	return NewStringValue(under), nil
+}
+func NewEmptyStringValue() *StringValue { return NewStringValue("") }
+func (v *StringValue) Get() interface{} { return string(*v) }
+func (v *StringValue) String() string   { return fmt.Sprint(string(*v)) }
 func (v *StringValue) Update(s string) error {
 	*v = StringValue(s)
 	return nil

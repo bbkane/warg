@@ -3,8 +3,9 @@ package value_test
 import (
 	"testing"
 
-	w "github.com/bbkane/warg/value"
 	"github.com/stretchr/testify/assert"
+
+	w "github.com/bbkane/warg/value"
 )
 
 func TestIntValue(t *testing.T) {

@@ -1,20 +1,46 @@
-package app
+package warg
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 
 	c "github.com/bbkane/warg/command"
+	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
 )
 
 type AppOpt = func(*App)
 
+// Unmarshaller turns a string into a map so we can index into it!
+// Useful for configs who will read a file to get it
+type Unmarshaller = func(string) (map[string]interface{}, error)
+
+func JSONUnmarshaller(filePath string) (map[string]interface{}, error) {
+	// TODO: expand homedir?
+	content, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	var m map[string]interface{}
+	err = json.Unmarshal(content, &m)
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 type App struct {
+	// Config()
+	configFlagName string
+	unmarshallers  map[string]Unmarshaller
+	configFlag     *f.Flag
 	// Help()
 	name          string
 	helpFlagNames []string
@@ -51,15 +77,39 @@ func RootSection(opts ...s.SectionOpt) AppOpt {
 	}
 }
 
+func Config(
+	configFlagName string,
+	unmarshallers map[string]Unmarshaller,
+	flagOpts ...f.FlagOpt,
+) AppOpt {
+	return func(app *App) {
+		app.configFlagName = configFlagName
+		app.unmarshallers = unmarshallers
+		configFlag := f.NewFlag(v.NewEmptyStringValue(), flagOpts...)
+		app.configFlag = &configFlag
+	}
+}
+
 func New(opts ...AppOpt) App {
 	app := App{}
 	for _, opt := range opts {
 		opt(&app)
 	}
-	// TODO: will it panic if we try to Parse an empty category?
+	// stitch up some "optional" parameters I'm expecting
+	// RootSection
+	if app.RootSection.Commands == nil {
+		app.RootSection = s.NewSection()
+	}
+	// Config - if passed, add to flags
+	if app.configFlag != nil {
+		app.RootSection.Flags[app.configFlagName] = *app.configFlag
+	}
+	// Help - TODO
+	// Version - TODO
 	return app
 }
 
+// TODO: get rid of this
 func New2(appOpts []AppOpt, rootCategoryOpts ...s.SectionOpt) App {
 	app := App{}
 	for _, opt := range appOpts {
@@ -153,7 +203,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		Action:      nil,
 	}
 
-	// special case versionFlag
+	// special case versionFlag and exit early
 	if gatherArgsResult.VersionPassed {
 		pr.Action = func(_ map[string]v.Value) error {
 			fmt.Print(app.version)
@@ -193,6 +243,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	}
 
 	// fmt.Printf("allowed flags: %#v\n", allowedFlags)
+	// NOTE: allowedFlags is the flags that we'll be manipulating
 
 	// update flags with passed values and ensure that no extra flags were passed
 	// TODO: ensure passed flags match available flags, only aggregrate flags passed multiple times, required flags make it

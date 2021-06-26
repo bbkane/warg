@@ -1,11 +1,11 @@
-///usr/bin/true; exec /usr/bin/env go run "$0" .
 package warg_test
 
 import (
-	"reflect"
 	"testing"
 
-	a "github.com/bbkane/warg/app"
+	"github.com/stretchr/testify/assert"
+
+	a "github.com/bbkane/warg"
 	c "github.com/bbkane/warg/command"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
@@ -49,6 +49,41 @@ func TestApp_Parse(t *testing.T) {
 			passedValuesWant:  v.ValueMap{"--com1f1": v.NewIntValue(1)},
 			wantErr:           false,
 		},
+		{
+			name: "no category",
+			app: a.New(
+				a.RootSection(
+					s.WithFlag(
+						"--af1",
+						v.NewEmptyIntValue(),
+					),
+				),
+			),
+
+			args:              []string{"app"},
+			passedCommandWant: nil,
+			passedValuesWant:  map[string]v.Value{},
+			wantErr:           false,
+		},
+		{
+			name: "flag default",
+			app: a.New(
+				a.RootSection(
+					s.WithCommand(
+						"com",
+						c.WithFlag(
+							"--flag",
+							v.NewEmptyStringValue(),
+							f.WithDefault(v.NewStringValue("hi")),
+						),
+					),
+				),
+			),
+			args:              []string{"test", "com"},
+			passedCommandWant: []string{"com"},
+			passedValuesWant:  v.ValueMap{"--flag": v.NewStringValue("hi")},
+			wantErr:           false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -59,12 +94,8 @@ func TestApp_Parse(t *testing.T) {
 				t.Errorf("RootCommand.Parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(pr.PassedCmd, tt.passedCommandWant) {
-				t.Errorf("RootCommand.Parse() got = %v, want %v", pr.PassedCmd, tt.passedCommandWant)
-			}
-			if !reflect.DeepEqual(pr.PassedFlags, tt.passedValuesWant) {
-				t.Errorf("RootCommand.Parse() got1 = %v, want %v", pr.PassedFlags, tt.passedValuesWant)
-			}
+			assert.Equal(t, pr.PassedCmd, tt.passedCommandWant)
+			assert.Equal(t, pr.PassedFlags, tt.passedValuesWant)
 		})
 	}
 }

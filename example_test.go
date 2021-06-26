@@ -3,7 +3,7 @@ package warg_test
 import (
 	"fmt"
 
-	a "github.com/bbkane/warg/app"
+	a "github.com/bbkane/warg"
 	c "github.com/bbkane/warg/command"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"

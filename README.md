@@ -171,28 +171,22 @@ root := NewSection(
     ),
 )
 
-type Unmarshaller = func(string) (map[string]interface{}, error)
-
 parser := a.NewApp(
     "example",
     "v0.0.0",
     a.Config(
-       "--config",
-       map[string]Unmarshaller{
-        ".json": a.JSONUnmarshaller,
-        ".yaml": warg_yaml.YAMLUnmarshaller,
-        ".yml": warg_yaml.YAMLUnmarshaller,
-       },
-       f.NewFlag(
-           "path to config",
-           v.NewEmptyStringValue(),
-           f.Default(v.NewStringValue("config.yml")),
-       )
-
+        "--config",
+        "path to config",
+        map[string]Unmarshaller{
+         ".json": a.JSONUnmarshaller,
+         ".yaml": warg_yaml.YAMLUnmarshaller,
+         ".yml": warg_yaml.YAMLUnmarshaller,
+        },
+       f.Default(v.NewStringValue("config.yml")),
     ),
     a.Help([]string{"-h", "--help"}, a.DefaultSectionHelp, a.DefaultCommandHelp),
     a.Version([]string{"--version"}),
-    a.AddRootSection(root),
+    a.AddRootSection(root),  // alternative to a.WithRootSection(s.SectionOpt...)
 )
 ```
 
@@ -205,3 +199,4 @@ config passed, file exists, can unmarshall, path error -> ERROR
 config passed, file exists, can unmarshall, path success, path not in config -> flag not set
 config passed, file exists, can unmarshall, path success, path in config, value error -> ERROR
 config passed, file exists, can unmarshall, path success, path in config, value created -> flag set
+
