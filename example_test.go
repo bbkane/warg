@@ -47,7 +47,7 @@ func Example_parse() {
 		fmt.Printf("Parse Error: %#v\n", err)
 		return
 	}
-	fmt.Printf("PassedCmd: %v\n", pr.PassedCmd)
+	fmt.Printf("PassedCmd: %v\n", pr.PasssedPath)
 	// fmt.Printf("PassedFlags: %#v\n", pr.PassedFlags)
 	if pr.Action == nil {
 		fmt.Println("Action is nil..")
@@ -123,7 +123,7 @@ func Example_help() {
 
 func Example_grabbit() {
 	_ = a.New(
-		"test",
+		"grabbit",
 		"v0.0.0",
 		a.OverrideHelp([]string{"--help", "-h"}),
 		a.OverrideVersion([]string{"--version"}),

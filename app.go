@@ -204,7 +204,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	}
 
 	pr := &ParseResult{
-		PassedCmd:   gatherArgsResult.Path,
+		PasssedPath: gatherArgsResult.Path,
 		PassedFlags: make(v.ValueMap),
 		Action:      nil,
 	}
@@ -251,33 +251,33 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	// fmt.Printf("allowed flags: %#v\n", allowedFlags)
 	// NOTE: allowedFlags is the flags that we'll be manipulating
 
-	// update flags with passed values and ensure that no extra flags were passed
-	// TODO: ensure passed flags match available flags, only aggregrate flags passed multiple times, required flags make it
-	for name, passed := range gatherArgsResult.FlagStrs {
-		flag, exists := allowedFlags[name]
-		if !exists {
-			return nil, fmt.Errorf("Unrecognized flag: %#v\n", name)
-		}
-		// TODO: check for repeated flags that aren't supposed to be repeated
-		for _, str := range passed {
-			flag.Value.Update(str)
-		}
-		flag.SetBy = "commandline"
-		// I would think this woudn't be necessary...
-		// I think because this isn't explicitly a pointer its passed by value? I'm too used to Python...
-		// TODO: look into this more :)
-		allowedFlags[name] = flag
-	}
-	// fmt.Printf("allowed flags: %#v\n", allowedFlags)
-
-	// update unset flags backup values
 	for name, flag := range allowedFlags {
-		// update from default value
+
+		// update from command line
+		strValues, exists := gatherArgsResult.FlagStrs[name]
+		if exists {
+			for _, v := range strValues {
+				flag.Value.Update(v)
+			}
+			flag.SetBy = "commandline"
+			// if they aren't all used
+			delete(gatherArgsResult.FlagStrs, name)
+		}
+
+		// TODO: update from config
+
+		// update from default
 		if flag.SetBy == "" && flag.Default != nil {
 			flag.Value = flag.Default
 			flag.SetBy = "appdefault"
-			allowedFlags[name] = flag
 		}
+		// I think this is legit :)
+		allowedFlags[name] = flag
+	}
+
+	// check for passed flags that arent' allowed
+	if len(gatherArgsResult.FlagStrs) != 0 {
+		return nil, fmt.Errorf("Unrecognized flags: %v\n", gatherArgsResult.FlagStrs)
 	}
 
 	if gatherArgsResult.HelpPassed {
@@ -332,7 +332,7 @@ func DefaultCategoryHelp(
 }
 
 type ParseResult struct {
-	PassedCmd   []string
+	PasssedPath []string
 	PassedFlags v.ValueMap
 	Action      c.Action
 }

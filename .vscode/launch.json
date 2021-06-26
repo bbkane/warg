@@ -1,0 +1,43 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // https://github.com/golang/vscode-go/blob/master/docs/debugging.md
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Package",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${fileDirname}",
+            "showLog": false,
+            "trace": "info",
+        },
+        {
+            // useful for figuring out why debug isn't working
+            "name": "Launch Package - debug log + verbose",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${fileDirname}",
+            "showLog": true,
+            "trace": "verbose",
+        },
+        {
+            // This just straight up doesn't work
+            // back to print...
+            "name": "Launch Test function",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}",
+            "args": [
+                "-test.run",
+                "^TestApp_Parse$",
+            ],
+            "showLog": true,
+            "trace": "verbose",
+        },
+    ],
+}
