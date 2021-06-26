@@ -245,27 +245,21 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		return nil, err
 	}
 
-	pr := &ParseResult{
-		PasssedPath: gar.Path,
-		PassedFlags: make(v.ValueMap),
-		Action:      nil,
-	}
-
 	// special case versionFlag and exit early
 	if gar.VersionPassed {
-		pr.Action = func(_ map[string]v.Value) error {
-			fmt.Print(app.version)
-			return nil
+		pr := ParseResult{
+			Action: func(_ map[string]v.Value) error {
+				fmt.Print(app.version)
+				return nil
+			},
 		}
-		return pr, nil
+		return &pr, nil
 	}
 
 	ftar, err := fitToApp(app.rootSection, gar.Path, gar.FlagStrs)
 	if err != nil {
 		return nil, err
 	}
-
-	pr.Action = ftar.Action
 
 	for name, flag := range ftar.AllowedFlags {
 
@@ -296,29 +290,41 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		return nil, fmt.Errorf("Unrecognized flags: %v\n", gar.FlagStrs)
 	}
 
-	if gar.HelpPassed {
-		if ftar.Section != nil && ftar.Command == nil {
-			pr.Action = DefaultCategoryHelp(app.name, gar.Path, *ftar.Section)
-		} else if ftar.Command != nil && ftar.Section == nil {
-			pr.Action = func(_ v.ValueMap) error {
-				// TODO
-				fmt.Printf("TODO :)")
-				return nil
+	// OK! Let's make the ParseResult for each case and gtfo
+	if ftar.Section != nil && ftar.Command == nil {
+		// no legit actions, just print the help
+		pr := ParseResult{
+			Action: DefaultCategoryHelp(app.name, gar.Path, *ftar.Section),
+		}
+		return &pr, nil
+	} else if ftar.Section == nil && ftar.Command != nil {
+		if gar.HelpPassed {
+			pr := ParseResult{
+				Action: func(_ v.ValueMap) error {
+					// TODO
+					fmt.Printf("TODO :)")
+					return nil
+				},
 			}
+			return &pr, nil
 		} else {
-			return nil, fmt.Errorf("Internal Error: invalid help state: currentCategory == %v, currentCommand == %v\n", ftar.Section, ftar.Command)
-		}
+			vm := make(v.ValueMap)
+			for name, flag := range ftar.AllowedFlags {
+				if flag.SetBy != "" {
+					vm[name] = flag.Value
+				}
+			}
 
-		return pr, nil
-	}
-
-	// make some values!
-	for name, flag := range ftar.AllowedFlags {
-		if flag.SetBy != "" {
-			pr.PassedFlags[name] = flag.Value
+			pr := ParseResult{
+				PasssedPath: gar.Path,
+				PassedFlags: vm,
+				Action:      ftar.Action,
+			}
+			return &pr, nil
 		}
+	} else {
+		return nil, fmt.Errorf("Internal Error: invalid help state: currentCategory == %v, currentCommand == %v\n", ftar.Section, ftar.Command)
 	}
-	return pr, nil
 }
 
 func DefaultCategoryHelp(

@@ -51,7 +51,7 @@ func TestApp_Parse(t *testing.T) {
 
 			args:             []string{"app"},
 			passedPathWant:   nil,
-			passedValuesWant: map[string]v.Value{},
+			passedValuesWant: nil,
 			wantErr:          false,
 		},
 		{
