@@ -143,7 +143,7 @@ root := NewSection(
         "help for --sflag",
         v.NewEmptyStringValue(),
         f.Alias("-s"),
-        f.ConfigPath("sflag", NewStringValueFromInterface), // interface[] -> (Value, error)
+        f.ConfigPath("config.sflag", NewStringValueFromInterface), // interface[] -> (Value, error)
         f.Default(NewStringValue("hi")),
         f.EnvVar("example_sflag"),
         f.Examples([]string{"hola", "hello, governer!"})
@@ -171,7 +171,7 @@ root := NewSection(
     ),
 )
 
-parser := a.NewApp(
+app := a.NewApp(
     "example",
     "v0.0.0",
     a.Config(
@@ -191,7 +191,15 @@ parser := a.NewApp(
     a.Version([]string{"--version"}),
     a.AddRootSection(root),  // alternative to a.WithRootSection(s.SectionOpt...)
 )
+
+pr, _ := app.Parse(os.Args)
 ```
+
+gatherArgs
+parseConfig(gatherArgs.configFlag)
+resolveAction
+resolveFlags
+return
 
 ## Cases for config:
 
@@ -202,4 +210,3 @@ config passed, file exists, can unmarshall, path error -> ERROR
 config passed, file exists, can unmarshall, path success, path not in config -> flag not set
 config passed, file exists, can unmarshall, path success, path in config, value error -> ERROR
 config passed, file exists, can unmarshall, path success, path in config, value created -> flag set
-

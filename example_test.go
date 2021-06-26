@@ -11,7 +11,6 @@ import (
 )
 
 func Example_parse() {
-
 	comAction := func(vm v.ValueMap) error {
 		action := vm["--flag"].Get().(int)
 		fmt.Printf("Action Output: %v\n", action)

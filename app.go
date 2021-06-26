@@ -38,9 +38,9 @@ func JSONUnmarshaller(filePath string) (map[string]interface{}, error) {
 
 type App struct {
 	// Config()
-	configFlagName string
-	unmarshallers  map[string]Unmarshaller
-	configFlag     *f.Flag
+	configFlagName     string
+	configUnmarshaller Unmarshaller
+	configFlag         *f.Flag
 	// Help()
 	name          string
 	helpFlagNames []string
@@ -83,13 +83,13 @@ func WithRootSection(helpShort string, opts ...s.SectionOpt) AppOpt {
 
 func Config(
 	configFlagName string,
-	unmarshallers map[string]Unmarshaller,
+	unmarshaller Unmarshaller,
 	helpShort string,
 	flagOpts ...f.FlagOpt,
 ) AppOpt {
 	return func(app *App) {
 		app.configFlagName = configFlagName
-		app.unmarshallers = unmarshallers
+		app.configUnmarshaller = unmarshaller
 		configFlag := f.NewFlag(helpShort, v.NewEmptyStringValue(), flagOpts...)
 		app.configFlag = &configFlag
 	}
@@ -197,20 +197,62 @@ func gatherArgs(osArgs []string, helpFlagNames []string, versionFlagNames []stri
 	return res, nil
 }
 
+type fitToAppResult struct {
+	Section      *s.Section
+	Command      *c.Command
+	Action       c.Action
+	AllowedFlags f.FlagMap
+}
+
+func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string) (*fitToAppResult, error) {
+	// validate passed command and get available flags
+	ftar := fitToAppResult{
+		Section:      &rootSection,
+		AllowedFlags: rootSection.Flags,
+		Command:      nil, // we start with a section, not a command
+	}
+	allowedCommands := rootSection.Commands
+	allowedCategories := rootSection.Sections
+	for _, word := range path {
+		if command, exists := allowedCommands[word]; exists {
+			ftar.Command = &command
+			ftar.Section = nil
+			ftar.Action = command.Action
+			allowedCommands = nil   // commands terminate
+			allowedCategories = nil // categories terminiate
+			for k, v := range command.Flags {
+				// TODO: check if key exists already
+				ftar.AllowedFlags[k] = v
+			}
+		} else if category, exists := allowedCategories[word]; exists {
+			ftar.Section = &category
+			allowedCommands = category.Commands
+			allowedCategories = category.Sections
+			for k, v := range command.Flags {
+				// TODO: check if key exists already
+				ftar.AllowedFlags[k] = v
+			}
+		} else {
+			return nil, fmt.Errorf("unexpected string: %#v\n", word)
+		}
+	}
+	return &ftar, nil
+}
+
 func (app *App) Parse(osArgs []string) (*ParseResult, error) {
-	gatherArgsResult, err := gatherArgs(osArgs, app.helpFlagNames, app.versionFlagNames)
+	gar, err := gatherArgs(osArgs, app.helpFlagNames, app.versionFlagNames)
 	if err != nil {
 		return nil, err
 	}
 
 	pr := &ParseResult{
-		PasssedPath: gatherArgsResult.Path,
+		PasssedPath: gar.Path,
 		PassedFlags: make(v.ValueMap),
 		Action:      nil,
 	}
 
 	// special case versionFlag and exit early
-	if gatherArgsResult.VersionPassed {
+	if gar.VersionPassed {
 		pr.Action = func(_ map[string]v.Value) error {
 			fmt.Print(app.version)
 			return nil
@@ -218,50 +260,24 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		return pr, nil
 	}
 
-	// validate passed command and get available flags
-	currentCategory := &(app.rootSection)
-	var currentCommand *c.Command = nil
-	allowedFlags := currentCategory.Flags
-	allowedCommands := currentCategory.Commands
-	allowedCategories := currentCategory.Sections
-	for _, word := range gatherArgsResult.Path {
-		if command, exists := allowedCommands[word]; exists {
-			currentCommand = &command
-			currentCategory = nil
-			pr.Action = command.Action
-			allowedCommands = nil   // commands terminate
-			allowedCategories = nil // categories terminiate
-			for k, v := range command.Flags {
-				// TODO: check if key exists already
-				allowedFlags[k] = v
-			}
-		} else if category, exists := allowedCategories[word]; exists {
-			currentCategory = &category
-			allowedCommands = category.Commands
-			allowedCategories = category.Sections
-			for k, v := range command.Flags {
-				// TODO: check if key exists already
-				allowedFlags[k] = v
-			}
-		} else {
-			return nil, fmt.Errorf("unexpected string: %#v\n", word)
-		}
+	ftar, err := fitToApp(app.rootSection, gar.Path, gar.FlagStrs)
+	if err != nil {
+		return nil, err
 	}
 
-	// fmt.Printf("allowed flags: %#v\n", allowedFlags)
-	// NOTE: allowedFlags is the flags that we'll be manipulating
+	pr.Action = ftar.Action
 
-	for name, flag := range allowedFlags {
+	for name, flag := range ftar.AllowedFlags {
 
 		// update from command line
-		strValues, exists := gatherArgsResult.FlagStrs[name]
+		strValues, exists := gar.FlagStrs[name]
 		if exists {
 			for _, v := range strValues {
 				flag.Value.Update(v)
 			}
 			flag.SetBy = "commandline"
 			// if they aren't all used
-			delete(gatherArgsResult.FlagStrs, name)
+			delete(gar.FlagStrs, name)
 		}
 
 		// TODO: update from config
@@ -272,32 +288,32 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 			flag.SetBy = "appdefault"
 		}
 		// I think this is legit :)
-		allowedFlags[name] = flag
+		ftar.AllowedFlags[name] = flag
 	}
 
 	// check for passed flags that arent' allowed
-	if len(gatherArgsResult.FlagStrs) != 0 {
-		return nil, fmt.Errorf("Unrecognized flags: %v\n", gatherArgsResult.FlagStrs)
+	if len(gar.FlagStrs) != 0 {
+		return nil, fmt.Errorf("Unrecognized flags: %v\n", gar.FlagStrs)
 	}
 
-	if gatherArgsResult.HelpPassed {
-		if currentCategory != nil && currentCommand == nil {
-			pr.Action = DefaultCategoryHelp(app.name, gatherArgsResult.Path, *currentCategory)
-		} else if currentCommand != nil && currentCategory == nil {
+	if gar.HelpPassed {
+		if ftar.Section != nil && ftar.Command == nil {
+			pr.Action = DefaultCategoryHelp(app.name, gar.Path, *ftar.Section)
+		} else if ftar.Command != nil && ftar.Section == nil {
 			pr.Action = func(_ v.ValueMap) error {
 				// TODO
 				fmt.Printf("TODO :)")
 				return nil
 			}
 		} else {
-			return nil, fmt.Errorf("Internal Error: invalid help state: currentCategory == %v, currentCommand == %v\n", currentCategory, currentCommand)
+			return nil, fmt.Errorf("Internal Error: invalid help state: currentCategory == %v, currentCommand == %v\n", ftar.Section, ftar.Command)
 		}
 
 		return pr, nil
 	}
 
 	// make some values!
-	for name, flag := range allowedFlags {
+	for name, flag := range ftar.AllowedFlags {
 		if flag.SetBy != "" {
 			pr.PassedFlags[name] = flag.Value
 		}
