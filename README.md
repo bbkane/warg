@@ -6,12 +6,18 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 - `AddXXX`: Add a created `XXX` to your tree
 - `WithXXX`: Create and add an `XXX` to your tree
 
-# Next Steps
+# TODO: Next Steps - Sun Jun 27 - 2021-06-27 06:39:58 PDT
 
-- function actions - see below
-- --help
+- write resolveFlags
+- make sure app.ConfigFlag is put into rootSection - see config cases at bottom
+- resolve app.ConfigFlag -> map (can just fake it for now :)
+- Use that in resolving the rest of the flags
+
+- pass by ref instead of value? especially with range for
+- color flag to get colored help?
+- bash completion
 - Web form
-- Config parsing
+- lsp
 
 # Other library names
 
@@ -194,12 +200,6 @@ app := a.NewApp(
 
 pr, _ := app.Parse(os.Args)
 ```
-
-gatherArgs
-parseConfig(gatherArgs.configFlag)
-resolveAction
-resolveFlags
-return
 
 ## Cases for config:
 

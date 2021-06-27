@@ -3,6 +3,7 @@ package warg
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -239,6 +240,10 @@ func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string
 	return &ftar, nil
 }
 
+func resolveFlag(flag *f.Flag, flagStrs map[string][]string) (*f.Flag, error) {
+	return nil, errors.New("TODO: implement me")
+}
+
 func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	gar, err := gatherArgs(osArgs, app.helpFlagNames, app.versionFlagNames)
 	if err != nil {
@@ -267,6 +272,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		strValues, exists := gar.FlagStrs[name]
 		if exists {
 			for _, v := range strValues {
+				// TODO: make sure we don't update over flags meant to be set once
 				flag.Value.Update(v)
 			}
 			flag.SetBy = "commandline"
@@ -323,7 +329,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 			return &pr, nil
 		}
 	} else {
-		return nil, fmt.Errorf("Internal Error: invalid help state: currentCategory == %v, currentCommand == %v\n", ftar.Section, ftar.Command)
+		return nil, fmt.Errorf("Internal Error: invalid parse state: currentCategory == %v, currentCommand == %v\n", ftar.Section, ftar.Command)
 	}
 }
 
