@@ -3,7 +3,6 @@ package warg
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -18,9 +17,11 @@ import (
 
 type AppOpt = func(*App)
 
+type ConfigMap = map[string]interface{}
+
 // Unmarshaller turns a string into a map so we can index into it!
 // Useful for configs who will read a file to get it
-type Unmarshaller = func(string) (map[string]interface{}, error)
+type Unmarshaller = func(string) (ConfigMap, error)
 
 func JSONUnmarshaller(filePath string) (map[string]interface{}, error) {
 	// TODO: expand homedir?
@@ -240,8 +241,30 @@ func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string
 	return &ftar, nil
 }
 
-func resolveFlag(flag *f.Flag, flagStrs map[string][]string) (*f.Flag, error) {
-	return nil, errors.New("TODO: implement me")
+// resolveFLag updates a flag's value from the command line, and then from the
+// default value. flag should not be nils
+func resolveFlag(flag *f.Flag, name string, flagStrs map[string][]string, configMap ConfigMap) error {
+	// update from command line
+	strValues, exists := flagStrs[name]
+	if exists {
+		for _, v := range strValues {
+			// TODO: make sure we don't update over flags meant to be set once
+			flag.Value.Update(v)
+		}
+		flag.SetBy = "commandline"
+		// if they aren't all used
+		delete(flagStrs, name)
+	}
+
+	// TODO: update from config
+
+	// update from default
+	if flag.SetBy == "" && flag.Default != nil {
+		flag.Value = flag.Default
+		flag.SetBy = "appdefault"
+	}
+
+	return nil
 }
 
 func (app *App) Parse(osArgs []string) (*ParseResult, error) {
@@ -266,28 +289,28 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		return nil, err
 	}
 
+	// update the config flag :)
+	// TODO: I'm initializing this twice because I need config values
+	// is that ok?
+	var configMap ConfigMap
+	if app.configFlag != nil {
+		// we're gonna make a config map out of this if everything goes well
+		// so pass nil for that now
+		err = resolveFlag(app.configFlag, app.configFlagName, gar.FlagStrs, nil)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// We need to loop over a map by value, so we can't modify it
+	// in place :/
 	for name, flag := range ftar.AllowedFlags {
 
-		// update from command line
-		strValues, exists := gar.FlagStrs[name]
-		if exists {
-			for _, v := range strValues {
-				// TODO: make sure we don't update over flags meant to be set once
-				flag.Value.Update(v)
-			}
-			flag.SetBy = "commandline"
-			// if they aren't all used
-			delete(gar.FlagStrs, name)
+		err = resolveFlag(&flag, name, gar.FlagStrs, configMap)
+		if err != nil {
+			return nil, err
 		}
 
-		// TODO: update from config
-
-		// update from default
-		if flag.SetBy == "" && flag.Default != nil {
-			flag.Value = flag.Default
-			flag.SetBy = "appdefault"
-		}
-		// I think this is legit :)
 		ftar.AllowedFlags[name] = flag
 	}
 

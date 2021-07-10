@@ -8,12 +8,11 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next Steps - Sun Jun 27 - 2021-06-27 06:39:58 PDT
 
-- write resolveFlags
-- make sure app.ConfigFlag is put into rootSection - see config cases at bottom
-- resolve app.ConfigFlag -> map (can just fake it for now :)
+- resolve app.ConfigFlag -> map (can just fake it for now :) - see
+  cases at bottom
 - Use that in resolving the rest of the flags
+- dear God tests plz
 
-- pass by ref instead of value? especially with range for
 - color flag to get colored help?
 - bash completion
 - Web form
