@@ -88,6 +88,8 @@ func Example_help() {
 		"v0.0.0",
 		w.OverrideHelp(
 			[]string{"-h", "--help"},
+			w.DefaultSectionHelp,
+			w.DefaultCommandHelp,
 		),
 		w.WithRootSection(
 			"example help!",
@@ -124,7 +126,11 @@ func Example_grabbit() {
 	_ = w.New(
 		"grabbit",
 		"v0.0.0",
-		w.OverrideHelp([]string{"--help", "-h"}),
+		w.OverrideHelp(
+			[]string{"--help", "-h"},
+			w.DefaultSectionHelp,
+			w.DefaultCommandHelp,
+		),
 		w.OverrideVersion([]string{"--version"}),
 
 		w.WithRootSection(

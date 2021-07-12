@@ -46,6 +46,8 @@ type App struct {
 	// Help()
 	name          string
 	helpFlagNames []string
+	sectionHelp   SectionHelp
+	commandHelp   CommandHelp
 	// Version()
 	version          string
 	versionFlagNames []string
@@ -53,9 +55,10 @@ type App struct {
 	rootSection s.Section
 }
 
-func OverrideHelp(helpFlagNames []string) AppOpt {
+func OverrideHelp(helpFlagNames []string, sectionHelp SectionHelp, commandHelp CommandHelp) AppOpt {
 	return func(app *App) {
-
+		app.sectionHelp = sectionHelp
+		app.commandHelp = commandHelp
 		app.helpFlagNames = helpFlagNames
 		for _, n := range helpFlagNames {
 			if !strings.HasPrefix(n, "-") {
@@ -114,7 +117,8 @@ func New(name string, version string, opts ...AppOpt) App {
 	// Help
 	if len(app.helpFlagNames) == 0 {
 		app.helpFlagNames = []string{"--help", "-h"}
-		// TODO: custom help functions
+		app.sectionHelp = DefaultSectionHelp
+		app.commandHelp = DefaultCommandHelp
 	}
 	// Version
 	if len(app.versionFlagNames) == 0 {
@@ -328,6 +332,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		ftar.AllowedFlags[name] = flag
 	}
 
+	// add the config flag so both help and actions can see it
 	if app.configFlag != nil {
 		ftar.AllowedFlags[app.configFlagName] = *app.configFlag
 	}
@@ -343,17 +348,13 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
 		pr := ParseResult{
-			Action: DefaultCategoryHelp(app.name, gar.Path, *ftar.Section),
+			Action: app.sectionHelp(app.name, gar.Path, *ftar.Section),
 		}
 		return &pr, nil
 	} else if ftar.Section == nil && ftar.Command != nil {
 		if gar.HelpPassed {
 			pr := ParseResult{
-				Action: func(_ v.ValueMap) error {
-					// TODO
-					fmt.Printf("TODO :)")
-					return nil
-				},
+				Action: app.commandHelp(app.name, gar.Path, *ftar.Command),
 			}
 			return &pr, nil
 		} else {
@@ -376,10 +377,26 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	}
 }
 
-func DefaultCategoryHelp(
+// TODO: actually put this in :)
+type CommandHelp = func(appName string, path []string, currentCommand c.Command) c.Action
+
+type SectionHelp = func(appName string, path []string, currentSection s.Section) c.Action
+
+func DefaultCommandHelp(
 	appName string,
 	path []string,
-	currentCategory s.Section,
+	currentCommand c.Command,
+) c.Action {
+	return func(vm v.ValueMap) error {
+		fmt.Println("TODO: implement")
+		return nil
+	}
+}
+
+func DefaultSectionHelp(
+	appName string,
+	path []string,
+	currentSection s.Section,
 ) c.Action {
 	return func(vm v.ValueMap) error {
 		f := bufio.NewWriter(os.Stdout)
@@ -387,15 +404,15 @@ func DefaultCategoryHelp(
 		// let's assume that HelpLong doesn't exist
 		fmt.Fprintf(f, "Current Category:\n")
 		totalPath := appName + " " + strings.Join(path, " ")
-		fmt.Fprintf(f, "  %s: %s\n", totalPath, currentCategory.HelpShort)
+		fmt.Fprintf(f, "  %s: %s\n", totalPath, currentSection.HelpShort)
 		fmt.Fprintf(f, "Subcategories:\n")
 		// TODO: sort these :)
-		for name, value := range currentCategory.Sections {
+		for name, value := range currentSection.Sections {
 			fmt.Fprintf(f, "  %s: %s\n", name, value.HelpShort)
 		}
 		// TODO: sort these too :)
 		fmt.Fprintf(f, "Commands:\n")
-		for name, value := range currentCategory.Commands {
+		for name, value := range currentSection.Commands {
 			fmt.Fprintf(f, "  %s: %s\n", name, value.HelpShort)
 		}
 		return nil
