@@ -92,7 +92,7 @@ func Config(
 	return func(app *App) {
 		app.configFlagName = configFlagName
 		app.configUnmarshaller = unmarshaller
-		configFlag := f.NewFlag(helpShort, v.NewEmptyStringValue(), flagOpts...)
+		configFlag := f.NewFlag(helpShort, v.StringValueEmpty(), flagOpts...)
 		app.configFlag = &configFlag
 	}
 }

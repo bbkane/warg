@@ -3,7 +3,7 @@ package warg_test
 import (
 	"testing"
 
-	a "github.com/bbkane/warg"
+	w "github.com/bbkane/warg"
 	c "github.com/bbkane/warg/command"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
@@ -15,7 +15,7 @@ func TestApp_Parse(t *testing.T) {
 
 	tests := []struct {
 		name             string
-		app              a.App
+		app              w.App
 		args             []string
 		passedPathWant   []string
 		passedValuesWant v.ValueMap
@@ -23,13 +23,13 @@ func TestApp_Parse(t *testing.T) {
 	}{
 		{
 			name: "from main",
-			app: a.New("test", "v0.0.0",
-				a.WithRootSection("help for test",
-					s.WithFlag("--af1", "flag help", v.NewEmptyIntValue()),
+			app: w.New("test", "v0.0.0",
+				w.WithRootSection("help for test",
+					s.WithFlag("--af1", "flag help", v.IntValueEmpty()),
 					s.WithSection("cat1", "help for cat1",
 						s.WithCommand("com1", "help for com1", c.DoNothing,
-							c.WithFlag("--com1f1", "flag help", v.NewEmptyIntValue(),
-								f.WithDefault(v.NewIntValue(10)),
+							c.WithFlag("--com1f1", "flag help", v.IntValueEmpty(),
+								f.Default(v.IntValueNew(10)),
 							),
 						),
 					),
@@ -38,14 +38,14 @@ func TestApp_Parse(t *testing.T) {
 
 			args:             []string{"app", "cat1", "com1", "--com1f1", "1"},
 			passedPathWant:   []string{"cat1", "com1"},
-			passedValuesWant: v.ValueMap{"--com1f1": v.NewIntValue(1)},
+			passedValuesWant: v.ValueMap{"--com1f1": v.IntValueNew(1)},
 			wantErr:          false,
 		},
 		{
 			name: "no category",
-			app: a.New("test", "v0.0.0",
-				a.WithRootSection("help for test",
-					s.WithFlag("--af1", "flag help", v.NewEmptyIntValue()),
+			app: w.New("test", "v0.0.0",
+				w.WithRootSection("help for test",
+					s.WithFlag("--af1", "flag help", v.IntValueEmpty()),
 				),
 			),
 
@@ -56,29 +56,29 @@ func TestApp_Parse(t *testing.T) {
 		},
 		{
 			name: "flag default",
-			app: a.New("test", "v0.0.0",
-				a.WithRootSection(
+			app: w.New("test", "v0.0.0",
+				w.WithRootSection(
 					"help for test",
 					s.WithCommand("com", "com help", c.DoNothing,
-						c.WithFlag("--flag", "flag help", v.NewEmptyStringValue(),
-							f.WithDefault(v.NewStringValue("hi")),
+						c.WithFlag("--flag", "flag help", v.StringValueEmpty(),
+							f.Default(v.StringValueNew("hi")),
 						),
 					),
 				),
 			),
 			args:             []string{"test", "com"},
 			passedPathWant:   []string{"com"},
-			passedValuesWant: v.ValueMap{"--flag": v.NewStringValue("hi")},
+			passedValuesWant: v.ValueMap{"--flag": v.StringValueNew("hi")},
 			wantErr:          false,
 		},
 		{
 			name: "extra flag",
-			app: a.New("test", "v0.0.0",
-				a.WithRootSection(
+			app: w.New("test", "v0.0.0",
+				w.WithRootSection(
 					"help for test",
 					s.WithCommand("com", "com help", c.DoNothing,
-						c.WithFlag("--flag", "flag help", v.NewEmptyStringValue(),
-							f.WithDefault(v.NewStringValue("hi")),
+						c.WithFlag("--flag", "flag help", v.StringValueEmpty(),
+							f.Default(v.StringValueNew("hi")),
 						),
 					),
 				),
@@ -90,24 +90,24 @@ func TestApp_Parse(t *testing.T) {
 		},
 		{
 			name: "config flag",
-			app: a.New("test", "v0.0.0",
-				a.Config(
+			app: w.New("test", "v0.0.0",
+				w.Config(
 					"--config",
 					// dummy function just to get me a map
-					func(s string) (a.ConfigMap, error) {
-						return a.ConfigMap{
+					func(s string) (w.ConfigMap, error) {
+						return w.ConfigMap{
 							"configName": s,
 							"key":        "mapkeyval",
 						}, nil
 					},
 					"config flag",
-					f.WithDefault(v.NewStringValue("defaultconfigval")),
+					f.Default(v.StringValueNew("defaultconfigval")),
 				),
-				a.WithRootSection(
+				w.WithRootSection(
 					"help for test",
-					s.WithFlag("--key", "a key", v.NewEmptyStringValue(),
-						f.ConfigPath("key", v.NewStringValueFromInterface),
-						f.WithDefault(v.NewStringValue("defaultkeyval")),
+					s.WithFlag("--key", "a key", v.StringValueEmpty(),
+						f.ConfigPath("key", v.StringValueFromInterface),
+						f.Default(v.StringValueNew("defaultkeyval")),
 					),
 					s.WithCommand("print", "print key value", c.DoNothing),
 				),
@@ -115,8 +115,8 @@ func TestApp_Parse(t *testing.T) {
 			args:           []string{"test", "print", "--config", "passedconfigval"},
 			passedPathWant: []string{"print"},
 			passedValuesWant: v.ValueMap{
-				"--key":    v.NewStringValue("mapkeyval"),
-				"--config": v.NewStringValue("passedconfigval"),
+				"--key":    v.StringValueNew("mapkeyval"),
+				"--config": v.StringValueNew("passedconfigval"),
 			},
 			wantErr: false,
 		},

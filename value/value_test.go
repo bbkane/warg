@@ -9,14 +9,14 @@ import (
 )
 
 func TestIntValue(t *testing.T) {
-	var v w.Value = w.NewIntValue(1)
+	var v w.Value = w.IntValueNew(1)
 	assert.Equal(t, v.Get().(int), 1)
 	v.Update("2")
 	assert.Equal(t, v.Get().(int), 2, "IntValue should be equal")
 }
 
 func TestStringSliceValue(t *testing.T) {
-	var v w.Value = w.NewStringSliceValue([]string{})
+	var v w.Value = w.StringSliceValueNew([]string{})
 
 	// Not sure why I get the following, but seems to be a
 	// limitation of the testing library

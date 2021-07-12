@@ -12,7 +12,7 @@ type FromInterface = func(interface{}) (Value, error)
 type ValueMap = map[string]Value
 
 // Value is a "generic" type that lets me store different types into flags
-//  ~Stolen from~ "Inspired" by https://golang.org/src/flag/flag.go?#L138
+//  ~Stolen from~ "Inspired by" https://golang.org/src/flag/flag.go?#L138
 type Value interface {
 	// Get returns the underlying value. It's meant to be type asserted against
 	Get() interface{}
@@ -29,8 +29,15 @@ type Value interface {
 
 type IntValue int
 
-func NewIntValue(val int) *IntValue  { return (*IntValue)(&val) }
-func NewEmptyIntValue() *IntValue    { return NewIntValue(0) }
+func IntValueNew(val int) *IntValue { return (*IntValue)(&val) }
+func IntValueEmpty() *IntValue      { return IntValueNew(0) }
+func IntValueFromInterface(val interface{}) (Value, error) {
+	under, ok := val.(int)
+	if !ok {
+		return nil, fmt.Errorf("can't create IntValue. Expected: int, got: %#v", val)
+	}
+	return IntValueNew(under), nil
+}
 func (i *IntValue) Get() interface{} { return int(*i) }
 func (i *IntValue) String() string   { return fmt.Sprint(int(*i)) }
 
@@ -45,17 +52,15 @@ func (i *IntValue) Update(s string) error {
 
 type StringValue string
 
-func NewStringValue(val string) *StringValue { return (*StringValue)(&val) }
-func NewStringValueFromInterface(val interface{}) (Value, error) {
+func StringValueNew(val string) *StringValue { return (*StringValue)(&val) }
+func StringValueEmpty() *StringValue         { return StringValueNew("") }
+func StringValueFromInterface(val interface{}) (Value, error) {
 	under, ok := val.(string)
 	if !ok {
 		return nil, fmt.Errorf("can't create StringValue. Expected: string, got: %#v", val)
 	}
-	var v Value = NewStringValue(under)
-
-	return v, nil
+	return StringValueNew(under), nil
 }
-func NewEmptyStringValue() *StringValue { return NewStringValue("") }
 func (v *StringValue) Get() interface{} { return string(*v) }
 func (v *StringValue) String() string   { return fmt.Sprint(string(*v)) }
 func (v *StringValue) Update(s string) error {
@@ -65,8 +70,8 @@ func (v *StringValue) Update(s string) error {
 
 type StringSliceValue []string
 
-func NewStringSliceValue(vals []string) *StringSliceValue { return (*StringSliceValue)(&vals) }
-func NewEmptyStringSliceValue() *StringSliceValue         { return NewStringSliceValue(nil) }
+func StringSliceValueNew(vals []string) *StringSliceValue { return (*StringSliceValue)(&vals) }
+func StringSliceValueEmpty() *StringSliceValue            { return StringSliceValueNew(nil) }
 func (ss *StringSliceValue) Get() interface{}             { return []string(*ss) }
 func (ss *StringSliceValue) String() string               { return fmt.Sprint([]string(*ss)) }
 func (ss *StringSliceValue) Update(val string) error {

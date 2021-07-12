@@ -3,7 +3,7 @@ package warg_test
 import (
 	"fmt"
 
-	a "github.com/bbkane/warg"
+	w "github.com/bbkane/warg"
 	c "github.com/bbkane/warg/command"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
@@ -17,10 +17,10 @@ func Example_parse() {
 		return nil
 	}
 
-	app := a.New(
+	app := w.New(
 		"test",
 		"v0.0.0",
-		a.WithRootSection(
+		w.WithRootSection(
 			"help for test",
 			s.WithSection(
 				"cat",
@@ -32,8 +32,8 @@ func Example_parse() {
 					c.WithFlag(
 						"--flag",
 						"flag help",
-						v.NewIntValue(0),
-						f.WithDefault(v.NewIntValue(10)),
+						v.IntValueNew(0),
+						f.Default(v.IntValueNew(10)),
 					),
 				),
 			),
@@ -62,10 +62,10 @@ func Example_parse() {
 }
 
 func Example_version() {
-	app := a.New(
+	app := w.New(
 		"test",
 		"v0.0.0",
-		a.OverrideVersion(
+		w.OverrideVersion(
 			[]string{"--version"},
 		),
 	)
@@ -83,13 +83,13 @@ func Example_version() {
 }
 
 func Example_help() {
-	app := a.New(
+	app := w.New(
 		"example",
 		"v0.0.0",
-		a.OverrideHelp(
+		w.OverrideHelp(
 			[]string{"-h", "--help"},
 		),
-		a.WithRootSection(
+		w.WithRootSection(
 			"example help!",
 			s.WithSection(
 				"cat",
@@ -121,13 +121,13 @@ func Example_help() {
 }
 
 func Example_grabbit() {
-	_ = a.New(
+	_ = w.New(
 		"grabbit",
 		"v0.0.0",
-		a.OverrideHelp([]string{"--help", "-h"}),
-		a.OverrideVersion([]string{"--version"}),
+		w.OverrideHelp([]string{"--help", "-h"}),
+		w.OverrideVersion([]string{"--version"}),
 
-		a.WithRootSection(
+		w.WithRootSection(
 			"grab pics from reddit!",
 			s.WithSection(
 				"config",
@@ -139,8 +139,8 @@ func Example_grabbit() {
 					c.WithFlag(
 						"--editor",
 						"path to editor",
-						v.NewEmptyStringValue(),
-						f.WithDefault(v.NewStringValue("vi")),
+						v.StringValueEmpty(),
+						f.Default(v.StringValueNew("vi")),
 					),
 				),
 			),

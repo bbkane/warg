@@ -42,14 +42,14 @@ func ConfigPath(path string, valueFromInterface v.FromInterface) FlagOpt {
 	}
 }
 
-func WithDefault(value v.Value) FlagOpt {
+func Default(value v.Value) FlagOpt {
 	return func(flag *Flag) {
 		flag.DefaultValue = value
 	}
 }
 
 func HelpLong(helpLong string) FlagOpt {
-	return func(cat *Flag) {
-		cat.HelpLong = helpLong
+	return func(flag *Flag) {
+		flag.HelpLong = helpLong
 	}
 }
