@@ -9,8 +9,7 @@ import (
 )
 
 func TestIntValue(t *testing.T) {
-	var v w.Value
-	v = w.NewIntValue(1)
+	var v w.Value = w.NewIntValue(1)
 	assert.Equal(t, v.Get().(int), 1)
 	v.Update("2")
 	assert.Equal(t, v.Get().(int), 2, "IntValue should be equal")

@@ -88,6 +88,38 @@ func TestApp_Parse(t *testing.T) {
 			passedValuesWant: nil,
 			wantErr:          true,
 		},
+		{
+			name: "config flag",
+			app: a.New("test", "v0.0.0",
+				a.Config(
+					"--config",
+					// dummy function just to get me a map
+					func(s string) (a.ConfigMap, error) {
+						return a.ConfigMap{
+							"configName": s,
+							"key":        "mapkeyval",
+						}, nil
+					},
+					"config flag",
+					f.WithDefault(v.NewStringValue("defaultconfigval")),
+				),
+				a.WithRootSection(
+					"help for test",
+					s.WithFlag("--key", "a key", v.NewEmptyStringValue(),
+						f.ConfigPath("key", v.NewStringValueFromInterface),
+						f.WithDefault(v.NewStringValue("defaultkeyval")),
+					),
+					s.WithCommand("print", "print key value", c.DoNothing),
+				),
+			),
+			args:           []string{"test", "print", "--config", "passedconfigval"},
+			passedPathWant: []string{"print"},
+			passedValuesWant: v.ValueMap{
+				"--key":    v.NewStringValue("mapkeyval"),
+				"--config": v.NewStringValue("passedconfigval"),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

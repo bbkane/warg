@@ -8,11 +8,15 @@ type FlagMap = map[string]Flag
 type FlagOpt = func(*Flag)
 
 type Flag struct {
-	// Default will be shoved into Value if needed
+
+	// TODO: make these private. resolveFlag should probably be a method on flag
+	ConfigFromInterface v.FromInterface
+	ConfigPath          string
+	// DefaultValue will be shoved into Value if needed
 	// can be nil
-	Default   v.Value
-	HelpLong  string
-	HelpShort string
+	DefaultValue v.Value
+	HelpLong     string
+	HelpShort    string
 	// SetBy holds where a flag is initialized. Is empty if not initialized
 	SetBy string
 	// Value holds what gets passed to the flag: --myflag value
@@ -31,9 +35,16 @@ func NewFlag(helpShort string, empty v.Value, opts ...FlagOpt) Flag {
 	return flag
 }
 
+func ConfigPath(path string, valueFromInterface v.FromInterface) FlagOpt {
+	return func(flag *Flag) {
+		flag.ConfigPath = path
+		flag.ConfigFromInterface = valueFromInterface
+	}
+}
+
 func WithDefault(value v.Value) FlagOpt {
 	return func(flag *Flag) {
-		flag.Default = value
+		flag.DefaultValue = value
 	}
 }
 

@@ -5,7 +5,10 @@ import (
 	"strconv"
 )
 
+// FromInterface specifies how to create a Value from an interface
+// Useful for reading a value from a config
 type FromInterface = func(interface{}) (Value, error)
+
 type ValueMap = map[string]Value
 
 // Value is a "generic" type that lets me store different types into flags
@@ -43,12 +46,14 @@ func (i *IntValue) Update(s string) error {
 type StringValue string
 
 func NewStringValue(val string) *StringValue { return (*StringValue)(&val) }
-func NewStringValueFromInterface(val interface{}) (*StringValue, error) {
+func NewStringValueFromInterface(val interface{}) (Value, error) {
 	under, ok := val.(string)
 	if !ok {
-		return nil, fmt.Errorf("Can't create StringValue. Expected: string, got: %#v\n", val)
+		return nil, fmt.Errorf("can't create StringValue. Expected: string, got: %#v", val)
 	}
-	return NewStringValue(under), nil
+	var v Value = NewStringValue(under)
+
+	return v, nil
 }
 func NewEmptyStringValue() *StringValue { return NewStringValue("") }
 func (v *StringValue) Get() interface{} { return string(*v) }

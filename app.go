@@ -110,10 +110,6 @@ func New(name string, version string, opts ...AppOpt) App {
 	if app.rootSection.Commands == nil {
 		app.rootSection = s.NewSection("")
 	}
-	// Config - if passed, add to flags
-	if app.configFlag != nil {
-		app.rootSection.Flags[app.configFlagName] = *app.configFlag
-	}
 
 	// Help
 	if len(app.helpFlagNames) == 0 {
@@ -190,11 +186,11 @@ func gatherArgs(osArgs []string, helpFlagNames []string, versionFlagNames []stri
 			res.FlagStrs[currentFlagName] = append(res.FlagStrs[currentFlagName], word)
 			expecting = expectingAnything
 		default:
-			return nil, fmt.Errorf("Internal Error: not expecting state: %#v\n", expecting)
+			return nil, fmt.Errorf("internal Error: not expecting state: %#v", expecting)
 		}
 	}
 	if expecting == expectingFlagValue {
-		return nil, fmt.Errorf("Flag passed without value. All flags must have one value passed. Flags can be repeated to accumulate values. Example: --flag value")
+		return nil, fmt.Errorf("flag passed without value. All flags must have one value passed. Flags can be repeated to accumulate values. Example: --flag value")
 	}
 	return res, nil
 }
@@ -235,32 +231,46 @@ func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string
 				ftar.AllowedFlags[k] = v
 			}
 		} else {
-			return nil, fmt.Errorf("unexpected string: %#v\n", word)
+			return nil, fmt.Errorf("unexpected string: %#v", word)
 		}
 	}
 	return &ftar, nil
 }
 
 // resolveFLag updates a flag's value from the command line, and then from the
-// default value. flag should not be nils
+// default value. flag should not be nil. deletes from flagStrs
 func resolveFlag(flag *f.Flag, name string, flagStrs map[string][]string, configMap ConfigMap) error {
 	// update from command line
 	strValues, exists := flagStrs[name]
-	if exists {
+	// the setby check for the first case is needed to
+	// idempotently resolve flags (like the config flag for example)
+	if flag.SetBy == "" && exists {
 		for _, v := range strValues {
 			// TODO: make sure we don't update over flags meant to be set once
 			flag.Value.Update(v)
 		}
-		flag.SetBy = "commandline"
-		// if they aren't all used
+		flag.SetBy = "passedflag"
+		// later we'll ensure that these aren't all used
 		delete(flagStrs, name)
 	}
 
-	// TODO: update from config
+	// update from config
+	if flag.SetBy == "" && configMap != nil && flag.ConfigFromInterface != nil {
+		// TODO: make this a lot more sophisticated
+		i, exists := configMap[flag.ConfigPath]
+		if exists {
+			v, err := flag.ConfigFromInterface(i)
+			if err != nil {
+				return err
+			}
+			flag.Value = v
+			flag.SetBy = "config"
+		}
+	}
 
 	// update from default
-	if flag.SetBy == "" && flag.Default != nil {
-		flag.Value = flag.Default
+	if flag.SetBy == "" && flag.DefaultValue != nil {
+		flag.Value = flag.DefaultValue
 		flag.SetBy = "appdefault"
 	}
 
@@ -290,13 +300,17 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	}
 
 	// update the config flag :)
-	// TODO: I'm initializing this twice because I need config values
-	// is that ok?
 	var configMap ConfigMap
 	if app.configFlag != nil {
 		// we're gonna make a config map out of this if everything goes well
 		// so pass nil for that now
 		err = resolveFlag(app.configFlag, app.configFlagName, gar.FlagStrs, nil)
+		if err != nil {
+			return nil, err
+		}
+		// TODO: don't panic if not not a string. return an error :)
+
+		configMap, err = app.configUnmarshaller(app.configFlag.Value.Get().(string))
 		if err != nil {
 			return nil, err
 		}
@@ -314,10 +328,16 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		ftar.AllowedFlags[name] = flag
 	}
 
+	if app.configFlag != nil {
+		ftar.AllowedFlags[app.configFlagName] = *app.configFlag
+	}
+
 	// check for passed flags that arent' allowed
 	if len(gar.FlagStrs) != 0 {
-		return nil, fmt.Errorf("Unrecognized flags: %v\n", gar.FlagStrs)
+		return nil, fmt.Errorf("unrecognized flags: %v", gar.FlagStrs)
 	}
+
+	// TODO: check that all required flags are resolved! Not sure I have required flags yet :)
 
 	// OK! Let's make the ParseResult for each case and gtfo
 	if ftar.Section != nil && ftar.Command == nil {
@@ -352,7 +372,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 			return &pr, nil
 		}
 	} else {
-		return nil, fmt.Errorf("Internal Error: invalid parse state: currentCategory == %v, currentCommand == %v\n", ftar.Section, ftar.Command)
+		return nil, fmt.Errorf("internal Error: invalid parse state: currentCategory == %v, currentCommand == %v", ftar.Section, ftar.Command)
 	}
 }
 
