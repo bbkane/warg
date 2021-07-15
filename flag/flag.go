@@ -15,8 +15,7 @@ type Flag struct {
 	// DefaultValue will be shoved into Value if needed
 	// can be nil
 	DefaultValue v.Value
-	HelpLong     string
-	HelpShort    string
+	Help         string
 	// SetBy holds where a flag is initialized. Is empty if not initialized
 	SetBy string
 	// Value holds what gets passed to the flag: --myflag value
@@ -26,8 +25,8 @@ type Flag struct {
 
 func NewFlag(helpShort string, empty v.Value, opts ...FlagOpt) Flag {
 	flag := Flag{
-		HelpShort: helpShort,
-		Value:     empty,
+		Help:  helpShort,
+		Value: empty,
 	}
 	for _, opt := range opts {
 		opt(&flag)
@@ -45,11 +44,5 @@ func ConfigPath(path string, valueFromInterface v.FromInterface) FlagOpt {
 func Default(value v.Value) FlagOpt {
 	return func(flag *Flag) {
 		flag.DefaultValue = value
-	}
-}
-
-func HelpLong(helpLong string) FlagOpt {
-	return func(flag *Flag) {
-		flag.HelpLong = helpLong
 	}
 }

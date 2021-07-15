@@ -13,19 +13,21 @@ type SectionMap = map[string]Section
 type SectionOpt = func(*Section)
 
 type Section struct {
-	Flags     f.FlagMap // Do subcommands need flags? leaf commands are the ones that do work....
-	Commands  c.CommandMap
-	Sections  SectionMap
-	HelpLong  string
-	HelpShort string
+	Flags    f.FlagMap // Do subcommands need flags? leaf commands are the ones that do work....
+	Commands c.CommandMap
+	Sections SectionMap
+	// Help is a required one-line descripiton of this section
+	Help string
+	// HelpLong is an optional longer description of this section
+	HelpLong string
 }
 
 func NewSection(helpShort string, opts ...SectionOpt) Section {
 	category := Section{
-		HelpShort: helpShort,
-		Flags:     make(map[string]f.Flag),
-		Sections:  make(map[string]Section),
-		Commands:  make(map[string]c.Command),
+		Help:     helpShort,
+		Flags:    make(map[string]f.Flag),
+		Sections: make(map[string]Section),
+		Commands: make(map[string]c.Command),
 	}
 	for _, opt := range opts {
 		opt(&category)

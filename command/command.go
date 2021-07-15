@@ -12,10 +12,12 @@ type CommandMap = map[string]Command
 type CommandOpt = func(*Command)
 
 type Command struct {
-	Action    Action
-	Flags     f.FlagMap
-	HelpLong  string
-	HelpShort string
+	Action Action
+	Flags  f.FlagMap
+	// Help is a required one-line description
+	Help string
+	// HelpLong is an optional longer description
+	HelpLong string
 }
 
 func DoNothing(_ v.ValueMap) error {
@@ -24,9 +26,9 @@ func DoNothing(_ v.ValueMap) error {
 
 func NewCommand(helpShort string, action Action, opts ...CommandOpt) Command {
 	category := Command{
-		HelpShort: helpShort,
-		Action:    action,
-		Flags:     make(map[string]f.Flag),
+		Help:   helpShort,
+		Action: action,
+		Flags:  make(map[string]f.Flag),
 	}
 	for _, opt := range opts {
 		opt(&category)

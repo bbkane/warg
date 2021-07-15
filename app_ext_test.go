@@ -120,6 +120,33 @@ func TestApp_Parse(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "section flag",
+			app: w.New(
+				"test",
+				"v0.0.0",
+				w.WithRootSection(
+					"help for test",
+					s.WithFlag(
+						"--sflag",
+						"help for --sflag",
+						v.StringValueEmpty(),
+						f.Default(v.StringValueNew("sflagval")),
+					),
+					s.WithCommand(
+						"com",
+						"help for com",
+						c.DoNothing,
+					),
+				),
+			),
+			args:           []string{"test", "com"},
+			passedPathWant: []string{"com"},
+			passedValuesWant: v.ValueMap{
+				"--sflag": v.StringValueNew("sflagval"),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -82,9 +82,9 @@ func Example_version() {
 	// v0.0.0
 }
 
-func Example_help() {
+func Example_section_help() {
 	app := w.New(
-		"example",
+		"grabbit",
 		"v0.0.0",
 		w.OverrideHelp(
 			[]string{"-h", "--help"},
@@ -92,52 +92,10 @@ func Example_help() {
 			w.DefaultCommandHelp,
 		),
 		w.WithRootSection(
-			"example help!",
-			s.WithSection(
-				"cat",
-				"cat help!",
-			),
-			s.WithCommand(
-				"com",
-				"com help!!",
-				c.DoNothing,
-			),
-		),
-	)
-	args := []string{"example", "--help"}
-	pr, err := app.Parse(args)
-	if err != nil {
-		panic(err)
-	}
-	err = pr.Action(pr.PassedFlags)
-	if err != nil {
-		panic(err)
-	}
-	// Output:
-	// Current Category:
-	//   example : example help!
-	// Subcategories:
-	//   cat: cat help!
-	// Commands:
-	//   com: com help!!
-}
-
-func Example_grabbit() {
-	_ = w.New(
-		"grabbit",
-		"v0.0.0",
-		w.OverrideHelp(
-			[]string{"--help", "-h"},
-			w.DefaultSectionHelp,
-			w.DefaultCommandHelp,
-		),
-		w.OverrideVersion([]string{"--version"}),
-
-		w.WithRootSection(
-			"grab pics from reddit!",
+			"grab those images!",
 			s.WithSection(
 				"config",
-				"work with the config",
+				"change grabbit's config",
 				s.WithCommand(
 					"edit",
 					"edit the config",
@@ -152,9 +110,88 @@ func Example_grabbit() {
 			),
 			s.WithCommand(
 				"grab",
-				"download the images!",
+				"do the grabbity grabbity",
 				c.DoNothing,
 			),
 		),
 	)
+	args := []string{"grabbit", "--help"}
+	pr, err := app.Parse(args)
+	if err != nil {
+		panic(err)
+	}
+	err = pr.Action(pr.PassedFlags)
+	if err != nil {
+		panic(err)
+	}
+	// Output:
+	// grab those images!
+	//
+	// Sections:
+	//   config : change grabbit's config
+	//
+	// Commands:
+	//   grab : do the grabbity grabbity
+}
+
+func Example_command_help() {
+	app := w.New(
+		"grabbit",
+		"v0.0.0",
+		w.OverrideHelp(
+			[]string{"-h", "--help"},
+			w.DefaultSectionHelp,
+			w.DefaultCommandHelp,
+		),
+		w.WithRootSection(
+			"grab those images!",
+			s.WithFlag(
+				"--config-path",
+				"path to config",
+				v.StringValueEmpty(),
+				f.Default(v.StringValueNew("~/.config/grabbit.yaml")),
+			),
+			s.WithSection(
+				"config",
+				"change grabbit's config",
+				s.WithCommand(
+					"edit",
+					"edit the config",
+					c.DoNothing,
+					c.WithFlag(
+						"--editor",
+						"path to editor",
+						v.StringValueEmpty(),
+						f.Default(v.StringValueNew("vi")),
+					),
+				),
+			),
+			s.WithCommand(
+				"grab",
+				"do the grabbity grabbity",
+				c.DoNothing,
+			),
+		),
+	)
+	args := []string{"example", "config", "edit", "-h"}
+	pr, err := app.Parse(args)
+	if err != nil {
+		panic(err)
+	}
+	err = pr.Action(pr.PassedFlags)
+	if err != nil {
+		panic(err)
+	}
+	// Output:
+	// edit the config
+
+	// Flags:
+	//
+	//   --config-path : path to config
+	// 	  value : ~/.config/grabbit.yaml
+	// 	  setby : appdefault
+
+	//  --editor : path to editor
+	// 	  value : vi
+	// 	  setby : appdefault
 }

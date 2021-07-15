@@ -6,136 +6,16 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 - `AddXXX`: Add a created `XXX` to your tree
 - `WithXXX`: Create and add an `XXX` to your tree
 
-# TODO: Next Steps - Sun Jun 27 - 2021-06-27 06:39:58 PDT
+# TODO: Next milestone: grabbit
 
-- resolve app.ConfigFlag -> map (can just fake it for now :) - see
-  cases at bottom
-- Use that in resolving the rest of the flags
-- dear God tests plz
-
-- color flag to get colored help?
-- bash completion
-- Web form
-- lsp
-
-# Other library names
-
-- argyoumeant
-- chronicli
-- clinch
-- embargo
-- gargle
-- miracli
-- monocli
-- motorcycli
-- oracli
-- periclis
-- receptacli
-- target
-- targpit
-- tentacli
-- warg
-- yaargparse
-- clide
-
-# Other category names
-
-- category
-- commandgroup (az calls them groups)
-- module
-- namespace
-- noun (with command -> verb rename too)
-- section
-- selection
+- write some decent default help (section done!)
+- instead of With/AddRootSection, should we just make it a required param?
+- add required flag
+- go through TODOs
+- upgrade config parser and write an example app
+- make help take an argument? - help = man, json, color, web, form, term, lsp, bash-completion, zsh-completion
 
 # Links
-
-- https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
-- https://dave.cheney.net/2016/11/13/do-not-fear-first-class-functions
-- https://commandcenter.blogspot.com/2014/01/self-referential-functions-and-design.html
-
-# Flags
-
-I'm not sure the best way to do flags...
-
-Kingpin uses https://pkg.go.dev/flag?utm_source=godoc#Getter - see https://github.com/alecthomas/kingpin#custom-parsers
-urfave/cli uses different Structs for each flagtype and then shoves them into a context: https://github.com/urfave/cli/blob/master/docs/v2/manual.md#flags (NOTE: they also support getting flags from envvars, files, JSON like I want)
-
-What about this:
-
-```go
-type Flag struct {
-    Help string
-    Parser func(interface{}, string) (error)
-    Value interface{}
-}
-```
-
-That's working for my IntListParser I think. I need to get that table driven and shove it into the flags. I also need to
-
-Look out for https://medium.com/hackernoon/today-i-learned-pass-by-reference-on-interface-parameter-in-golang-35ee8d8a848e
-
-So.. that did not work. See ~/Code/Go/interfaces for what I'm copying into the repo
-
-# Parsing
-
-from ~/journal/arg_parsing.md
-
-- parse into a struct somehow (similar to JSON)
-- parse level by level (similar to JSON)
-- parse a whole line at once - similar to kingpin? `parsed.EnteredArgs("certificate create").Flag("id")`
-- I wish I could generate an anonymous algebraic type and let people use that.
-
-NOTE: I *can* make the parser create a new data structure for the user to use, instead of filling in the inline flags. can also separate FlagValueParams and PassedFlags into separate data structures
-
-I'm not a huge fan of the following because it's easy to misspell a case statement and you probably don't know if you have all of them
-
-```
-parser := NewApp(...)
-passedCommand, passedFlags, err := parser.RootCommand.Parse(os.Args[1:])
-panicIf(err)
-switch passedCommand{
-case "cat1 com1":
-    ...
-default:
-    ...
-}
-```
-
-The following approach means I need to return a the LeafCommand of the parse tree and it needs to have a Execute function that can only return an error. So I don't like that
-
-```
-parser := NewApp(...)
-leafCommand, passedFlags, err := parser.Parse(os.Args[1:])
-panicIf(err)
-err := passedCommand.Execute(passedFlags)
-panicIf(err)
-```
-
-TODO: rename RootCommand to RootCategory, get better names for tests args (got and got1)
-
-The perfect solution would let me loop through the possible LeafCommands, and manually call the functions I need with the passed FlagMap.
-What if I had a method to loop through the possible commmands and then catch any that didn't get visited. We could put that in a test
-
-
-Something like the following where GetCommand() sets a "visited value"
-
-```
-parser = NewApp(...)
-
-switch leafCommand{
-    case parser.GetCommand("cat com1"):
-        ...
-    case parser.GetCommand("cat1 com1"):
-        ...
-}
-
-for command in parser.AllCommands():
-    if not command.Visited():
-        error
-```
-
-The action thing is easier so I'mma run with that for now :)
 
 # Working towards
 
@@ -199,8 +79,83 @@ app := a.NewApp(
 
 pr, _ := app.Parse(os.Args)
 ```
+# Help
 
-## Cases for config:
+## Section
+
+```
+$ grabbit -h
+
+helplong - Grab images from Reddit :)
+
+Sections:
+config : helpshort - change grabbit's config
+
+Commands:
+  grab : grab those images!!
+
+Examples:
+
+  # basic grab:
+  grabbit grab \
+      --subreddit bob \
+      --limit 10 \
+      --sort top \
+      --timeframe weekly \
+      --location ~/Downloads
+
+  # config grab:
+  grabbit grab  # all params in the config baby!
+```
+
+## Command
+
+```
+$ grabbit grab -h
+
+helplong - do the grabby grabby
+
+Flags:
+
+  --subreddit : help - subreddit name
+    short : -s
+    configpath : subreddits[].name
+    envvar : GRABBIT_SUBREDDIT_NAME
+    examples :
+      [art wallpapers]
+    required : true
+    setby : config
+    type : stringslice
+    value : [earthporn cityporn]
+
+  --limit : how many pics to grab
+    short : -s
+    configpath : subreddits[].limit
+    envvar : GRABBIT_SUBREDDIT_LIMIT
+    examples :
+      [art wallpapers]
+    required : true
+    setby : passedflag
+    type : int
+    value : 10
+
+Examples:
+
+  # basic grab:
+  grabbit grab \
+      --subreddit bob \
+      --limit 10 \
+      --sort top \
+      --timeframe weekly \
+      --location ~/Downloads
+
+  # config grab:
+  grabbit grab  # all params in the config baby!
+```
+
+# Cases for config:
+
+These need to be added to get configs working well enough :)
 
 config not passed -> flag not set
 config passed, file doesn't exist -> flag not set  # command should error if a flag isn't set properly

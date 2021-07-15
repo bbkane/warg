@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strings"
 
 	c "github.com/bbkane/warg/command"
@@ -348,13 +349,13 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
 		pr := ParseResult{
-			Action: app.sectionHelp(app.name, gar.Path, *ftar.Section),
+			Action: app.sectionHelp(app.name, gar.Path, *ftar.Section, ftar.AllowedFlags),
 		}
 		return &pr, nil
 	} else if ftar.Section == nil && ftar.Command != nil {
 		if gar.HelpPassed {
 			pr := ParseResult{
-				Action: app.commandHelp(app.name, gar.Path, *ftar.Command),
+				Action: app.commandHelp(app.name, gar.Path, *ftar.Command, ftar.AllowedFlags),
 			}
 			return &pr, nil
 		} else {
@@ -378,17 +379,50 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 }
 
 // TODO: actually put this in :)
-type CommandHelp = func(appName string, path []string, currentCommand c.Command) c.Action
+type CommandHelp = func(appName string, path []string, cur c.Command, flagMap f.FlagMap) c.Action
 
-type SectionHelp = func(appName string, path []string, currentSection s.Section) c.Action
+type SectionHelp = func(appName string, path []string, cur s.Section, flagMap f.FlagMap) c.Action
 
 func DefaultCommandHelp(
 	appName string,
 	path []string,
-	currentCommand c.Command,
+	cur c.Command,
+	flagMap f.FlagMap,
 ) c.Action {
 	return func(vm v.ValueMap) error {
-		fmt.Println("TODO: implement")
+		f := bufio.NewWriter(os.Stdout)
+		defer f.Flush()
+
+		// Print top help section
+		if cur.HelpLong == "" {
+			fmt.Fprintf(f, "%s\n", cur.Help)
+		} else {
+			fmt.Fprintf(f, "%s\n", cur.Help)
+		}
+
+		fmt.Fprintln(f)
+
+		fmt.Fprintf(f, "Flags:\n")
+		fmt.Fprintln(f)
+		{
+			keys := make([]string, 0, len(flagMap))
+			for k := range flagMap {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+			for _, k := range keys {
+				flag := flagMap[k]
+				fmt.Fprintf(f, "  %s : %s\n", k, flag.Help)
+				if flag.ConfigPath != "" {
+					fmt.Fprintf(f, "    configpath : %s\n", flag.ConfigPath)
+				}
+				if flag.SetBy != "" {
+					fmt.Fprintf(f, "    value : %s\n", flag.Value)
+					fmt.Fprintf(f, "    setby : %s\n", flag.SetBy)
+				}
+				fmt.Fprintln(f)
+			}
+		}
 		return nil
 	}
 }
@@ -396,25 +430,53 @@ func DefaultCommandHelp(
 func DefaultSectionHelp(
 	appName string,
 	path []string,
-	currentSection s.Section,
+	cur s.Section,
+	flagMap f.FlagMap,
 ) c.Action {
 	return func(vm v.ValueMap) error {
 		f := bufio.NewWriter(os.Stdout)
 		defer f.Flush()
-		// let's assume that HelpLong doesn't exist
-		fmt.Fprintf(f, "Current Category:\n")
-		totalPath := appName + " " + strings.Join(path, " ")
-		fmt.Fprintf(f, "  %s: %s\n", totalPath, currentSection.HelpShort)
-		fmt.Fprintf(f, "Subcategories:\n")
-		// TODO: sort these :)
-		for name, value := range currentSection.Sections {
-			fmt.Fprintf(f, "  %s: %s\n", name, value.HelpShort)
+
+		// Print top help section
+		if cur.HelpLong == "" {
+			fmt.Fprintf(f, "%s\n", cur.Help)
+		} else {
+			fmt.Fprintf(f, "%s\n", cur.Help)
 		}
-		// TODO: sort these too :)
+
+		fmt.Fprintln(f)
+
+		// Print sections
+		fmt.Fprintf(f, "Sections:\n")
+		{
+			keys := make([]string, 0, len(cur.Sections))
+			for k := range cur.Sections {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+
+			for _, k := range keys {
+				fmt.Fprintf(f, "  %s : %s\n", k, cur.Sections[k].Help)
+			}
+		}
+
+		fmt.Fprintln(f)
+
+		// Print commands
 		fmt.Fprintf(f, "Commands:\n")
-		for name, value := range currentSection.Commands {
-			fmt.Fprintf(f, "  %s: %s\n", name, value.HelpShort)
+		{
+			keys := make([]string, 0, len(cur.Commands))
+			for k := range cur.Commands {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+
+			for _, k := range keys {
+				fmt.Fprintf(f, "  %s : %s\n", k, cur.Commands[k].Help)
+			}
 		}
+
+		// TODO: print examples once we have them :)
 		return nil
 	}
 }
