@@ -12,6 +12,7 @@ import (
 
 	c "github.com/bbkane/warg/command"
 	f "github.com/bbkane/warg/flag"
+
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
 )
@@ -75,19 +76,7 @@ func OverrideVersion(versionFlagNames []string) AppOpt {
 	}
 }
 
-func AddRootSection(rootSection s.Section) AppOpt {
-	return func(app *App) {
-		app.rootSection = rootSection
-	}
-}
-
-func WithRootSection(helpShort string, opts ...s.SectionOpt) AppOpt {
-	return func(app *App) {
-		app.rootSection = s.NewSection(helpShort, opts...)
-	}
-}
-
-func Config(
+func ConfigFlag(
 	configFlagName string,
 	unmarshaller Unmarshaller,
 	helpShort string,
@@ -101,18 +90,14 @@ func Config(
 	}
 }
 
-func New(name string, version string, opts ...AppOpt) App {
+func New(name string, version string, rootSection s.Section, opts ...AppOpt) App {
 	app := App{
-		name:    name,
-		version: version,
+		name:        name,
+		rootSection: rootSection,
+		version:     version,
 	}
 	for _, opt := range opts {
 		opt(&app)
-	}
-	// stitch up some "optional" parameters I'm expecting
-	// RootSection
-	if app.rootSection.Commands == nil {
-		app.rootSection = s.NewSection("")
 	}
 
 	// Help

@@ -20,7 +20,7 @@ func Example_parse() {
 	app := w.New(
 		"test",
 		"v0.0.0",
-		w.WithRootSection(
+		s.NewSection(
 			"help for test",
 			s.WithSection(
 				"cat",
@@ -65,6 +65,7 @@ func Example_version() {
 	app := w.New(
 		"test",
 		"v0.0.0",
+		s.NewSection(""),
 		w.OverrideVersion(
 			[]string{"--version"},
 		),
@@ -86,12 +87,7 @@ func Example_section_help() {
 	app := w.New(
 		"grabbit",
 		"v0.0.0",
-		w.OverrideHelp(
-			[]string{"-h", "--help"},
-			w.DefaultSectionHelp,
-			w.DefaultCommandHelp,
-		),
-		w.WithRootSection(
+		s.NewSection(
 			"grab those images!",
 			s.WithSection(
 				"config",
@@ -113,6 +109,11 @@ func Example_section_help() {
 				"do the grabbity grabbity",
 				c.DoNothing,
 			),
+		),
+		w.OverrideHelp(
+			[]string{"-h", "--help"},
+			w.DefaultSectionHelp,
+			w.DefaultCommandHelp,
 		),
 	)
 	args := []string{"grabbit", "--help"}
@@ -138,12 +139,7 @@ func Example_command_help() {
 	app := w.New(
 		"grabbit",
 		"v0.0.0",
-		w.OverrideHelp(
-			[]string{"-h", "--help"},
-			w.DefaultSectionHelp,
-			w.DefaultCommandHelp,
-		),
-		w.WithRootSection(
+		s.NewSection(
 			"grab those images!",
 			s.WithFlag(
 				"--config-path",
@@ -172,6 +168,11 @@ func Example_command_help() {
 				c.DoNothing,
 			),
 		),
+		w.OverrideHelp(
+			[]string{"-h", "--help"},
+			w.DefaultSectionHelp,
+			w.DefaultCommandHelp,
+		),
 	)
 	args := []string{"example", "config", "edit", "-h"}
 	pr, err := app.Parse(args)
@@ -187,7 +188,7 @@ func Example_command_help() {
 
 	// Flags:
 	//
-	//   --config-path : path to config
+	//  --config-path : path to config
 	// 	  value : ~/.config/grabbit.yaml
 	// 	  setby : appdefault
 

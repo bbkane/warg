@@ -24,7 +24,7 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "from main",
 			app: w.New("test", "v0.0.0",
-				w.WithRootSection("help for test",
+				s.NewSection("help for test",
 					s.WithFlag("--af1", "flag help", v.IntValueEmpty()),
 					s.WithSection("cat1", "help for cat1",
 						s.WithCommand("com1", "help for com1", c.DoNothing,
@@ -44,7 +44,7 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "no category",
 			app: w.New("test", "v0.0.0",
-				w.WithRootSection("help for test",
+				s.NewSection("help for test",
 					s.WithFlag("--af1", "flag help", v.IntValueEmpty()),
 				),
 			),
@@ -57,7 +57,7 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "flag default",
 			app: w.New("test", "v0.0.0",
-				w.WithRootSection(
+				s.NewSection(
 					"help for test",
 					s.WithCommand("com", "com help", c.DoNothing,
 						c.WithFlag("--flag", "flag help", v.StringValueEmpty(),
@@ -74,7 +74,7 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "extra flag",
 			app: w.New("test", "v0.0.0",
-				w.WithRootSection(
+				s.NewSection(
 					"help for test",
 					s.WithCommand("com", "com help", c.DoNothing,
 						c.WithFlag("--flag", "flag help", v.StringValueEmpty(),
@@ -91,7 +91,15 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "config flag",
 			app: w.New("test", "v0.0.0",
-				w.Config(
+				s.NewSection(
+					"help for test",
+					s.WithFlag("--key", "a key", v.StringValueEmpty(),
+						f.ConfigPath("key", v.StringValueFromInterface),
+						f.Default(v.StringValueNew("defaultkeyval")),
+					),
+					s.WithCommand("print", "print key value", c.DoNothing),
+				),
+				w.ConfigFlag(
 					"--config",
 					// dummy function just to get me a map
 					func(s string) (w.ConfigMap, error) {
@@ -102,14 +110,6 @@ func TestApp_Parse(t *testing.T) {
 					},
 					"config flag",
 					f.Default(v.StringValueNew("defaultconfigval")),
-				),
-				w.WithRootSection(
-					"help for test",
-					s.WithFlag("--key", "a key", v.StringValueEmpty(),
-						f.ConfigPath("key", v.StringValueFromInterface),
-						f.Default(v.StringValueNew("defaultkeyval")),
-					),
-					s.WithCommand("print", "print key value", c.DoNothing),
 				),
 			),
 			args:           []string{"test", "print", "--config", "passedconfigval"},
@@ -125,7 +125,7 @@ func TestApp_Parse(t *testing.T) {
 			app: w.New(
 				"test",
 				"v0.0.0",
-				w.WithRootSection(
+				s.NewSection(
 					"help for test",
 					s.WithFlag(
 						"--sflag",
