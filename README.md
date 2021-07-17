@@ -1,3 +1,7 @@
+# DO NOT USE
+
+This library is still under heavy development, will probably break, and will definitely change.
+
 See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # Naming Conventions
