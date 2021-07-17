@@ -25,14 +25,22 @@ type ConfigMap = map[string]interface{}
 // Useful for configs who will read a file to get it
 type Unmarshaller = func(string) (ConfigMap, error)
 
+// JSONUnmarshaller tries to turn a filepath into a map[string]interface .
+// It does NOT error if the file can not be read. If it did, then users would
+// be forced to have a config before the app would work. TODO: is this the best method?
+// It DOES error if the file can't be unmarshalled
+// Note that all numbers in JSON are floats. So, no int flags if you use this encoder.
+// Cast to an int after parsing if you like instead
 func JSONUnmarshaller(filePath string) (map[string]interface{}, error) {
 	// TODO: expand homedir?
+	var m map[string]interface{}
+
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		return nil, err
+		// the file not existing is ok
+		return m, nil
 	}
 
-	var m map[string]interface{}
 	err = json.Unmarshal(content, &m)
 	if err != nil {
 		return nil, err
@@ -85,7 +93,7 @@ func ConfigFlag(
 	return func(app *App) {
 		app.configFlagName = configFlagName
 		app.configUnmarshaller = unmarshaller
-		configFlag := f.NewFlag(helpShort, v.StringValueEmpty(), flagOpts...)
+		configFlag := f.NewFlag(helpShort, v.StringEmpty(), flagOpts...)
 		app.configFlag = &configFlag
 	}
 }
@@ -246,8 +254,10 @@ func resolveFlag(flag *f.Flag, name string, flagStrs map[string][]string, config
 
 	// update from config
 	if flag.SetBy == "" && configMap != nil && flag.ConfigFromInterface != nil {
-		// TODO: make this a lot more sophisticated
-		i, exists := configMap[flag.ConfigPath]
+		i, exists, err := followPath(configMap, flag.ConfigPath)
+		if err != nil {
+			return err
+		}
 		if exists {
 			v, err := flag.ConfigFromInterface(i)
 			if err != nil {
@@ -265,6 +275,40 @@ func resolveFlag(flag *f.Flag, name string, flagStrs map[string][]string, config
 	}
 
 	return nil
+}
+
+// followPath takes a map and a path with elements separated by dots
+// and retrieves the interface at the end of it. If the interface
+// doesn't exist, then the bool value is false
+func followPath(m ConfigMap, path string) (interface{}, bool, error) {
+	pathSlice := strings.Split(path, ".")
+	lastIndex := len(pathSlice) - 1
+	var err error
+	// step down the path
+	for _, step := range pathSlice[:lastIndex] {
+		nextIface, exists := m[step]
+		if !exists {
+			return nil, false, nil
+		}
+		nextMap, isMap := nextIface.(map[string]interface{})
+		if !isMap {
+			err = fmt.Errorf(
+				"error: expected map[string]interface{} at %#v: got %#v",
+				step,
+				nextIface,
+			)
+			return nil, false, err
+		}
+		m = nextMap
+	}
+
+	step := pathSlice[lastIndex]
+	val, exists := m[step]
+	if !exists {
+		return nil, false, err
+	}
+
+	return val, true, nil
 }
 
 func (app *App) Parse(osArgs []string) (*ParseResult, error) {

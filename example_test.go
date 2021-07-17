@@ -32,8 +32,8 @@ func Example_parse() {
 					c.WithFlag(
 						"--flag",
 						"flag help",
-						v.IntValueNew(0),
-						f.Default(v.IntValueNew(10)),
+						v.IntNew(0),
+						f.Default(v.IntNew(10)),
 					),
 				),
 			),
@@ -99,8 +99,8 @@ func Example_section_help() {
 					c.WithFlag(
 						"--editor",
 						"path to editor",
-						v.StringValueEmpty(),
-						f.Default(v.StringValueNew("vi")),
+						v.StringEmpty(),
+						f.Default(v.StringNew("vi")),
 					),
 				),
 			),
@@ -144,8 +144,8 @@ func Example_command_help() {
 			s.WithFlag(
 				"--config-path",
 				"path to config",
-				v.StringValueEmpty(),
-				f.Default(v.StringValueNew("~/.config/grabbit.yaml")),
+				v.StringEmpty(),
+				f.Default(v.StringNew("~/.config/grabbit.yaml")),
 			),
 			s.WithSection(
 				"config",
@@ -157,8 +157,8 @@ func Example_command_help() {
 					c.WithFlag(
 						"--editor",
 						"path to editor",
-						v.StringValueEmpty(),
-						f.Default(v.StringValueNew("vi")),
+						v.StringEmpty(),
+						f.Default(v.StringNew("vi")),
 					),
 				),
 			),

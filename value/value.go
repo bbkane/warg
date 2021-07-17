@@ -27,54 +27,54 @@ type Value interface {
 
 // TODO: should I be returning pointers?
 
-type IntValue int
+type Int int
 
-func IntValueNew(val int) *IntValue { return (*IntValue)(&val) }
-func IntValueEmpty() *IntValue      { return IntValueNew(0) }
-func IntValueFromInterface(val interface{}) (Value, error) {
+func IntNew(val int) *Int { return (*Int)(&val) }
+func IntEmpty() *Int      { return IntNew(0) }
+func IntFromInterface(val interface{}) (Value, error) {
 	under, ok := val.(int)
 	if !ok {
 		return nil, fmt.Errorf("can't create IntValue. Expected: int, got: %#v", val)
 	}
-	return IntValueNew(under), nil
+	return IntNew(under), nil
 }
-func (i *IntValue) Get() interface{} { return int(*i) }
-func (i *IntValue) String() string   { return fmt.Sprint(int(*i)) }
+func (i *Int) Get() interface{} { return int(*i) }
+func (i *Int) String() string   { return fmt.Sprint(int(*i)) }
 
-func (i *IntValue) Update(s string) error {
+func (i *Int) Update(s string) error {
 	v, err := strconv.ParseInt(s, 0, strconv.IntSize)
 	if err != nil {
 		return err
 	}
-	*i = IntValue(v)
+	*i = Int(v)
 	return nil
 }
 
-type StringValue string
+type String string
 
-func StringValueNew(val string) *StringValue { return (*StringValue)(&val) }
-func StringValueEmpty() *StringValue         { return StringValueNew("") }
-func StringValueFromInterface(val interface{}) (Value, error) {
+func StringNew(val string) *String { return (*String)(&val) }
+func StringEmpty() *String         { return StringNew("") }
+func StringFromInterface(val interface{}) (Value, error) {
 	under, ok := val.(string)
 	if !ok {
 		return nil, fmt.Errorf("can't create StringValue. Expected: string, got: %#v", val)
 	}
-	return StringValueNew(under), nil
+	return StringNew(under), nil
 }
-func (v *StringValue) Get() interface{} { return string(*v) }
-func (v *StringValue) String() string   { return fmt.Sprint(string(*v)) }
-func (v *StringValue) Update(s string) error {
-	*v = StringValue(s)
+func (v *String) Get() interface{} { return string(*v) }
+func (v *String) String() string   { return fmt.Sprint(string(*v)) }
+func (v *String) Update(s string) error {
+	*v = String(s)
 	return nil
 }
 
-type StringSliceValue []string
+type StringValue []string
 
-func StringSliceValueNew(vals []string) *StringSliceValue { return (*StringSliceValue)(&vals) }
-func StringSliceValueEmpty() *StringSliceValue            { return StringSliceValueNew(nil) }
-func (ss *StringSliceValue) Get() interface{}             { return []string(*ss) }
-func (ss *StringSliceValue) String() string               { return fmt.Sprint([]string(*ss)) }
-func (ss *StringSliceValue) Update(val string) error {
+func StringSliceNew(vals []string) *StringValue { return (*StringValue)(&vals) }
+func StringSliceEmpty() *StringValue            { return StringSliceNew(nil) }
+func (ss *StringValue) Get() interface{}        { return []string(*ss) }
+func (ss *StringValue) String() string          { return fmt.Sprint([]string(*ss)) }
+func (ss *StringValue) Update(val string) error {
 	*ss = append(*ss, val)
 	return nil
 }

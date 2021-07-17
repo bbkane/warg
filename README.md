@@ -8,11 +8,9 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
-- write some decent default help (section done!)
-- instead of With/AddRootSection, should we just make it a required param?
-- add required flag
-- go through TODOs
 - upgrade config parser and write an example app
+- go through TODOs
+- add required flag
 - make help take an argument? - help = man, json, color, web, form, term, lsp, bash-completion, zsh-completion
 
 # Links
@@ -160,7 +158,7 @@ These need to be added to get configs working well enough :)
 config not passed -> flag not set
 config passed, file doesn't exist -> flag not set  # command should error if a flag isn't set properly
 config passed, file exists, can't unmarshall -> ERROR
-config passed, file exists, can unmarshall, path error -> ERROR
-config passed, file exists, can unmarshall, path success, path not in config -> flag not set
-config passed, file exists, can unmarshall, path success, path in config, value error -> ERROR
-config passed, file exists, can unmarshall, path success, path in config, value created -> flag set
+config passed, file exists, can unmarshall, invalid path-> ERROR
+config passed, file exists, can unmarshall, valid path, path not in config -> flag not set
+config passed, file exists, can unmarshall, valid path, path in config, value error -> ERROR
+config passed, file exists, can unmarshall, valid path, path in config, value created -> flag set
