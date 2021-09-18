@@ -2,6 +2,7 @@ package command
 
 import (
 	"log"
+	"strings"
 
 	f "github.com/bbkane/warg/flag"
 	v "github.com/bbkane/warg/value"
@@ -37,6 +38,9 @@ func NewCommand(helpShort string, action Action, opts ...CommandOpt) Command {
 }
 
 func AddFlag(name string, value f.Flag) CommandOpt {
+	if !strings.HasPrefix(name, "-") {
+		log.Panicf("helpFlags should start with '-': %#v\n", name)
+	}
 	return func(app *Command) {
 		if _, alreadyThere := app.Flags[name]; !alreadyThere {
 			app.Flags[name] = value
@@ -46,7 +50,7 @@ func AddFlag(name string, value f.Flag) CommandOpt {
 	}
 }
 
-func WithFlag(name string, helpShort string, empty v.Value, opts ...f.FlagOpt) CommandOpt {
+func WithFlag(name string, helpShort string, empty v.EmptyConstructor, opts ...f.FlagOpt) CommandOpt {
 	return AddFlag(name, f.NewFlag(helpShort, empty, opts...))
 }
 

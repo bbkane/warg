@@ -26,13 +26,14 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "from main",
 			app: w.New(
-				"test", "v0.0.0",
+				"test",
+				"v0.0.0",
 				s.NewSection(
 					"help for test",
 					s.WithFlag(
 						"--af1",
 						"flag help",
-						v.IntEmpty(),
+						v.IntEmpty,
 					),
 					s.WithSection(
 						"cat1",
@@ -44,7 +45,7 @@ func TestApp_Parse(t *testing.T) {
 							c.WithFlag(
 								"--com1f1",
 								"flag help",
-								v.IntEmpty(),
+								v.IntEmpty,
 								f.Default("10"),
 							),
 						),
@@ -67,7 +68,7 @@ func TestApp_Parse(t *testing.T) {
 					s.WithFlag(
 						"--af1",
 						"flag help",
-						v.IntEmpty(),
+						v.IntEmpty,
 					),
 				),
 			),
@@ -91,7 +92,7 @@ func TestApp_Parse(t *testing.T) {
 						c.WithFlag(
 							"--flag",
 							"flag help",
-							v.StringEmpty(),
+							v.StringEmpty,
 							f.Default("hi"),
 						),
 					),
@@ -116,7 +117,7 @@ func TestApp_Parse(t *testing.T) {
 						c.WithFlag(
 							"--flag",
 							"flag help",
-							v.StringEmpty(),
+							v.StringEmpty,
 							f.Default("hi"),
 						),
 					),
@@ -137,7 +138,7 @@ func TestApp_Parse(t *testing.T) {
 					s.WithFlag(
 						"--key",
 						"a key",
-						v.StringEmpty(),
+						v.StringEmpty,
 						f.ConfigPath("key", v.StringFromInterface),
 						f.Default("defaultkeyval"),
 					),
@@ -174,7 +175,7 @@ func TestApp_Parse(t *testing.T) {
 					s.WithFlag(
 						"--sflag",
 						"help for --sflag",
-						v.StringEmpty(),
+						v.StringEmpty,
 						f.Default("sflagval"),
 					),
 					s.WithCommand(
@@ -200,7 +201,7 @@ func TestApp_Parse(t *testing.T) {
 					s.WithFlag(
 						"--val",
 						"flag help",
-						v.StringEmpty(),
+						v.StringEmpty,
 						f.ConfigPath("params.val", v.StringFromInterface),
 					),
 					s.WithCommand(

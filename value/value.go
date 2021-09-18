@@ -35,7 +35,7 @@ type Value interface {
 type Int int
 
 func IntNew(val int) *Int { return (*Int)(&val) }
-func IntEmpty() *Int      { return IntNew(0) }
+func IntEmpty() Value     { return IntNew(0) }
 func IntFromInterface(val interface{}) (Value, error) {
 	under, ok := val.(int)
 	if !ok {
@@ -58,7 +58,7 @@ func (i *Int) Update(s string) error {
 type String string
 
 func StringNew(val string) *String { return (*String)(&val) }
-func StringEmpty() *String         { return StringNew("") }
+func StringEmpty() Value           { return StringNew("") }
 func StringFromInterface(val interface{}) (Value, error) {
 	under, ok := val.(string)
 	if !ok {
@@ -76,7 +76,7 @@ func (v *String) Update(s string) error {
 type StringValue []string
 
 func StringSliceNew(vals []string) *StringValue { return (*StringValue)(&vals) }
-func StringSliceEmpty() *StringValue            { return StringSliceNew(nil) }
+func StringSliceEmpty() Value                   { return StringSliceNew(nil) }
 func (ss *StringValue) Get() interface{}        { return []string(*ss) }
 func (ss *StringValue) String() string          { return fmt.Sprint([]string(*ss)) }
 func (ss *StringValue) Update(val string) error {

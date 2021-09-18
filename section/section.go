@@ -2,6 +2,7 @@ package section
 
 import (
 	"log"
+	"strings"
 
 	c "github.com/bbkane/warg/command"
 	f "github.com/bbkane/warg/flag"
@@ -56,6 +57,9 @@ func AddCommand(name string, value c.Command) SectionOpt {
 }
 
 func AddFlag(name string, value f.Flag) SectionOpt {
+	if !strings.HasPrefix(name, "-") {
+		log.Panicf("helpFlags should start with '-': %#v\n", name)
+	}
 	return func(app *Section) {
 		if _, alreadyThere := app.Flags[name]; !alreadyThere {
 			app.Flags[name] = value
@@ -70,7 +74,7 @@ func WithSection(name string, helpShort string, opts ...SectionOpt) SectionOpt {
 	return AddSection(name, NewSection(helpShort, opts...))
 }
 
-func WithFlag(name string, helpShort string, empty v.Value, opts ...f.FlagOpt) SectionOpt {
+func WithFlag(name string, helpShort string, empty v.EmptyConstructor, opts ...f.FlagOpt) SectionOpt {
 	return AddFlag(name, f.NewFlag(helpShort, empty, opts...))
 }
 

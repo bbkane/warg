@@ -93,7 +93,7 @@ func ConfigFlag(
 	return func(app *App) {
 		app.configFlagName = configFlagName
 		app.configUnmarshaller = unmarshaller
-		configFlag := f.NewFlag(helpShort, v.StringEmpty(), flagOpts...)
+		configFlag := f.NewFlag(helpShort, v.StringEmpty, flagOpts...)
 		app.configFlag = &configFlag
 	}
 }
@@ -110,13 +110,17 @@ func New(name string, version string, rootSection s.Section, opts ...AppOpt) App
 
 	// Help
 	if len(app.helpFlagNames) == 0 {
-		app.helpFlagNames = []string{"--help", "-h"}
-		app.sectionHelp = DefaultSectionHelp
-		app.commandHelp = DefaultCommandHelp
+		OverrideHelp(
+			[]string{"-h", "--help"},
+			DefaultSectionHelp,
+			DefaultCommandHelp,
+		)(&app)
 	}
 	// Version
 	if len(app.versionFlagNames) == 0 {
-		app.versionFlagNames = []string{"--version"}
+		OverrideVersion(
+			[]string{"--version"},
+		)(&app)
 	}
 	return app
 }
@@ -238,6 +242,9 @@ func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string
 // resolveFLag updates a flag's value from the command line, and then from the
 // default value. flag should not be nil. deletes from flagStrs
 func resolveFlag(flag *f.Flag, name string, flagStrs map[string][]string, configMap ConfigMap) error {
+
+	flag.Value = flag.EmptyValueConstructor()
+
 	// update from command line
 	strValues, exists := flagStrs[name]
 	// the setby check for the first case is needed to

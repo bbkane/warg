@@ -25,13 +25,13 @@ type Flag struct {
 	Value v.Value
 
 	// EmptyConstructor tells flag how to make a value
-	// EmptyValueConstructor v.EmptyConstructor
+	EmptyValueConstructor v.EmptyConstructor
 }
 
-func NewFlag(helpShort string, empty v.Value, opts ...FlagOpt) Flag {
+func NewFlag(helpShort string, empty v.EmptyConstructor, opts ...FlagOpt) Flag {
 	flag := Flag{
-		Help:  helpShort,
-		Value: empty,
+		Help:                  helpShort,
+		EmptyValueConstructor: empty,
 	}
 	for _, opt := range opts {
 		opt(&flag)

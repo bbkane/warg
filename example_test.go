@@ -32,7 +32,7 @@ func Example_parse() {
 					c.WithFlag(
 						"--flag",
 						"flag help",
-						v.IntNew(0),
+						v.IntEmpty,
 						f.Default("10"),
 					),
 				),
@@ -99,7 +99,7 @@ func Example_section_help() {
 					c.WithFlag(
 						"--editor",
 						"path to editor",
-						v.StringEmpty(),
+						v.StringEmpty,
 						f.Default("vi"),
 					),
 				),
@@ -135,45 +135,41 @@ func Example_section_help() {
 	//   grab : do the grabbity grabbity
 }
 
-func Example_command_help() {
+func Example_grabbit_help() {
 	app := w.New(
 		"grabbit",
 		"v0.0.0",
 		s.NewSection(
-			"grab those images!",
-			s.WithFlag(
-				"--config-path",
-				"path to config",
-				v.StringEmpty(),
-				f.Default("~/.config/grabbit.yaml"),
+			"Get top images from subreddits",
+			s.WithCommand(
+				"grab",
+				"Grab images. Use `config edit` first to create a config",
+				c.DoNothing,
 			),
 			s.WithSection(
 				"config",
-				"change grabbit's config",
+				"config commands",
 				s.WithCommand(
 					"edit",
-					"edit the config",
+					"Edit or create configuration file. Uses $EDITOR as a fallback",
 					c.DoNothing,
 					c.WithFlag(
 						"--editor",
 						"path to editor",
-						v.StringEmpty(),
+						v.StringEmpty,
 						f.Default("vi"),
 					),
 				),
 			),
-			s.WithCommand(
-				"grab",
-				"do the grabbity grabbity",
-				c.DoNothing,
-			),
 		),
-		w.OverrideHelp(
-			[]string{"-h", "--help"},
-			w.DefaultSectionHelp,
-			w.DefaultCommandHelp,
+		w.ConfigFlag(
+			"--config-path",
+			w.JSONUnmarshaller,
+			"config filepath",
+			f.Default("~/.config/grabbit.yaml"),
 		),
 	)
+
 	args := []string{"example", "config", "edit", "-h"}
 	pr, err := app.Parse(args)
 	if err != nil {
@@ -183,16 +179,17 @@ func Example_command_help() {
 	if err != nil {
 		panic(err)
 	}
+
 	// Output:
-	// edit the config
+	// Edit or create configuration file. Uses $EDITOR as a fallback
 
 	// Flags:
-	//
-	//  --config-path : path to config
-	// 	  value : ~/.config/grabbit.yaml
-	// 	  setby : appdefault
 
-	//  --editor : path to editor
-	// 	  value : vi
-	// 	  setby : appdefault
+	//   --config-path : config filepath
+	//     value : ~/.config/grabbit.yaml
+	//     setby : appdefault
+
+	//   --editor : path to editor
+	//     value : vi
+	//     setby : appdefault
 }
