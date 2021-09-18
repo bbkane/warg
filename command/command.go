@@ -45,7 +45,7 @@ func AddFlag(name string, value f.Flag) CommandOpt {
 		if _, alreadyThere := app.Flags[name]; !alreadyThere {
 			app.Flags[name] = value
 		} else {
-			log.Fatalf("flag already exists: %#v\n", name)
+			log.Panicf("flag already exists: %#v\n", name)
 		}
 	}
 }

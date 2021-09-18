@@ -146,6 +146,30 @@ func Example_grabbit_help() {
 				"Grab images. Use `config edit` first to create a config",
 				c.DoNothing,
 			),
+			s.WithFlag(
+				"--log-filename",
+				"log filename",
+				v.StringEmpty,
+				f.Default("~/.config/grabbit.jsonl"),
+			),
+			s.WithFlag(
+				"--log-maxage",
+				"max age before log rotation in days",
+				v.IntEmpty,
+				f.Default("30"),
+			),
+			s.WithFlag(
+				"--log-maxbackups",
+				"num backups for the log",
+				v.IntEmpty,
+				f.Default("0"),
+			),
+			s.WithFlag(
+				"--log-maxsize",
+				"max size of log in megabytes",
+				v.IntEmpty,
+				f.Default("5"),
+			),
 			s.WithSection(
 				"config",
 				"config commands",
@@ -182,14 +206,30 @@ func Example_grabbit_help() {
 
 	// Output:
 	// Edit or create configuration file. Uses $EDITOR as a fallback
-
+	//
 	// Flags:
-
+	//
 	//   --config-path : config filepath
 	//     value : ~/.config/grabbit.yaml
 	//     setby : appdefault
-
+	//
 	//   --editor : path to editor
 	//     value : vi
+	//     setby : appdefault
+	//
+	//   --log-filename : log filename
+	//     value : ~/.config/grabbit.jsonl
+	//     setby : appdefault
+	//
+	//   --log-maxage : max age before log rotation in days
+	//     value : 30
+	//     setby : appdefault
+	//
+	//   --log-maxbackups : num backups for the log
+	//     value : 0
+	//     setby : appdefault
+	//
+	//   --log-maxsize : max size of log in megabytes
+	//     value : 5
 	//     setby : appdefault
 }

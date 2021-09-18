@@ -41,7 +41,7 @@ func AddSection(name string, value Section) SectionOpt {
 		if _, alreadyThere := app.Sections[name]; !alreadyThere {
 			app.Sections[name] = value
 		} else {
-			log.Fatalf("category already exists: %#v\n", name)
+			log.Panicf("category already exists: %#v\n", name)
 		}
 	}
 }
@@ -51,7 +51,7 @@ func AddCommand(name string, value c.Command) SectionOpt {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
 		} else {
-			log.Fatalf("command already exists: %#v\n", name)
+			log.Panicf("command already exists: %#v\n", name)
 		}
 	}
 }
@@ -64,7 +64,7 @@ func AddFlag(name string, value f.Flag) SectionOpt {
 		if _, alreadyThere := app.Flags[name]; !alreadyThere {
 			app.Flags[name] = value
 		} else {
-			log.Fatalf("flag already exists: %#v\n", name)
+			log.Panicf("flag already exists: %#v\n", name)
 		}
 
 	}
