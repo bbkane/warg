@@ -9,6 +9,11 @@ import (
 // Useful for reading a value from a config
 type FromInterface = func(interface{}) (Value, error)
 
+// EmptyConstructur just builds a new value
+// Useful to create new values as well as initialize them
+// TODO: better name :)
+type EmptyConstructor = func() Value
+
 type ValueMap = map[string]Value
 
 // Value is a "generic" type that lets me store different types into flags

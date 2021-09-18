@@ -269,8 +269,10 @@ func resolveFlag(flag *f.Flag, name string, flagStrs map[string][]string, config
 	}
 
 	// update from default
-	if flag.SetBy == "" && flag.DefaultValue != nil {
-		flag.Value = flag.DefaultValue
+	if flag.SetBy == "" && len(flag.DefaultValues) > 0 {
+		for _, v := range flag.DefaultValues {
+			flag.Value.Update(v)
+		}
 		flag.SetBy = "appdefault"
 	}
 

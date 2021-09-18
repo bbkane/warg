@@ -45,7 +45,7 @@ func TestApp_Parse(t *testing.T) {
 								"--com1f1",
 								"flag help",
 								v.IntEmpty(),
-								f.Default(v.IntNew(10)),
+								f.Default("10"),
 							),
 						),
 					),
@@ -92,7 +92,7 @@ func TestApp_Parse(t *testing.T) {
 							"--flag",
 							"flag help",
 							v.StringEmpty(),
-							f.Default(v.StringNew("hi")),
+							f.Default("hi"),
 						),
 					),
 				),
@@ -117,7 +117,7 @@ func TestApp_Parse(t *testing.T) {
 							"--flag",
 							"flag help",
 							v.StringEmpty(),
-							f.Default(v.StringNew("hi")),
+							f.Default("hi"),
 						),
 					),
 				),
@@ -139,7 +139,7 @@ func TestApp_Parse(t *testing.T) {
 						"a key",
 						v.StringEmpty(),
 						f.ConfigPath("key", v.StringFromInterface),
-						f.Default(v.StringNew("defaultkeyval")),
+						f.Default("defaultkeyval"),
 					),
 					s.WithCommand("print", "print key value", c.DoNothing),
 				),
@@ -153,7 +153,7 @@ func TestApp_Parse(t *testing.T) {
 						}, nil
 					},
 					"config flag",
-					f.Default(v.StringNew("defaultconfigval")),
+					f.Default("defaultconfigval"),
 				),
 			),
 			args:           []string{"test", "print", "--config", "passedconfigval"},
@@ -175,7 +175,7 @@ func TestApp_Parse(t *testing.T) {
 						"--sflag",
 						"help for --sflag",
 						v.StringEmpty(),
-						f.Default(v.StringNew("sflagval")),
+						f.Default("sflagval"),
 					),
 					s.WithCommand(
 						"com",
@@ -215,7 +215,7 @@ func TestApp_Parse(t *testing.T) {
 					"path to config",
 					// TODO: make this test work by following the config cases
 					// in the README
-					f.Default(v.StringNew("testdata/simple_json_config.json")),
+					f.Default("testdata/simple_json_config.json"),
 				),
 			),
 

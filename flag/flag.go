@@ -12,15 +12,20 @@ type Flag struct {
 	// TODO: make these private. resolveFlag should probably be a method on flag
 	ConfigFromInterface v.FromInterface
 	ConfigPath          string
-	// DefaultValue will be shoved into Value if needed
-	// can be nil
-	DefaultValue v.Value
-	Help         string
+	// DefaultValues will be shoved into Value if the app builder specifies it.
+	// For scalar values, the last DefaultValues wins
+	DefaultValues []string
+	Help          string
 	// SetBy holds where a flag is initialized. Is empty if not initialized
 	SetBy string
 	// Value holds what gets passed to the flag: --myflag value
 	// and should be initialized to the empty value
+	// TODO: make this private? TODO: Update docs once this is successfully
+	// an output instead of an input
 	Value v.Value
+
+	// EmptyConstructor tells flag how to make a value
+	// EmptyValueConstructor v.EmptyConstructor
 }
 
 func NewFlag(helpShort string, empty v.Value, opts ...FlagOpt) Flag {
@@ -41,8 +46,8 @@ func ConfigPath(path string, valueFromInterface v.FromInterface) FlagOpt {
 	}
 }
 
-func Default(value v.Value) FlagOpt {
+func Default(values ...string) FlagOpt {
 	return func(flag *Flag) {
-		flag.DefaultValue = value
+		flag.DefaultValues = values
 	}
 }
