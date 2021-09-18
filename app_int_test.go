@@ -1,5 +1,7 @@
 package warg
 
+// internal tests - part of the warg package
+
 import (
 	"testing"
 )

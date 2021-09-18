@@ -1,5 +1,7 @@
 package warg_test
 
+// external tests - import warg like it's an external package
+
 import (
 	"testing"
 
@@ -23,12 +25,26 @@ func TestApp_Parse(t *testing.T) {
 	}{
 		{
 			name: "from main",
-			app: w.New("test", "v0.0.0",
-				s.NewSection("help for test",
-					s.WithFlag("--af1", "flag help", v.IntEmpty()),
-					s.WithSection("cat1", "help for cat1",
-						s.WithCommand("com1", "help for com1", c.DoNothing,
-							c.WithFlag("--com1f1", "flag help", v.IntEmpty(),
+			app: w.New(
+				"test", "v0.0.0",
+				s.NewSection(
+					"help for test",
+					s.WithFlag(
+						"--af1",
+						"flag help",
+						v.IntEmpty(),
+					),
+					s.WithSection(
+						"cat1",
+						"help for cat1",
+						s.WithCommand(
+							"com1",
+							"help for com1",
+							c.DoNothing,
+							c.WithFlag(
+								"--com1f1",
+								"flag help",
+								v.IntEmpty(),
 								f.Default(v.IntNew(10)),
 							),
 						),
@@ -43,9 +59,16 @@ func TestApp_Parse(t *testing.T) {
 		},
 		{
 			name: "no category",
-			app: w.New("test", "v0.0.0",
-				s.NewSection("help for test",
-					s.WithFlag("--af1", "flag help", v.IntEmpty()),
+			app: w.New(
+				"test",
+				"v0.0.0",
+				s.NewSection(
+					"help for test",
+					s.WithFlag(
+						"--af1",
+						"flag help",
+						v.IntEmpty(),
+					),
 				),
 			),
 
@@ -56,11 +79,19 @@ func TestApp_Parse(t *testing.T) {
 		},
 		{
 			name: "flag default",
-			app: w.New("test", "v0.0.0",
+			app: w.New(
+				"test",
+				"v0.0.0",
 				s.NewSection(
 					"help for test",
-					s.WithCommand("com", "com help", c.DoNothing,
-						c.WithFlag("--flag", "flag help", v.StringEmpty(),
+					s.WithCommand(
+						"com",
+						"com help",
+						c.DoNothing,
+						c.WithFlag(
+							"--flag",
+							"flag help",
+							v.StringEmpty(),
 							f.Default(v.StringNew("hi")),
 						),
 					),
@@ -73,11 +104,19 @@ func TestApp_Parse(t *testing.T) {
 		},
 		{
 			name: "extra flag",
-			app: w.New("test", "v0.0.0",
+			app: w.New(
+				"test",
+				"v0.0.0",
 				s.NewSection(
 					"help for test",
-					s.WithCommand("com", "com help", c.DoNothing,
-						c.WithFlag("--flag", "flag help", v.StringEmpty(),
+					s.WithCommand(
+						"com",
+						"com help",
+						c.DoNothing,
+						c.WithFlag(
+							"--flag",
+							"flag help",
+							v.StringEmpty(),
 							f.Default(v.StringNew("hi")),
 						),
 					),
@@ -90,10 +129,15 @@ func TestApp_Parse(t *testing.T) {
 		},
 		{
 			name: "config flag",
-			app: w.New("test", "v0.0.0",
+			app: w.New(
+				"test",
+				"v0.0.0",
 				s.NewSection(
 					"help for test",
-					s.WithFlag("--key", "a key", v.StringEmpty(),
+					s.WithFlag(
+						"--key",
+						"a key",
+						v.StringEmpty(),
 						f.ConfigPath("key", v.StringFromInterface),
 						f.Default(v.StringNew("defaultkeyval")),
 					),
@@ -153,10 +197,17 @@ func TestApp_Parse(t *testing.T) {
 				"test",
 				"v0.0.0",
 				s.NewSection("help for test",
-					s.WithFlag("--val", "flag help", v.StringEmpty(),
+					s.WithFlag(
+						"--val",
+						"flag help",
+						v.StringEmpty(),
 						f.ConfigPath("params.val", v.StringFromInterface),
 					),
-					s.WithCommand("com", "help for com", c.DoNothing),
+					s.WithCommand(
+						"com",
+						"help for com",
+						c.DoNothing,
+					),
 				),
 				w.ConfigFlag(
 					"--config",

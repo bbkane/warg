@@ -12,6 +12,7 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
+- make a "niceflags" package that produces sectionopts and commandopts
 - upgrade config parser and write an example app
 - go through TODOs
 - add required flag
