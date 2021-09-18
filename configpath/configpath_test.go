@@ -47,6 +47,7 @@ func Test_FollowPath(t *testing.T) {
 			expectedErr:    false,
 		},
 		{
+			// TODO: make this not fail
 			name: "in array",
 			path: "subreddits[].name",
 			data: configpath.ConfigMap{
