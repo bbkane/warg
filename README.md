@@ -12,10 +12,13 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
-- make a "niceflags" package that produces sectionopts and commandopts
-- upgrade config parser and write an example app
+- upgrade config parser
 - go through TODOs
 - add required flag
+- add type of flag to help output
+- add envvar option to flag
+- firm up tests - does got or expected come first when comparing
+- should my config paths start with . to be jq compatible?
 - make help take an argument? - help = man, json, color, web, form, term, lsp, bash-completion, zsh-completion
 
 # Links

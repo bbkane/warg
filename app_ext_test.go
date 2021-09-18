@@ -7,9 +7,11 @@ import (
 
 	w "github.com/bbkane/warg"
 	c "github.com/bbkane/warg/command"
+	"github.com/bbkane/warg/configpath"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -147,8 +149,8 @@ func TestApp_Parse(t *testing.T) {
 				w.ConfigFlag(
 					"--config",
 					// dummy function just to get me a map
-					func(s string) (w.ConfigMap, error) {
-						return w.ConfigMap{
+					func(s string) (configpath.ConfigMap, error) {
+						return configpath.ConfigMap{
 							"configName": s,
 							"key":        "mapkeyval",
 						}, nil

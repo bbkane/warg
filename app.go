@@ -11,19 +11,17 @@ import (
 	"strings"
 
 	c "github.com/bbkane/warg/command"
+	"github.com/bbkane/warg/configpath"
 	f "github.com/bbkane/warg/flag"
-
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
 )
 
 type AppOpt = func(*App)
 
-type ConfigMap = map[string]interface{}
-
 // Unmarshaller turns a string into a map so we can index into it!
 // Useful for configs who will read a file to get it
-type Unmarshaller = func(string) (ConfigMap, error)
+type Unmarshaller = func(string) (configpath.ConfigMap, error)
 
 // JSONUnmarshaller tries to turn a filepath into a map[string]interface .
 // It does NOT error if the file can not be read. If it did, then users would
@@ -241,7 +239,7 @@ func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string
 
 // resolveFLag updates a flag's value from the command line, and then from the
 // default value. flag should not be nil. deletes from flagStrs
-func resolveFlag(flag *f.Flag, name string, flagStrs map[string][]string, configMap ConfigMap) error {
+func resolveFlag(flag *f.Flag, name string, flagStrs map[string][]string, configMap configpath.ConfigMap) error {
 
 	flag.Value = flag.EmptyValueConstructor()
 
@@ -261,7 +259,7 @@ func resolveFlag(flag *f.Flag, name string, flagStrs map[string][]string, config
 
 	// update from config
 	if flag.SetBy == "" && configMap != nil && flag.ConfigFromInterface != nil {
-		i, exists, err := followPath(configMap, flag.ConfigPath)
+		i, exists, err := configpath.FollowPath(configMap, flag.ConfigPath)
 		if err != nil {
 			return err
 		}
@@ -284,40 +282,6 @@ func resolveFlag(flag *f.Flag, name string, flagStrs map[string][]string, config
 	}
 
 	return nil
-}
-
-// followPath takes a map and a path with elements separated by dots
-// and retrieves the interface at the end of it. If the interface
-// doesn't exist, then the bool value is false
-func followPath(m ConfigMap, path string) (interface{}, bool, error) {
-	pathSlice := strings.Split(path, ".")
-	lastIndex := len(pathSlice) - 1
-	var err error
-	// step down the path
-	for _, step := range pathSlice[:lastIndex] {
-		nextIface, exists := m[step]
-		if !exists {
-			return nil, false, nil
-		}
-		nextMap, isMap := nextIface.(map[string]interface{})
-		if !isMap {
-			err = fmt.Errorf(
-				"error: expected map[string]interface{} at %#v: got %#v",
-				step,
-				nextIface,
-			)
-			return nil, false, err
-		}
-		m = nextMap
-	}
-
-	step := pathSlice[lastIndex]
-	val, exists := m[step]
-	if !exists {
-		return nil, false, err
-	}
-
-	return val, true, nil
 }
 
 func (app *App) Parse(osArgs []string) (*ParseResult, error) {
@@ -343,7 +307,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	}
 
 	// update the config flag :)
-	var configMap ConfigMap
+	var configMap configpath.ConfigMap
 	if app.configFlag != nil {
 		// we're gonna make a config map out of this if everything goes well
 		// so pass nil for that now
