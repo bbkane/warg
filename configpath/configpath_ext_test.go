@@ -17,12 +17,12 @@ func Test_FollowPath(t *testing.T) {
 		expectedErr    bool
 	}{
 		{
-			name: "from test app",
+			name: "one_key",
 			path: "key",
 			data: configpath.ConfigMap{
-				"key": "mapkeyval",
+				"key": "value",
 			},
-			expectedIface:  "mapkeyval",
+			expectedIface:  "value",
 			expectedExists: true,
 			expectedErr:    false,
 		},
@@ -35,11 +35,11 @@ func Test_FollowPath(t *testing.T) {
 			expectedErr:    false,
 		},
 		{
-			name: "nested_keys",
-			path: "hi.there",
+			name: "two_keys",
+			path: "key1.key2",
 			data: configpath.ConfigMap{
-				"hi": configpath.ConfigMap{
-					"there": 1,
+				"key1": configpath.ConfigMap{
+					"key2": 1,
 				},
 			},
 			expectedIface:  1,
@@ -62,7 +62,7 @@ func Test_FollowPath(t *testing.T) {
 					},
 				},
 			},
-			expectedIface:  []string{"earthporn", "wallpapers"},
+			expectedIface:  []interface{}([]interface{}{"earthporn", "wallpapers"}),
 			expectedExists: true,
 			expectedErr:    false,
 		},
@@ -70,6 +70,7 @@ func Test_FollowPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// TODO: toggle back between versions
 			iface, exists, err := configpath.FollowPath(
 				tt.data,
 				tt.path,
