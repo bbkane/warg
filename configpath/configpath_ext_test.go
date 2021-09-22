@@ -9,12 +9,11 @@ import (
 
 func Test_FollowPath(t *testing.T) {
 	tests := []struct {
-		name           string
-		path           string
-		data           configpath.ConfigMap
-		expectedIface  interface{}
-		expectedExists bool
-		expectedErr    bool
+		name                     string
+		path                     string
+		data                     configpath.ConfigMap
+		expectedFollowPathResult configpath.FollowPathResult
+		expectedErr              bool
 	}{
 		{
 			name: "one_key",
@@ -22,17 +21,19 @@ func Test_FollowPath(t *testing.T) {
 			data: configpath.ConfigMap{
 				"key": "value",
 			},
-			expectedIface:  "value",
-			expectedExists: true,
-			expectedErr:    false,
+			expectedFollowPathResult: configpath.FollowPathResult{
+				IFace: "value", Exists: true, Aggregated: false,
+			},
+			expectedErr: false,
 		},
 		{
-			name:           "nil_map",
-			path:           "hi",
-			data:           nil,
-			expectedIface:  nil,
-			expectedExists: false,
-			expectedErr:    false,
+			name: "nil_map",
+			path: "hi",
+			data: nil,
+			expectedFollowPathResult: configpath.FollowPathResult{
+				IFace: nil, Exists: false, Aggregated: false,
+			},
+			expectedErr: false,
 		},
 		{
 			name: "two_keys",
@@ -42,9 +43,10 @@ func Test_FollowPath(t *testing.T) {
 					"key2": 1,
 				},
 			},
-			expectedIface:  1,
-			expectedExists: true,
-			expectedErr:    false,
+			expectedFollowPathResult: configpath.FollowPathResult{
+				IFace: 1, Exists: true, Aggregated: false,
+			},
+			expectedErr: false,
 		},
 		{
 			// TODO: make this not fail
@@ -62,16 +64,17 @@ func Test_FollowPath(t *testing.T) {
 					},
 				},
 			},
-			expectedIface:  []interface{}([]interface{}{"earthporn", "wallpapers"}),
-			expectedExists: true,
-			expectedErr:    false,
+			expectedFollowPathResult: configpath.FollowPathResult{
+				IFace: []interface{}([]interface{}{"earthporn", "wallpapers"}), Exists: true, Aggregated: true,
+			},
+			expectedErr: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// TODO: toggle back between versions
-			iface, exists, err := configpath.FollowPath(
+			actualFPR, err := configpath.FollowPath(
 				tt.data,
 				tt.path,
 			)
@@ -86,8 +89,7 @@ func Test_FollowPath(t *testing.T) {
 				return
 			}
 
-			assert.Equal(t, tt.expectedExists, exists)
-			assert.Equal(t, tt.expectedIface, iface)
+			assert.Equal(t, tt.expectedFollowPathResult, actualFPR)
 		})
 	}
 }

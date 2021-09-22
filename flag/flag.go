@@ -1,6 +1,9 @@
 package flag
 
 import (
+	"fmt"
+
+	"github.com/bbkane/warg/configpath"
 	v "github.com/bbkane/warg/value"
 )
 
@@ -26,6 +29,73 @@ type Flag struct {
 
 	// EmptyConstructor tells flag how to make a value
 	EmptyValueConstructor v.EmptyConstructor
+}
+
+// resolveFLag updates a flag's value from the command line, and then from the
+// default value. flag should not be nil. deletes from flagStrs
+func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configMap configpath.ConfigMap) error {
+
+	flag.Value = flag.EmptyValueConstructor()
+
+	// update from command line
+	{
+		strValues, exists := flagStrs[name]
+		// the setby check for the first case is needed to
+		// idempotently resolve flags (like the config flag for example)
+		if flag.SetBy == "" && exists {
+			for _, v := range strValues {
+				// TODO: make sure we don't update over flags meant to be set once
+				flag.Value.Update(v)
+			}
+			flag.SetBy = "passedflag"
+			// later we'll ensure that these aren't all used
+			delete(flagStrs, name)
+		}
+	}
+
+	// update from config
+	{
+		if flag.SetBy == "" && configMap != nil && flag.ConfigFromInterface != nil {
+			fpr, err := configpath.FollowPath(configMap, flag.ConfigPath)
+			if err != nil {
+				return err
+			}
+			if fpr.Exists {
+				if !fpr.Aggregated {
+					v, err := flag.ConfigFromInterface(fpr.IFace)
+					if err != nil {
+						return err
+					}
+					flag.Value = v
+					flag.SetBy = "config"
+				} else {
+					under, ok := fpr.IFace.([]interface{})
+					if !ok {
+						return fmt.Errorf("expected []interface{}, got: %#v", under)
+					}
+					for _, e := range under {
+						err = flag.Value.UpdateFromInterface(e)
+						if err != nil {
+							return fmt.Errorf("could not update aggregate value: %w", err)
+						}
+					}
+					flag.SetBy = "config"
+				}
+			}
+		}
+	}
+
+	// update from default
+	{
+		if flag.SetBy == "" && len(flag.DefaultValues) > 0 {
+			for _, v := range flag.DefaultValues {
+				flag.Value.Update(v)
+			}
+			flag.SetBy = "appdefault"
+		}
+	}
+
+	return nil
 }
 
 func NewFlag(helpShort string, empty v.EmptyConstructor, opts ...FlagOpt) Flag {

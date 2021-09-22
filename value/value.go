@@ -1,6 +1,7 @@
 package value
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 )
@@ -24,13 +25,23 @@ type Value interface {
 
 	// Update updates the underlying value from a string
 	// It replaces single values and appends to list values
+	// TODO: throw an error for single values
 	Update(string) error
+
+	// UpdateFromInterface updates the underlying value from an interface
+	// It replaces single values and appends to aggregate values,
+	// so the interface MUST BE the 'single' part of the aggreate
+	// For exampple, the StringSlice.UpdateFromInterface
+	// must be called with a string, not a []string
+	// TODO: return an error for already initialized single values
+	// This function is needed for configpath handling
+	UpdateFromInterface(interface{}) error
 
 	// Make it printable!
 	String() string
 }
 
-// TODO: should I be returning pointers?
+var ErrIncompatibleInterface = errors.New("could not decode interface into Value")
 
 type Int int
 
@@ -54,6 +65,14 @@ func (i *Int) Update(s string) error {
 	*i = Int(v)
 	return nil
 }
+func (i *Int) UpdateFromInterface(iFace interface{}) error {
+	under, ok := iFace.(int)
+	if !ok {
+		return ErrIncompatibleInterface
+	}
+	*i = Int(under)
+	return nil
+}
 
 type String string
 
@@ -72,14 +91,37 @@ func (v *String) Update(s string) error {
 	*v = String(s)
 	return nil
 }
+func (v *String) UpdateFromInterface(iFace interface{}) error {
+	under, ok := iFace.(string)
+	if !ok {
+		return ErrIncompatibleInterface
+	}
+	*v = String(under)
+	return nil
+}
 
-type StringValue []string
+type StringSlice []string
 
-func StringSliceNew(vals []string) *StringValue { return (*StringValue)(&vals) }
-func StringSliceEmpty() Value                   { return StringSliceNew(nil) }
-func (ss *StringValue) Get() interface{}        { return []string(*ss) }
-func (ss *StringValue) String() string          { return fmt.Sprint([]string(*ss)) }
-func (ss *StringValue) Update(val string) error {
+func StringSliceNew(vals []string) *StringSlice { return (*StringSlice)(&vals) }
+func StringSliceFromInterface(val interface{}) (Value, error) {
+	under, ok := val.([]string)
+	if !ok {
+		return nil, fmt.Errorf("can't create StringSlice. Expected: []string, got: %#v", val)
+	}
+	return StringSliceNew(under), nil
+}
+func StringSliceEmpty() Value            { return StringSliceNew(nil) }
+func (ss *StringSlice) Get() interface{} { return []string(*ss) }
+func (ss *StringSlice) String() string   { return fmt.Sprint([]string(*ss)) }
+func (ss *StringSlice) Update(val string) error {
 	*ss = append(*ss, val)
+	return nil
+}
+func (ss *StringSlice) UpdateFromInterface(iFace interface{}) error {
+	under, ok := iFace.(string)
+	if !ok {
+		return ErrIncompatibleInterface
+	}
+	*ss = append(*ss, under)
 	return nil
 }

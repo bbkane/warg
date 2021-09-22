@@ -131,7 +131,7 @@ func TestApp_Parse(t *testing.T) {
 			wantErr:          true,
 		},
 		{
-			name: "config flag",
+			name: "config_flag",
 			app: w.New(
 				"test",
 				"v0.0.0",
@@ -227,6 +227,51 @@ func TestApp_Parse(t *testing.T) {
 			passedValuesWant: v.ValueMap{
 				"--config": v.StringNew("testdata/simple_json_config.json"),
 				"--val":    v.StringNew("hi"),
+			},
+			wantErr: false,
+		},
+		{
+			name: "config_slice",
+			app: w.New(
+				"test",
+				"v0.0.0",
+				s.NewSection(
+					"help for test",
+					s.WithFlag(
+						"--subreddits",
+						"the subreddits",
+						v.StringSliceEmpty,
+						// TODO: gonna need something here
+						f.ConfigPath("subreddits[].name", v.StringFromInterface),
+					),
+					s.WithCommand("print", "print key value", c.DoNothing),
+				),
+				w.ConfigFlag(
+					"--config",
+					// dummy function just to get me a map
+					func(_ string) (configpath.ConfigMap, error) {
+						return configpath.ConfigMap{
+							"subreddits": []configpath.ConfigMap{
+								{
+									"name":  "earthporn",
+									"limit": 10,
+								},
+								{
+									"name":  "wallpapers",
+									"limit": 5,
+								},
+							},
+						}, nil
+					},
+					"config flag",
+					f.Default("defaultconfigval"),
+				),
+			),
+			args:           []string{"test", "print", "--config", "passedconfigval"},
+			passedPathWant: []string{"print"},
+			passedValuesWant: v.ValueMap{
+				"--subreddits": v.StringSliceNew([]string{"earthporn", "wallpapers"}),
+				"--config":     v.StringNew("passedconfigval"),
 			},
 			wantErr: false,
 		},

@@ -237,53 +237,6 @@ func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string
 	return &ftar, nil
 }
 
-// resolveFLag updates a flag's value from the command line, and then from the
-// default value. flag should not be nil. deletes from flagStrs
-func resolveFlag(flag *f.Flag, name string, flagStrs map[string][]string, configMap configpath.ConfigMap) error {
-
-	flag.Value = flag.EmptyValueConstructor()
-
-	// update from command line
-	strValues, exists := flagStrs[name]
-	// the setby check for the first case is needed to
-	// idempotently resolve flags (like the config flag for example)
-	if flag.SetBy == "" && exists {
-		for _, v := range strValues {
-			// TODO: make sure we don't update over flags meant to be set once
-			flag.Value.Update(v)
-		}
-		flag.SetBy = "passedflag"
-		// later we'll ensure that these aren't all used
-		delete(flagStrs, name)
-	}
-
-	// update from config
-	if flag.SetBy == "" && configMap != nil && flag.ConfigFromInterface != nil {
-		i, exists, err := configpath.FollowPath(configMap, flag.ConfigPath)
-		if err != nil {
-			return err
-		}
-		if exists {
-			v, err := flag.ConfigFromInterface(i)
-			if err != nil {
-				return err
-			}
-			flag.Value = v
-			flag.SetBy = "config"
-		}
-	}
-
-	// update from default
-	if flag.SetBy == "" && len(flag.DefaultValues) > 0 {
-		for _, v := range flag.DefaultValues {
-			flag.Value.Update(v)
-		}
-		flag.SetBy = "appdefault"
-	}
-
-	return nil
-}
-
 func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	gar, err := gatherArgs(osArgs, app.helpFlagNames, app.versionFlagNames)
 	if err != nil {
@@ -311,7 +264,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	if app.configFlag != nil {
 		// we're gonna make a config map out of this if everything goes well
 		// so pass nil for that now
-		err = resolveFlag(app.configFlag, app.configFlagName, gar.FlagStrs, nil)
+		err = app.configFlag.Resolve(app.configFlagName, gar.FlagStrs, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -327,7 +280,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	// in place :/
 	for name, flag := range ftar.AllowedFlags {
 
-		err = resolveFlag(&flag, name, gar.FlagStrs, configMap)
+		err = flag.Resolve(name, gar.FlagStrs, configMap)
 		if err != nil {
 			return nil, err
 		}

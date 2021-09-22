@@ -35,13 +35,19 @@ func tokenize(path string) ([]Token, error) {
 	return tokens, nil
 }
 
+type FollowPathResult struct {
+	IFace      interface{}
+	Exists     bool
+	Aggregated bool
+}
+
 // FollowPath takes a map and a path with elements separated by dots
 // and retrieves the interface at the end of it. If the interface
 // doesn't exist, then the bool value is false
-func FollowPath(data ConfigMap, path string) (interface{}, bool, error) {
+func FollowPath(data ConfigMap, path string) (FollowPathResult, error) {
 	tokens, err := tokenize(path)
 	if err != nil {
-		return nil, false, err
+		return FollowPathResult{}, err
 	}
 
 	lenTokens := len(tokens)
@@ -52,14 +58,14 @@ func FollowPath(data ConfigMap, path string) (interface{}, bool, error) {
 			// cast it to a slice, then get all keys from it!
 			sliceOfDicts, ok := current.([]ConfigMap)
 			if !ok {
-				return nil, false, fmt.Errorf(
+				return FollowPathResult{}, fmt.Errorf(
 					"expecting []ConfigMap: got %T: path: %v: token: %v",
 					current, path, token,
 				)
 			}
 			finalToken := tokens[lenTokens-1]
 			if finalToken.Type != TokenTypeKey {
-				return nil, false, fmt.Errorf(
+				return FollowPathResult{}, fmt.Errorf(
 					"expected TokenTypeKey for last element: path: %v: token: %v",
 					path,
 					token,
@@ -69,20 +75,19 @@ func FollowPath(data ConfigMap, path string) (interface{}, bool, error) {
 			for _, e := range sliceOfDicts {
 				val, exists := e[finalToken.Text]
 				if !exists {
-					return nil, false, fmt.Errorf(
+					return FollowPathResult{}, fmt.Errorf(
 						"for the slice operator, ALL elements must contain the key: path: %v: key: %v",
 						path, finalToken.Text,
 					)
 				}
 				ret = append(ret, val)
 			}
-			// Todo: I need to figure out how to update the value from a slice of interfaces
-			return ret, true, nil
+			return FollowPathResult{IFace: ret, Exists: true, Aggregated: true}, nil
 		} else {
 			// outside the special case, we should be able to just index into this thing, and loop again
 			// or, if it's the last one, return
 			if token.Type != TokenTypeKey {
-				return nil, false, fmt.Errorf(
+				return FollowPathResult{}, fmt.Errorf(
 					"expected TokenTypeKey for last element: path: %v: token: %v",
 					path,
 					token,
@@ -90,7 +95,7 @@ func FollowPath(data ConfigMap, path string) (interface{}, bool, error) {
 			}
 			currentMap, ok := current.(ConfigMap)
 			if !ok {
-				return nil, false, fmt.Errorf(
+				return FollowPathResult{}, fmt.Errorf(
 					"expecting ConfigMap: got %T: path: %v: token: %v",
 					current, path, token,
 				)
@@ -99,9 +104,9 @@ func FollowPath(data ConfigMap, path string) (interface{}, bool, error) {
 			next, exists := currentMap[token.Text]
 			current = next
 			if !exists {
-				return nil, false, nil
+				return FollowPathResult{}, nil
 			}
 		}
 	}
-	return current, true, nil
+	return FollowPathResult{IFace: current, Exists: true, Aggregated: false}, nil
 }
