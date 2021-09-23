@@ -18,12 +18,12 @@ import (
 func TestApp_Parse(t *testing.T) {
 
 	tests := []struct {
-		name             string
-		app              w.App
-		args             []string
-		passedPathWant   []string
-		passedValuesWant v.ValueMap
-		wantErr          bool
+		name                 string
+		app                  w.App
+		args                 []string
+		passedPathWant       []string
+		passedFlagValuesWant f.FlagValues
+		wantErr              bool
 	}{
 		{
 			name: "from main",
@@ -55,10 +55,10 @@ func TestApp_Parse(t *testing.T) {
 				),
 			),
 
-			args:             []string{"app", "cat1", "com1", "--com1f1", "1"},
-			passedPathWant:   []string{"cat1", "com1"},
-			passedValuesWant: v.ValueMap{"--com1f1": v.IntNew(1)},
-			wantErr:          false,
+			args:                 []string{"app", "cat1", "com1", "--com1f1", "1"},
+			passedPathWant:       []string{"cat1", "com1"},
+			passedFlagValuesWant: f.FlagValues{"--com1f1": int(1)},
+			wantErr:              false,
 		},
 		{
 			name: "no category",
@@ -75,10 +75,10 @@ func TestApp_Parse(t *testing.T) {
 				),
 			),
 
-			args:             []string{"app"},
-			passedPathWant:   nil,
-			passedValuesWant: nil,
-			wantErr:          false,
+			args:                 []string{"app"},
+			passedPathWant:       nil,
+			passedFlagValuesWant: nil,
+			wantErr:              false,
 		},
 		{
 			name: "flag default",
@@ -100,10 +100,10 @@ func TestApp_Parse(t *testing.T) {
 					),
 				),
 			),
-			args:             []string{"test", "com"},
-			passedPathWant:   []string{"com"},
-			passedValuesWant: v.ValueMap{"--flag": v.StringNew("hi")},
-			wantErr:          false,
+			args:                 []string{"test", "com"},
+			passedPathWant:       []string{"com"},
+			passedFlagValuesWant: f.FlagValues{"--flag": "hi"},
+			wantErr:              false,
 		},
 		{
 			name: "extra flag",
@@ -125,10 +125,10 @@ func TestApp_Parse(t *testing.T) {
 					),
 				),
 			),
-			args:             []string{"test", "com", "--unexpected", "value"},
-			passedPathWant:   nil,
-			passedValuesWant: nil,
-			wantErr:          true,
+			args:                 []string{"test", "com", "--unexpected", "value"},
+			passedPathWant:       nil,
+			passedFlagValuesWant: nil,
+			wantErr:              true,
 		},
 		{
 			name: "config_flag",
@@ -161,9 +161,9 @@ func TestApp_Parse(t *testing.T) {
 			),
 			args:           []string{"test", "print", "--config", "passedconfigval"},
 			passedPathWant: []string{"print"},
-			passedValuesWant: v.ValueMap{
-				"--key":    v.StringNew("mapkeyval"),
-				"--config": v.StringNew("passedconfigval"),
+			passedFlagValuesWant: f.FlagValues{
+				"--key":    "mapkeyval",
+				"--config": "passedconfigval",
 			},
 			wantErr: false,
 		},
@@ -189,8 +189,8 @@ func TestApp_Parse(t *testing.T) {
 			),
 			args:           []string{"test", "com"},
 			passedPathWant: []string{"com"},
-			passedValuesWant: v.ValueMap{
-				"--sflag": v.StringNew("sflagval"),
+			passedFlagValuesWant: f.FlagValues{
+				"--sflag": "sflagval",
 			},
 			wantErr: false,
 		},
@@ -224,9 +224,9 @@ func TestApp_Parse(t *testing.T) {
 
 			args:           []string{"app", "com"},
 			passedPathWant: []string{"com"},
-			passedValuesWant: v.ValueMap{
-				"--config": v.StringNew("testdata/simple_json_config.json"),
-				"--val":    v.StringNew("hi"),
+			passedFlagValuesWant: f.FlagValues{
+				"--config": "testdata/simple_json_config.json",
+				"--val":    "hi",
 			},
 			wantErr: false,
 		},
@@ -269,9 +269,9 @@ func TestApp_Parse(t *testing.T) {
 			),
 			args:           []string{"test", "print", "--config", "passedconfigval"},
 			passedPathWant: []string{"print"},
-			passedValuesWant: v.ValueMap{
-				"--subreddits": v.StringSliceNew([]string{"earthporn", "wallpapers"}),
-				"--config":     v.StringNew("passedconfigval"),
+			passedFlagValuesWant: f.FlagValues{
+				"--subreddits": []string{"earthporn", "wallpapers"},
+				"--config":     "passedconfigval",
 			},
 			wantErr: false,
 		},
@@ -294,7 +294,7 @@ func TestApp_Parse(t *testing.T) {
 			}
 
 			assert.Equal(t, tt.passedPathWant, pr.PasssedPath)
-			assert.Equal(t, tt.passedValuesWant, pr.PassedFlags)
+			assert.Equal(t, tt.passedFlagValuesWant, pr.PassedFlags)
 		})
 	}
 }

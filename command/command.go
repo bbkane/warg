@@ -8,7 +8,7 @@ import (
 	v "github.com/bbkane/warg/value"
 )
 
-type Action = func(v.ValueMap) error
+type Action = func(f.FlagValues) error
 type CommandMap = map[string]Command
 type CommandOpt = func(*Command)
 
@@ -21,7 +21,7 @@ type Command struct {
 	HelpLong string
 }
 
-func DoNothing(_ v.ValueMap) error {
+func DoNothing(_ f.FlagValues) error {
 	return nil
 }
 

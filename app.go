@@ -246,7 +246,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	// special case versionFlag and exit early
 	if gar.VersionPassed {
 		pr := ParseResult{
-			Action: func(_ map[string]v.Value) error {
+			Action: func(_ f.FlagValues) error {
 				fmt.Print(app.version)
 				return nil
 			},
@@ -314,16 +314,17 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 			}
 			return &pr, nil
 		} else {
-			vm := make(v.ValueMap)
+			// TODO: change this
+			fvs := make(f.FlagValues)
 			for name, flag := range ftar.AllowedFlags {
 				if flag.SetBy != "" {
-					vm[name] = flag.Value
+					fvs[name] = flag.Value.Get()
 				}
 			}
 
 			pr := ParseResult{
 				PasssedPath: gar.Path,
-				PassedFlags: vm,
+				PassedFlags: fvs,
 				Action:      ftar.Action,
 			}
 			return &pr, nil
@@ -344,7 +345,7 @@ func DefaultCommandHelp(
 	cur c.Command,
 	flagMap f.FlagMap,
 ) c.Action {
-	return func(vm v.ValueMap) error {
+	return func(_ f.FlagValues) error {
 		f := bufio.NewWriter(os.Stdout)
 		defer f.Flush()
 
@@ -388,7 +389,7 @@ func DefaultSectionHelp(
 	cur s.Section,
 	flagMap f.FlagMap,
 ) c.Action {
-	return func(vm v.ValueMap) error {
+	return func(_ f.FlagValues) error {
 		f := bufio.NewWriter(os.Stdout)
 		defer f.Flush()
 
@@ -438,6 +439,6 @@ func DefaultSectionHelp(
 
 type ParseResult struct {
 	PasssedPath []string
-	PassedFlags v.ValueMap
+	PassedFlags f.FlagValues
 	Action      c.Action
 }

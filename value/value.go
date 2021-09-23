@@ -15,8 +15,6 @@ type FromInterface = func(interface{}) (Value, error)
 // TODO: better name :)
 type EmptyConstructor = func() Value
 
-type ValueMap = map[string]Value
-
 // Value is a "generic" type that lets me store different types into flags
 //  ~Stolen from~ "Inspired by" https://golang.org/src/flag/flag.go?#L138
 type Value interface {

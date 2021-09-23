@@ -10,6 +10,8 @@ import (
 type FlagMap = map[string]Flag
 type FlagOpt = func(*Flag)
 
+type FlagValues = map[string]interface{}
+
 type Flag struct {
 
 	// TODO: make these private. resolveFlag should probably be a method on flag
