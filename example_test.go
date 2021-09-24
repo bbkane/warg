@@ -71,11 +71,7 @@ func Example_version() {
 		),
 	)
 	args := []string{"example", "--version"}
-	pr, err := app.Parse(args)
-	if err != nil {
-		panic(err)
-	}
-	err = pr.Action(pr.PassedFlags)
+	err := app.Run(args)
 	if err != nil {
 		panic(err)
 	}
@@ -117,11 +113,7 @@ func Example_section_help() {
 		),
 	)
 	args := []string{"grabbit", "--help"}
-	pr, err := app.Parse(args)
-	if err != nil {
-		panic(err)
-	}
-	err = pr.Action(pr.PassedFlags)
+	err := app.Run(args)
 	if err != nil {
 		panic(err)
 	}
@@ -227,11 +219,7 @@ func Example_grabbit_help() {
 	)
 
 	args := []string{"example", "config", "edit", "-h"}
-	pr, err := app.Parse(args)
-	if err != nil {
-		panic(err)
-	}
-	err = pr.Action(pr.PassedFlags)
+	err := app.Run(args)
 	if err != nil {
 		panic(err)
 	}

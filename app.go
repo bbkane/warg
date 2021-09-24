@@ -31,7 +31,7 @@ type Unmarshaller = func(string) (configpath.ConfigMap, error)
 // Cast to an int after parsing if you like instead
 func JSONUnmarshaller(filePath string) (map[string]interface{}, error) {
 	// TODO: expand homedir?
-	var m map[string]interface{}
+	var m configpath.ConfigMap
 
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -332,6 +332,18 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	} else {
 		return nil, fmt.Errorf("internal Error: invalid parse state: currentCategory == %v, currentCommand == %v", ftar.Section, ftar.Command)
 	}
+}
+
+func (app *App) Run(osArgs []string) error {
+	pr, err := app.Parse(osArgs)
+	if err != nil {
+		return err
+	}
+	err = pr.Action(pr.PassedFlags)
+	if err != nil {
+		return err
+	}
+	return err
 }
 
 // TODO: actually put this in :)
