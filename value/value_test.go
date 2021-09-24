@@ -27,3 +27,9 @@ func TestStringSliceValue(t *testing.T) {
 	v.Update("hi")
 	assert.Equal(t, v.Get().([]string), []string{"hi"})
 }
+
+func TestIntSliceValue(t *testing.T) {
+	var v w.Value = w.IntSliceNew([]int{})
+	v.Update("1")
+	assert.Equal(t, v.Get().([]int), []int{1})
+}

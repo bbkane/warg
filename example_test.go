@@ -145,30 +145,62 @@ func Example_grabbit_help() {
 				"grab",
 				"Grab images. Use `config edit` first to create a config",
 				c.DoNothing,
+				c.WithFlag(
+					"--subreddit-name",
+					"subreddit to grab",
+					v.StringSliceEmpty,
+					f.Default("wallpapers"),
+					f.ConfigPath("subreddits[].name", v.StringSliceFromInterface),
+				),
+				c.WithFlag(
+					"--subreddit-destination",
+					"Where to store the subreddit",
+					v.StringSliceEmpty,
+					f.Default("~/Pictures/grabbit"),
+					f.ConfigPath("subreddits[].destination", v.StringSliceFromInterface),
+				),
+				c.WithFlag(
+					"--subreddit-timeframe",
+					"Take the top subreddits from this timeframe",
+					v.StringSliceEmpty,
+					f.Default("week"),
+					f.ConfigPath("subreddits[].timeframe", v.StringSliceFromInterface),
+				),
+				c.WithFlag(
+					"--subreddit-limit",
+					"max number of links to try to download",
+					v.IntSliceEmpty,
+					f.Default("5"),
+					f.ConfigPath("subreddit[].limit", v.IntSliceFromInterface),
+				),
 			),
 			s.WithFlag(
 				"--log-filename",
 				"log filename",
 				v.StringEmpty,
 				f.Default("~/.config/grabbit.jsonl"),
+				f.ConfigPath("lumberjacklogger.filename", v.StringFromInterface),
 			),
 			s.WithFlag(
 				"--log-maxage",
 				"max age before log rotation in days",
 				v.IntEmpty,
 				f.Default("30"),
+				f.ConfigPath("lumberjacklogger.maxage", v.IntFromInterface),
 			),
 			s.WithFlag(
 				"--log-maxbackups",
 				"num backups for the log",
 				v.IntEmpty,
 				f.Default("0"),
+				f.ConfigPath("lumberjacklogger.maxbackups", v.IntFromInterface),
 			),
 			s.WithFlag(
 				"--log-maxsize",
 				"max size of log in megabytes",
 				v.IntEmpty,
 				f.Default("5"),
+				f.ConfigPath("lumberjacklogger.maxsize", v.IntFromInterface),
 			),
 			s.WithSection(
 				"config",
@@ -218,18 +250,22 @@ func Example_grabbit_help() {
 	//     setby : appdefault
 	//
 	//   --log-filename : log filename
+	//     configpath : lumberjacklogger.filename
 	//     value : ~/.config/grabbit.jsonl
 	//     setby : appdefault
 	//
 	//   --log-maxage : max age before log rotation in days
+	//     configpath : lumberjacklogger.maxage
 	//     value : 30
 	//     setby : appdefault
 	//
 	//   --log-maxbackups : num backups for the log
+	//     configpath : lumberjacklogger.maxbackups
 	//     value : 0
 	//     setby : appdefault
 	//
 	//   --log-maxsize : max size of log in megabytes
+	//     configpath : lumberjacklogger.maxsize
 	//     value : 5
 	//     setby : appdefault
 }

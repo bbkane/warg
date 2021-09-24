@@ -78,7 +78,7 @@ func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configMap c
 					for _, e := range under {
 						err = flag.Value.UpdateFromInterface(e)
 						if err != nil {
-							return fmt.Errorf("could not update aggregate value: %w", err)
+							return fmt.Errorf("could not update container type value: %w", err)
 						}
 					}
 					flag.SetBy = "config"
