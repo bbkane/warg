@@ -103,8 +103,8 @@ func FollowPath(data ConfigMap, path string) (FollowPathResult, error) {
 			currentMap, ok := current.(ConfigMap)
 			if !ok {
 				return FollowPathResult{}, fmt.Errorf(
-					"expecting ConfigMap: got %T: path: %v: token: %v",
-					current, path, token,
+					"expecting ConfigMap: \n  actual type %T\n  actual value: %#v\n  path: %v\n  token: %v",
+					current, current, path, token,
 				)
 			}
 			// dumbest thing ever, but it appears I reassign current and assing exists with the same statement

@@ -41,27 +41,21 @@ type Value interface {
 
 var ErrIncompatibleInterface = errors.New("could not decode interface into Value")
 
+// Int is updateable from a float or int. If a float is passed, it will be truncated.
+// Example: 4.5 -> 4, 3.99 -> 3
 type Int int
 
 func IntNew(val int) *Int { return (*Int)(&val) }
 func IntEmpty() Value     { return IntNew(0) }
-func IntFromFloatOrIntInterface(val interface{}) (Value, error) {
-	switch under := val.(type) {
+func IntFromInterface(iFace interface{}) (Value, error) {
+	switch under := iFace.(type) {
 	case int:
 		return IntNew(under), nil
 	case float64: // like JSON
 		return IntNew(int(under)), nil
 	default:
-		return nil, fmt.Errorf("can't create IntValue. Expected: int or float64, got: %#v", val)
+		return nil, fmt.Errorf("can't create IntValue. Expected: int or float64, got: %#v", iFace)
 	}
-
-}
-func IntFromInterface(val interface{}) (Value, error) {
-	under, ok := val.(int)
-	if !ok {
-		return nil, fmt.Errorf("can't create IntValue. Expected: int, got: %#v", val)
-	}
-	return IntNew(under), nil
 }
 func (v *Int) Get() interface{} { return int(*v) }
 func (v *Int) String() string   { return fmt.Sprint(int(*v)) }
@@ -76,11 +70,14 @@ func (v *Int) Update(s string) error {
 }
 func (v *Int) UpdateFromInterface(iFace interface{}) error {
 	// TODO: make this accept a float to not panic!
-	under, ok := iFace.(int)
-	if !ok {
-		return ErrIncompatibleInterface
+	switch under := iFace.(type) {
+	case int:
+		*v = Int(under)
+	case float64: // like JSON
+		*v = Int(int(under))
+	default:
+		return fmt.Errorf("can't create IntValue. Expected: int or float64, got: %#v", iFace)
 	}
-	*v = Int(under)
 	return nil
 }
 
@@ -88,10 +85,10 @@ type String string
 
 func StringNew(val string) *String { return (*String)(&val) }
 func StringEmpty() Value           { return StringNew("") }
-func StringFromInterface(val interface{}) (Value, error) {
-	under, ok := val.(string)
+func StringFromInterface(iFace interface{}) (Value, error) {
+	under, ok := iFace.(string)
 	if !ok {
-		return nil, fmt.Errorf("can't create StringValue. Expected: string, got: %#v", val)
+		return nil, fmt.Errorf("can't create StringValue. Expected: string, got: %#v", iFace)
 	}
 	return StringNew(under), nil
 }
@@ -113,10 +110,10 @@ func (v *String) UpdateFromInterface(iFace interface{}) error {
 type StringSlice []string
 
 func StringSliceNew(vals []string) *StringSlice { return (*StringSlice)(&vals) }
-func StringSliceFromInterface(val interface{}) (Value, error) {
-	under, ok := val.([]string)
+func StringSliceFromInterface(iFace interface{}) (Value, error) {
+	under, ok := iFace.([]string)
 	if !ok {
-		return nil, fmt.Errorf("can't create StringSlice. Expected: []string, got: %#v", val)
+		return nil, fmt.Errorf("can't create StringSlice. Expected: []string, got: %#v", iFace)
 	}
 	return StringSliceNew(under), nil
 }
@@ -136,17 +133,27 @@ func (v *StringSlice) UpdateFromInterface(iFace interface{}) error {
 	return nil
 }
 
+// IntSlice is updateable from a float or int. If a float is passed, it will be truncated.
+// Example: 4.5 -> 4, 3.99 -> 3
 type IntSlice []int
 
 func IntSliceNew(vals []int) *IntSlice {
 	return (*IntSlice)(&vals)
 }
-func IntSliceFromInterface(val interface{}) (Value, error) {
-	under, ok := val.([]int)
-	if !ok {
+func IntSliceFromInterface(iFace interface{}) (Value, error) {
+
+	switch under := iFace.(type) {
+	case []int:
+		return IntSliceNew(under), nil
+	case []float64:
+		var ret []int
+		for _, e := range under {
+			ret = append(ret, int(e))
+		}
+		return IntSliceNew(ret), nil
+	default:
 		return nil, ErrIncompatibleInterface
 	}
-	return IntSliceNew(under), nil
 }
 func IntSliceEmpty() Value           { return IntSliceNew(nil) }
 func (v *IntSlice) Get() interface{} { return []int(*v) }
@@ -160,10 +167,13 @@ func (v *IntSlice) Update(s string) error {
 	return nil
 }
 func (v *IntSlice) UpdateFromInterface(iFace interface{}) error {
-	under, ok := iFace.(int)
-	if !ok {
-		return ErrIncompatibleInterface
+	switch under := iFace.(type) {
+	case int:
+		*v = append(*v, under)
+	case float64: // like JSON
+		*v = append(*v, int(under))
+	default:
+		return fmt.Errorf("can't update IntSlice. Expected: int or float64, got: %#v", iFace)
 	}
-	*v = append(*v, under)
 	return nil
 }
