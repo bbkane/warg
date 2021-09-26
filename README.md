@@ -12,6 +12,11 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
+- make IntSlice interface to accept a float (or make it new Value type)
+- Fix grabbit subreddit-limit arg thing (it's set by appdefault to be a one element list, when the others are set by config to be a 2 element list)
+- Fix failing test derived from Grabbit! DONE!
+- --help should never panic! Right now it does if it finds an improper config file
+- Get errors a lot better... now that I'm actually trying to use it I'm running into them... Use ~/Code/Go/error_wrap_2
 - upgrade config parser
 - go through TODOs
 - add required flag

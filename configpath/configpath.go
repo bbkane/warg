@@ -56,11 +56,11 @@ func FollowPath(data ConfigMap, path string) (FollowPathResult, error) {
 		if i == lenTokens-2 && token.Type == TokenTypeSlice {
 			// we're at the second to last token, so current should also be a slice
 			// cast it to a slice, then get all keys from it!
-			sliceOfDicts, ok := current.([]ConfigMap)
+			sliceOfDicts, ok := current.([]interface{})
 			if !ok {
 				return FollowPathResult{}, fmt.Errorf(
-					"expecting []ConfigMap: got %T: path: %v: token: %v",
-					current, path, token,
+					"expecting []interface{}: \n  actual type %T\n  actual value: %#v\n   path: %v\n  token: %v",
+					current, current, path, token,
 				)
 			}
 			finalToken := tokens[lenTokens-1]
@@ -73,7 +73,14 @@ func FollowPath(data ConfigMap, path string) (FollowPathResult, error) {
 			}
 			var ret []interface{}
 			for _, e := range sliceOfDicts {
-				val, exists := e[finalToken.Text]
+				cm, ok := e.(ConfigMap)
+				if !ok {
+					return FollowPathResult{}, fmt.Errorf(
+						"expecting ConfigMap: \n  actual type %T\n  actual value: %#v\n  path: %v\n  token: %v",
+						current, current, path, token,
+					)
+				}
+				val, exists := cm[finalToken.Text]
 				if !exists {
 					return FollowPathResult{}, fmt.Errorf(
 						"for the slice operator, ALL elements must contain the key: path: %v: key: %v",

@@ -248,30 +248,16 @@ func TestApp_Parse(t *testing.T) {
 				),
 				w.ConfigFlag(
 					"--config",
-					// dummy function just to get me a map
-					func(_ string) (configpath.ConfigMap, error) {
-						return configpath.ConfigMap{
-							"subreddits": []configpath.ConfigMap{
-								{
-									"name":  "earthporn",
-									"limit": 10,
-								},
-								{
-									"name":  "wallpapers",
-									"limit": 5,
-								},
-							},
-						}, nil
-					},
+					w.JSONUnmarshaller,
 					"config flag",
-					f.Default("defaultconfigval"),
+					f.Default("testdata/config_slice.json"),
 				),
 			),
-			args:           []string{"test", "print", "--config", "passedconfigval"},
+			args:           []string{"test", "print"},
 			passedPathWant: []string{"print"},
 			passedFlagValuesWant: f.FlagValues{
 				"--subreddits": []string{"earthporn", "wallpapers"},
-				"--config":     "passedconfigval",
+				"--config":     "testdata/config_slice.json",
 			},
 			wantErr: false,
 		},

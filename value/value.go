@@ -45,6 +45,17 @@ type Int int
 
 func IntNew(val int) *Int { return (*Int)(&val) }
 func IntEmpty() Value     { return IntNew(0) }
+func IntFromFloatOrIntInterface(val interface{}) (Value, error) {
+	switch under := val.(type) {
+	case int:
+		return IntNew(under), nil
+	case float64: // like JSON
+		return IntNew(int(under)), nil
+	default:
+		return nil, fmt.Errorf("can't create IntValue. Expected: int or float64, got: %#v", val)
+	}
+
+}
 func IntFromInterface(val interface{}) (Value, error) {
 	under, ok := val.(int)
 	if !ok {
@@ -64,6 +75,7 @@ func (v *Int) Update(s string) error {
 	return nil
 }
 func (v *Int) UpdateFromInterface(iFace interface{}) error {
+	// TODO: make this accept a float to not panic!
 	under, ok := iFace.(int)
 	if !ok {
 		return ErrIncompatibleInterface
