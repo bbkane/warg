@@ -1,4 +1,4 @@
-package configpath
+package jsonreader
 
 import (
 	"testing"
@@ -10,31 +10,31 @@ func TestTokenize(t *testing.T) {
 	tests := []struct {
 		name           string
 		path           string
-		expectedTokens []Token
+		expectedTokens []token
 		expectedErr    bool
 	}{
 		{
 			name:           "one_key",
 			path:           "key",
-			expectedTokens: []Token{{Text: "key", Type: TokenTypeKey}},
+			expectedTokens: []token{{Text: "key", Type: tokenTypeKey}},
 			expectedErr:    false,
 		},
 		{
 			name: "two_keys",
 			path: "key1.key2",
-			expectedTokens: []Token{
-				{Text: "key1", Type: TokenTypeKey},
-				{Text: "key2", Type: TokenTypeKey},
+			expectedTokens: []token{
+				{Text: "key1", Type: tokenTypeKey},
+				{Text: "key2", Type: tokenTypeKey},
 			},
 			expectedErr: false,
 		},
 		{
 			name: "key_slice",
 			path: "key[].slice_key",
-			expectedTokens: []Token{
-				{Text: "key", Type: TokenTypeKey},
-				{Text: "[]", Type: TokenTypeSlice},
-				{Text: "slice_key", Type: TokenTypeKey},
+			expectedTokens: []token{
+				{Text: "key", Type: tokenTypeKey},
+				{Text: "[]", Type: tokenTypeSlice},
+				{Text: "slice_key", Type: tokenTypeKey},
 			},
 		},
 		// TODO: a slice in the middle of a key will break it. Test that once I care enough :)

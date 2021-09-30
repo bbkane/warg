@@ -5,6 +5,7 @@ import (
 
 	w "github.com/bbkane/warg"
 	c "github.com/bbkane/warg/command"
+	"github.com/bbkane/warg/configreader/jsonreader"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
@@ -212,7 +213,7 @@ func Example_grabbit_help() {
 		),
 		w.ConfigFlag(
 			"--config-path",
-			w.JSONUnmarshaller,
+			jsonreader.NewJSONConfigReader,
 			"config filepath",
 			f.Default("~/.config/grabbit.yaml"),
 		),

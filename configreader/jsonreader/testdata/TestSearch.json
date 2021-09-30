@@ -1,0 +1,16 @@
+{
+  "key": "value",
+  "key1": {
+    "key2": 1
+  },
+  "subreddits": [
+    {
+      "name": "earthporn",
+      "limit": 10
+    },
+    {
+      "name": "wallpapers",
+      "limit": 5
+    }
+  ]
+}

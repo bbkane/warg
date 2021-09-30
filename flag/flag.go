@@ -3,7 +3,7 @@ package flag
 import (
 	"fmt"
 
-	"github.com/bbkane/warg/configpath"
+	"github.com/bbkane/warg/configreader"
 	v "github.com/bbkane/warg/value"
 )
 
@@ -35,7 +35,7 @@ type Flag struct {
 
 // resolveFLag updates a flag's value from the command line, and then from the
 // default value. flag should not be nil. deletes from flagStrs
-func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configMap configpath.ConfigMap) error {
+func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReader configreader.ConfigReader) error {
 
 	flag.Value = flag.EmptyValueConstructor()
 
@@ -57,13 +57,13 @@ func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configMap c
 
 	// update from config
 	{
-		if flag.SetBy == "" && configMap != nil && flag.ConfigFromInterface != nil {
-			fpr, err := configpath.FollowPath(configMap, flag.ConfigPath)
+		if flag.SetBy == "" && configReader != nil && flag.ConfigFromInterface != nil {
+			fpr, err := configReader.Search(flag.ConfigPath)
 			if err != nil {
 				return err
 			}
 			if fpr.Exists {
-				if !fpr.Aggregated {
+				if !fpr.IsAggregated {
 					v, err := flag.ConfigFromInterface(fpr.IFace)
 					if err != nil {
 						return err

@@ -7,7 +7,8 @@ import (
 
 	w "github.com/bbkane/warg"
 	c "github.com/bbkane/warg/command"
-	"github.com/bbkane/warg/configpath"
+	"github.com/bbkane/warg/configreader"
+	"github.com/bbkane/warg/configreader/jsonreader"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
@@ -148,12 +149,20 @@ func TestApp_Parse(t *testing.T) {
 				),
 				w.ConfigFlag(
 					"--config",
-					// dummy function just to get me a map
-					func(s string) (configpath.ConfigMap, error) {
-						return configpath.ConfigMap{
-							"configName": s,
-							"key":        "mapkeyval",
-						}, nil
+					func(_ string) (configreader.ConfigReader, error) {
+
+						var cr configreader.ConfigReaderFunc = func(path string) (configreader.ConfigSearchResult, error) {
+							if path == "key" {
+								return configreader.ConfigSearchResult{
+									IFace:        "mapkeyval",
+									Exists:       true,
+									IsAggregated: false,
+								}, nil
+							}
+							return configreader.ConfigSearchResult{}, nil
+						}
+
+						return cr, nil
 					},
 					"config flag",
 					f.Default("defaultconfigval"),
@@ -214,7 +223,7 @@ func TestApp_Parse(t *testing.T) {
 				),
 				w.ConfigFlag(
 					"--config",
-					w.JSONUnmarshaller,
+					jsonreader.NewJSONConfigReader,
 					"path to config",
 					// TODO: make this test work by following the config cases
 					// in the README
@@ -248,7 +257,7 @@ func TestApp_Parse(t *testing.T) {
 				),
 				w.ConfigFlag(
 					"--config",
-					w.JSONUnmarshaller,
+					jsonreader.NewJSONConfigReader,
 					"config flag",
 					f.Default("testdata/config_slice.json"),
 				),

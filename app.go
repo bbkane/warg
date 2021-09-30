@@ -2,16 +2,14 @@ package warg
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"sort"
 	"strings"
 
 	c "github.com/bbkane/warg/command"
-	"github.com/bbkane/warg/configpath"
+	"github.com/bbkane/warg/configreader"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
@@ -19,38 +17,11 @@ import (
 
 type AppOpt = func(*App)
 
-// Unmarshaller turns a string into a map so we can index into it!
-// Useful for configs who will read a file to get it
-type Unmarshaller = func(string) (configpath.ConfigMap, error)
-
-// JSONUnmarshaller tries to turn a filepath into a map[string]interface .
-// It does NOT error if the file can not be read. If it did, then users would
-// be forced to have a config before the app would work. TODO: is this the best method?
-// It DOES error if the file can't be unmarshalled
-// Note that all numbers in JSON are floats. So, no int flags if you use this encoder.
-// Cast to an int after parsing if you like instead
-func JSONUnmarshaller(filePath string) (map[string]interface{}, error) {
-	// TODO: expand homedir?
-	var m configpath.ConfigMap
-
-	content, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		// the file not existing is ok
-		return m, nil
-	}
-
-	err = json.Unmarshal(content, &m)
-	if err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 type App struct {
 	// Config()
-	configFlagName     string
-	configUnmarshaller Unmarshaller
-	configFlag         *f.Flag
+	configFlagName  string
+	newConfigReader configreader.NewConfigReader
+	configFlag      *f.Flag
 	// Help()
 	name          string
 	helpFlagNames []string
@@ -84,13 +55,13 @@ func OverrideVersion(versionFlagNames []string) AppOpt {
 
 func ConfigFlag(
 	configFlagName string,
-	unmarshaller Unmarshaller,
+	unmarshaller configreader.NewConfigReader,
 	helpShort string,
 	flagOpts ...f.FlagOpt,
 ) AppOpt {
 	return func(app *App) {
 		app.configFlagName = configFlagName
-		app.configUnmarshaller = unmarshaller
+		app.newConfigReader = unmarshaller
 		configFlag := f.NewFlag(helpShort, v.StringEmpty, flagOpts...)
 		app.configFlag = &configFlag
 	}
@@ -202,6 +173,7 @@ type fitToAppResult struct {
 	AllowedFlags f.FlagMap
 }
 
+// fitToApp takes the command entered by a user and maps it to a command in the tree
 func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string) (*fitToAppResult, error) {
 	// validate passed command and get available flags
 	ftar := fitToAppResult{
@@ -259,8 +231,8 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		return nil, err
 	}
 
-	// update the config flag :)
-	var configMap configpath.ConfigMap
+	var configReader configreader.ConfigReader
+	// get the value of a potential passed --config flag
 	if app.configFlag != nil {
 		// we're gonna make a config map out of this if everything goes well
 		// so pass nil for that now
@@ -269,18 +241,16 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 			return nil, err
 		}
 		// TODO: don't panic if not not a string. return an error :)
-
-		configMap, err = app.configUnmarshaller(app.configFlag.Value.Get().(string))
+		configReader, err = app.newConfigReader(app.configFlag.Value.Get().(string))
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	// We need to loop over a map by value, so we can't modify it
-	// in place :/
+	// Loop over allowed flags for the passed command and try to resolve them
 	for name, flag := range ftar.AllowedFlags {
 
-		err = flag.Resolve(name, gar.FlagStrs, configMap)
+		err = flag.Resolve(name, gar.FlagStrs, configReader)
 		if err != nil {
 			return nil, err
 		}
