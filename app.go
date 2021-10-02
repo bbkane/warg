@@ -55,13 +55,13 @@ func OverrideVersion(versionFlagNames []string) AppOpt {
 
 func ConfigFlag(
 	configFlagName string,
-	unmarshaller configreader.NewConfigReader,
+	newConfigReader configreader.NewConfigReader,
 	helpShort string,
 	flagOpts ...f.FlagOpt,
 ) AppOpt {
 	return func(app *App) {
 		app.configFlagName = configFlagName
-		app.newConfigReader = unmarshaller
+		app.newConfigReader = newConfigReader
 		configFlag := f.NewFlag(helpShort, v.StringEmpty, flagOpts...)
 		app.configFlag = &configFlag
 	}
