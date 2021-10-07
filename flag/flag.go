@@ -37,7 +37,11 @@ type Flag struct {
 // default value. flag should not be nil. deletes from flagStrs
 func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReader configreader.ConfigReader) error {
 
-	flag.Value = flag.EmptyValueConstructor()
+	v, err := flag.EmptyValueConstructor()
+	if err != nil {
+		return fmt.Errorf("flag error: %v: %w", name, err)
+	}
+	flag.Value = v
 
 	// update from command line
 	{

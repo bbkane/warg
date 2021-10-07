@@ -219,7 +219,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	if gar.VersionPassed {
 		pr := ParseResult{
 			Action: func(_ f.FlagValues) error {
-				fmt.Print(app.version)
+				fmt.Println(app.version)
 				return nil
 			},
 		}

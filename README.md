@@ -12,8 +12,13 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
-- finish tests for configreader/jsonreader - note that I'm using testify in new and exciting ways so that might be broken too...
-- get grabbit working with YAML - turns out YAML and JSON need fundamentally incompatible ConfigMaps - see "The Case for ConfigReader" at the bottom and ~/warg_configreader.md
+- dear lord make a path value type that auto-expands home
+- need WAY better error messages - figure out whether I want errors for users or errors for devs (with stacktraces)
+- rm --version - folks can just use version subcommmand
+- the commnd handlers need to be able to see app.Version - new context?
+- write down a list of differences between container type values and scalar values - what I wish the methods were named etc
+- turn --help Example tests into regular tests with an update flag to generate the help text golden file - need to make the app output more flexible for this - add color=true|false|auto support here?
+- make OverrideVersionFlag customizable (with an action)
 - Add ~/Code/Go/hello_testing/README.md to go notes on blog. Also expected, actual order convention
 - write a good `errors` package - see bottom of README
 - go through tests and change everything to `expected`, `actual`
@@ -21,13 +26,11 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 - Fix failing test derived from Grabbit! DONE!
 - --help should never panic! Right now it does if it finds an improper config file
 - Get errors a lot better... now that I'm actually trying to use it I'm running into them... Use ~/Code/Go/error_wrap_2
-- upgrade config parser
 - go through TODOs
 - add required flag
 - add type of flag to help output
 - add envvar option to flag
 - firm up tests - does got or expected come first when comparing - also use testify better - see configreader/jsonreader
-- should my config paths start with . to be jq compatible? Nah... to be fully jq compatible, they'd also ahave to be surrounded by `[]` - DONE
 - make help take an argument? - help = man, json, color, web, form, term, lsp, bash-completion, zsh-completion
 
 # Links
@@ -128,48 +131,6 @@ Examples:
   # config grab:
   grabbit grab  # all params in the config baby!
 ```
-
-# Cases for config:
-
-These need to be added to get configs working well enough :)
-
-config not passed -> flag not set
-config passed, file doesn't exist -> flag not set  # command should error if a flag isn't set properly
-config passed, file exists, can't unmarshall -> ERROR
-config passed, file exists, can unmarshall, invalid path-> ERROR
-config passed, file exists, can unmarshall, valid path, path not in config -> flag not set
-config passed, file exists, can unmarshall, valid path, path in config, value error -> ERROR
-config passed, file exists, can unmarshall, valid path, path in config, value created -> flag set
-
-# The case for ConfigReader
-
-When it comes to map interfaces, JSON can only decode into `map[string]interface{}` and YAML can only decode internal maps into `map[interface{}]interface{}` . This is bad because my code relies on `type ConfigMap = map[string]interface{}` everywhere.
-
-Right now, I've got the JSON one working, but I need to change how that part works...
-
-```go
-type ConfigSearchResult struct {
-	IFace      interface{}
-	Exists     bool
-	IsAggregated bool
-}
-
-type ConfigReader interface {
-	Search(path string) (interface{}, error)
-}
-
-type NewConfigReader = func(filePath string) (ConfigReader, error)
-```
-
-with the following hierarchy:
-
-```
-configreader # contains above definitions
-configreader/json  # implements them!
-```
-
-Other packages, such as `configreader_yaml` (which I can put in here for now, but should move into its own package when I want to shed dependencies), can use the interfaces too
-
 # Ideas for errors
 
 There are two types of errors I care about:
