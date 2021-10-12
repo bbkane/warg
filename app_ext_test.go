@@ -62,7 +62,7 @@ func TestApp_Parse(t *testing.T) {
 			wantErr:              false,
 		},
 		{
-			name: "no category",
+			name: "no section",
 			app: w.New(
 				"test",
 				"v0.0.0",
@@ -274,7 +274,6 @@ func TestApp_Parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			// pr, err := tt.app.RootCategory.Parse(tt.args)
 			pr, err := tt.app.Parse(tt.args)
 
 			// return early if there's an error

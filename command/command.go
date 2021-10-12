@@ -26,15 +26,15 @@ func DoNothing(_ f.FlagValues) error {
 }
 
 func NewCommand(helpShort string, action Action, opts ...CommandOpt) Command {
-	category := Command{
+	command := Command{
 		Help:   helpShort,
 		Action: action,
 		Flags:  make(map[string]f.Flag),
 	}
 	for _, opt := range opts {
-		opt(&category)
+		opt(&command)
 	}
-	return category
+	return command
 }
 
 func AddFlag(name string, value f.Flag) CommandOpt {

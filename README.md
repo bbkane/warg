@@ -12,10 +12,8 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
-- dear lord make a path value type that auto-expands home
-- need WAY better error messages - figure out whether I want errors for users or errors for devs (with stacktraces)
+- make an app.Test() method folks can add to their apps
 - rm --version - folks can just use version subcommmand
-- the commnd handlers need to be able to see app.Version - new context?
 - write down a list of differences between container type values and scalar values - what I wish the methods were named etc
 - turn --help Example tests into regular tests with an update flag to generate the help text golden file - need to make the app output more flexible for this - add color=true|false|auto support here?
 - make OverrideVersionFlag customizable (with an action)

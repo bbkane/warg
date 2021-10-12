@@ -24,16 +24,16 @@ type Section struct {
 }
 
 func NewSection(helpShort string, opts ...SectionOpt) Section {
-	category := Section{
+	section := Section{
 		Help:     helpShort,
 		Flags:    make(map[string]f.Flag),
 		Sections: make(map[string]Section),
 		Commands: make(map[string]c.Command),
 	}
 	for _, opt := range opts {
-		opt(&category)
+		opt(&section)
 	}
-	return category
+	return section
 }
 
 func AddSection(name string, value Section) SectionOpt {
@@ -41,7 +41,7 @@ func AddSection(name string, value Section) SectionOpt {
 		if _, alreadyThere := app.Sections[name]; !alreadyThere {
 			app.Sections[name] = value
 		} else {
-			log.Panicf("category already exists: %#v\n", name)
+			log.Panicf("section already exists: %#v\n", name)
 		}
 	}
 }

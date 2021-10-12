@@ -308,7 +308,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 			return &pr, nil
 		}
 	} else {
-		return nil, fmt.Errorf("internal Error: invalid parse state: currentCategory == %v, currentCommand == %v", ftar.Section, ftar.Command)
+		return nil, fmt.Errorf("internal Error: invalid parse state: currentSection == %v, currentCommand == %v", ftar.Section, ftar.Command)
 	}
 }
 
