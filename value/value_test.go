@@ -1,8 +1,10 @@
 package value_test
 
 import (
+	"path/filepath"
 	"testing"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/stretchr/testify/require"
 
 	w "github.com/bbkane/warg/value"
@@ -39,3 +41,24 @@ func TestIntSliceValue(t *testing.T) {
 	v.Update("1")
 	require.Equal(t, v.Get().([]int), []int{1})
 }
+
+func TestPathValue(t *testing.T) {
+	home, err := homedir.Dir()
+	require.Nil(t, err)
+
+	var v w.Value
+	v, err = w.PathEmpty()
+	require.Nil(t, err)
+	err = v.Update("~/tmp")
+	require.Nil(t, err)
+	require.Equal(t,
+		filepath.Join(home, "tmp"),
+		v.Get().(string),
+	)
+}
+
+// func TestPathSliceValue(t *testing.T) {
+// 	home, err := homedir.Dir()
+// 	require.Nil(t, err)
+
+// }
