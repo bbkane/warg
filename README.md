@@ -12,22 +12,16 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
+- change value to not care when it's updated (flag parsing should do that), add a ReplaceFromInterface() method, TypeInfo() method (to show if it's a scalar or container)
+- go through tests and change everything to `expected`, `actual`, use testify/require instead of assert
 - make an app.Test() method folks can add to their apps - should test for unique flag names between parent and child sections/commands for one thing
-- write down a list of differences between container type values and scalar values - what I wish the methods were named etc
 - turn --help Example tests into regular tests with an update flag to generate the help text golden file - need to make the app output more flexible for this - add color=true|false|auto support here?
-- make OverrideVersionFlag customizable (with an action)
-- Add ~/Code/Go/hello_testing/README.md to go notes on blog. Also expected, actual order convention
 - write a good `errors` package - see bottom of README
-- go through tests and change everything to `expected`, `actual`
 - Fix grabbit subreddit-limit arg thing (it's set by appdefault to be a one element list, when the others are set by config to be a 2 element list) - this is probably going to be best handled by the user in docs - warg doesn't know these are related...
-- Fix failing test derived from Grabbit! DONE!
-- --help should never panic! Right now it does if it finds an improper config file
-- Get errors a lot better... now that I'm actually trying to use it I'm running into them... Use ~/Code/Go/error_wrap_2
 - go through TODOs
 - add required flag
 - add type of flag to help output
 - add envvar option to flag
-- firm up tests - does got or expected come first when comparing - also use testify better - see configreader/jsonreader
 - make help take an argument? - help = man, json, color, web, form, term, lsp, bash-completion, zsh-completion
 
 # Links
