@@ -27,9 +27,6 @@ type App struct {
 	helpFlagNames []string
 	sectionHelp   SectionHelp
 	commandHelp   CommandHelp
-	// Version()
-	version          string
-	versionFlagNames []string
 	// rootSection holds the good stuff!
 	rootSection s.Section
 }
@@ -47,12 +44,6 @@ func OverrideHelp(helpFlagNames []string, sectionHelp SectionHelp, commandHelp C
 	}
 }
 
-func OverrideVersion(versionFlagNames []string) AppOpt {
-	return func(app *App) {
-		app.versionFlagNames = versionFlagNames
-	}
-}
-
 func ConfigFlag(
 	configFlagName string,
 	newConfigReader configreader.NewConfigReader,
@@ -67,11 +58,10 @@ func ConfigFlag(
 	}
 }
 
-func New(name string, version string, rootSection s.Section, opts ...AppOpt) App {
+func New(name string, rootSection s.Section, opts ...AppOpt) App {
 	app := App{
 		name:        name,
 		rootSection: rootSection,
-		version:     version,
 	}
 	for _, opt := range opts {
 		opt(&app)
@@ -85,12 +75,7 @@ func New(name string, version string, rootSection s.Section, opts ...AppOpt) App
 			DefaultCommandHelp,
 		)(&app)
 	}
-	// Version
-	if len(app.versionFlagNames) == 0 {
-		OverrideVersion(
-			[]string{"--version"},
-		)(&app)
-	}
+
 	return app
 }
 
@@ -100,9 +85,8 @@ type gatherArgsResult struct {
 	// Path holds the path to the current command/section
 	Path []string
 	// FlagStrings is a map of all flags to their values
-	FlagStrs      map[string][]string
-	VersionPassed bool
-	HelpPassed    bool
+	FlagStrs   map[string][]string
+	HelpPassed bool
 }
 
 func containsString(haystack []string, needle string) bool {
@@ -117,7 +101,7 @@ func containsString(haystack []string, needle string) bool {
 // gatherArgs "parses" os.Argv into commands and flags. It's a 'lowering' function,
 // simplifying os.Args as much as possible before needing knowledge of this particular app
 // TODO: test this! Also, --help and --version do NOT require values
-func gatherArgs(osArgs []string, helpFlagNames []string, versionFlagNames []string) (*gatherArgsResult, error) {
+func gatherArgs(osArgs []string, helpFlagNames []string) (*gatherArgsResult, error) {
 	res := &gatherArgsResult{
 		FlagStrs: make(map[string][]string),
 	}
@@ -140,12 +124,6 @@ func gatherArgs(osArgs []string, helpFlagNames []string, versionFlagNames []stri
 				res.HelpPassed = true
 				continue
 			}
-			if containsString(versionFlagNames, word) {
-				res.VersionPassed = true
-				// No need to do any more processing. Let's get out of here
-				// NOTE: as is, this means that any number of categories can be passed. Not sure if I care...
-				return res, nil
-			}
 			if strings.HasPrefix(word, "-") {
 				currentFlagName = word
 				expecting = expectingFlagValue
@@ -161,7 +139,7 @@ func gatherArgs(osArgs []string, helpFlagNames []string, versionFlagNames []stri
 		}
 	}
 	if expecting == expectingFlagValue {
-		return nil, fmt.Errorf("flag passed without value. All flags must have one value passed. Flags can be repeated to accumulate values. Example: --flag value")
+		return nil, fmt.Errorf("flag passed without value( %#v) . All flags must have one value passed. Flags can be repeated to accumulate values. Example: --level 9000", currentFlagName)
 	}
 	return res, nil
 }
@@ -216,20 +194,9 @@ func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string
 }
 
 func (app *App) Parse(osArgs []string) (*ParseResult, error) {
-	gar, err := gatherArgs(osArgs, app.helpFlagNames, app.versionFlagNames)
+	gar, err := gatherArgs(osArgs, app.helpFlagNames)
 	if err != nil {
 		return nil, err
-	}
-
-	// special case versionFlag and exit early
-	if gar.VersionPassed {
-		pr := ParseResult{
-			Action: func(_ f.FlagValues) error {
-				fmt.Println(app.version)
-				return nil
-			},
-		}
-		return &pr, nil
 	}
 
 	ftar, err := fitToApp(app.rootSection, gar.Path, gar.FlagStrs)

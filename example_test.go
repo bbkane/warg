@@ -21,7 +21,6 @@ func Example_parse() {
 
 	app := w.New(
 		"test",
-		"v0.0.0",
 		s.NewSection(
 			"help for test",
 			s.WithSection(
@@ -63,28 +62,9 @@ func Example_parse() {
 	// Action Output: 3
 }
 
-func Example_version() {
-	app := w.New(
-		"test",
-		"v0.0.0",
-		s.NewSection(""),
-		w.OverrideVersion(
-			[]string{"--version"},
-		),
-	)
-	args := []string{"example", "--version"}
-	err := app.Run(args)
-	if err != nil {
-		panic(err)
-	}
-	// Output:
-	// v0.0.0
-}
-
 func Example_section_help() {
 	app := w.New(
 		"grabbit",
-		"v0.0.0",
 		s.NewSection(
 			"grab those images!",
 			s.WithSection(
@@ -132,7 +112,6 @@ func Example_section_help() {
 func Example_grabbit_help() {
 	app := w.New(
 		"grabbit",
-		"v0.0.0",
 		s.NewSection(
 			"Get top images from subreddits",
 			s.WithCommand(

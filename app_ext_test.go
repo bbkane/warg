@@ -30,7 +30,6 @@ func TestApp_Parse(t *testing.T) {
 			name: "from main",
 			app: w.New(
 				"test",
-				"v0.0.0",
 				s.NewSection(
 					"help for test",
 					s.WithFlag(
@@ -65,7 +64,6 @@ func TestApp_Parse(t *testing.T) {
 			name: "no section",
 			app: w.New(
 				"test",
-				"v0.0.0",
 				s.NewSection(
 					"help for test",
 					s.WithFlag(
@@ -85,7 +83,6 @@ func TestApp_Parse(t *testing.T) {
 			name: "flag default",
 			app: w.New(
 				"test",
-				"v0.0.0",
 				s.NewSection(
 					"help for test",
 					s.WithCommand(
@@ -110,7 +107,6 @@ func TestApp_Parse(t *testing.T) {
 			name: "extra flag",
 			app: w.New(
 				"test",
-				"v0.0.0",
 				s.NewSection(
 					"help for test",
 					s.WithCommand(
@@ -135,7 +131,6 @@ func TestApp_Parse(t *testing.T) {
 			name: "config_flag",
 			app: w.New(
 				"test",
-				"v0.0.0",
 				s.NewSection(
 					"help for test",
 					s.WithFlag(
@@ -180,7 +175,6 @@ func TestApp_Parse(t *testing.T) {
 			name: "section flag",
 			app: w.New(
 				"test",
-				"v0.0.0",
 				s.NewSection(
 					"help for test",
 					s.WithFlag(
@@ -207,7 +201,6 @@ func TestApp_Parse(t *testing.T) {
 			name: "simple JSON config",
 			app: w.New(
 				"test",
-				"v0.0.0",
 				s.NewSection("help for test",
 					s.WithFlag(
 						"--val",
@@ -243,7 +236,6 @@ func TestApp_Parse(t *testing.T) {
 			name: "config_slice",
 			app: w.New(
 				"test",
-				"v0.0.0",
 				s.NewSection(
 					"help for test",
 					s.WithFlag(

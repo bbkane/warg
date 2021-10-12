@@ -12,8 +12,7 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
-- make an app.Test() method folks can add to their apps
-- rm --version - folks can just use version subcommmand
+- make an app.Test() method folks can add to their apps - should test for unique flag names between parent and child sections/commands for one thing
 - write down a list of differences between container type values and scalar values - what I wish the methods were named etc
 - turn --help Example tests into regular tests with an update flag to generate the help text golden file - need to make the app output more flexible for this - add color=true|false|auto support here?
 - make OverrideVersionFlag customizable (with an action)
