@@ -2,10 +2,11 @@ package warg_test
 
 import (
 	"fmt"
+	"os"
 
 	w "github.com/bbkane/warg"
 	c "github.com/bbkane/warg/command"
-	"github.com/bbkane/warg/configreader/jsonreader"
+	"github.com/bbkane/warg/configreader/yamlreader"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
@@ -213,25 +214,27 @@ func Example_grabbit_help() {
 		),
 		w.ConfigFlag(
 			"--config-path",
-			jsonreader.NewJSONConfigReader,
+			yamlreader.NewYAMLConfigReader,
 			"config filepath",
-			f.Default("~/.config/grabbit.yaml"),
+			f.Default("/path/to/config.yaml"),
 		),
 	)
 
 	args := []string{"example", "config", "edit", "-h"}
 	err := app.Run(args)
 	if err != nil {
-		panic(err)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 	}
-
 	// Output:
 	// Edit or create configuration file. Uses $EDITOR as a fallback
 	//
 	// Flags:
 	//
 	//   --config-path : config filepath
-	//     value : ~/.config/grabbit.yaml
+	//     value : /path/to/config.yaml
 	//     setby : appdefault
 	//
 	//   --editor : path to editor

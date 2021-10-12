@@ -166,6 +166,8 @@ func gatherArgs(osArgs []string, helpFlagNames []string, versionFlagNames []stri
 	return res, nil
 }
 
+// fitToAppResult holds the result of fitToApp
+// Exactly one of Section or Command should hold something. The other should be nil
 type fitToAppResult struct {
 	Section      *s.Section
 	Command      *c.Command
@@ -173,37 +175,41 @@ type fitToAppResult struct {
 	AllowedFlags f.FlagMap
 }
 
-// fitToApp takes the command entered by a user and maps it to a command in the tree
+// fitToApp takes the command entered by a user and uses it to "walk" down the apps command tree
 func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string) (*fitToAppResult, error) {
 	// validate passed command and get available flags
 	ftar := fitToAppResult{
 		Section:      &rootSection,
+		Action:       nil,
 		AllowedFlags: rootSection.Flags,
 		Command:      nil, // we start with a section, not a command
 	}
-	allowedCommands := rootSection.Commands
-	allowedCategories := rootSection.Sections
+	childCommands := rootSection.Commands
+	childSections := rootSection.Sections
 	for _, word := range path {
-		if command, exists := allowedCommands[word]; exists {
+		if command, exists := childCommands[word]; exists {
 			ftar.Command = &command
 			ftar.Section = nil
 			ftar.Action = command.Action
-			allowedCommands = nil   // commands terminate
-			allowedCategories = nil // categories terminiate
+			// once we're in a commmand, we should be at the end of the path
+			// commands have no child commands or child sections
+			childCommands = nil
+			childSections = nil
 			for k, v := range command.Flags {
 				// TODO: check if key exists already
 				ftar.AllowedFlags[k] = v
 			}
-		} else if category, exists := allowedCategories[word]; exists {
-			ftar.Section = &category
-			allowedCommands = category.Commands
-			allowedCategories = category.Sections
+		} else if section, exists := childSections[word]; exists {
+			ftar.Section = &section
+			childCommands = section.Commands
+			childSections = section.Sections
 			for k, v := range command.Flags {
 				// TODO: check if key exists already
 				ftar.AllowedFlags[k] = v
 			}
 		} else {
-			return nil, fmt.Errorf("unexpected string: %#v", word)
+			retErr := fmt.Errorf("expected command or section, but got %#v, try --help", word)
+			return nil, retErr
 		}
 	}
 	return &ftar, nil
@@ -241,9 +247,11 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 			return nil, err
 		}
 		// TODO: don't panic if not not a string. return an error :)
-		configReader, err = app.newConfigReader(app.configFlag.Value.Get().(string))
+		// I think it will always be a string...
+		configPath := app.configFlag.Value.Get().(string)
+		configReader, err = app.newConfigReader(configPath)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error reading config path ( %s ) : %w", configPath, err)
 		}
 	}
 
@@ -313,7 +321,7 @@ func (app *App) Run(osArgs []string) error {
 	if err != nil {
 		return err
 	}
-	return err
+	return nil
 }
 
 // TODO: actually put this in :)
@@ -340,7 +348,9 @@ func DefaultCommandHelp(
 
 		fmt.Fprintln(f)
 
-		fmt.Fprintf(f, "Flags:\n")
+		if len(flagMap) > 0 {
+			fmt.Fprintf(f, "Flags:\n")
+		}
 		fmt.Fprintln(f)
 		{
 			keys := make([]string, 0, len(flagMap))
@@ -382,10 +392,10 @@ func DefaultSectionHelp(
 			fmt.Fprintf(f, "%s\n", cur.Help)
 		}
 
-		fmt.Fprintln(f)
-
 		// Print sections
-		fmt.Fprintf(f, "Sections:\n")
+		if len(cur.Sections) > 0 {
+			fmt.Fprintf(f, "\nSections:\n")
+		}
 		{
 			keys := make([]string, 0, len(cur.Sections))
 			for k := range cur.Sections {
@@ -398,10 +408,10 @@ func DefaultSectionHelp(
 			}
 		}
 
-		fmt.Fprintln(f)
-
 		// Print commands
-		fmt.Fprintf(f, "Commands:\n")
+		if len(cur.Commands) > 0 {
+			fmt.Fprintf(f, "\nCommands:\n")
+		}
 		{
 			keys := make([]string, 0, len(cur.Commands))
 			for k := range cur.Commands {
