@@ -3,6 +3,7 @@ package warg
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"sort"
@@ -25,17 +26,19 @@ type App struct {
 	// Help()
 	name          string
 	helpFlagNames []string
+	helpWriter    io.Writer
 	sectionHelp   SectionHelp
 	commandHelp   CommandHelp
 	// rootSection holds the good stuff!
 	rootSection s.Section
 }
 
-func OverrideHelp(helpFlagNames []string, sectionHelp SectionHelp, commandHelp CommandHelp) AppOpt {
+func OverrideHelp(w io.Writer, helpFlagNames []string, sectionHelp SectionHelp, commandHelp CommandHelp) AppOpt {
 	return func(app *App) {
 		app.sectionHelp = sectionHelp
 		app.commandHelp = commandHelp
 		app.helpFlagNames = helpFlagNames
+		app.helpWriter = w
 		for _, n := range helpFlagNames {
 			if !strings.HasPrefix(n, "-") {
 				log.Panicf("helpFlags should start with '-': %#v\n", n)
@@ -70,6 +73,7 @@ func New(name string, rootSection s.Section, opts ...AppOpt) App {
 	// Help
 	if len(app.helpFlagNames) == 0 {
 		OverrideHelp(
+			os.Stderr,
 			[]string{"-h", "--help"},
 			DefaultSectionHelp,
 			DefaultCommandHelp,
@@ -249,13 +253,13 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
 		pr := ParseResult{
-			Action: app.sectionHelp(app.name, gar.Path, *ftar.Section, ftar.AllowedFlags),
+			Action: app.sectionHelp(app.helpWriter, app.name, gar.Path, *ftar.Section, ftar.AllowedFlags),
 		}
 		return &pr, nil
 	} else if ftar.Section == nil && ftar.Command != nil {
 		if gar.HelpPassed {
 			pr := ParseResult{
-				Action: app.commandHelp(app.name, gar.Path, *ftar.Command, ftar.AllowedFlags),
+				Action: app.commandHelp(app.helpWriter, app.name, gar.Path, *ftar.Command, ftar.AllowedFlags),
 			}
 			return &pr, nil
 		} else {
@@ -292,18 +296,19 @@ func (app *App) Run(osArgs []string) error {
 }
 
 // TODO: actually put this in :)
-type CommandHelp = func(appName string, path []string, cur c.Command, flagMap f.FlagMap) c.Action
+type CommandHelp = func(w io.Writer, appName string, path []string, cur c.Command, flagMap f.FlagMap) c.Action
 
-type SectionHelp = func(appName string, path []string, cur s.Section, flagMap f.FlagMap) c.Action
+type SectionHelp = func(w io.Writer, appName string, path []string, cur s.Section, flagMap f.FlagMap) c.Action
 
 func DefaultCommandHelp(
+	w io.Writer,
 	appName string,
 	path []string,
 	cur c.Command,
 	flagMap f.FlagMap,
 ) c.Action {
 	return func(_ f.FlagValues) error {
-		f := bufio.NewWriter(os.Stdout)
+		f := bufio.NewWriter(w)
 		defer f.Flush()
 
 		// Print top help section
@@ -343,13 +348,14 @@ func DefaultCommandHelp(
 }
 
 func DefaultSectionHelp(
+	w io.Writer,
 	appName string,
 	path []string,
 	cur s.Section,
 	flagMap f.FlagMap,
 ) c.Action {
 	return func(_ f.FlagValues) error {
-		f := bufio.NewWriter(os.Stdout)
+		f := bufio.NewWriter(w)
 		defer f.Flush()
 
 		// Print top help section

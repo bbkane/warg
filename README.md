@@ -12,15 +12,15 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
-- go through tests and change everything to `expected`, `actual`, use testify/require instead of assert
+- separate command flags and inherited flags in --help, add value.Description()
+- Write good doc comments, README, examples
 - make an app.Test() method folks can add to their apps - should test for unique flag names between parent and child sections/commands for one thing
-- turn --help Example tests into regular tests with an update flag to generate the help text golden file - need to make the app output more flexible for this - add color=true|false|auto support here?
 - write a good `errors` package - see bottom of README
-- Fix grabbit subreddit-limit arg thing (it's set by appdefault to be a one element list, when the others are set by config to be a 2 element list) - this is probably going to be best handled by the user in docs - warg doesn't know these are related...
 - go through TODOs
 - add required flag
 - add type of flag to help output
 - add envvar option to flag
+- figure out what to do with --color , --help requires it?
 - make help take an argument? - help = man, json, color, web, form, term, lsp, bash-completion, zsh-completion
 
 # Links

@@ -1,0 +1,8 @@
+edit the config
+
+Flags:
+
+  --editor : path to editor
+    value : vi
+    setby : appdefault
+

@@ -13,18 +13,18 @@ import (
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestApp_Parse(t *testing.T) {
 
 	tests := []struct {
-		name                 string
-		app                  w.App
-		args                 []string
-		passedPathWant       []string
-		passedFlagValuesWant f.FlagValues
-		wantErr              bool
+		name                     string
+		app                      w.App
+		args                     []string
+		expectedPassedPath       []string
+		expectedPassedFlagValues f.FlagValues
+		expectedErr              bool
 	}{
 		{
 			name: "from main",
@@ -55,10 +55,10 @@ func TestApp_Parse(t *testing.T) {
 				),
 			),
 
-			args:                 []string{"app", "cat1", "com1", "--com1f1", "1"},
-			passedPathWant:       []string{"cat1", "com1"},
-			passedFlagValuesWant: f.FlagValues{"--com1f1": int(1)},
-			wantErr:              false,
+			args:                     []string{"app", "cat1", "com1", "--com1f1", "1"},
+			expectedPassedPath:       []string{"cat1", "com1"},
+			expectedPassedFlagValues: f.FlagValues{"--com1f1": int(1)},
+			expectedErr:              false,
 		},
 		{
 			name: "no section",
@@ -74,10 +74,10 @@ func TestApp_Parse(t *testing.T) {
 				),
 			),
 
-			args:                 []string{"app"},
-			passedPathWant:       nil,
-			passedFlagValuesWant: nil,
-			wantErr:              false,
+			args:                     []string{"app"},
+			expectedPassedPath:       nil,
+			expectedPassedFlagValues: nil,
+			expectedErr:              false,
 		},
 		{
 			name: "flag default",
@@ -98,13 +98,13 @@ func TestApp_Parse(t *testing.T) {
 					),
 				),
 			),
-			args:                 []string{"test", "com"},
-			passedPathWant:       []string{"com"},
-			passedFlagValuesWant: f.FlagValues{"--flag": "hi"},
-			wantErr:              false,
+			args:                     []string{"test", "com"},
+			expectedPassedPath:       []string{"com"},
+			expectedPassedFlagValues: f.FlagValues{"--flag": "hi"},
+			expectedErr:              false,
 		},
 		{
-			name: "extra flag",
+			name: "extra_flag",
 			app: w.New(
 				"test",
 				s.NewSection(
@@ -122,10 +122,10 @@ func TestApp_Parse(t *testing.T) {
 					),
 				),
 			),
-			args:                 []string{"test", "com", "--unexpected", "value"},
-			passedPathWant:       nil,
-			passedFlagValuesWant: nil,
-			wantErr:              true,
+			args:                     []string{"test", "com", "--unexpected", "value"},
+			expectedPassedPath:       nil,
+			expectedPassedFlagValues: nil,
+			expectedErr:              true,
 		},
 		{
 			name: "config_flag",
@@ -163,13 +163,13 @@ func TestApp_Parse(t *testing.T) {
 					f.Default("defaultconfigval"),
 				),
 			),
-			args:           []string{"test", "print", "--config", "passedconfigval"},
-			passedPathWant: []string{"print"},
-			passedFlagValuesWant: f.FlagValues{
+			args:               []string{"test", "print", "--config", "passedconfigval"},
+			expectedPassedPath: []string{"print"},
+			expectedPassedFlagValues: f.FlagValues{
 				"--key":    "mapkeyval",
 				"--config": "passedconfigval",
 			},
-			wantErr: false,
+			expectedErr: false,
 		},
 		{
 			name: "section flag",
@@ -190,12 +190,12 @@ func TestApp_Parse(t *testing.T) {
 					),
 				),
 			),
-			args:           []string{"test", "com"},
-			passedPathWant: []string{"com"},
-			passedFlagValuesWant: f.FlagValues{
+			args:               []string{"test", "com"},
+			expectedPassedPath: []string{"com"},
+			expectedPassedFlagValues: f.FlagValues{
 				"--sflag": "sflagval",
 			},
-			wantErr: false,
+			expectedErr: false,
 		},
 		{
 			name: "simple JSON config",
@@ -224,13 +224,13 @@ func TestApp_Parse(t *testing.T) {
 				),
 			),
 
-			args:           []string{"app", "com"},
-			passedPathWant: []string{"com"},
-			passedFlagValuesWant: f.FlagValues{
+			args:               []string{"app", "com"},
+			expectedPassedPath: []string{"com"},
+			expectedPassedFlagValues: f.FlagValues{
 				"--config": "testdata/simple_json_config.json",
 				"--val":    "hi",
 			},
-			wantErr: false,
+			expectedErr: false,
 		},
 		{
 			name: "config_slice",
@@ -253,33 +253,29 @@ func TestApp_Parse(t *testing.T) {
 					f.Default("testdata/config_slice.json"),
 				),
 			),
-			args:           []string{"test", "print"},
-			passedPathWant: []string{"print"},
-			passedFlagValuesWant: f.FlagValues{
+			args:               []string{"test", "print"},
+			expectedPassedPath: []string{"print"},
+			expectedPassedFlagValues: f.FlagValues{
 				"--subreddits": []string{"earthporn", "wallpapers"},
 				"--config":     "testdata/config_slice.json",
 			},
-			wantErr: false,
+			expectedErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			pr, err := tt.app.Parse(tt.args)
+			actualPR, actualErr := tt.app.Parse(tt.args)
 
-			// return early if there's an error
-			// don't want to deref a null pr
-			if (err != nil) && tt.wantErr {
+			if tt.expectedErr {
+				require.NotNil(t, actualErr)
 				return
+			} else {
+				require.Nil(t, actualErr)
 			}
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("RootCommand.Parse() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			assert.Equal(t, tt.passedPathWant, pr.PasssedPath)
-			assert.Equal(t, tt.passedFlagValuesWant, pr.PassedFlags)
+			require.Equal(t, tt.expectedPassedPath, actualPR.PasssedPath)
+			require.Equal(t, tt.expectedPassedFlagValues, actualPR.PassedFlags)
 		})
 	}
 }
