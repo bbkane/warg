@@ -4,8 +4,11 @@ import "fmt"
 
 type stringV string
 
-func (v *stringV) Get() interface{} { return string(*v) }
-func (v *stringV) String() string   { return fmt.Sprint(string(*v)) }
+func (v *stringV) Get() interface{}    { return string(*v) }
+func (v *stringV) String() string      { return fmt.Sprint(string(*v)) }
+func (v *stringV) TypeInfo() typeInfo  { return TypeInfoScalar }
+func (v *stringV) Description() string { return "string" }
+
 func (v *stringV) Update(s string) error {
 	*v = stringV(s)
 	return nil
@@ -45,6 +48,8 @@ func (v *stringSliceV) ReplaceFromInterface(iFace interface{}) error {
 	*v = *stringSliceNew(under)
 	return nil
 }
+func (v *stringSliceV) TypeInfo() typeInfo  { return TypeInfoSlice }
+func (v *stringSliceV) Description() string { return "string slice" }
 
 func StringSliceEmpty() (Value, error)   { return stringSliceNew(nil), nil }
 func (v *stringSliceV) Get() interface{} { return []string(*v) }

@@ -12,7 +12,6 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
-- change value to not care when it's updated (flag parsing should do that), add a ReplaceFromInterface() method, TypeInfo() method (to show if it's a scalar or container)
 - go through tests and change everything to `expected`, `actual`, use testify/require instead of assert
 - make an app.Test() method folks can add to their apps - should test for unique flag names between parent and child sections/commands for one thing
 - turn --help Example tests into regular tests with an update flag to generate the help text golden file - need to make the app output more flexible for this - add color=true|false|auto support here?

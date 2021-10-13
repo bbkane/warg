@@ -4,18 +4,32 @@ import (
 	"errors"
 )
 
+type typeInfo int64
+
+const (
+	TypeInfoScalar typeInfo = iota + 1
+	TypeInfoSlice
+)
+
 // Value is a "generic" type that lets me store different types into flags
 //  ~Stolen from~ "Inspired by" https://golang.org/src/flag/flag.go?#L138
 // There are two underlying "type" families designed to fit in Value:
 // - scalar types (Int, String, ...)
 // - container types (IntSlice, StringMap, ...)
 type Value interface {
+
+	// Description of the type. useful for help messages
+	Description() string
+
 	// Get returns the underlying value. It's meant to be type asserted against
 	// Example: myInt := v.(int)
 	Get() interface{}
 
 	// ReplaceFromInterface replaces a value with one found in an interface (useful for configs)
 	ReplaceFromInterface(interface{}) error
+
+	// TypeInfo specifies whether what "overall" type of value this is - scalar, slice, etc.
+	TypeInfo() typeInfo
 
 	// Update appends to container type Values from a string (useful for CLI flags, env vars, default values)
 	// and replaces scalar Values

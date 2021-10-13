@@ -15,8 +15,11 @@ func pathNew(val string) (*pathV, error) {
 	}
 	return (*pathV)(&expanded), nil
 }
-func (v *pathV) Get() interface{} { return string(*v) }
-func (v *pathV) String() string   { return fmt.Sprint(string(*v)) }
+func (v *pathV) Get() interface{}    { return string(*v) }
+func (v *pathV) String() string      { return fmt.Sprint(string(*v)) }
+func (v *pathV) TypeInfo() typeInfo  { return TypeInfoScalar }
+func (v *pathV) Description() string { return "path" }
+
 func (v *pathV) Update(s string) error {
 	new, err := pathNew(s)
 	if err != nil {
@@ -81,6 +84,10 @@ func (v *pathSliceV) UpdateFromInterface(iFace interface{}) error {
 	*v = append(*v, expanded)
 	return nil
 }
+
+func (v *pathSliceV) TypeInfo() typeInfo  { return TypeInfoSlice }
+func (v *pathSliceV) Description() string { return "path slice" }
+
 func PathSliceEmpty() (Value, error) { return &pathSliceV{}, nil }
 
 func (v *pathSliceV) ReplaceFromInterface(iFace interface{}) error {

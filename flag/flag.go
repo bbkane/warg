@@ -2,6 +2,7 @@ package flag
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/bbkane/warg/configreader"
 	v "github.com/bbkane/warg/value"
@@ -47,7 +48,6 @@ func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReade
 		// idempotently resolve flags (like the config flag for example)
 		if flag.SetBy == "" && exists {
 			for _, v := range strValues {
-				// TODO: make sure we don't update over flags meant to be set once
 				flag.Value.Update(v)
 			}
 			flag.SetBy = "passedflag"
@@ -91,7 +91,6 @@ func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReade
 	{
 		if flag.SetBy == "" && len(flag.DefaultValues) > 0 {
 			for _, v := range flag.DefaultValues {
-				// TODO: don't update flags more than once if they're not supposed to be
 				flag.Value.Update(v)
 			}
 			flag.SetBy = "appdefault"
@@ -120,6 +119,13 @@ func ConfigPath(path string) FlagOpt {
 
 func Default(values ...string) FlagOpt {
 	return func(flag *Flag) {
+		empty, err := flag.EmptyValueConstructor()
+		if err != nil {
+			log.Panicf("cannot create empty flag value when checking default: %v", flag)
+		}
+		if empty.TypeInfo() == v.TypeInfoScalar && len(values) != 1 {
+			log.Panicf("a scalar flag should only have one default value: We don't know the name of the type, but here's the Help: %#v", flag.Help)
+		}
 		flag.DefaultValues = values
 	}
 }

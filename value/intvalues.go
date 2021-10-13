@@ -12,8 +12,10 @@ type intV int
 func intNew(val int) *intV     { return (*intV)(&val) }
 func IntEmpty() (Value, error) { return intNew(0), nil }
 
-func (v *intV) Get() interface{} { return int(*v) }
-func (v *intV) String() string   { return fmt.Sprint(int(*v)) }
+func (v *intV) Get() interface{}    { return int(*v) }
+func (v *intV) String() string      { return fmt.Sprint(int(*v)) }
+func (v *intV) TypeInfo() typeInfo  { return TypeInfoScalar }
+func (v *intV) Description() string { return "int" }
 
 func (v *intV) ReplaceFromInterface(iFace interface{}) error {
 	switch under := iFace.(type) {
@@ -74,6 +76,8 @@ func (v *intSlice) ReplaceFromInterface(iFace interface{}) error {
 	}
 	return nil
 }
+func (v *intSlice) TypeInfo() typeInfo  { return TypeInfoSlice }
+func (v *intSlice) Description() string { return "int slice" }
 
 func (v *intSlice) String() string { return fmt.Sprint([]int(*v)) }
 func (v *intSlice) Update(s string) error {
