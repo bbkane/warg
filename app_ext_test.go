@@ -137,7 +137,7 @@ func TestApp_Parse(t *testing.T) {
 						"--key",
 						"a key",
 						v.StringEmpty,
-						f.ConfigPath("key", v.StringFromInterface),
+						f.ConfigPath("key"),
 						f.Default("defaultkeyval"),
 					),
 					s.WithCommand("print", "print key value", c.DoNothing),
@@ -206,7 +206,7 @@ func TestApp_Parse(t *testing.T) {
 						"--val",
 						"flag help",
 						v.StringEmpty,
-						f.ConfigPath("params.val", v.StringFromInterface),
+						f.ConfigPath("params.val"),
 					),
 					s.WithCommand(
 						"com",
@@ -242,8 +242,7 @@ func TestApp_Parse(t *testing.T) {
 						"--subreddits",
 						"the subreddits",
 						v.StringSliceEmpty,
-						// TODO: gonna need something here
-						f.ConfigPath("subreddits[].name", v.StringFromInterface),
+						f.ConfigPath("subreddits[].name"),
 					),
 					s.WithCommand("print", "print key value", c.DoNothing),
 				),

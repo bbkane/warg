@@ -19,6 +19,14 @@ func TestIntValue(t *testing.T) {
 	require.Equal(t, v.Get().(int), 2)
 }
 
+func TestStringValue(t *testing.T) {
+	var v w.Value
+	v, err := w.StringEmpty()
+	require.Nil(t, err)
+	v.ReplaceFromInterface("hi")
+	require.Equal(t, "hi", v.Get())
+}
+
 func TestStringSliceValue(t *testing.T) {
 	var v w.Value
 	v, err := w.StringSliceEmpty()
@@ -57,8 +65,15 @@ func TestPathValue(t *testing.T) {
 	)
 }
 
-// func TestPathSliceValue(t *testing.T) {
-// 	home, err := homedir.Dir()
-// 	require.Nil(t, err)
+func TestPathSliceValue(t *testing.T) {
 
-// }
+	var v w.Value
+	v, err := w.PathSliceEmpty()
+	require.Nil(t, err)
+	v.ReplaceFromInterface(
+		[]string{"hi"},
+	)
+
+	require.Equal(t, v.Get().([]string), []string{"hi"})
+
+}

@@ -11,18 +11,21 @@ type intV int
 
 func intNew(val int) *intV     { return (*intV)(&val) }
 func IntEmpty() (Value, error) { return intNew(0), nil }
-func IntFromInterface(iFace interface{}) (Value, error) {
-	switch under := iFace.(type) {
-	case int:
-		return intNew(under), nil
-	case float64: // like JSON
-		return intNew(int(under)), nil
-	default:
-		return nil, fmt.Errorf("can't create IntValue. Expected: int or float64, got: %#v", iFace)
-	}
-}
+
 func (v *intV) Get() interface{} { return int(*v) }
 func (v *intV) String() string   { return fmt.Sprint(int(*v)) }
+
+func (v *intV) ReplaceFromInterface(iFace interface{}) error {
+	switch under := iFace.(type) {
+	case int:
+		*v = *intNew(under)
+	case float64: // like JSON
+		*v = *intNew(int(under))
+	default:
+		return fmt.Errorf("can't create IntValue. Expected: int or float64, got: %#v", iFace)
+	}
+	return nil
+}
 
 func (v *intV) Update(s string) error {
 	decoded, err := strconv.ParseInt(s, 0, strconv.IntSize)
@@ -52,24 +55,27 @@ type intSlice []int
 func intSliceNew(vals []int) *intSlice {
 	return (*intSlice)(&vals)
 }
-func IntSliceFromInterface(iFace interface{}) (Value, error) {
 
+func IntSliceEmpty() (Value, error)  { return intSliceNew(nil), nil }
+func (v *intSlice) Get() interface{} { return []int(*v) }
+
+func (v *intSlice) ReplaceFromInterface(iFace interface{}) error {
 	switch under := iFace.(type) {
 	case []int:
-		return intSliceNew(under), nil
+		*v = *intSliceNew(under)
 	case []float64:
 		var ret []int
 		for _, e := range under {
 			ret = append(ret, int(e))
 		}
-		return intSliceNew(ret), nil
+		*v = *intSliceNew(ret)
 	default:
-		return nil, ErrIncompatibleInterface
+		return ErrIncompatibleInterface
 	}
+	return nil
 }
-func IntSliceEmpty() (Value, error)  { return intSliceNew(nil), nil }
-func (v *intSlice) Get() interface{} { return []int(*v) }
-func (v *intSlice) String() string   { return fmt.Sprint([]int(*v)) }
+
+func (v *intSlice) String() string { return fmt.Sprint([]int(*v)) }
 func (v *intSlice) Update(s string) error {
 	decoded, err := strconv.ParseInt(s, 0, strconv.IntSize)
 	if err != nil {

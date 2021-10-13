@@ -42,12 +42,17 @@ func PathEmpty() (Value, error) {
 	return pathNew("")
 }
 
-func PathFromInterface(iFace interface{}) (Value, error) {
+func (v *pathV) ReplaceFromInterface(iFace interface{}) error {
 	under, ok := iFace.(string)
 	if !ok {
-		return nil, ErrIncompatibleInterface
+		return ErrIncompatibleInterface
 	}
-	return pathNew(under)
+	new, err := pathNew(under)
+	if err != nil {
+		return err
+	}
+	*v = *new
+	return nil
 }
 
 // ---
@@ -77,17 +82,21 @@ func (v *pathSliceV) UpdateFromInterface(iFace interface{}) error {
 	return nil
 }
 func PathSliceEmpty() (Value, error) { return &pathSliceV{}, nil }
-func PathSliceFromInterface(iFace interface{}) (Value, error) {
+
+func (v *pathSliceV) ReplaceFromInterface(iFace interface{}) error {
 	under, ok := iFace.([]string)
 	if !ok {
-		return nil, ErrIncompatibleInterface
+		return ErrIncompatibleInterface
 	}
 	new, _ := PathSliceEmpty()
 	for _, e := range under {
 		err := new.Update(e)
 		if err != nil {
-			return nil, fmt.Errorf("could not expand: %v: %w", e, err)
+			return fmt.Errorf("could not expand: %v: %w", e, err)
 		}
 	}
-	return new, nil
+	// TODO: does this even work?
+	new2 := new.Get().([]string)
+	*v = *(*pathSliceV)(&new2)
+	return nil
 }

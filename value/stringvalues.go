@@ -21,12 +21,14 @@ func (v *stringV) UpdateFromInterface(iFace interface{}) error {
 
 func stringNew(val string) *stringV { return (*stringV)(&val) }
 func StringEmpty() (Value, error)   { return stringNew(""), nil }
-func StringFromInterface(iFace interface{}) (Value, error) {
+
+func (v *stringV) ReplaceFromInterface(iFace interface{}) error {
 	under, ok := iFace.(string)
 	if !ok {
-		return nil, fmt.Errorf("can't create StringValue. Expected: string, got: %#v", iFace)
+		return fmt.Errorf("can't create StringValue. Expected: string, got: %#v", iFace)
 	}
-	return stringNew(under), nil
+	*v = *stringNew(under)
+	return nil
 }
 
 // ---
@@ -34,13 +36,16 @@ func StringFromInterface(iFace interface{}) (Value, error) {
 type stringSliceV []string
 
 func stringSliceNew(vals []string) *stringSliceV { return (*stringSliceV)(&vals) }
-func StringSliceFromInterface(iFace interface{}) (Value, error) {
+
+func (v *stringSliceV) ReplaceFromInterface(iFace interface{}) error {
 	under, ok := iFace.([]string)
 	if !ok {
-		return nil, ErrIncompatibleInterface
+		return ErrIncompatibleInterface
 	}
-	return stringSliceNew(under), nil
+	*v = *stringSliceNew(under)
+	return nil
 }
+
 func StringSliceEmpty() (Value, error)   { return stringSliceNew(nil), nil }
 func (v *stringSliceV) Get() interface{} { return []string(*v) }
 func (v *stringSliceV) String() string   { return fmt.Sprint([]string(*v)) }

@@ -100,7 +100,7 @@ func containsString(haystack []string, needle string) bool {
 
 // gatherArgs "parses" os.Argv into commands and flags. It's a 'lowering' function,
 // simplifying os.Args as much as possible before needing knowledge of this particular app
-// TODO: test this! Also, --help and --version do NOT require values
+// --help does NOT require a value
 func gatherArgs(osArgs []string, helpFlagNames []string) (*gatherArgsResult, error) {
 	res := &gatherArgsResult{
 		FlagStrs: make(map[string][]string),

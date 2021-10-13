@@ -13,15 +13,12 @@ type FlagOpt = func(*Flag)
 type FlagValues = map[string]interface{}
 
 type Flag struct {
-
-	// TODO: make these private. resolveFlag should probably be a method on flag
-	ConfigFromInterface v.FromInterface
-	ConfigPath          string
+	ConfigPath string
 	// DefaultValues will be shoved into Value if the app builder specifies it.
 	// For scalar values, the last DefaultValues wins
 	DefaultValues []string
 	Help          string
-	// SetBy holds where a flag is initialized. Is empty if not initialized
+	// SetBy possible values: appdefault, config, passedflag
 	SetBy string
 	// Value holds what gets passed to the flag: --myflag value
 	// and should be initialized to the empty value
@@ -61,18 +58,17 @@ func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReade
 
 	// update from config
 	{
-		if flag.SetBy == "" && configReader != nil && flag.ConfigFromInterface != nil {
+		if flag.SetBy == "" && configReader != nil {
 			fpr, err := configReader.Search(flag.ConfigPath)
 			if err != nil {
 				return err
 			}
 			if fpr.Exists {
 				if !fpr.IsAggregated {
-					v, err := flag.ConfigFromInterface(fpr.IFace)
+					err := flag.Value.ReplaceFromInterface(fpr.IFace)
 					if err != nil {
 						return err
 					}
-					flag.Value = v
 					flag.SetBy = "config"
 				} else {
 					under, ok := fpr.IFace.([]interface{})
@@ -95,6 +91,7 @@ func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReade
 	{
 		if flag.SetBy == "" && len(flag.DefaultValues) > 0 {
 			for _, v := range flag.DefaultValues {
+				// TODO: don't update flags more than once if they're not supposed to be
 				flag.Value.Update(v)
 			}
 			flag.SetBy = "appdefault"
@@ -115,10 +112,9 @@ func NewFlag(helpShort string, empty v.EmptyConstructor, opts ...FlagOpt) Flag {
 	return flag
 }
 
-func ConfigPath(path string, valueFromInterface v.FromInterface) FlagOpt {
+func ConfigPath(path string) FlagOpt {
 	return func(flag *Flag) {
 		flag.ConfigPath = path
-		flag.ConfigFromInterface = valueFromInterface
 	}
 }
 
