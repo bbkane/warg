@@ -21,6 +21,7 @@ func printFlag(w io.Writer, name string, flag *f.Flag) {
 	if flag.ConfigPath != "" {
 		fmt.Fprintf(w, "    configpath : %s\n", flag.ConfigPath)
 	}
+	fmt.Fprintf(w, "    type : %s\n", flag.TypeDescription)
 	if flag.SetBy != "" {
 		fmt.Fprintf(w, "    value : %s\n", flag.Value)
 		fmt.Fprintf(w, "    setby : %s\n", flag.SetBy)
@@ -77,6 +78,9 @@ func DefaultCommandHelp(
 				sectionFlagHelp.WriteTo(f)
 			}
 		}
+		if cur.Footer != "" {
+			fmt.Fprintf(f, "%s\n", cur.Footer)
+		}
 		return nil
 	}
 }
@@ -130,8 +134,9 @@ func DefaultSectionHelp(
 				fmt.Fprintf(f, "  %s : %s\n", k, cur.Commands[k].Help)
 			}
 		}
-
-		// TODO: print examples once we have them :)
+		if cur.Footer != "" {
+			fmt.Fprintf(f, "%s\n", cur.Footer)
+		}
 		return nil
 	}
 }

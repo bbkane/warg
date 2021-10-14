@@ -21,6 +21,8 @@ type Section struct {
 	Help string
 	// HelpLong is an optional longer description of this section
 	HelpLong string
+	// Footer is yet another optional longer description.
+	Footer string
 }
 
 func NewSection(helpShort string, opts ...SectionOpt) Section {
@@ -80,6 +82,12 @@ func WithFlag(name string, helpShort string, empty v.EmptyConstructor, opts ...f
 
 func WithCommand(name string, helpShort string, action c.Action, opts ...c.CommandOpt) SectionOpt {
 	return AddCommand(name, c.NewCommand(helpShort, action, opts...))
+}
+
+func Footer(footer string) SectionOpt {
+	return func(cat *Section) {
+		cat.Footer = footer
+	}
 }
 
 func HelpLong(helpLong string) SectionOpt {

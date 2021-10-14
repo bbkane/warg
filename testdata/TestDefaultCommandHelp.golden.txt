@@ -1,8 +1,17 @@
-edit the config
+Edit the config. A default config will be created if it doesn't exist
 
 Command Flags:
 
   --editor : path to editor
+    type : string
     value : vi
     setby : appdefault
+
+Examples:
+
+# Use defaults
+grabbit config edit
+
+# Override defaults
+grabbit config edit --config-path /path/to/config --editor code
 

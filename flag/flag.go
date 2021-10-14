@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/bbkane/warg/configreader"
+	"github.com/bbkane/warg/value"
 	v "github.com/bbkane/warg/value"
 )
 
@@ -24,9 +25,11 @@ type Flag struct {
 
 	// IsCommandFlag is set when parsing. Set to true if the flag was attached to a command (as opposed to being inherited from a section)
 	IsCommandFlag bool
-	// SetBy is set when parsing. Possible values: appdefault, config, passedflag
+	// TypeDescription is set when parsing. Describes the type: int, string, ...
+	TypeDescription string
+	// SetBy might be set when parsing. Possible values: appdefault, config, passedflag
 	SetBy string
-	// Value is set when parsing. The interface returned by updating a flag
+	// Value might be set when parsing. The interface returned by updating a flag
 	Value v.Value
 }
 
@@ -39,6 +42,7 @@ func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReade
 		return fmt.Errorf("flag error: %v: %w", name, err)
 	}
 	flag.Value = v
+	flag.TypeDescription = v.Description()
 
 	// update from command line
 	{
@@ -46,6 +50,11 @@ func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReade
 		// the setby check for the first case is needed to
 		// idempotently resolve flags (like the config flag for example)
 		if flag.SetBy == "" && exists {
+
+			if v.TypeInfo() == value.TypeInfoScalar && len(strValues) > 1 {
+				return fmt.Errorf("flag error: %v: flag passed multiple times, it's value (type %v), can only be updated once", name, flag.TypeDescription)
+			}
+
 			for _, v := range strValues {
 				flag.Value.Update(v)
 			}

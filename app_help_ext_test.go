@@ -103,17 +103,38 @@ func TestDefaultSectionHelp(t *testing.T) {
 func TestDefaultCommandHelp(t *testing.T) {
 	var actualBuffer bytes.Buffer
 
+	rootFooter := `Examples:
+
+# Grab without config
+grabbit grab
+
+# Edit config, then grab
+grabbit config edit
+grabbit grab
+`
+
+	configEditFooter := `Examples:
+
+# Use defaults
+grabbit config edit
+
+# Override defaults
+grabbit config edit --config-path /path/to/config --editor code
+`
+
 	app := warg.New(
 		"grabbit",
 		s.NewSection(
 			"grab those images!",
 			s.WithSection(
 				"config",
-				"change grabbit's config",
+				"Change grabbit's config",
+				s.Footer(rootFooter),
 				s.WithCommand(
 					"edit",
-					"edit the config",
+					"Edit the config. A default config will be created if it doesn't exist",
 					c.DoNothing,
+					c.Footer(configEditFooter),
 					c.WithFlag(
 						"--editor",
 						"path to editor",

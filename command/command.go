@@ -17,10 +17,14 @@ type Command struct {
 	Flags  f.FlagMap
 	// Help is a required one-line description
 	Help string
+	// Footer is yet another optional longer description.
+	Footer string
 	// HelpLong is an optional longer description
 	HelpLong string
 }
 
+// DoNothing is a command action that simply returns
+// Useful for prototyping
 func DoNothing(_ f.FlagValues) error {
 	return nil
 }
@@ -52,6 +56,12 @@ func AddFlag(name string, value f.Flag) CommandOpt {
 
 func WithFlag(name string, helpShort string, empty v.EmptyConstructor, opts ...f.FlagOpt) CommandOpt {
 	return AddFlag(name, f.NewFlag(helpShort, empty, opts...))
+}
+
+func Footer(footer string) CommandOpt {
+	return func(cat *Command) {
+		cat.Footer = footer
+	}
 }
 
 func HelpLong(helpLong string) CommandOpt {
