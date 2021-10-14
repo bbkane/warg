@@ -18,6 +18,32 @@ import (
 
 var update = flag.Bool("update", false, "update golden files")
 
+func RequireEqualBytesOrDiff(t *testing.T, expectedFilePath string, actual []byte, msg string) {
+	expectedBytes, readErr := ioutil.ReadFile(expectedFilePath)
+	require.Nil(t, readErr)
+	if bytes.Equal(expectedBytes, actual) {
+		return
+	}
+
+	actualTmpFile, err := ioutil.TempFile(os.TempDir(), "go-test-actual-")
+	if err != nil {
+		t.Fatalf("Error creating tmpfile: %v", err)
+	}
+	defer actualTmpFile.Close()
+
+	_, err = actualTmpFile.Write(actual)
+	if err != nil {
+		t.Fatalf("Error writing tmpfile: %v", err)
+	}
+
+	t.Fatalf(
+		"%s: expected != actual. See diff:\n  vimdiff %s %s\n",
+		msg,
+		expectedFilePath,
+		actualTmpFile.Name(),
+	)
+}
+
 func TestDefaultSectionHelp(t *testing.T) {
 	var actualBuffer bytes.Buffer
 
@@ -66,10 +92,12 @@ func TestDefaultSectionHelp(t *testing.T) {
 		t.Logf("Wrote: %v\n", golden)
 	}
 
-	expectedBytes, readErr := ioutil.ReadFile(golden)
-	require.Nil(t, readErr)
-
-	require.Equal(t, expectedBytes, actualBuffer.Bytes())
+	RequireEqualBytesOrDiff(
+		t,
+		golden,
+		actualBuffer.Bytes(),
+		t.Name(),
+	)
 }
 
 func TestDefaultCommandHelp(t *testing.T) {
@@ -119,9 +147,10 @@ func TestDefaultCommandHelp(t *testing.T) {
 		require.Nil(t, writeErr)
 		t.Logf("Wrote: %v\n", golden)
 	}
-
-	expectedBytes, readErr := ioutil.ReadFile(golden)
-	require.Nil(t, readErr)
-
-	require.Equal(t, expectedBytes, actualBuffer.Bytes())
+	RequireEqualBytesOrDiff(
+		t,
+		golden,
+		actualBuffer.Bytes(),
+		t.Name(),
+	)
 }

@@ -14,21 +14,20 @@ type FlagOpt = func(*Flag)
 type FlagValues = map[string]interface{}
 
 type Flag struct {
-	ConfigPath string
+	// EmptyConstructor tells flag how to make a value
+	EmptyValueConstructor v.EmptyConstructor
+	ConfigPath            string
 	// DefaultValues will be shoved into Value if the app builder specifies it.
 	// For scalar values, the last DefaultValues wins
 	DefaultValues []string
 	Help          string
-	// SetBy possible values: appdefault, config, passedflag
-	SetBy string
-	// Value holds what gets passed to the flag: --myflag value
-	// and should be initialized to the empty value
-	// TODO: make this private? TODO: Update docs once this is successfully
-	// an output instead of an input
-	Value v.Value
 
-	// EmptyConstructor tells flag how to make a value
-	EmptyValueConstructor v.EmptyConstructor
+	// IsCommandFlag is set when parsing. Set to true if the flag was attached to a command (as opposed to being inherited from a section)
+	IsCommandFlag bool
+	// SetBy is set when parsing. Possible values: appdefault, config, passedflag
+	SetBy string
+	// Value is set when parsing. The interface returned by updating a flag
+	Value v.Value
 }
 
 // resolveFLag updates a flag's value from the command line, and then from the

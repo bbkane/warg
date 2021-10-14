@@ -1,6 +1,6 @@
 edit the config
 
-Flags:
+Command Flags:
 
   --editor : path to editor
     value : vi

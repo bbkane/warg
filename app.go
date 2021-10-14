@@ -1,12 +1,10 @@
 package warg
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"sort"
 	"strings"
 
 	c "github.com/bbkane/warg/command"
@@ -158,13 +156,13 @@ type fitToAppResult struct {
 }
 
 // fitToApp takes the command entered by a user and uses it to "walk" down the apps command tree
-func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string) (*fitToAppResult, error) {
+func fitToApp(rootSection s.Section, path []string) (*fitToAppResult, error) {
 	// validate passed command and get available flags
 	ftar := fitToAppResult{
 		Section:      &rootSection,
-		Action:       nil,
-		AllowedFlags: rootSection.Flags,
 		Command:      nil, // we start with a section, not a command
+		AllowedFlags: rootSection.Flags,
+		Action:       nil,
 	}
 	childCommands := rootSection.Commands
 	childSections := rootSection.Sections
@@ -179,6 +177,7 @@ func fitToApp(rootSection s.Section, path []string, flagStrs map[string][]string
 			childSections = nil
 			for k, v := range command.Flags {
 				// TODO: check if key exists already
+				v.IsCommandFlag = true
 				ftar.AllowedFlags[k] = v
 			}
 		} else if section, exists := childSections[word]; exists {
@@ -203,11 +202,12 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		return nil, err
 	}
 
-	ftar, err := fitToApp(app.rootSection, gar.Path, gar.FlagStrs)
+	ftar, err := fitToApp(app.rootSection, gar.Path)
 	if err != nil {
 		return nil, err
 	}
 
+	// fill the flags
 	var configReader configreader.ConfigReader
 	// get the value of a potential passed --config flag
 	if app.configFlag != nil {
@@ -217,8 +217,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		// TODO: don't panic if not not a string. return an error :)
-		// I think it will always be a string...
+		// NOTE: this *should* always be a string
 		configPath := app.configFlag.Value.Get().(string)
 		configReader, err = app.newConfigReader(configPath)
 		if err != nil {
@@ -293,113 +292,6 @@ func (app *App) Run(osArgs []string) error {
 		return err
 	}
 	return nil
-}
-
-// TODO: actually put this in :)
-type CommandHelp = func(w io.Writer, appName string, path []string, cur c.Command, flagMap f.FlagMap) c.Action
-
-type SectionHelp = func(w io.Writer, appName string, path []string, cur s.Section, flagMap f.FlagMap) c.Action
-
-func DefaultCommandHelp(
-	w io.Writer,
-	appName string,
-	path []string,
-	cur c.Command,
-	flagMap f.FlagMap,
-) c.Action {
-	return func(_ f.FlagValues) error {
-		f := bufio.NewWriter(w)
-		defer f.Flush()
-
-		// Print top help section
-		if cur.HelpLong == "" {
-			fmt.Fprintf(f, "%s\n", cur.Help)
-		} else {
-			fmt.Fprintf(f, "%s\n", cur.Help)
-		}
-
-		fmt.Fprintln(f)
-
-		if len(flagMap) > 0 {
-			fmt.Fprintf(f, "Flags:\n")
-		}
-		fmt.Fprintln(f)
-		{
-			keys := make([]string, 0, len(flagMap))
-			for k := range flagMap {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-			for _, k := range keys {
-				flag := flagMap[k]
-				fmt.Fprintf(f, "  %s : %s\n", k, flag.Help)
-				if flag.ConfigPath != "" {
-					fmt.Fprintf(f, "    configpath : %s\n", flag.ConfigPath)
-				}
-				if flag.SetBy != "" {
-					fmt.Fprintf(f, "    value : %s\n", flag.Value)
-					fmt.Fprintf(f, "    setby : %s\n", flag.SetBy)
-				}
-				fmt.Fprintln(f)
-			}
-		}
-		return nil
-	}
-}
-
-func DefaultSectionHelp(
-	w io.Writer,
-	appName string,
-	path []string,
-	cur s.Section,
-	flagMap f.FlagMap,
-) c.Action {
-	return func(_ f.FlagValues) error {
-		f := bufio.NewWriter(w)
-		defer f.Flush()
-
-		// Print top help section
-		if cur.HelpLong == "" {
-			fmt.Fprintf(f, "%s\n", cur.Help)
-		} else {
-			fmt.Fprintf(f, "%s\n", cur.Help)
-		}
-
-		// Print sections
-		if len(cur.Sections) > 0 {
-			fmt.Fprintf(f, "\nSections:\n")
-		}
-		{
-			keys := make([]string, 0, len(cur.Sections))
-			for k := range cur.Sections {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-
-			for _, k := range keys {
-				fmt.Fprintf(f, "  %s : %s\n", k, cur.Sections[k].Help)
-			}
-		}
-
-		// Print commands
-		if len(cur.Commands) > 0 {
-			fmt.Fprintf(f, "\nCommands:\n")
-		}
-		{
-			keys := make([]string, 0, len(cur.Commands))
-			for k := range cur.Commands {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-
-			for _, k := range keys {
-				fmt.Fprintf(f, "  %s : %s\n", k, cur.Commands[k].Help)
-			}
-		}
-
-		// TODO: print examples once we have them :)
-		return nil
-	}
 }
 
 type ParseResult struct {
