@@ -294,6 +294,17 @@ func (app *App) Run(osArgs []string) error {
 	return nil
 }
 
+// MustRun runs the app with os.Args
+// If there's an error, it will be printed to stderr and os.Exit(1)
+// will be called
+func (app *App) MustRun() {
+	err := app.Run(os.Args)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
 type ParseResult struct {
 	PasssedPath []string
 	PassedFlags f.FlagValues

@@ -12,6 +12,7 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
+- Enum value type - Make
 - make colored help
 - Write good doc comments, README, examples
 - make an app.Test() method folks can add to their apps - should test for unique flag names between parent and child sections/commands for one thing
