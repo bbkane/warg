@@ -61,7 +61,7 @@ func TestDefaultSectionHelp(t *testing.T) {
 					c.WithFlag(
 						"--editor",
 						"path to editor",
-						v.StringEmpty,
+						v.String,
 						f.Default("vi"),
 					),
 				),
@@ -138,7 +138,7 @@ grabbit config edit --config-path /path/to/config --editor code
 					c.WithFlag(
 						"--editor",
 						"path to editor",
-						v.StringEmpty,
+						v.String,
 						f.Default("vi"),
 					),
 				),

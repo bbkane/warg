@@ -23,7 +23,7 @@ func (v *stringV) UpdateFromInterface(iFace interface{}) error {
 }
 
 func stringNew(val string) *stringV { return (*stringV)(&val) }
-func StringEmpty() (Value, error)   { return stringNew(""), nil }
+func String() (Value, error)        { return stringNew(""), nil }
 
 func (v *stringV) ReplaceFromInterface(iFace interface{}) error {
 	under, ok := iFace.(string)
@@ -51,7 +51,7 @@ func (v *stringSliceV) ReplaceFromInterface(iFace interface{}) error {
 func (v *stringSliceV) TypeInfo() typeInfo  { return TypeInfoSlice }
 func (v *stringSliceV) Description() string { return "string slice" }
 
-func StringSliceEmpty() (Value, error)   { return stringSliceNew(nil), nil }
+func StringSlice() (Value, error)        { return stringSliceNew(nil), nil }
 func (v *stringSliceV) Get() interface{} { return []string(*v) }
 func (v *stringSliceV) String() string   { return fmt.Sprint([]string(*v)) }
 func (v *stringSliceV) Update(val string) error {

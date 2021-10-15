@@ -41,7 +41,7 @@ func (v *pathV) UpdateFromInterface(iFace interface{}) error {
 	return nil
 }
 
-func PathEmpty() (Value, error) {
+func Path() (Value, error) {
 	return pathNew("")
 }
 
@@ -88,14 +88,14 @@ func (v *pathSliceV) UpdateFromInterface(iFace interface{}) error {
 func (v *pathSliceV) TypeInfo() typeInfo  { return TypeInfoSlice }
 func (v *pathSliceV) Description() string { return "path slice" }
 
-func PathSliceEmpty() (Value, error) { return &pathSliceV{}, nil }
+func PathSlice() (Value, error) { return &pathSliceV{}, nil }
 
 func (v *pathSliceV) ReplaceFromInterface(iFace interface{}) error {
 	under, ok := iFace.([]string)
 	if !ok {
 		return ErrIncompatibleInterface
 	}
-	new, _ := PathSliceEmpty()
+	new, _ := PathSlice()
 	for _, e := range under {
 		err := new.Update(e)
 		if err != nil {

@@ -103,9 +103,12 @@ func DefaultSectionHelp(
 			fmt.Fprintf(f, "%s\n", cur.Help)
 		}
 
+		fmt.Fprintln(f)
+
 		// Print sections
 		if len(cur.Sections) > 0 {
-			fmt.Fprintf(f, "\nSections:\n")
+			fmt.Fprintf(f, "Sections:\n")
+			fmt.Fprintln(f)
 		}
 		{
 			keys := make([]string, 0, len(cur.Sections))
@@ -119,9 +122,12 @@ func DefaultSectionHelp(
 			}
 		}
 
+		fmt.Fprintln(f)
+
 		// Print commands
 		if len(cur.Commands) > 0 {
-			fmt.Fprintf(f, "\nCommands:\n")
+			fmt.Fprintf(f, "Commands:\n")
+			fmt.Fprintln(f)
 		}
 		{
 			keys := make([]string, 0, len(cur.Commands))
@@ -135,6 +141,7 @@ func DefaultSectionHelp(
 			}
 		}
 		if cur.Footer != "" {
+			fmt.Fprintln(f)
 			fmt.Fprintf(f, "%s\n", cur.Footer)
 		}
 		return nil

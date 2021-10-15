@@ -12,7 +12,7 @@ import (
 
 func TestIntValue(t *testing.T) {
 	var v w.Value
-	v, err := w.IntEmpty()
+	v, err := w.Int()
 	require.Nil(t, err)
 	require.Equal(t, v.Get().(int), 0)
 	v.Update("2")
@@ -21,7 +21,7 @@ func TestIntValue(t *testing.T) {
 
 func TestStringValue(t *testing.T) {
 	var v w.Value
-	v, err := w.StringEmpty()
+	v, err := w.String()
 	require.Nil(t, err)
 	v.ReplaceFromInterface("hi")
 	require.Equal(t, "hi", v.Get())
@@ -29,7 +29,7 @@ func TestStringValue(t *testing.T) {
 
 func TestStringSliceValue(t *testing.T) {
 	var v w.Value
-	v, err := w.StringSliceEmpty()
+	v, err := w.StringSlice()
 	require.Nil(t, err)
 
 	// Not sure why I get the following, but seems to be a
@@ -44,7 +44,7 @@ func TestStringSliceValue(t *testing.T) {
 
 func TestIntSliceValue(t *testing.T) {
 	var v w.Value
-	v, err := w.IntSliceEmpty()
+	v, err := w.IntSlice()
 	require.Nil(t, err)
 	v.Update("1")
 	require.Equal(t, v.Get().([]int), []int{1})
@@ -55,7 +55,7 @@ func TestPathValue(t *testing.T) {
 	require.Nil(t, err)
 
 	var v w.Value
-	v, err = w.PathEmpty()
+	v, err = w.Path()
 	require.Nil(t, err)
 	err = v.Update("~/tmp")
 	require.Nil(t, err)
@@ -68,7 +68,7 @@ func TestPathValue(t *testing.T) {
 func TestPathSliceValue(t *testing.T) {
 
 	var v w.Value
-	v, err := w.PathSliceEmpty()
+	v, err := w.PathSlice()
 	require.Nil(t, err)
 	v.ReplaceFromInterface(
 		[]string{"hi"},

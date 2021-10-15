@@ -54,7 +54,7 @@ func ConfigFlag(
 	return func(app *App) {
 		app.configFlagName = configFlagName
 		app.newConfigReader = newConfigReader
-		configFlag := f.NewFlag(helpShort, v.PathEmpty, flagOpts...)
+		configFlag := f.NewFlag(helpShort, v.Path, flagOpts...)
 		app.configFlag = &configFlag
 	}
 }

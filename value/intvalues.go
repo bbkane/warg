@@ -9,8 +9,8 @@ import (
 // Example: 4.5 -> 4, 3.99 -> 3
 type intV int
 
-func intNew(val int) *intV     { return (*intV)(&val) }
-func IntEmpty() (Value, error) { return intNew(0), nil }
+func intNew(val int) *intV { return (*intV)(&val) }
+func Int() (Value, error)  { return intNew(0), nil }
 
 func (v *intV) Get() interface{}    { return int(*v) }
 func (v *intV) String() string      { return fmt.Sprint(int(*v)) }
@@ -58,7 +58,7 @@ func intSliceNew(vals []int) *intSlice {
 	return (*intSlice)(&vals)
 }
 
-func IntSliceEmpty() (Value, error)  { return intSliceNew(nil), nil }
+func IntSlice() (Value, error)       { return intSliceNew(nil), nil }
 func (v *intSlice) Get() interface{} { return []int(*v) }
 
 func (v *intSlice) ReplaceFromInterface(iFace interface{}) error {

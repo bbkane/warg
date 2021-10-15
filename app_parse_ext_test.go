@@ -35,7 +35,7 @@ func TestApp_Parse(t *testing.T) {
 					s.WithFlag(
 						"--af1",
 						"flag help",
-						v.IntEmpty,
+						v.Int,
 					),
 					s.WithSection(
 						"cat1",
@@ -47,7 +47,7 @@ func TestApp_Parse(t *testing.T) {
 							c.WithFlag(
 								"--com1f1",
 								"flag help",
-								v.IntEmpty,
+								v.Int,
 								f.Default("10"),
 							),
 						),
@@ -69,7 +69,7 @@ func TestApp_Parse(t *testing.T) {
 					s.WithFlag(
 						"--af1",
 						"flag help",
-						v.IntEmpty,
+						v.Int,
 					),
 				),
 			),
@@ -92,7 +92,7 @@ func TestApp_Parse(t *testing.T) {
 						c.WithFlag(
 							"--flag",
 							"flag help",
-							v.StringEmpty,
+							v.String,
 							f.Default("hi"),
 						),
 					),
@@ -116,7 +116,7 @@ func TestApp_Parse(t *testing.T) {
 						c.WithFlag(
 							"--flag",
 							"flag help",
-							v.StringEmpty,
+							v.String,
 							f.Default("hi"),
 						),
 					),
@@ -136,7 +136,7 @@ func TestApp_Parse(t *testing.T) {
 					s.WithFlag(
 						"--key",
 						"a key",
-						v.StringEmpty,
+						v.String,
 						f.ConfigPath("key"),
 						f.Default("defaultkeyval"),
 					),
@@ -180,7 +180,7 @@ func TestApp_Parse(t *testing.T) {
 					s.WithFlag(
 						"--sflag",
 						"help for --sflag",
-						v.StringEmpty,
+						v.String,
 						f.Default("sflagval"),
 					),
 					s.WithCommand(
@@ -205,7 +205,7 @@ func TestApp_Parse(t *testing.T) {
 					s.WithFlag(
 						"--val",
 						"flag help",
-						v.StringEmpty,
+						v.String,
 						f.ConfigPath("params.val"),
 					),
 					s.WithCommand(
@@ -241,7 +241,7 @@ func TestApp_Parse(t *testing.T) {
 					s.WithFlag(
 						"--subreddits",
 						"the subreddits",
-						v.StringSliceEmpty,
+						v.StringSlice,
 						f.ConfigPath("subreddits[].name"),
 					),
 					s.WithCommand("print", "print key value", c.DoNothing),
