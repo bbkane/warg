@@ -12,6 +12,7 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
+- show section flags? It would be nice to show the --help flag
 - Enum value type - Make
 - make colored help
 - Write good doc comments, README, examples
