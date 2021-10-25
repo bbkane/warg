@@ -1,4 +1,4 @@
-package warg
+package help
 
 import (
 	"bufio"
@@ -110,8 +110,7 @@ func DefaultSectionHelp(w io.Writer, cur s.Section, _ HelpInfo) c.Action {
 		if len(cur.Sections) > 0 {
 			fmt.Fprintf(f, "Sections:\n")
 			fmt.Fprintln(f)
-		}
-		{
+
 			keys := make([]string, 0, len(cur.Sections))
 			for k := range cur.Sections {
 				keys = append(keys, k)
@@ -121,15 +120,15 @@ func DefaultSectionHelp(w io.Writer, cur s.Section, _ HelpInfo) c.Action {
 			for _, k := range keys {
 				fmt.Fprintf(f, "  %s : %s\n", k, cur.Sections[k].Help)
 			}
+
+			fmt.Fprintln(f)
 		}
-		fmt.Fprintln(f)
 
 		// Print commands
 		if len(cur.Commands) > 0 {
 			fmt.Fprintf(f, "Commands:\n")
 			fmt.Fprintln(f)
-		}
-		{
+
 			keys := make([]string, 0, len(cur.Commands))
 			for k := range cur.Commands {
 				keys = append(keys, k)
@@ -140,6 +139,7 @@ func DefaultSectionHelp(w io.Writer, cur s.Section, _ HelpInfo) c.Action {
 				fmt.Fprintf(f, "  %s : %s\n", k, cur.Commands[k].Help)
 			}
 		}
+
 		if cur.Footer != "" {
 			fmt.Fprintln(f)
 			fmt.Fprintf(f, "%s\n", cur.Footer)

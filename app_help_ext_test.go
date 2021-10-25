@@ -11,6 +11,8 @@ import (
 	"github.com/bbkane/warg"
 	c "github.com/bbkane/warg/command"
 	f "github.com/bbkane/warg/flag"
+	"github.com/bbkane/warg/help"
+
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
 	"github.com/stretchr/testify/require"
@@ -75,8 +77,8 @@ func TestDefaultSectionHelp(t *testing.T) {
 		warg.OverrideHelp(
 			&actualBuffer,
 			[]string{"-h", "--help"},
-			warg.DefaultSectionHelp,
-			warg.DefaultCommandHelp,
+			help.DefaultSectionHelp,
+			help.DefaultCommandHelp,
 		),
 	)
 	args := []string{"grabbit", "--help"}
@@ -152,8 +154,8 @@ grabbit config edit --config-path /path/to/config --editor code
 		warg.OverrideHelp(
 			&actualBuffer,
 			[]string{"-h", "--help"},
-			warg.DefaultSectionHelp,
-			warg.DefaultCommandHelp,
+			help.DefaultSectionHelp,
+			help.DefaultCommandHelp,
 		),
 	)
 	args := []string{"grabbit", "config", "edit", "--help"}

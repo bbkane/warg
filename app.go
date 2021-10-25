@@ -11,6 +11,7 @@ import (
 	c "github.com/bbkane/warg/command"
 	"github.com/bbkane/warg/configreader"
 	f "github.com/bbkane/warg/flag"
+	"github.com/bbkane/warg/help"
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
 )
@@ -29,14 +30,14 @@ type App struct {
 	name          string
 	helpFlagNames []string
 	helpWriter    io.Writer
-	sectionHelp   SectionHelp
-	commandHelp   CommandHelp
+	sectionHelp   help.SectionHelp
+	commandHelp   help.CommandHelp
 	// rootSection holds the good stuff!
 	rootSection s.Section
 }
 
 // OverrideHelp will let you provide own help function.
-func OverrideHelp(w io.Writer, helpFlagNames []string, sectionHelp SectionHelp, commandHelp CommandHelp) AppOpt {
+func OverrideHelp(w io.Writer, helpFlagNames []string, sectionHelp help.SectionHelp, commandHelp help.CommandHelp) AppOpt {
 	return func(app *App) {
 		app.sectionHelp = sectionHelp
 		app.commandHelp = commandHelp
@@ -80,8 +81,8 @@ func New(name string, rootSection s.Section, opts ...AppOpt) App {
 		OverrideHelp(
 			os.Stderr,
 			[]string{"-h", "--help"},
-			DefaultSectionHelp,
-			DefaultCommandHelp,
+			help.DefaultSectionHelp,
+			help.DefaultCommandHelp,
 		)(&app)
 	}
 
@@ -270,14 +271,14 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
 		pr := ParseResult{
-			Action: app.sectionHelp(app.helpWriter, *ftar.Section, HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}),
+			Action: app.sectionHelp(app.helpWriter, *ftar.Section, help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}),
 			// Action: app.sectionHelp(app.helpWriter, app.name, gar.Path, *ftar.Section, ftar.AllowedFlags),
 		}
 		return &pr, nil
 	} else if ftar.Section == nil && ftar.Command != nil {
 		if gar.HelpPassed {
 			pr := ParseResult{
-				Action: app.commandHelp(app.helpWriter, *ftar.Command, HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}),
+				Action: app.commandHelp(app.helpWriter, *ftar.Command, help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}),
 
 				// Action: app.commandHelp(app.helpWriter, app.name, gar.Path, *ftar.Command, ftar.AllowedFlags),
 			}

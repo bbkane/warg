@@ -15,8 +15,8 @@ type SectionMap = map[string]Section
 // SectionOpt customizes a Section on creation
 type SectionOpt = func(*Section)
 
-// Sections are like "folders" for Commmands
-// They should have noun names
+// Sections are like "folders" for Commmands.
+// They should have noun names.
 // Sections should not be created in place - use New/With/AddSection functions
 type Section struct {
 	// Flags holds flags available to this Section and all subsections and Commands
