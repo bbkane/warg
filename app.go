@@ -60,7 +60,7 @@ func ConfigFlag(
 	return func(app *App) {
 		app.configFlagName = configFlagName
 		app.newConfigReader = newConfigReader
-		configFlag := f.NewFlag(helpShort, v.Path, flagOpts...)
+		configFlag := f.New(helpShort, v.Path, flagOpts...)
 		app.configFlag = &configFlag
 	}
 }
@@ -208,7 +208,7 @@ type ParseResult struct {
 	// Path to the command invoked. Does not include executable name (os.Args[0])
 	Path []string
 	// PassedFlags holds the set flags!
-	PassedFlags f.FlagValues
+	PassedFlags f.PassedFlags
 	// Action holds the passed command's action to execute.
 	Action c.Action
 }
@@ -284,7 +284,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 			return &pr, nil
 		} else {
 			// TODO: change this
-			fvs := make(f.FlagValues)
+			fvs := make(f.PassedFlags)
 			for name, flag := range ftar.AllowedFlags {
 				if flag.SetBy != "" {
 					fvs[name] = flag.Value.Get()

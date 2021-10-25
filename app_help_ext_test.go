@@ -49,7 +49,7 @@ func TestDefaultSectionHelp(t *testing.T) {
 
 	app := warg.New(
 		"grabbit",
-		s.NewSection(
+		s.New(
 			"grab those images!",
 			s.WithSection(
 				"config",
@@ -124,7 +124,7 @@ grabbit config edit --config-path /path/to/config --editor code
 
 	app := warg.New(
 		"grabbit",
-		s.NewSection(
+		s.New(
 			"grab those images!",
 			s.WithSection(
 				"config",

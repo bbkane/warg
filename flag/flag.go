@@ -5,23 +5,28 @@ import (
 	"log"
 
 	"github.com/bbkane/warg/configreader"
-	"github.com/bbkane/warg/value"
 	v "github.com/bbkane/warg/value"
 )
 
+// FlagMap holds flags - used by Commands and Sections
 type FlagMap = map[string]Flag
+
+// FlagOpt customizes a Flag on creation
 type FlagOpt = func(*Flag)
 
-type FlagValues = map[string]interface{}
+// PassedFlags holds a map of flag names to flag Values and is passed to a command's Action
+type PassedFlags = map[string]interface{}
 
 type Flag struct {
 	// EmptyConstructor tells flag how to make a value
 	EmptyValueConstructor v.EmptyConstructor
-	ConfigPath            string
+	// ConfigPath is the path from the config to the value the flag updates
+	ConfigPath string
 	// DefaultValues will be shoved into Value if the app builder specifies it.
 	// For scalar values, the last DefaultValues wins
 	DefaultValues []string
-	Help          string
+	// Help is a message for the user on how to use this flag
+	Help string
 
 	// IsCommandFlag is set when parsing. Set to true if the flag was attached to a command (as opposed to being inherited from a section)
 	IsCommandFlag bool
@@ -33,16 +38,16 @@ type Flag struct {
 	Value v.Value
 }
 
-// resolveFLag updates a flag's value from the command line, and then from the
+// Resolve updates a flag's value from the command line, and then from the
 // default value. flag should not be nil. deletes from flagStrs
 func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReader configreader.ConfigReader) error {
 
-	v, err := flag.EmptyValueConstructor()
+	val, err := flag.EmptyValueConstructor()
 	if err != nil {
 		return fmt.Errorf("flag error: %v: %w", name, err)
 	}
-	flag.Value = v
-	flag.TypeDescription = v.Description()
+	flag.Value = val
+	flag.TypeDescription = val.Description()
 
 	// update from command line
 	{
@@ -51,7 +56,7 @@ func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReade
 		// idempotently resolve flags (like the config flag for example)
 		if flag.SetBy == "" && exists {
 
-			if v.TypeInfo() == value.TypeInfoScalar && len(strValues) > 1 {
+			if val.TypeInfo() == v.TypeInfoScalar && len(strValues) > 1 {
 				return fmt.Errorf("flag error: %v: flag passed multiple times, it's value (type %v), can only be updated once", name, flag.TypeDescription)
 			}
 
@@ -108,7 +113,8 @@ func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReade
 	return nil
 }
 
-func NewFlag(helpShort string, empty v.EmptyConstructor, opts ...FlagOpt) Flag {
+// New creates a Flag with options!
+func New(helpShort string, empty v.EmptyConstructor, opts ...FlagOpt) Flag {
 	flag := Flag{
 		Help:                  helpShort,
 		EmptyValueConstructor: empty,
@@ -119,12 +125,15 @@ func NewFlag(helpShort string, empty v.EmptyConstructor, opts ...FlagOpt) Flag {
 	return flag
 }
 
+// ConfigPath adds a configpath to a flag
 func ConfigPath(path string) FlagOpt {
 	return func(flag *Flag) {
 		flag.ConfigPath = path
 	}
 }
 
+// Default adds default values to a flag. The flag will be updated with each of the values when Resolve is called.
+// Panics when multiple values are passed and the flags is scalar
 func Default(values ...string) FlagOpt {
 	return func(flag *Flag) {
 		empty, err := flag.EmptyValueConstructor()

@@ -42,7 +42,7 @@ func printFlag(w io.Writer, name string, flag *f.Flag) {
 }
 
 func DefaultCommandHelp(w io.Writer, cur c.Command, helpInfo HelpInfo) c.Action {
-	return func(fv f.FlagValues) error {
+	return func(fv f.PassedFlags) error {
 		f := bufio.NewWriter(w)
 		defer f.Flush()
 		// Print top help section
@@ -93,7 +93,7 @@ func DefaultCommandHelp(w io.Writer, cur c.Command, helpInfo HelpInfo) c.Action 
 }
 
 func DefaultSectionHelp(w io.Writer, cur s.Section, _ HelpInfo) c.Action {
-	return func(fv f.FlagValues) error {
+	return func(fv f.PassedFlags) error {
 		f := bufio.NewWriter(w)
 		defer f.Flush()
 

@@ -16,6 +16,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// NOTE: this is is a bit of a hack to mock out a configreader
+// NOTE: see https://karthikkaranth.me/blog/functions-implementing-interfaces-in-go/
+// for how to use ConfigReaderFunc in tests
+type ConfigReaderFunc func(path string) (configreader.ConfigSearchResult, error)
+
+func (f ConfigReaderFunc) Search(path string) (configreader.ConfigSearchResult, error) {
+	return f(path)
+}
+
 func TestApp_Parse(t *testing.T) {
 
 	tests := []struct {
@@ -23,14 +32,14 @@ func TestApp_Parse(t *testing.T) {
 		app                      w.App
 		args                     []string
 		expectedPassedPath       []string
-		expectedPassedFlagValues f.FlagValues
+		expectedPassedFlagValues f.PassedFlags
 		expectedErr              bool
 	}{
 		{
 			name: "from main",
 			app: w.New(
 				"test",
-				s.NewSection(
+				s.New(
 					"help for test",
 					s.WithFlag(
 						"--af1",
@@ -57,14 +66,14 @@ func TestApp_Parse(t *testing.T) {
 
 			args:                     []string{"app", "cat1", "com1", "--com1f1", "1"},
 			expectedPassedPath:       []string{"cat1", "com1"},
-			expectedPassedFlagValues: f.FlagValues{"--com1f1": int(1)},
+			expectedPassedFlagValues: f.PassedFlags{"--com1f1": int(1)},
 			expectedErr:              false,
 		},
 		{
 			name: "no section",
 			app: w.New(
 				"test",
-				s.NewSection(
+				s.New(
 					"help for test",
 					s.WithFlag(
 						"--af1",
@@ -83,7 +92,7 @@ func TestApp_Parse(t *testing.T) {
 			name: "flag default",
 			app: w.New(
 				"test",
-				s.NewSection(
+				s.New(
 					"help for test",
 					s.WithCommand(
 						"com",
@@ -100,14 +109,14 @@ func TestApp_Parse(t *testing.T) {
 			),
 			args:                     []string{"test", "com"},
 			expectedPassedPath:       []string{"com"},
-			expectedPassedFlagValues: f.FlagValues{"--flag": "hi"},
+			expectedPassedFlagValues: f.PassedFlags{"--flag": "hi"},
 			expectedErr:              false,
 		},
 		{
 			name: "extra_flag",
 			app: w.New(
 				"test",
-				s.NewSection(
+				s.New(
 					"help for test",
 					s.WithCommand(
 						"com",
@@ -131,7 +140,7 @@ func TestApp_Parse(t *testing.T) {
 			name: "config_flag",
 			app: w.New(
 				"test",
-				s.NewSection(
+				s.New(
 					"help for test",
 					s.WithFlag(
 						"--key",
@@ -145,8 +154,7 @@ func TestApp_Parse(t *testing.T) {
 				w.ConfigFlag(
 					"--config",
 					func(_ string) (configreader.ConfigReader, error) {
-
-						var cr configreader.ConfigReaderFunc = func(path string) (configreader.ConfigSearchResult, error) {
+						var cr ConfigReaderFunc = func(path string) (configreader.ConfigSearchResult, error) {
 							if path == "key" {
 								return configreader.ConfigSearchResult{
 									IFace:        "mapkeyval",
@@ -165,7 +173,7 @@ func TestApp_Parse(t *testing.T) {
 			),
 			args:               []string{"test", "print", "--config", "passedconfigval"},
 			expectedPassedPath: []string{"print"},
-			expectedPassedFlagValues: f.FlagValues{
+			expectedPassedFlagValues: f.PassedFlags{
 				"--key":    "mapkeyval",
 				"--config": "passedconfigval",
 			},
@@ -175,7 +183,7 @@ func TestApp_Parse(t *testing.T) {
 			name: "section flag",
 			app: w.New(
 				"test",
-				s.NewSection(
+				s.New(
 					"help for test",
 					s.WithFlag(
 						"--sflag",
@@ -192,7 +200,7 @@ func TestApp_Parse(t *testing.T) {
 			),
 			args:               []string{"test", "com"},
 			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: f.FlagValues{
+			expectedPassedFlagValues: f.PassedFlags{
 				"--sflag": "sflagval",
 			},
 			expectedErr: false,
@@ -201,7 +209,7 @@ func TestApp_Parse(t *testing.T) {
 			name: "simple JSON config",
 			app: w.New(
 				"test",
-				s.NewSection("help for test",
+				s.New("help for test",
 					s.WithFlag(
 						"--val",
 						"flag help",
@@ -226,7 +234,7 @@ func TestApp_Parse(t *testing.T) {
 
 			args:               []string{"app", "com"},
 			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: f.FlagValues{
+			expectedPassedFlagValues: f.PassedFlags{
 				"--config": "testdata/simple_json_config.json",
 				"--val":    "hi",
 			},
@@ -236,7 +244,7 @@ func TestApp_Parse(t *testing.T) {
 			name: "config_slice",
 			app: w.New(
 				"test",
-				s.NewSection(
+				s.New(
 					"help for test",
 					s.WithFlag(
 						"--subreddits",
@@ -255,7 +263,7 @@ func TestApp_Parse(t *testing.T) {
 			),
 			args:               []string{"test", "print"},
 			expectedPassedPath: []string{"print"},
-			expectedPassedFlagValues: f.FlagValues{
+			expectedPassedFlagValues: f.PassedFlags{
 				"--subreddits": []string{"earthporn", "wallpapers"},
 				"--config":     "testdata/config_slice.json",
 			},

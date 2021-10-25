@@ -8,10 +8,18 @@ import (
 	v "github.com/bbkane/warg/value"
 )
 
-type Action = func(f.FlagValues) error
+// An Action is run as the result of a command
+type Action = func(f.PassedFlags) error
+
+// A CommandMap holds Commands and is used by Sections
 type CommandMap = map[string]Command
+
+// A CommandOpt customizes a Command
 type CommandOpt = func(*Command)
 
+// A Command will run code for you!
+// The name of a Command should probably be a verb - add , edit, run, ...
+// It should not be constructed directly - use AddCommand/NewCommand/WithCommand functions
 type Command struct {
 	Action Action
 	Flags  f.FlagMap
@@ -23,13 +31,14 @@ type Command struct {
 	HelpLong string
 }
 
-// DoNothing is a command action that simply returns
+// DoNothing is a command action that simply returns nil
 // Useful for prototyping
-func DoNothing(_ f.FlagValues) error {
+func DoNothing(_ f.PassedFlags) error {
 	return nil
 }
 
-func NewCommand(helpShort string, action Action, opts ...CommandOpt) Command {
+// New builds a Command
+func New(helpShort string, action Action, opts ...CommandOpt) Command {
 	command := Command{
 		Help:   helpShort,
 		Action: action,
@@ -41,6 +50,7 @@ func NewCommand(helpShort string, action Action, opts ...CommandOpt) Command {
 	return command
 }
 
+// AddFlag adds an existing flag to a Command. It panics if a flag with the same name exists
 func AddFlag(name string, value f.Flag) CommandOpt {
 	if !strings.HasPrefix(name, "-") {
 		log.Panicf("helpFlags should start with '-': %#v\n", name)
@@ -54,16 +64,19 @@ func AddFlag(name string, value f.Flag) CommandOpt {
 	}
 }
 
+// WithFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
 func WithFlag(name string, helpShort string, empty v.EmptyConstructor, opts ...f.FlagOpt) CommandOpt {
-	return AddFlag(name, f.NewFlag(helpShort, empty, opts...))
+	return AddFlag(name, f.New(helpShort, empty, opts...))
 }
 
+// Footer adds an Help string to the command - useful from a help function
 func Footer(footer string) CommandOpt {
 	return func(cat *Command) {
 		cat.Footer = footer
 	}
 }
 
+// HelpLong adds an Help string to the command - useful from a help function
 func HelpLong(helpLong string) CommandOpt {
 	return func(cat *Command) {
 		cat.HelpLong = helpLong

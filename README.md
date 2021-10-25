@@ -12,14 +12,13 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
-- show section flags? It would be nice to show the --help flag
+- add envvar option to flag
 - Enum value type - Make
 - make colored help
 - Write good doc comments, README, examples
 - make an app.Test() method folks can add to their apps - should test for unique flag names between parent and child sections/commands for one thing
 - go through TODOs
 - add required flag
-- add envvar option to flag
 - figure out what to do with --color , --help requires it?
 - make help take an argument? - help = man, json, color, web, form, term, lsp, bash-completion, zsh-completion
 
