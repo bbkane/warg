@@ -12,9 +12,21 @@ import (
 	s "github.com/bbkane/warg/section"
 )
 
-type CommandHelp = func(w io.Writer, appName string, path []string, cur c.Command, flagMap f.FlagMap) c.Action
+// HelpInfo lists common information available to a help function
+type HelpInfo struct {
+	// AppName as defined by warg.New()
+	AppName string
+	// Path passed either to a command or a section
+	Path []string
+	// AvailableFlags for the section or commmand.
+	// All flags are Resolved if possible (i.e., flag.SetBy != "")
+	AvailableFlags f.FlagMap
+	// RootSection of the app. Especially useful for printing all sections and commands
+	RootSection s.Section
+}
 
-type SectionHelp = func(w io.Writer, appName string, path []string, cur s.Section, flagMap f.FlagMap) c.Action
+type CommandHelp = func(w io.Writer, cur c.Command, helpInfo HelpInfo) c.Action
+type SectionHelp = func(w io.Writer, cur s.Section, helpInfo HelpInfo) c.Action
 
 func printFlag(w io.Writer, name string, flag *f.Flag) {
 	fmt.Fprintf(w, "  %s : %s\n", name, flag.Help)
@@ -29,14 +41,8 @@ func printFlag(w io.Writer, name string, flag *f.Flag) {
 	fmt.Fprintln(w)
 }
 
-func DefaultCommandHelp(
-	w io.Writer,
-	appName string,
-	path []string,
-	cur c.Command,
-	flagMap f.FlagMap,
-) c.Action {
-	return func(_ f.FlagValues) error {
+func DefaultCommandHelp(w io.Writer, cur c.Command, helpInfo HelpInfo) c.Action {
+	return func(fv f.FlagValues) error {
 		f := bufio.NewWriter(w)
 		defer f.Flush()
 		// Print top help section
@@ -53,13 +59,13 @@ func DefaultCommandHelp(
 		var commandFlagHelp bytes.Buffer
 		var sectionFlagHelp bytes.Buffer
 		{
-			keys := make([]string, 0, len(flagMap))
-			for k := range flagMap {
+			keys := make([]string, 0, len(helpInfo.AvailableFlags))
+			for k := range helpInfo.AvailableFlags {
 				keys = append(keys, k)
 			}
 			sort.Strings(keys)
 			for _, name := range keys {
-				flag := flagMap[name]
+				flag := helpInfo.AvailableFlags[name]
 				if flag.IsCommandFlag {
 					printFlag(&commandFlagHelp, name, &flag)
 				} else {
@@ -82,17 +88,12 @@ func DefaultCommandHelp(
 			fmt.Fprintf(f, "%s\n", cur.Footer)
 		}
 		return nil
+
 	}
 }
 
-func DefaultSectionHelp(
-	w io.Writer,
-	appName string,
-	path []string,
-	cur s.Section,
-	flagMap f.FlagMap,
-) c.Action {
-	return func(_ f.FlagValues) error {
+func DefaultSectionHelp(w io.Writer, cur s.Section, _ HelpInfo) c.Action {
+	return func(fv f.FlagValues) error {
 		f := bufio.NewWriter(w)
 		defer f.Flush()
 
@@ -121,7 +122,6 @@ func DefaultSectionHelp(
 				fmt.Fprintf(f, "  %s : %s\n", k, cur.Sections[k].Help)
 			}
 		}
-
 		fmt.Fprintln(f)
 
 		// Print commands

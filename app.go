@@ -1,3 +1,4 @@
+// Declaratively create heirarchical command line apps.
 package warg
 
 import (
@@ -14,8 +15,11 @@ import (
 	v "github.com/bbkane/warg/value"
 )
 
+// AppOpt let's you customize the app. It panics if there is an error
 type AppOpt = func(*App)
 
+// An App contains your defined sections, commands, and flags
+// Create a new App with New()
 type App struct {
 	// Config()
 	configFlagName  string
@@ -31,6 +35,7 @@ type App struct {
 	rootSection s.Section
 }
 
+// OverrideHelp will let you provide own help function.
 func OverrideHelp(w io.Writer, helpFlagNames []string, sectionHelp SectionHelp, commandHelp CommandHelp) AppOpt {
 	return func(app *App) {
 		app.sectionHelp = sectionHelp
@@ -45,6 +50,7 @@ func OverrideHelp(w io.Writer, helpFlagNames []string, sectionHelp SectionHelp, 
 	}
 }
 
+// ConfigFlag lets you customize your config flag. Especially useful for changing the config reader (for example to choose whether to use a JSON or YAML structured config)
 func ConfigFlag(
 	configFlagName string,
 	newConfigReader configreader.NewConfigReader,
@@ -59,6 +65,7 @@ func ConfigFlag(
 	}
 }
 
+// New builds a new App!
 func New(name string, rootSection s.Section, opts ...AppOpt) App {
 	app := App{
 		name:        name,
@@ -196,6 +203,17 @@ func fitToApp(rootSection s.Section, path []string) (*fitToAppResult, error) {
 	return &ftar, nil
 }
 
+// ParseResult holds the result of parsing the command line.
+type ParseResult struct {
+	// Path to the command invoked. Does not include executable name (os.Args[0])
+	Path []string
+	// PassedFlags holds the set flags!
+	PassedFlags f.FlagValues
+	// Action holds the passed command's action to execute.
+	Action c.Action
+}
+
+// Parse parses the args, but does not execute anything.
 func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	gar, err := gatherArgs(osArgs, app.helpFlagNames)
 	if err != nil {
@@ -252,13 +270,16 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
 		pr := ParseResult{
-			Action: app.sectionHelp(app.helpWriter, app.name, gar.Path, *ftar.Section, ftar.AllowedFlags),
+			Action: app.sectionHelp(app.helpWriter, *ftar.Section, HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}),
+			// Action: app.sectionHelp(app.helpWriter, app.name, gar.Path, *ftar.Section, ftar.AllowedFlags),
 		}
 		return &pr, nil
 	} else if ftar.Section == nil && ftar.Command != nil {
 		if gar.HelpPassed {
 			pr := ParseResult{
-				Action: app.commandHelp(app.helpWriter, app.name, gar.Path, *ftar.Command, ftar.AllowedFlags),
+				Action: app.commandHelp(app.helpWriter, *ftar.Command, HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}),
+
+				// Action: app.commandHelp(app.helpWriter, app.name, gar.Path, *ftar.Command, ftar.AllowedFlags),
 			}
 			return &pr, nil
 		} else {
@@ -271,7 +292,7 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 			}
 
 			pr := ParseResult{
-				PasssedPath: gar.Path,
+				Path:        gar.Path,
 				PassedFlags: fvs,
 				Action:      ftar.Action,
 			}
@@ -282,6 +303,8 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 	}
 }
 
+// Run parses the args, runs the action for the command passed,
+// and returns any errors encountered.
 func (app *App) Run(osArgs []string) error {
 	pr, err := app.Parse(osArgs)
 	if err != nil {
@@ -294,19 +317,13 @@ func (app *App) Run(osArgs []string) error {
 	return nil
 }
 
-// MustRun runs the app with os.Args
+// MustRun runs the app
 // If there's an error, it will be printed to stderr and os.Exit(1)
 // will be called
-func (app *App) MustRun() {
-	err := app.Run(os.Args)
+func (app *App) MustRun(osArgs []string) {
+	err := app.Run(osArgs)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-}
-
-type ParseResult struct {
-	PasssedPath []string
-	PassedFlags f.FlagValues
-	Action      c.Action
 }
