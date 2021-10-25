@@ -11,10 +11,12 @@ const (
 	TypeInfoSlice
 )
 
-// Value is a "generic" type that lets me store different types into flags
-//  ~Stolen from~ "Inspired by" https://golang.org/src/flag/flag.go?#L138
+// Value is a "generic" type to store different types into flags
+// Inspired by https://golang.org/src/flag/flag.go .
 // There are two underlying "type" families designed to fit in Value:
+//
 // - scalar types (Int, String, ...)
+//
 // - container types (IntSlice, StringMap, ...)
 type Value interface {
 
@@ -44,7 +46,7 @@ type Value interface {
 	UpdateFromInterface(interface{}) error
 }
 
-// EmptyConstructur just builds a new value
+// EmptyConstructur just builds a new value.
 // Useful to create new values as well as initialize them
 type EmptyConstructor = func() (Value, error)
 

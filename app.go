@@ -317,7 +317,7 @@ func (app *App) Run(osArgs []string) error {
 	return nil
 }
 
-// MustRun runs the app
+// MustRun runs the app.
 // If there's an error, it will be printed to stderr and os.Exit(1)
 // will be called
 func (app *App) MustRun(osArgs []string) {
