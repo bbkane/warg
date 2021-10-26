@@ -211,8 +211,10 @@ func resolveFlag(
 	name string,
 	flagStrs map[string][]string,
 	configReader configreader.ConfigReader,
+	lookupEnv LookupFunc,
 ) error {
-	// return flag.Resolve(name, flagStrs, configReader)
+	// TODO: can I delete from flagStrs in the caller? then I wouldn't need to pass
+	// flagStrs (just a potential strValues) into here and it's a more pure function
 
 	val, err := flag.EmptyValueConstructor()
 	if err != nil {
@@ -221,7 +223,7 @@ func resolveFlag(
 	flag.Value = val
 	flag.TypeDescription = val.Description()
 
-	// update from command line
+	// try to update from command line and delete from flagStrs
 	{
 		strValues, exists := flagStrs[name]
 		// the setby check for the first case is needed to
@@ -272,6 +274,21 @@ func resolveFlag(
 		}
 	}
 
+	// update from envvars
+	{
+		if flag.SetBy == "" && len(flag.EnvVars) > 0 {
+			for _, e := range flag.EnvVars {
+				val, exists := lookupEnv(e)
+				if exists {
+					flag.Value.Update(val)
+					flag.SetBy = "envvar"
+					break // stop looking for envvars
+				}
+
+			}
+		}
+	}
+
 	// update from default
 	{
 		if flag.SetBy == "" && len(flag.DefaultValues) > 0 {
@@ -296,7 +313,7 @@ type ParseResult struct {
 }
 
 // Parse parses the args, but does not execute anything.
-func (app *App) Parse(osArgs []string, lookup LookupFunc) (*ParseResult, error) {
+func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, error) {
 	gar, err := gatherArgs(osArgs, app.helpFlagNames)
 	if err != nil {
 		return nil, err
@@ -312,8 +329,8 @@ func (app *App) Parse(osArgs []string, lookup LookupFunc) (*ParseResult, error) 
 	// get the value of a potential passed --config flag
 	if app.configFlag != nil {
 		// we're gonna make a config map out of this if everything goes well
-		// so pass nil for that now
-		err = resolveFlag(app.configFlag, app.configFlagName, gar.FlagStrs, nil)
+		// so pass nil for the configreader now
+		err = resolveFlag(app.configFlag, app.configFlagName, gar.FlagStrs, nil, osLookupEnv)
 		if err != nil {
 			return nil, err
 		}
@@ -328,7 +345,7 @@ func (app *App) Parse(osArgs []string, lookup LookupFunc) (*ParseResult, error) 
 	// Loop over allowed flags for the passed command and try to resolve them
 	for name, flag := range ftar.AllowedFlags {
 
-		err = resolveFlag(&flag, name, gar.FlagStrs, configReader)
+		err = resolveFlag(&flag, name, gar.FlagStrs, configReader, osLookupEnv)
 		if err != nil {
 			return nil, err
 		}
@@ -387,8 +404,8 @@ func (app *App) Parse(osArgs []string, lookup LookupFunc) (*ParseResult, error) 
 
 // Run parses the args, runs the action for the command passed,
 // and returns any errors encountered.
-func (app *App) Run(osArgs []string, lookup LookupFunc) error {
-	pr, err := app.Parse(osArgs, lookup)
+func (app *App) Run(osArgs []string, osLookupEnv LookupFunc) error {
+	pr, err := app.Parse(osArgs, osLookupEnv)
 	if err != nil {
 		return err
 	}
@@ -402,8 +419,8 @@ func (app *App) Run(osArgs []string, lookup LookupFunc) error {
 // MustRun runs the app.
 // If there's an error, it will be printed to stderr and os.Exit(1)
 // will be called
-func (app *App) MustRun(osArgs []string, lookup LookupFunc) {
-	err := app.Run(osArgs, lookup)
+func (app *App) MustRun(osArgs []string, osLookupEnv LookupFunc) {
+	err := app.Run(osArgs, osLookupEnv)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

@@ -277,6 +277,38 @@ func TestApp_Parse(t *testing.T) {
 			},
 			expectedErr: false,
 		},
+		{
+			name: "envvar",
+			app: warg.New(
+				t.Name(),
+				s.New(
+					"help for test",
+					s.WithFlag(
+						"--flag",
+						"help for --flag",
+						v.String,
+						f.EnvVars("notthere", "there", "alsothere"),
+					),
+					s.WithCommand(
+						"test",
+						"blah",
+						c.DoNothing,
+					),
+				),
+			),
+			args: []string{t.Name(), "test"},
+			lookup: warg.DictLookup(
+				map[string]string{
+					"there":     "there",
+					"alsothere": "alsothere",
+				},
+			),
+			expectedPassedPath: []string{"test"},
+			expectedPassedFlagValues: f.PassedFlags{
+				"--flag": "there",
+			},
+			expectedErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

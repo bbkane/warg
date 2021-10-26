@@ -12,9 +12,6 @@ type FlagMap = map[string]Flag
 // FlagOpt customizes a Flag on creation
 type FlagOpt = func(*Flag)
 
-// Look up keys (meant for environment variable parsing) - fulfillable with os.LookupEnv or warg.DictLookup(map)
-type LookupFunc = func(key string) (string, bool)
-
 // PassedFlags holds a map of flag names to flag Values and is passed to a command's Action
 type PassedFlags = map[string]interface{}
 
@@ -26,6 +23,8 @@ type Flag struct {
 	// DefaultValues will be shoved into Value if the app builder specifies it.
 	// For scalar values, the last DefaultValues wins
 	DefaultValues []string
+	// Envvars holds a list of environment variables to update this flag. Only the first one that exists will be used.
+	EnvVars []string
 	// Help is a message for the user on how to use this flag
 	Help string
 
@@ -70,5 +69,12 @@ func Default(values ...string) FlagOpt {
 			log.Panicf("a scalar flag should only have one default value: We don't know the name of the type, but here's the Help: %#v", flag.Help)
 		}
 		flag.DefaultValues = values
+	}
+}
+
+// EnvVars adds a list of environmental variables to search through to update this flag. The first one that exists will be used to update the flag. Further existing envvars will be ignored.
+func EnvVars(name ...string) FlagOpt {
+	return func(f *Flag) {
+		f.EnvVars = name
 	}
 }

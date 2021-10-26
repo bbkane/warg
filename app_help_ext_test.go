@@ -142,6 +142,8 @@ grabbit config edit --config-path /path/to/config --editor code
 						"path to editor",
 						v.String,
 						f.Default("vi"),
+						f.ConfigPath("editor"),
+						f.EnvVars("EDITOR"),
 					),
 				),
 			),
@@ -159,7 +161,7 @@ grabbit config edit --config-path /path/to/config --editor code
 		),
 	)
 	args := []string{"grabbit", "config", "edit", "--help"}
-	actualErr := app.Run(args, warg.DictLookup(nil))
+	actualErr := app.Run(args, warg.DictLookup(map[string]string{"EDITOR": "emacs"}))
 	require.Nil(t, actualErr)
 
 	golden := filepath.Join("testdata", t.Name()+".golden.txt")

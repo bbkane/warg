@@ -30,13 +30,19 @@ type SectionHelp = func(w io.Writer, cur s.Section, helpInfo HelpInfo) c.Action
 
 func printFlag(w io.Writer, name string, flag *f.Flag) {
 	fmt.Fprintf(w, "  %s : %s\n", name, flag.Help)
-	if flag.ConfigPath != "" {
-		fmt.Fprintf(w, "    configpath : %s\n", flag.ConfigPath)
-	}
 	fmt.Fprintf(w, "    type : %s\n", flag.TypeDescription)
 	if flag.SetBy != "" {
 		fmt.Fprintf(w, "    value : %s\n", flag.Value)
 		fmt.Fprintf(w, "    setby : %s\n", flag.SetBy)
+	}
+	if len(flag.DefaultValues) > 0 {
+		fmt.Fprintf(w, "    default : %s\n", flag.DefaultValues)
+	}
+	if flag.ConfigPath != "" {
+		fmt.Fprintf(w, "    configpath : %s\n", flag.ConfigPath)
+	}
+	if len(flag.EnvVars) > 0 {
+		fmt.Fprintf(w, "    envvars : %s\n", flag.EnvVars)
 	}
 	fmt.Fprintln(w)
 }

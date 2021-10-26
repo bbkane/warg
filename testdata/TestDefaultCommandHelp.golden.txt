@@ -4,8 +4,11 @@ Command Flags:
 
   --editor : path to editor
     type : string
-    value : vi
-    setby : appdefault
+    value : emacs
+    setby : envvar
+    default : [vi]
+    configpath : editor
+    envvars : [EDITOR]
 
 Examples:
 

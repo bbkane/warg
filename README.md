@@ -12,7 +12,6 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 
 # TODO: Next milestone: grabbit
 
-- add envvar option to flag
 - add required flag
 - Add secret flags - TODO: does this break everything? Secrets shouldn't be passed via CLI yet this library demands that...
 - Enum value type - Make
