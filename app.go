@@ -215,7 +215,7 @@ type ParseResult struct {
 }
 
 // Parse parses the args, but does not execute anything.
-func (app *App) Parse(osArgs []string) (*ParseResult, error) {
+func (app *App) Parse(osArgs []string, lookup f.LookupFunc) (*ParseResult, error) {
 	gar, err := gatherArgs(osArgs, app.helpFlagNames)
 	if err != nil {
 		return nil, err
@@ -306,8 +306,8 @@ func (app *App) Parse(osArgs []string) (*ParseResult, error) {
 
 // Run parses the args, runs the action for the command passed,
 // and returns any errors encountered.
-func (app *App) Run(osArgs []string) error {
-	pr, err := app.Parse(osArgs)
+func (app *App) Run(osArgs []string, lookup f.LookupFunc) error {
+	pr, err := app.Parse(osArgs, lookup)
 	if err != nil {
 		return err
 	}
@@ -321,10 +321,17 @@ func (app *App) Run(osArgs []string) error {
 // MustRun runs the app.
 // If there's an error, it will be printed to stderr and os.Exit(1)
 // will be called
-func (app *App) MustRun(osArgs []string) {
-	err := app.Run(osArgs)
+func (app *App) MustRun(osArgs []string, lookup f.LookupFunc) {
+	err := app.Run(osArgs, lookup)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
+	}
+}
+
+func DictLookup(m map[string]string) f.LookupFunc {
+	return func(key string) (string, bool) {
+		val, exists := m[key]
+		return val, exists
 	}
 }

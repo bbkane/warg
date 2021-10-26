@@ -14,6 +14,9 @@ type FlagMap = map[string]Flag
 // FlagOpt customizes a Flag on creation
 type FlagOpt = func(*Flag)
 
+// Look up keys (meant for environment variable parsing) - fulfillable with os.LookupEnv or warg.DictLookup(map)
+type LookupFunc = func(key string) (string, bool)
+
 // PassedFlags holds a map of flag names to flag Values and is passed to a command's Action
 type PassedFlags = map[string]interface{}
 
@@ -40,7 +43,11 @@ type Flag struct {
 
 // Resolve updates a flag's value from the command line, and then from the
 // default value. flag should not be nil. deletes from flagStrs
-func (flag *Flag) Resolve(name string, flagStrs map[string][]string, configReader configreader.ConfigReader) error {
+func (flag *Flag) Resolve(
+	name string,
+	flagStrs map[string][]string,
+	configReader configreader.ConfigReader,
+) error {
 
 	val, err := flag.EmptyValueConstructor()
 	if err != nil {

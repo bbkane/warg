@@ -82,7 +82,7 @@ func TestDefaultSectionHelp(t *testing.T) {
 		),
 	)
 	args := []string{"grabbit", "--help"}
-	actualErr := app.Run(args)
+	actualErr := app.Run(args, warg.DictLookup(nil))
 	require.Nil(t, actualErr)
 
 	golden := filepath.Join("testdata", t.Name()+".golden.txt")
@@ -159,7 +159,7 @@ grabbit config edit --config-path /path/to/config --editor code
 		),
 	)
 	args := []string{"grabbit", "config", "edit", "--help"}
-	actualErr := app.Run(args)
+	actualErr := app.Run(args, warg.DictLookup(nil))
 	require.Nil(t, actualErr)
 
 	golden := filepath.Join("testdata", t.Name()+".golden.txt")

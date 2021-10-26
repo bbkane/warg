@@ -5,7 +5,7 @@ package warg_test
 import (
 	"testing"
 
-	w "github.com/bbkane/warg"
+	"github.com/bbkane/warg"
 	c "github.com/bbkane/warg/command"
 	"github.com/bbkane/warg/configreader"
 	"github.com/bbkane/warg/configreader/jsonreader"
@@ -29,15 +29,16 @@ func TestApp_Parse(t *testing.T) {
 
 	tests := []struct {
 		name                     string
-		app                      w.App
+		app                      warg.App
 		args                     []string
+		lookup                   f.LookupFunc
 		expectedPassedPath       []string
 		expectedPassedFlagValues f.PassedFlags
 		expectedErr              bool
 	}{
 		{
 			name: "from main",
-			app: w.New(
+			app: warg.New(
 				"test",
 				s.New(
 					"help for test",
@@ -65,13 +66,14 @@ func TestApp_Parse(t *testing.T) {
 			),
 
 			args:                     []string{"app", "cat1", "com1", "--com1f1", "1"},
+			lookup:                   warg.DictLookup(nil),
 			expectedPassedPath:       []string{"cat1", "com1"},
 			expectedPassedFlagValues: f.PassedFlags{"--com1f1": int(1)},
 			expectedErr:              false,
 		},
 		{
 			name: "no section",
-			app: w.New(
+			app: warg.New(
 				"test",
 				s.New(
 					"help for test",
@@ -82,15 +84,15 @@ func TestApp_Parse(t *testing.T) {
 					),
 				),
 			),
-
 			args:                     []string{"app"},
+			lookup:                   warg.DictLookup(nil),
 			expectedPassedPath:       nil,
 			expectedPassedFlagValues: nil,
 			expectedErr:              false,
 		},
 		{
 			name: "flag default",
-			app: w.New(
+			app: warg.New(
 				"test",
 				s.New(
 					"help for test",
@@ -108,13 +110,14 @@ func TestApp_Parse(t *testing.T) {
 				),
 			),
 			args:                     []string{"test", "com"},
+			lookup:                   warg.DictLookup(nil),
 			expectedPassedPath:       []string{"com"},
 			expectedPassedFlagValues: f.PassedFlags{"--flag": "hi"},
 			expectedErr:              false,
 		},
 		{
 			name: "extra_flag",
-			app: w.New(
+			app: warg.New(
 				"test",
 				s.New(
 					"help for test",
@@ -132,13 +135,14 @@ func TestApp_Parse(t *testing.T) {
 				),
 			),
 			args:                     []string{"test", "com", "--unexpected", "value"},
+			lookup:                   warg.DictLookup(nil),
 			expectedPassedPath:       nil,
 			expectedPassedFlagValues: nil,
 			expectedErr:              true,
 		},
 		{
 			name: "config_flag",
-			app: w.New(
+			app: warg.New(
 				"test",
 				s.New(
 					"help for test",
@@ -151,7 +155,7 @@ func TestApp_Parse(t *testing.T) {
 					),
 					s.WithCommand("print", "print key value", c.DoNothing),
 				),
-				w.ConfigFlag(
+				warg.ConfigFlag(
 					"--config",
 					func(_ string) (configreader.ConfigReader, error) {
 						var cr ConfigReaderFunc = func(path string) (configreader.ConfigSearchResult, error) {
@@ -172,6 +176,7 @@ func TestApp_Parse(t *testing.T) {
 				),
 			),
 			args:               []string{"test", "print", "--config", "passedconfigval"},
+			lookup:             warg.DictLookup(nil),
 			expectedPassedPath: []string{"print"},
 			expectedPassedFlagValues: f.PassedFlags{
 				"--key":    "mapkeyval",
@@ -181,7 +186,7 @@ func TestApp_Parse(t *testing.T) {
 		},
 		{
 			name: "section flag",
-			app: w.New(
+			app: warg.New(
 				"test",
 				s.New(
 					"help for test",
@@ -199,6 +204,7 @@ func TestApp_Parse(t *testing.T) {
 				),
 			),
 			args:               []string{"test", "com"},
+			lookup:             warg.DictLookup(nil),
 			expectedPassedPath: []string{"com"},
 			expectedPassedFlagValues: f.PassedFlags{
 				"--sflag": "sflagval",
@@ -207,7 +213,7 @@ func TestApp_Parse(t *testing.T) {
 		},
 		{
 			name: "simple JSON config",
-			app: w.New(
+			app: warg.New(
 				"test",
 				s.New("help for test",
 					s.WithFlag(
@@ -222,7 +228,7 @@ func TestApp_Parse(t *testing.T) {
 						c.DoNothing,
 					),
 				),
-				w.ConfigFlag(
+				warg.ConfigFlag(
 					"--config",
 					jsonreader.NewJSONConfigReader,
 					"path to config",
@@ -233,6 +239,7 @@ func TestApp_Parse(t *testing.T) {
 			),
 
 			args:               []string{"app", "com"},
+			lookup:             warg.DictLookup(nil),
 			expectedPassedPath: []string{"com"},
 			expectedPassedFlagValues: f.PassedFlags{
 				"--config": "testdata/simple_json_config.json",
@@ -242,7 +249,7 @@ func TestApp_Parse(t *testing.T) {
 		},
 		{
 			name: "config_slice",
-			app: w.New(
+			app: warg.New(
 				"test",
 				s.New(
 					"help for test",
@@ -254,7 +261,7 @@ func TestApp_Parse(t *testing.T) {
 					),
 					s.WithCommand("print", "print key value", c.DoNothing),
 				),
-				w.ConfigFlag(
+				warg.ConfigFlag(
 					"--config",
 					jsonreader.NewJSONConfigReader,
 					"config flag",
@@ -262,6 +269,7 @@ func TestApp_Parse(t *testing.T) {
 				),
 			),
 			args:               []string{"test", "print"},
+			lookup:             warg.DictLookup(nil),
 			expectedPassedPath: []string{"print"},
 			expectedPassedFlagValues: f.PassedFlags{
 				"--subreddits": []string{"earthporn", "wallpapers"},
@@ -273,7 +281,7 @@ func TestApp_Parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			actualPR, actualErr := tt.app.Parse(tt.args)
+			actualPR, actualErr := tt.app.Parse(tt.args, tt.lookup)
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
