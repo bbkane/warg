@@ -27,6 +27,8 @@ type Flag struct {
 	EnvVars []string
 	// Help is a message for the user on how to use this flag
 	Help string
+	// Required means the user MUST fill this flag
+	Required bool
 
 	// IsCommandFlag is set when parsing. Set to true if the flag was attached to a command (as opposed to being inherited from a section)
 	IsCommandFlag bool
@@ -76,5 +78,12 @@ func Default(values ...string) FlagOpt {
 func EnvVars(name ...string) FlagOpt {
 	return func(f *Flag) {
 		f.EnvVars = name
+	}
+}
+
+// Required means the user MUST fill this flag
+func Required() FlagOpt {
+	return func(f *Flag) {
+		f.Required = true
 	}
 }

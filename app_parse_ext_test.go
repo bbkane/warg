@@ -309,6 +309,33 @@ func TestApp_Parse(t *testing.T) {
 			},
 			expectedErr: false,
 		},
+		{
+			name: "requiredFlag",
+			app: warg.New(
+				t.Name(),
+				s.New(
+					"help for test",
+					s.WithFlag(
+						"--flag",
+						"help for --flag",
+						v.String,
+						f.Required(),
+					),
+					s.WithCommand(
+						"test",
+						"blah",
+						c.DoNothing,
+					),
+				),
+			),
+			args: []string{t.Name(), "test"},
+			lookup: warg.DictLookup(
+				nil,
+			),
+			expectedPassedPath:       []string{"test"},
+			expectedPassedFlagValues: f.PassedFlags{},
+			expectedErr:              true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

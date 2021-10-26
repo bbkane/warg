@@ -44,6 +44,9 @@ func printFlag(w io.Writer, name string, flag *f.Flag) {
 	if len(flag.EnvVars) > 0 {
 		fmt.Fprintf(w, "    envvars : %s\n", flag.EnvVars)
 	}
+	if flag.Required {
+		fmt.Fprintf(w, "    required : true\n")
+	}
 	fmt.Fprintln(w)
 }
 

@@ -144,6 +144,7 @@ grabbit config edit --config-path /path/to/config --editor code
 						f.Default("vi"),
 						f.ConfigPath("editor"),
 						f.EnvVars("EDITOR"),
+						f.Required(),
 					),
 				),
 			),
