@@ -204,6 +204,87 @@ func fitToApp(rootSection s.Section, path []string) (*fitToAppResult, error) {
 	return &ftar, nil
 }
 
+// resolveFlag updates a flag's value from the command line, and then from the
+// default value. flag should not be nil. deletes from flagStrs
+func resolveFlag(
+	flag *f.Flag,
+	name string,
+	flagStrs map[string][]string,
+	configReader configreader.ConfigReader,
+) error {
+	// return flag.Resolve(name, flagStrs, configReader)
+
+	val, err := flag.EmptyValueConstructor()
+	if err != nil {
+		return fmt.Errorf("flag error: %v: %w", name, err)
+	}
+	flag.Value = val
+	flag.TypeDescription = val.Description()
+
+	// update from command line
+	{
+		strValues, exists := flagStrs[name]
+		// the setby check for the first case is needed to
+		// idempotently resolve flags (like the config flag for example)
+		if flag.SetBy == "" && exists {
+
+			if val.TypeInfo() == v.TypeInfoScalar && len(strValues) > 1 {
+				return fmt.Errorf("flag error: %v: flag passed multiple times, it's value (type %v), can only be updated once", name, flag.TypeDescription)
+			}
+
+			for _, v := range strValues {
+				flag.Value.Update(v)
+			}
+			flag.SetBy = "passedflag"
+			// later we'll ensure that these aren't all used
+			delete(flagStrs, name)
+		}
+	}
+
+	// update from config
+	{
+		if flag.SetBy == "" && configReader != nil {
+			fpr, err := configReader.Search(flag.ConfigPath)
+			if err != nil {
+				return err
+			}
+			if fpr.Exists {
+				if !fpr.IsAggregated {
+					err := flag.Value.ReplaceFromInterface(fpr.IFace)
+					if err != nil {
+						return err
+					}
+					flag.SetBy = "config"
+				} else {
+					under, ok := fpr.IFace.([]interface{})
+					if !ok {
+						return fmt.Errorf("expected []interface{}, got: %#v", under)
+					}
+					for _, e := range under {
+						err = flag.Value.UpdateFromInterface(e)
+						if err != nil {
+							return fmt.Errorf("could not update container type value: %w", err)
+						}
+					}
+					flag.SetBy = "config"
+				}
+			}
+		}
+	}
+
+	// update from default
+	{
+		if flag.SetBy == "" && len(flag.DefaultValues) > 0 {
+			for _, v := range flag.DefaultValues {
+				flag.Value.Update(v)
+			}
+			flag.SetBy = "appdefault"
+		}
+	}
+
+	return nil
+}
+
 // ParseResult holds the result of parsing the command line.
 type ParseResult struct {
 	// Path to the command invoked. Does not include executable name (os.Args[0])
@@ -215,7 +296,7 @@ type ParseResult struct {
 }
 
 // Parse parses the args, but does not execute anything.
-func (app *App) Parse(osArgs []string, lookup f.LookupFunc) (*ParseResult, error) {
+func (app *App) Parse(osArgs []string, lookup LookupFunc) (*ParseResult, error) {
 	gar, err := gatherArgs(osArgs, app.helpFlagNames)
 	if err != nil {
 		return nil, err
@@ -232,7 +313,7 @@ func (app *App) Parse(osArgs []string, lookup f.LookupFunc) (*ParseResult, error
 	if app.configFlag != nil {
 		// we're gonna make a config map out of this if everything goes well
 		// so pass nil for that now
-		err = app.configFlag.Resolve(app.configFlagName, gar.FlagStrs, nil)
+		err = resolveFlag(app.configFlag, app.configFlagName, gar.FlagStrs, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -247,7 +328,7 @@ func (app *App) Parse(osArgs []string, lookup f.LookupFunc) (*ParseResult, error
 	// Loop over allowed flags for the passed command and try to resolve them
 	for name, flag := range ftar.AllowedFlags {
 
-		err = flag.Resolve(name, gar.FlagStrs, configReader)
+		err = resolveFlag(&flag, name, gar.FlagStrs, configReader)
 		if err != nil {
 			return nil, err
 		}
@@ -306,7 +387,7 @@ func (app *App) Parse(osArgs []string, lookup f.LookupFunc) (*ParseResult, error
 
 // Run parses the args, runs the action for the command passed,
 // and returns any errors encountered.
-func (app *App) Run(osArgs []string, lookup f.LookupFunc) error {
+func (app *App) Run(osArgs []string, lookup LookupFunc) error {
 	pr, err := app.Parse(osArgs, lookup)
 	if err != nil {
 		return err
@@ -321,7 +402,7 @@ func (app *App) Run(osArgs []string, lookup f.LookupFunc) error {
 // MustRun runs the app.
 // If there's an error, it will be printed to stderr and os.Exit(1)
 // will be called
-func (app *App) MustRun(osArgs []string, lookup f.LookupFunc) {
+func (app *App) MustRun(osArgs []string, lookup LookupFunc) {
 	err := app.Run(osArgs, lookup)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -329,7 +410,10 @@ func (app *App) MustRun(osArgs []string, lookup f.LookupFunc) {
 	}
 }
 
-func DictLookup(m map[string]string) f.LookupFunc {
+// Look up keys (meant for environment variable parsing) - fulfillable with os.LookupEnv or warg.DictLookup(map)
+type LookupFunc = func(key string) (string, bool)
+
+func DictLookup(m map[string]string) LookupFunc {
 	return func(key string) (string, bool) {
 		val, exists := m[key]
 		return val, exists

@@ -31,7 +31,7 @@ func TestApp_Parse(t *testing.T) {
 		name                     string
 		app                      warg.App
 		args                     []string
-		lookup                   f.LookupFunc
+		lookup                   warg.LookupFunc
 		expectedPassedPath       []string
 		expectedPassedFlagValues f.PassedFlags
 		expectedErr              bool
