@@ -52,6 +52,8 @@ func intSliceNew(vals []int) *intSlice {
 	return (*intSlice)(&vals)
 }
 
+// IntSlice is updateable from a float or int. If a float is passed, it will be truncated.
+// Example: 4.5 -> 4, 3.99 -> 3
 func IntSlice() (Value, error)       { return intSliceNew(nil), nil }
 func (v *intSlice) Get() interface{} { return []int(*v) }
 

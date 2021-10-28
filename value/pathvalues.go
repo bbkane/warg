@@ -41,6 +41,7 @@ func (v *pathV) UpdateFromInterface(iFace interface{}) error {
 	return nil
 }
 
+// Path autoexpands ~ when updated and otherwise behaves like a string
 func Path() (Value, error) {
 	return pathNew("")
 }
@@ -79,6 +80,7 @@ func (v *pathSliceV) UpdateFromInterface(iFace interface{}) error {
 func (v *pathSliceV) TypeInfo() typeInfo  { return TypeInfoSlice }
 func (v *pathSliceV) Description() string { return "path slice" }
 
+// PathSlice autoexpands ~ when updated and otherwise behaves like a []string
 func PathSlice() (Value, error) { return &pathSliceV{}, nil }
 
 func (v *pathSliceV) ReplaceFromInterface(iFace interface{}) error {

@@ -6,9 +6,11 @@ import (
 
 type typeInfo int64
 
+// These constants describe the container type of a Value.
 const (
 	TypeInfoScalar typeInfo = iota + 1
 	TypeInfoSlice
+	TypeInfoMap
 )
 
 // Value is a "generic" type to store different types into flags
