@@ -37,8 +37,8 @@ type Value interface {
 	// and replaces scalar Values
 	Update(string) error
 
-	// UpdateFrom interface updates a container type Value from an interface (useful for configs)
-	// and replaces scalar values
+	// UpdateFromInterface updates a container type Value from an interface (useful for configs)
+	// and replaces scalar values (for scalar values, UpdateFromInterface is the same as ReplaceFromInterface).
 	// Note that UpdateFromInterface must be called with the "contained" type for container type Values
 	// For example, the StringSlice.UpdateFromInterface
 	// must be called with a string, not a []string

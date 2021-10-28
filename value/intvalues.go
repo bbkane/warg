@@ -10,7 +10,10 @@ import (
 type intV int
 
 func intNew(val int) *intV { return (*intV)(&val) }
-func Int() (Value, error)  { return intNew(0), nil }
+
+// Int is updateable from a float or int. If a float is passed, it will be truncated.
+// Example: 4.5 -> 4, 3.99 -> 3
+func Int() (Value, error) { return intNew(0), nil }
 
 func (v *intV) Get() interface{}    { return int(*v) }
 func (v *intV) String() string      { return fmt.Sprint(int(*v)) }
@@ -38,16 +41,7 @@ func (v *intV) Update(s string) error {
 	return nil
 }
 func (v *intV) UpdateFromInterface(iFace interface{}) error {
-	// TODO: make this accept a float to not panic!
-	switch under := iFace.(type) {
-	case int:
-		*v = intV(under)
-	case float64: // like JSON
-		*v = intV(int(under))
-	default:
-		return fmt.Errorf("can't create IntValue. Expected: int or float64, got: %#v", iFace)
-	}
-	return nil
+	return v.ReplaceFromInterface(iFace)
 }
 
 // intSlice is updateable from a float or int. If a float is passed, it will be truncated.

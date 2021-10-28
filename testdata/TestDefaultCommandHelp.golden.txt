@@ -9,6 +9,7 @@ Command Flags:
     default : [vi]
     configpath : editor
     envvars : [EDITOR]
+    required : true
 
 Examples:
 

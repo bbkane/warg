@@ -46,16 +46,7 @@ func Path() (Value, error) {
 }
 
 func (v *pathV) ReplaceFromInterface(iFace interface{}) error {
-	under, ok := iFace.(string)
-	if !ok {
-		return ErrIncompatibleInterface
-	}
-	new, err := pathNew(under)
-	if err != nil {
-		return err
-	}
-	*v = *new
-	return nil
+	return v.UpdateFromInterface(iFace)
 }
 
 // ---

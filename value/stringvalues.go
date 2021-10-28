@@ -1,6 +1,8 @@
 package value
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type stringV string
 
@@ -26,12 +28,55 @@ func stringNew(val string) *stringV { return (*stringV)(&val) }
 func String() (Value, error)        { return stringNew(""), nil }
 
 func (v *stringV) ReplaceFromInterface(iFace interface{}) error {
+	return v.UpdateFromInterface(iFace)
+}
+
+// --
+
+type stringEnumV struct {
+	description string
+	choices     []string
+	current     string
+}
+
+func (v *stringEnumV) Get() interface{}    { return v.current }
+func (v *stringEnumV) String() string      { return v.current }
+func (v *stringEnumV) TypeInfo() typeInfo  { return TypeInfoScalar }
+func (v *stringEnumV) Description() string { return v.description }
+func (v *stringEnumV) Update(val string) error {
+	var updated bool
+	for _, choice := range v.choices {
+		if val == choice {
+			v.current = choice
+			updated = true
+			break
+		}
+	}
+	if !updated {
+		return fmt.Errorf("string enum update invalid choice: available: %v: choice: %v", v.choices, val)
+	}
+	return nil
+}
+
+func (v *stringEnumV) UpdateFromInterface(iFace interface{}) error {
 	under, ok := iFace.(string)
 	if !ok {
-		return fmt.Errorf("can't create StringValue. Expected: string, got: %#v", iFace)
+		return ErrIncompatibleInterface
 	}
-	*v = *stringNew(under)
-	return nil
+	return v.Update(under)
+}
+
+func (v *stringEnumV) ReplaceFromInterface(iFace interface{}) error {
+	return v.UpdateFromInterface(iFace)
+}
+
+func StringEnum(choices ...string) EmptyConstructor {
+	return func() (Value, error) {
+		return &stringEnumV{
+			choices:     choices,
+			description: fmt.Sprintf("string enum: choiced: %v", choices),
+		}, nil
+	}
 }
 
 // ---
