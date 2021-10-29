@@ -53,7 +53,7 @@ func New(helpShort string, action Action, opts ...CommandOpt) Command {
 // AddFlag adds an existing flag to a Command. It panics if a flag with the same name exists
 func AddFlag(name string, value f.Flag) CommandOpt {
 	if !strings.HasPrefix(name, "-") {
-		log.Panicf("helpFlags should start with '-': %#v\n", name)
+		log.Panicf("flags should start with '-': %#v\n", name)
 	}
 	return func(app *Command) {
 		if _, alreadyThere := app.Flags[name]; !alreadyThere {

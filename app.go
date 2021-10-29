@@ -36,17 +36,24 @@ type App struct {
 	rootSection s.Section
 }
 
-// OverrideHelp will let you provide own help function.
-func OverrideHelp(w io.Writer, helpFlagNames []string, sectionHelp help.SectionHelp, commandHelp help.CommandHelp) AppOpt {
-	return func(app *App) {
-		app.sectionHelp = sectionHelp
-		app.commandHelp = commandHelp
-		app.helpFlagNames = helpFlagNames
-		app.helpWriter = w
-		for _, n := range helpFlagNames {
-			if !strings.HasPrefix(n, "-") {
-				log.Panicf("helpFlags should start with '-': %#v\n", n)
+func OverrideHelp(helpFlagName string, helpFlag f.Flag, commandHelp help.CommandHelp, sectionHelp help.SectionHelp, helpWriter io.Writer) AppOpt {
+	if !strings.HasPrefix(helpFlagName, "-") {
+		log.Panicf("flags should start with '-': %#v\n", helpFlagName)
+	}
+	return func(a *App) {
+		if _, alreadyThere := a.rootSection.Flags[helpFlagName]; !alreadyThere {
+			a.rootSection.Flags[helpFlagName] = helpFlag
+
+			a.helpFlagNames = append(a.helpFlagNames, helpFlagName)
+			if helpFlag.Alias != "" {
+				a.helpFlagNames = append(a.helpFlagNames, helpFlag.Alias)
 			}
+
+			a.commandHelp = commandHelp
+			a.sectionHelp = sectionHelp
+			a.helpWriter = helpWriter // TODO: this shouldn't really be an app property, but instead be closed over by the help functions
+		} else {
+			log.Panicf("flag already exists: %#v\n", helpFlagName)
 		}
 	}
 }
@@ -79,10 +86,16 @@ func New(name string, rootSection s.Section, opts ...AppOpt) App {
 	// Help
 	if len(app.helpFlagNames) == 0 {
 		OverrideHelp(
-			os.Stderr,
-			[]string{"-h", "--help"},
-			help.DefaultSectionHelp,
+			"--help",
+			f.New(
+				"Print help",
+				v.String,
+				f.Default("default"),
+				f.Alias("-h"),
+			),
 			help.DefaultCommandHelp,
+			help.DefaultSectionHelp,
+			os.Stderr,
 		)(&app)
 	}
 
@@ -101,7 +114,9 @@ type gatherArgsResult struct {
 	// Path holds the path to the current command/section
 	Path []string
 	// FlagStrs is a slice of flags and values passed from the CLI. It can't be a map because flags can have aliases and we need to preserve order
-	FlagStrs   []flagStr
+	FlagStrs []flagStr
+	// HelpPassed records whether --help was passed. The help flag may be set to a default value, so we need to check whether it's passed explicitly
+	// so we can decide whether it needs to be acted upon
 	HelpPassed bool
 }
 
@@ -476,6 +491,7 @@ func (app *App) MustRun(osArgs []string, osLookupEnv LookupFunc) {
 // Look up keys (meant for environment variable parsing) - fulfillable with os.LookupEnv or warg.DictLookup(map)
 type LookupFunc = func(key string) (string, bool)
 
+// TOOD: change to DictLookup
 func DictLookup(m map[string]string) LookupFunc {
 	return func(key string) (string, bool) {
 		val, exists := m[key]

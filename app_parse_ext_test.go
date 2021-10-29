@@ -68,7 +68,7 @@ func TestApp_Parse(t *testing.T) {
 			args:                     []string{"app", "cat1", "com1", "--com1f1", "1"},
 			lookup:                   warg.DictLookup(nil),
 			expectedPassedPath:       []string{"cat1", "com1"},
-			expectedPassedFlagValues: f.PassedFlags{"--com1f1": int(1)},
+			expectedPassedFlagValues: f.PassedFlags{"--com1f1": int(1), "--help": "default"},
 			expectedErr:              false,
 		},
 		{
@@ -112,7 +112,7 @@ func TestApp_Parse(t *testing.T) {
 			args:                     []string{"test", "com"},
 			lookup:                   warg.DictLookup(nil),
 			expectedPassedPath:       []string{"com"},
-			expectedPassedFlagValues: f.PassedFlags{"--flag": "hi"},
+			expectedPassedFlagValues: f.PassedFlags{"--flag": "hi", "--help": "default"},
 			expectedErr:              false,
 		},
 		{
@@ -181,6 +181,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: f.PassedFlags{
 				"--key":    "mapkeyval",
 				"--config": "passedconfigval",
+				"--help":   "default",
 			},
 			expectedErr: false,
 		},
@@ -208,6 +209,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedPath: []string{"com"},
 			expectedPassedFlagValues: f.PassedFlags{
 				"--sflag": "sflagval",
+				"--help":  "default",
 			},
 			expectedErr: false,
 		},
@@ -244,6 +246,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: f.PassedFlags{
 				"--config": "testdata/simple_json_config.json",
 				"--val":    "hi",
+				"--help":   "default",
 			},
 			expectedErr: false,
 		},
@@ -274,6 +277,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: f.PassedFlags{
 				"--subreddits": []string{"earthporn", "wallpapers"},
 				"--config":     "testdata/config_slice.json",
+				"--help":       "default",
 			},
 			expectedErr: false,
 		},
@@ -306,6 +310,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedPath: []string{"test"},
 			expectedPassedFlagValues: f.PassedFlags{
 				"--flag": "there",
+				"--help": "default",
 			},
 			expectedErr: false,
 		},
@@ -358,7 +363,7 @@ func TestApp_Parse(t *testing.T) {
 			args:                     []string{t.Name(), "test", "-f", "val"},
 			lookup:                   warg.DictLookup(nil),
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: f.PassedFlags{"--flag": "val"},
+			expectedPassedFlagValues: f.PassedFlags{"--flag": "val", "--help": "default"},
 			expectedErr:              false,
 		},
 		{
@@ -383,7 +388,7 @@ func TestApp_Parse(t *testing.T) {
 			args:                     []string{t.Name(), "test", "-f", "1", "--flag", "2", "-f", "3", "--flag", "4"},
 			lookup:                   warg.DictLookup(nil),
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: f.PassedFlags{"--flag": []string{"1", "2", "3", "4"}},
+			expectedPassedFlagValues: f.PassedFlags{"--flag": []string{"1", "2", "3", "4"}, "--help": "default"},
 			expectedErr:              false,
 		},
 	}

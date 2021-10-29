@@ -17,10 +17,10 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 - add flag.TypeInfo to be set to the value.TypeInfo - then I can make default a list when appropriate
 - print long values more neatly.... make a value.StringList() method?
 - figure out what to do with --color , --help requires it?
-- make help take an argument? - help = man, json, color, web, form, term, lsp, bash-completion, zsh-completion
 - Write good doc comments, README, examples
 - make an app.Test() method folks can add to their apps - should test for unique flag names between parent and child sections/commands for one thing
 - go through TODOs
+- --help ideas: man, json, web, form, term, lsp, bash-completion, zsh-completion, outline
 
 # Links
 
