@@ -13,7 +13,6 @@ See ~/journal/arg_parsing.md and ~/Git/bakeoff_argparse
 # TODO: Next milestone: grabbit
 
 - make colored help
-- make flag short aliases
 - make help less verbose...
 - add flag.TypeInfo to be set to the value.TypeInfo - then I can make default a list when appropriate
 - print long values more neatly.... make a value.StringList() method?

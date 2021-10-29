@@ -89,13 +89,19 @@ func New(name string, rootSection s.Section, opts ...AppOpt) App {
 	return app
 }
 
+type flagStr struct {
+	NameOrAlias string
+	Value       string
+	Consumed    bool
+}
+
 type gatherArgsResult struct {
 	// Appname holds os.Args[0]
 	AppName string
 	// Path holds the path to the current command/section
 	Path []string
-	// FlagStrings is a map of all flags to their values
-	FlagStrs   map[string][]string
+	// FlagStrs is a slice of flags and values passed from the CLI. It can't be a map because flags can have aliases and we need to preserve order
+	FlagStrs   []flagStr
 	HelpPassed bool
 }
 
@@ -113,7 +119,7 @@ func containsString(haystack []string, needle string) bool {
 // --help does NOT require a value
 func gatherArgs(osArgs []string, helpFlagNames []string) (*gatherArgsResult, error) {
 	res := &gatherArgsResult{
-		FlagStrs: make(map[string][]string),
+		FlagStrs: nil,
 	}
 	res.AppName = osArgs[0]
 
@@ -142,7 +148,7 @@ func gatherArgs(osArgs []string, helpFlagNames []string) (*gatherArgsResult, err
 				res.Path = append(res.Path, word)
 			}
 		case expectingFlagValue:
-			res.FlagStrs[currentFlagName] = append(res.FlagStrs[currentFlagName], word)
+			res.FlagStrs = append(res.FlagStrs, flagStr{NameOrAlias: currentFlagName, Value: word, Consumed: false})
 			expecting = expectingAnything
 		default:
 			return nil, fmt.Errorf("internal Error: not expecting state: %#v", expecting)
@@ -154,23 +160,35 @@ func gatherArgs(osArgs []string, helpFlagNames []string) (*gatherArgsResult, err
 	return res, nil
 }
 
+// flagNameToAlias is a map of flag name to flag alias
+type flagNameToAlias map[string]string
+
 // fitToAppResult holds the result of fitToApp
 // Exactly one of Section or Command should hold something. The other should be nil
 type fitToAppResult struct {
-	Section      *s.Section
-	Command      *c.Command
-	Action       c.Action
-	AllowedFlags f.FlagMap
+	Section            *s.Section
+	Command            *c.Command
+	Action             c.Action
+	AllowedFlags       f.FlagMap
+	AllowedFlagAliases flagNameToAlias
 }
 
 // fitToApp takes the command entered by a user and uses it to "walk" down the apps command tree
 func fitToApp(rootSection s.Section, path []string) (*fitToAppResult, error) {
 	// validate passed command and get available flags
 	ftar := fitToAppResult{
-		Section:      &rootSection,
-		Command:      nil, // we start with a section, not a command
-		AllowedFlags: rootSection.Flags,
-		Action:       nil,
+		Section:            &rootSection,
+		Command:            nil, // we start with a section, not a command
+		Action:             nil,
+		AllowedFlags:       rootSection.Flags,
+		AllowedFlagAliases: make(flagNameToAlias),
+	}
+	// Add any root flag aliases to AllowedFlagAliases
+	// Wonder if I could put all this in one part of the code...
+	for flagName, flag := range ftar.AllowedFlags {
+		if flag.Alias != "" {
+			ftar.AllowedFlagAliases[flagName] = flag.Alias
+		}
 	}
 	childCommands := rootSection.Commands
 	childSections := rootSection.Sections
@@ -183,18 +201,24 @@ func fitToApp(rootSection s.Section, path []string) (*fitToAppResult, error) {
 			// commands have no child commands or child sections
 			childCommands = nil
 			childSections = nil
-			for k, v := range command.Flags {
-				// TODO: check if key exists already
-				v.IsCommandFlag = true
-				ftar.AllowedFlags[k] = v
+			for flagName, flag := range command.Flags {
+				// TODO: check if name exists already
+				if flag.Alias != "" {
+					ftar.AllowedFlagAliases[flagName] = flag.Alias
+				}
+				flag.IsCommandFlag = true
+				ftar.AllowedFlags[flagName] = flag
 			}
 		} else if section, exists := childSections[word]; exists {
 			ftar.Section = &section
 			childCommands = section.Commands
 			childSections = section.Sections
-			for k, v := range command.Flags {
+			for flagName, flag := range section.Flags {
 				// TODO: check if key exists already
-				ftar.AllowedFlags[k] = v
+				if flag.Alias != "" {
+					ftar.AllowedFlagAliases[flagName] = flag.Alias
+				}
+				ftar.AllowedFlags[flagName] = flag
 			}
 		} else {
 			retErr := fmt.Errorf("expected command or section, but got %#v, try --help", word)
@@ -209,9 +233,10 @@ func fitToApp(rootSection s.Section, path []string) (*fitToAppResult, error) {
 func resolveFlag(
 	flag *f.Flag,
 	name string,
-	flagStrs map[string][]string,
+	flagStrs []flagStr,
 	configReader configreader.ConfigReader,
 	lookupEnv LookupFunc,
+	aliases flagNameToAlias,
 ) error {
 	// TODO: can I delete from flagStrs in the caller? then I wouldn't need to pass
 	// flagStrs (just a potential strValues) into here and it's a more pure function
@@ -223,13 +248,19 @@ func resolveFlag(
 	flag.Value = val
 	flag.TypeDescription = val.Description()
 
-	// try to update from command line and delete from flagStrs
+	// try to update from command line and consume from flagStrs
+	// need to check flag.SetBy even in the first case because we could be resolving
+	// flags multiple times (for instance --config gets resolved before this and also now)
 	{
-		strValues, exists := flagStrs[name]
-		// the setby check for the first case is needed to
-		// idempotently resolve flags (like the config flag for example)
-		if flag.SetBy == "" && exists {
+		strValues := []string{}
+		for i := range flagStrs {
+			if flagStrs[i].NameOrAlias == name || flagStrs[i].NameOrAlias == aliases[name] {
+				strValues = append(strValues, flagStrs[i].Value)
+				flagStrs[i].Consumed = true
+			}
+		}
 
+		if flag.SetBy == "" && len(strValues) > 0 {
 			if val.TypeInfo() == v.TypeInfoScalar && len(strValues) > 1 {
 				return fmt.Errorf("flag error: %v: flag passed multiple times, it's value (type %v), can only be updated once", name, flag.TypeDescription)
 			}
@@ -238,8 +269,6 @@ func resolveFlag(
 				flag.Value.Update(v)
 			}
 			flag.SetBy = "passedflag"
-			// later we'll ensure that these aren't all used
-			delete(flagStrs, name)
 		}
 	}
 
@@ -330,7 +359,14 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	if app.configFlag != nil {
 		// we're gonna make a config map out of this if everything goes well
 		// so pass nil for the configreader now
-		err = resolveFlag(app.configFlag, app.configFlagName, gar.FlagStrs, nil, osLookupEnv)
+		err = resolveFlag(
+			app.configFlag,
+			app.configFlagName,
+			gar.FlagStrs,
+			nil,
+			osLookupEnv,
+			ftar.AllowedFlagAliases,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -345,7 +381,14 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	// Loop over allowed flags for the passed command and try to resolve them
 	for name, flag := range ftar.AllowedFlags {
 
-		err = resolveFlag(&flag, name, gar.FlagStrs, configReader, osLookupEnv)
+		err = resolveFlag(
+			&flag,
+			name,
+			gar.FlagStrs,
+			configReader,
+			osLookupEnv,
+			ftar.AllowedFlagAliases,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -362,12 +405,11 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		ftar.AllowedFlags[app.configFlagName] = *app.configFlag
 	}
 
-	// check for passed flags that arent' allowed
-	if len(gar.FlagStrs) != 0 {
-		return nil, fmt.Errorf("unrecognized flags: %v", gar.FlagStrs)
+	for _, e := range gar.FlagStrs {
+		if !e.Consumed {
+			return nil, fmt.Errorf("unrecognized flag: %v -> %v", e.NameOrAlias, e.Consumed)
+		}
 	}
-
-	// TODO: check that all required flags are resolved! Not sure I have required flags yet :)
 
 	// OK! Let's make the ParseResult for each case and gtfo
 	if ftar.Section != nil && ftar.Command == nil {

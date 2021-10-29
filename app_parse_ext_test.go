@@ -336,6 +336,56 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: f.PassedFlags{},
 			expectedErr:              true,
 		},
+		{
+			name: "flagAlias",
+			app: warg.New(
+				t.Name(),
+				s.New(
+					"help for section",
+					s.WithFlag(
+						"--flag",
+						"help for --flag",
+						v.String,
+						f.Alias("-f"),
+					),
+					s.WithCommand(
+						"test",
+						"help for test",
+						c.DoNothing,
+					),
+				),
+			),
+			args:                     []string{t.Name(), "test", "-f", "val"},
+			lookup:                   warg.DictLookup(nil),
+			expectedPassedPath:       []string{"test"},
+			expectedPassedFlagValues: f.PassedFlags{"--flag": "val"},
+			expectedErr:              false,
+		},
+		{
+			name: "flagAliasWithList",
+			app: warg.New(
+				t.Name(),
+				s.New(
+					"help for section",
+					s.WithCommand(
+						"test",
+						"help for test",
+						c.DoNothing,
+						c.WithFlag(
+							"--flag",
+							"help for --flag",
+							v.StringSlice,
+							f.Alias("-f"),
+						),
+					),
+				),
+			),
+			args:                     []string{t.Name(), "test", "-f", "1", "--flag", "2", "-f", "3", "--flag", "4"},
+			lookup:                   warg.DictLookup(nil),
+			expectedPassedPath:       []string{"test"},
+			expectedPassedFlagValues: f.PassedFlags{"--flag": []string{"1", "2", "3", "4"}},
+			expectedErr:              false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

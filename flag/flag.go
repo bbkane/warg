@@ -2,6 +2,7 @@ package flag
 
 import (
 	"log"
+	"strings"
 
 	v "github.com/bbkane/warg/value"
 )
@@ -16,26 +17,39 @@ type FlagOpt = func(*Flag)
 type PassedFlags = map[string]interface{}
 
 type Flag struct {
-	// EmptyConstructor tells flag how to make a value
-	EmptyValueConstructor v.EmptyConstructor
+	// Alias is an alternative name for a flag, usually shorter :)
+	Alias string
+
 	// ConfigPath is the path from the config to the value the flag updates
 	ConfigPath string
+
 	// DefaultValues will be shoved into Value if the app builder specifies it.
 	// For scalar values, the last DefaultValues wins
 	DefaultValues []string
+
 	// Envvars holds a list of environment variables to update this flag. Only the first one that exists will be used.
 	EnvVars []string
+
+	// EmptyConstructor tells flag how to make a value
+	EmptyValueConstructor v.EmptyConstructor
+
 	// Help is a message for the user on how to use this flag
 	Help string
+
 	// Required means the user MUST fill this flag
 	Required bool
 
+	// -- the following are set when parsing
+
 	// IsCommandFlag is set when parsing. Set to true if the flag was attached to a command (as opposed to being inherited from a section)
 	IsCommandFlag bool
-	// TypeDescription is set when parsing. Describes the type: int, string, ...
-	TypeDescription string
+
 	// SetBy might be set when parsing. Possible values: appdefault, config, passedflag
 	SetBy string
+
+	// TypeDescription is set when parsing. Describes the type: int, string, ...
+	TypeDescription string
+
 	// Value might be set when parsing. The interface returned by updating a flag
 	Value v.Value
 }
@@ -50,6 +64,16 @@ func New(helpShort string, empty v.EmptyConstructor, opts ...FlagOpt) Flag {
 		opt(&flag)
 	}
 	return flag
+}
+
+// Alias is an alternative name for a flag, usually shorter :)
+func Alias(alias string) FlagOpt {
+	if !strings.HasPrefix(alias, "-") {
+		log.Panicf("All aliases should start with '-': %v", alias)
+	}
+	return func(f *Flag) {
+		f.Alias = alias
+	}
 }
 
 // ConfigPath adds a configpath to a flag
