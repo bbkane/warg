@@ -11,6 +11,14 @@ Command Flags:
     envvars : [EDITOR]
     required : true
 
+Inherited Section Flags:
+
+  --help : Print help
+    type : string
+    value : default
+    setby : appdefault
+    default : [default]
+
 Examples:
 
 # Use defaults

@@ -66,7 +66,7 @@ func ExampleNew() {
 	// Of course, in actual code, it would be something like:
 	// err := app.Run(os.Args, os.LookupEnv)
 	// TODO: add envvar to the example once they're implemented - looks like the Go playground supports them ( https://play.golang.org/p/nHJQcAUewNF )
-	err := app.Run([]string{"blog.exe", "login"}, warg.LookupDict(nil))
+	err := app.Run([]string{"blog.exe", "login"}, warg.LookupMap(nil))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
