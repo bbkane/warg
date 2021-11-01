@@ -491,8 +491,7 @@ func (app *App) MustRun(osArgs []string, osLookupEnv LookupFunc) {
 // Look up keys (meant for environment variable parsing) - fulfillable with os.LookupEnv or warg.DictLookup(map)
 type LookupFunc = func(key string) (string, bool)
 
-// TOOD: change to DictLookup
-func DictLookup(m map[string]string) LookupFunc {
+func LookupDict(m map[string]string) LookupFunc {
 	return func(key string) (string, bool) {
 		val, exists := m[key]
 		return val, exists
