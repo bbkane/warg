@@ -26,40 +26,69 @@ type App struct {
 	configFlagName  string
 	newConfigReader configreader.NewConfigReader
 	configFlag      *f.Flag
-	// Help()
-	name          string
-	helpFlagNames []string
+
+	// New Help()
+	name         string
+	helpFlagName string
+	// Note that this can be ""
+	helpFlagAlias string
+	helpMappings  []HelpFlagMapping
 	helpWriter    io.Writer
-	sectionHelp   help.SectionHelp
-	commandHelp   help.CommandHelp
+
 	// rootSection holds the good stuff!
 	rootSection s.Section
 }
 
-func OverrideHelp(helpFlagName string, helpFlag f.Flag, commandHelp help.CommandHelp, sectionHelp help.SectionHelp, helpWriter io.Writer) AppOpt {
-	if !strings.HasPrefix(helpFlagName, "-") {
-		log.Panicf("flags should start with '-': %#v\n", helpFlagName)
-	}
+type HelpFlagMapping struct {
+	Name        string
+	CommandHelp help.CommandHelp
+	SectionHelp help.SectionHelp
+}
+
+func OverrideHelpFlag(
+	mappings []HelpFlagMapping,
+	helpWriter io.Writer,
+	flagName string,
+	flagHelp string,
+	flagOpts ...f.FlagOpt,
+) AppOpt {
 	return func(a *App) {
-		if _, alreadyThere := a.rootSection.Flags[helpFlagName]; !alreadyThere {
-			a.rootSection.Flags[helpFlagName] = helpFlag
 
-			a.helpFlagNames = append(a.helpFlagNames, helpFlagName)
-			if helpFlag.Alias != "" {
-				a.helpFlagNames = append(a.helpFlagNames, helpFlag.Alias)
-			}
-
-			a.commandHelp = commandHelp
-			a.sectionHelp = sectionHelp
-			a.helpWriter = helpWriter // TODO: this shouldn't really be an app property, but instead be closed over by the help functions
-		} else {
-			log.Panicf("flag already exists: %#v\n", helpFlagName)
+		if !strings.HasPrefix(flagName, "-") {
+			log.Panicf("flagName should start with '-': %#v\n", flagName)
 		}
+
+		if _, alreadyThere := a.rootSection.Flags[flagName]; alreadyThere {
+			log.Panicf("flag already exists: %#v\n", flagName)
+		}
+		helpValues := make([]string, len(mappings))
+		for i := range mappings {
+			helpValues[i] = mappings[i].Name
+		}
+
+		helpFlag := f.New(
+			flagHelp,
+			v.StringEnum(helpValues...),
+			flagOpts...,
+		)
+
+		if len(helpFlag.DefaultValues) == 0 {
+			log.Panic("--help flag must have a default. use flag.Default(...) to set one")
+		}
+
+		a.rootSection.Flags[flagName] = helpFlag
+		// TODO: add these...
+		a.helpFlagName = flagName
+		a.helpFlagAlias = helpFlag.Alias
+		a.helpMappings = mappings
+		a.helpWriter = helpWriter
+
 	}
 }
 
 // ConfigFlag lets you customize your config flag. Especially useful for changing the config reader (for example to choose whether to use a JSON or YAML structured config)
 func ConfigFlag(
+	// TODO: put the new stuff at the front to be consistent with OverrideHelpFlag
 	configFlagName string,
 	newConfigReader configreader.NewConfigReader,
 	helpShort string,
@@ -83,19 +112,16 @@ func New(name string, rootSection s.Section, opts ...AppOpt) App {
 		opt(&app)
 	}
 
-	// Help
-	if len(app.helpFlagNames) == 0 {
-		OverrideHelp(
-			"--help",
-			f.New(
-				"Print help",
-				v.String,
-				f.Default("default"),
-				f.Alias("-h"),
-			),
-			help.DefaultCommandHelp,
-			help.DefaultSectionHelp,
+	if app.helpFlagName == "" {
+		OverrideHelpFlag(
+			[]HelpFlagMapping{
+				{Name: "default", CommandHelp: help.DefaultCommandHelp, SectionHelp: help.DefaultSectionHelp},
+			},
 			os.Stderr,
+			"--help",
+			"Print help",
+			f.Alias("-h"),
+			f.Default("default"),
 		)(&app)
 	}
 
@@ -129,47 +155,57 @@ func containsString(haystack []string, needle string) bool {
 	return false
 }
 
-// gatherArgs "parses" os.Argv into commands and flags. It's a 'lowering' function,
-// simplifying os.Args as much as possible before needing knowledge of this particular app
-// --help does NOT require a value
+// gatherArgs separates os.Args into a command path, a list of flags and their values from the CLI.
+// It also takes note of whether --help was passed. To minimize ambiguitiy between a path element and an optional
+// argument to --help, --help must be either not be passed, be the last string passed, or have exactly one value after it.
+// See warg-gatherArgs-state-machine.png at the root of the repo for a diagram.
 func gatherArgs(osArgs []string, helpFlagNames []string) (*gatherArgsResult, error) {
-	res := &gatherArgsResult{
-		FlagStrs: nil,
-	}
+	res := &gatherArgsResult{}
 	res.AppName = osArgs[0]
 
-	// let's declare some states with an "enum"...
-	expectingAnything := "expectingAnything"
-	expectingFlagValue := "expectingFlagValue"
-	// currentFlagName is only valid when expectingFlagValue
-	// I miss ADTs in go
-	var currentFlagName string
+	startSt := "startSt"
+	helpFlagPassedSt := "helpFlagPassedSt"
+	helpValuePassedSt := "helpValuePassedSt"
+	flagPassedSt := "flagPassedSt"
 
-	// set up initial conditions
-	currentFlagName = ""
-	expecting := expectingAnything
-	for _, word := range osArgs[1:] {
-		switch expecting {
-		case expectingAnything:
-			if containsString(helpFlagNames, word) {
+	state := startSt
+	var currentFlagName string
+	for _, arg := range osArgs[1:] {
+		// fmt.Printf("state: %v, arg: %v\n", state, arg)
+
+		switch state {
+		case startSt:
+			if containsString(helpFlagNames, arg) {
 				res.HelpPassed = true
-				continue
+				currentFlagName = arg
+				state = helpFlagPassedSt
+			} else if strings.HasPrefix(arg, "-") {
+				currentFlagName = arg
+				state = flagPassedSt
+			} else { // cmd
+				res.Path = append(res.Path, arg)
+				state = startSt
 			}
-			if strings.HasPrefix(word, "-") {
-				currentFlagName = word
-				expecting = expectingFlagValue
-			} else {
-				// command case
-				res.Path = append(res.Path, word)
-			}
-		case expectingFlagValue:
-			res.FlagStrs = append(res.FlagStrs, flagStr{NameOrAlias: currentFlagName, Value: word, Consumed: false})
-			expecting = expectingAnything
+		case helpFlagPassedSt:
+			res.FlagStrs = append(
+				res.FlagStrs,
+				flagStr{NameOrAlias: currentFlagName, Value: arg, Consumed: false},
+			)
+			state = helpValuePassedSt
+		case helpValuePassedSt:
+			return nil, fmt.Errorf("help flags should take maximally one arg, but more than one passed: %s", arg)
+		case flagPassedSt:
+			res.FlagStrs = append(
+				res.FlagStrs,
+				flagStr{NameOrAlias: currentFlagName, Value: arg, Consumed: false},
+			)
+			state = startSt
 		default:
-			return nil, fmt.Errorf("internal Error: not expecting state: %#v", expecting)
+			return nil, fmt.Errorf("internal error: unknown state: %s", state)
 		}
 	}
-	if expecting == expectingFlagValue {
+	// check the only non-terminal state
+	if state == flagPassedSt {
 		return nil, fmt.Errorf("flag passed without value( %#v) . All flags must have one value passed. Flags can be repeated to accumulate values. Example: --level 9000", currentFlagName)
 	}
 	return res, nil
@@ -281,7 +317,10 @@ func resolveFlag(
 			}
 
 			for _, v := range strValues {
-				flag.Value.Update(v)
+				err = flag.Value.Update(v)
+				if err != nil {
+					return fmt.Errorf("error updating flag %v from passed flag value %v: %w", name, v, err)
+				}
 			}
 			flag.SetBy = "passedflag"
 		}
@@ -324,7 +363,10 @@ func resolveFlag(
 			for _, e := range flag.EnvVars {
 				val, exists := lookupEnv(e)
 				if exists {
-					flag.Value.Update(val)
+					err = flag.Value.Update(val)
+					if err != nil {
+						return fmt.Errorf("error updating flag %v from envvar %v: %w", name, val, err)
+					}
 					flag.SetBy = "envvar"
 					break // stop looking for envvars
 				}
@@ -337,7 +379,10 @@ func resolveFlag(
 	{
 		if flag.SetBy == "" && len(flag.DefaultValues) > 0 {
 			for _, v := range flag.DefaultValues {
-				flag.Value.Update(v)
+				err = flag.Value.Update(v)
+				if err != nil {
+					return fmt.Errorf("internal error updating flag %v from appdefault %v: %w", name, val, err)
+				}
 			}
 			flag.SetBy = "appdefault"
 		}
@@ -358,7 +403,11 @@ type ParseResult struct {
 
 // Parse parses the args, but does not execute anything.
 func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, error) {
-	gar, err := gatherArgs(osArgs, app.helpFlagNames)
+	helpFlagNames := []string{app.helpFlagName}
+	if app.helpFlagAlias != "" {
+		helpFlagNames = append(helpFlagNames, app.helpFlagAlias)
+	}
+	gar, err := gatherArgs(osArgs, helpFlagNames)
 	if err != nil {
 		return nil, err
 	}
@@ -429,21 +478,33 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	// OK! Let's make the ParseResult for each case and gtfo
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
-		pr := ParseResult{
-			Action: app.sectionHelp(app.helpWriter, *ftar.Section, help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}),
-			// Action: app.sectionHelp(app.helpWriter, app.name, gar.Path, *ftar.Section, ftar.AllowedFlags),
+		helpInfo := help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}
+		// We know the helpFlag has a default so this is safe
+		helpType := ftar.AllowedFlags[app.helpFlagName].Value.Get().(string)
+		for _, e := range app.helpMappings {
+			if e.Name == helpType {
+				pr := ParseResult{
+					Action: e.SectionHelp(app.helpWriter, *ftar.Section, helpInfo),
+				}
+				return &pr, nil
+			}
 		}
-		return &pr, nil
+		return nil, fmt.Errorf("some problem with section help: info: %v", helpInfo)
 	} else if ftar.Section == nil && ftar.Command != nil {
 		if gar.HelpPassed {
-			pr := ParseResult{
-				Action: app.commandHelp(app.helpWriter, *ftar.Command, help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}),
-
-				// Action: app.commandHelp(app.helpWriter, app.name, gar.Path, *ftar.Command, ftar.AllowedFlags),
+			helpInfo := help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}
+			// We know the helpFlag has a default so this is safe
+			helpType := ftar.AllowedFlags[app.helpFlagName].Value.Get().(string)
+			for _, e := range app.helpMappings {
+				if e.Name == helpType {
+					pr := ParseResult{
+						Action: e.CommandHelp(app.helpWriter, *ftar.Command, helpInfo),
+					}
+					return &pr, nil
+				}
 			}
-			return &pr, nil
+			return nil, fmt.Errorf("some problem with section help: info: %v", helpInfo)
 		} else {
-			// TODO: change this
 			fvs := make(f.PassedFlags)
 			for name, flag := range ftar.AllowedFlags {
 				if flag.SetBy != "" {

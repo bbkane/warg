@@ -13,8 +13,8 @@ Command Flags:
 
 Inherited Section Flags:
 
-  --help : Print help
-    type : string
+  --help : Print help information
+    type : stringenum with choices: [default]
     value : default
     setby : appdefault
     default : [default]

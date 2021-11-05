@@ -78,7 +78,7 @@ func StringEnum(choices ...string) EmptyConstructor {
 	return func() (Value, error) {
 		return &stringEnumV{
 			choices:     choices,
-			description: fmt.Sprintf("string enum: choiced: %v", choices),
+			description: fmt.Sprintf("stringenum with choices: %v", choices),
 		}, nil
 	}
 }

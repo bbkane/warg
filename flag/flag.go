@@ -55,9 +55,9 @@ type Flag struct {
 }
 
 // New creates a Flag with options!
-func New(helpShort string, empty v.EmptyConstructor, opts ...FlagOpt) Flag {
+func New(help string, empty v.EmptyConstructor, opts ...FlagOpt) Flag {
 	flag := Flag{
-		Help:                  helpShort,
+		Help:                  help,
 		EmptyValueConstructor: empty,
 	}
 	for _, opt := range opts {

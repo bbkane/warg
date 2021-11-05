@@ -74,17 +74,15 @@ func TestDefaultSectionHelp(t *testing.T) {
 				c.DoNothing,
 			),
 		),
-		warg.OverrideHelp(
-			"--help",
-			f.New(
-				"Print help information",
-				v.String,
-				f.Default("default"),
-				f.Alias("-h"),
-			),
-			help.DefaultCommandHelp,
-			help.DefaultSectionHelp,
+		warg.OverrideHelpFlag(
+			[]warg.HelpFlagMapping{
+				{Name: "default", CommandHelp: help.DefaultCommandHelp, SectionHelp: help.DefaultSectionHelp},
+			},
 			&actualBuffer,
+			"--help",
+			"Print help information",
+			f.Default("default"),
+			f.Alias("-h"),
 		),
 	)
 	args := []string{"grabbit", "--help"}
@@ -160,17 +158,15 @@ grabbit config edit --config-path /path/to/config --editor code
 				c.DoNothing,
 			),
 		),
-		warg.OverrideHelp(
-			"--help",
-			f.New(
-				"Print help",
-				v.String,
-				f.Default("default"),
-				f.Alias("-h"),
-			),
-			help.DefaultCommandHelp,
-			help.DefaultSectionHelp,
+		warg.OverrideHelpFlag(
+			[]warg.HelpFlagMapping{
+				{Name: "default", CommandHelp: help.DefaultCommandHelp, SectionHelp: help.DefaultSectionHelp},
+			},
 			&actualBuffer,
+			"--help",
+			"Print help information",
+			f.Default("default"),
+			f.Alias("-h"),
 		),
 	)
 	args := []string{"grabbit", "config", "edit", "--help"}
