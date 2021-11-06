@@ -47,6 +47,7 @@ func ExampleNew() {
 				"URL of the blog",
 				value.String,
 				flag.Default("https://www.myblog.com"),
+				flag.EnvVars("BLOG_URL"),
 			),
 			section.WithSection(
 				"comments",
@@ -63,12 +64,18 @@ func ExampleNew() {
 		),
 	)
 
-	// Of course, in actual code, it would be something like:
-	// err := app.Run(os.Args, os.LookupEnv)
-	// TODO: add envvar to the example once they're implemented - looks like the Go playground supports them ( https://play.golang.org/p/nHJQcAUewNF )
-	err := app.Run([]string{"blog.exe", "login"}, warg.LookupMap(nil))
+	// normally we would rely on the user to set the environment variable,
+	// bu this is an example
+	err := os.Setenv("BLOG_URL", "https://envvar.com")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	err = app.Run([]string{"blog.exe", "login"}, os.LookupEnv)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	// Output:
+	// Logging into https://envvar.com
 }

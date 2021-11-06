@@ -77,7 +77,6 @@ func OverrideHelpFlag(
 		}
 
 		a.rootSection.Flags[flagName] = helpFlag
-		// TODO: add these...
 		a.helpFlagName = flagName
 		a.helpFlagAlias = helpFlag.Alias
 		a.helpMappings = mappings
