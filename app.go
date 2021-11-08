@@ -296,6 +296,7 @@ func resolveFlag(
 	}
 	flag.Value = val
 	flag.TypeDescription = val.Description()
+	flag.TypeInfo = val.TypeInfo()
 
 	// try to update from command line and consume from flagStrs
 	// need to check flag.SetBy even in the first case because we could be resolving

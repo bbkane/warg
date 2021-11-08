@@ -50,6 +50,9 @@ type Flag struct {
 	// TypeDescription is set when parsing. Describes the type: int, string, ...
 	TypeDescription string
 
+	// TypeInfo is set when parsing. Describes the "shape" of the type
+	TypeInfo v.TypeInfo
+
 	// Value might be set when parsing. The interface returned by updating a flag
 	Value v.Value
 }

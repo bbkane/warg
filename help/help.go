@@ -12,6 +12,7 @@ import (
 	c "github.com/bbkane/warg/command"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
+	"github.com/bbkane/warg/value"
 	"github.com/mattn/go-isatty"
 )
 
@@ -31,32 +32,133 @@ type HelpInfo struct {
 type CommandHelp = func(file *os.File, cur c.Command, helpInfo HelpInfo) c.Action
 type SectionHelp = func(file *os.File, cur s.Section, helpInfo HelpInfo) c.Action
 
-func printFlag(w io.Writer, name string, flag *f.Flag) {
-	fmt.Fprintf(w, "  %s : %s\n", name, flag.Help)
-	fmt.Fprintf(w, "    type : %s\n", flag.TypeDescription)
-	if flag.SetBy != "" {
-		fmt.Fprintf(w, "    value : %s\n", flag.Value)
-		fmt.Fprintf(w, "    setby : %s\n", flag.SetBy)
+// https://stackoverflow.com/a/45456649/2958070
+func leftPad(s string, pad string, plength int) string {
+	for i := len(s); i < plength; i++ {
+		s = pad + s
 	}
+	return s
+}
+
+func printFlag(w io.Writer, name string, flag *f.Flag) {
+	if flag.Alias != "" {
+		fmt.Fprintf(
+			w,
+			"  %s , %s : %s\n",
+			color.Add(color.Bold+color.ForegroundYellow, name),
+			color.Add(color.Bold+color.ForegroundYellow, flag.Alias),
+			flag.Help,
+		)
+	} else {
+		fmt.Fprintf(
+			w,
+			"  %s : %s\n",
+			color.Add(color.Bold+color.ForegroundYellow, name),
+			flag.Help,
+		)
+	}
+	fmt.Fprintf(
+		w,
+		"    %s : %s\n",
+		color.Add(color.Bold, "type"),
+		flag.TypeDescription,
+	)
+
+	// TODO: should I print these one by one like I do value?
 	if len(flag.DefaultValues) > 0 {
-		fmt.Fprintf(w, "    default : %s\n", flag.DefaultValues)
+		if flag.TypeInfo == value.TypeInfoScalar {
+			fmt.Fprintf(
+				w,
+				"    %s : %s\n",
+				color.Add(color.Bold, "default"),
+				flag.DefaultValues[0],
+			)
+		} else {
+			fmt.Fprintf(
+				w,
+				"    %s : %s\n",
+				color.Add(color.Bold, "default"),
+				flag.DefaultValues,
+			)
+		}
 	}
 	if flag.ConfigPath != "" {
-		fmt.Fprintf(w, "    configpath : %s\n", flag.ConfigPath)
+		fmt.Fprintf(
+			w,
+			"    %s : %s\n",
+			color.Add(color.Bold, "configpath"),
+			flag.ConfigPath,
+		)
 	}
 	if len(flag.EnvVars) > 0 {
-		fmt.Fprintf(w, "    envvars : %s\n", flag.EnvVars)
+		fmt.Fprintf(w,
+			"    %s : %s\n",
+			color.Add(color.Bold, "envvars"),
+			flag.EnvVars,
+		)
 	}
+
+	// TODO: it would be nice if this were red when the value isn't set
 	if flag.Required {
-		fmt.Fprintf(w, "    required : true\n")
+		fmt.Fprintf(w,
+			"    %s : true\n",
+			color.Add(color.Bold, "required"),
+		)
 	}
+
+	if flag.SetBy != "" {
+		if flag.TypeInfo == value.TypeInfoSlice {
+
+			width := len(fmt.Sprint(len(flag.Value.StringSlice())))
+			fmt.Fprintf(w,
+				"    %s (set by %s) :\n",
+				color.Add(color.Bold, "value"),
+				color.Add(color.Bold, flag.SetBy),
+			)
+
+			for i, e := range flag.Value.StringSlice() {
+				fmt.Fprintf(
+					w,
+					"      %s %s\n",
+					color.Add(
+						color.Bold,
+						leftPad(fmt.Sprint(i), "0", width)+")",
+					),
+					e,
+				)
+			}
+		} else {
+			fmt.Fprintf(
+				w,
+				"    %s (set by %s) : %s\n",
+				color.Add(color.Bold, "value"),
+				color.Add(color.Bold, flag.SetBy),
+				flag.Value,
+			)
+		}
+	}
+
 	fmt.Fprintln(w)
 }
 
 func DefaultCommandHelp(file *os.File, cur c.Command, helpInfo HelpInfo) c.Action {
-	return func(_ f.PassedFlags) error {
+	return func(pf f.PassedFlags) error {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
+
+		// default to trying to use color
+		useColor := "auto"
+		// respect a --color string
+		if useColorI, exists := pf["--color"]; exists {
+			if useColorUnder, isStr := useColorI.(string); isStr {
+				useColor = useColorUnder
+			}
+		}
+
+		if useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd())) {
+			color.Enable()
+		}
+
 		// Print top help section
 		if cur.HelpLong == "" {
 			fmt.Fprintf(f, "%s\n", cur.Help)
@@ -86,12 +188,12 @@ func DefaultCommandHelp(file *os.File, cur c.Command, helpInfo HelpInfo) c.Actio
 			}
 
 			if commandFlagHelp.Len() > 0 {
-				fmt.Fprintf(f, "Command Flags:\n")
+				fmt.Fprintln(f, color.Add(color.Bold+color.Underline, "Command Flags:"))
 				fmt.Fprintln(f)
 				commandFlagHelp.WriteTo(f)
 			}
 			if sectionFlagHelp.Len() > 0 {
-				fmt.Fprintf(f, "Inherited Section Flags:\n")
+				fmt.Fprintln(f, color.Add(color.Bold+color.Underline, "Inherited Section Flags:"))
 				fmt.Fprintln(f)
 				sectionFlagHelp.WriteTo(f)
 			}
@@ -147,7 +249,7 @@ func DefaultSectionHelp(file *os.File, cur s.Section, _ HelpInfo) c.Action {
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					color.Add(color.ForegroundCyan, k),
+					color.Add(color.Bold+color.ForegroundCyan, k),
 					cur.Sections[k].Help,
 				)
 			}
@@ -170,7 +272,7 @@ func DefaultSectionHelp(file *os.File, cur s.Section, _ HelpInfo) c.Action {
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					color.Add(color.ForegroundGreen, k),
+					color.Add(color.Bold+color.ForegroundGreen, k),
 					cur.Commands[k].Help,
 				)
 			}
