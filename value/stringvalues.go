@@ -6,10 +6,11 @@ import (
 
 type stringV string
 
-func (v *stringV) Get() interface{}    { return string(*v) }
-func (v *stringV) String() string      { return fmt.Sprint(string(*v)) }
-func (v *stringV) TypeInfo() typeInfo  { return TypeInfoScalar }
-func (v *stringV) Description() string { return "string" }
+func (v *stringV) Get() interface{}      { return string(*v) }
+func (v *stringV) String() string        { return fmt.Sprint(string(*v)) }
+func (v *stringV) StringSlice() []string { return nil }
+func (v *stringV) TypeInfo() TypeInfo    { return TypeInfoScalar }
+func (v *stringV) Description() string   { return "string" }
 
 func (v *stringV) Update(s string) error {
 	*v = stringV(s)
@@ -41,10 +42,11 @@ type stringEnumV struct {
 	current     string
 }
 
-func (v *stringEnumV) Get() interface{}    { return v.current }
-func (v *stringEnumV) String() string      { return v.current }
-func (v *stringEnumV) TypeInfo() typeInfo  { return TypeInfoScalar }
-func (v *stringEnumV) Description() string { return v.description }
+func (v *stringEnumV) Get() interface{}      { return v.current }
+func (v *stringEnumV) String() string        { return v.current }
+func (v *stringEnumV) StringSlice() []string { return nil }
+func (v *stringEnumV) TypeInfo() TypeInfo    { return TypeInfoScalar }
+func (v *stringEnumV) Description() string   { return v.description }
 func (v *stringEnumV) Update(val string) error {
 	var updated bool
 	for _, choice := range v.choices {
@@ -97,13 +99,20 @@ func (v *stringSliceV) ReplaceFromInterface(iFace interface{}) error {
 	*v = *stringSliceNew(under)
 	return nil
 }
-func (v *stringSliceV) TypeInfo() typeInfo  { return TypeInfoSlice }
+func (v *stringSliceV) TypeInfo() TypeInfo  { return TypeInfoSlice }
 func (v *stringSliceV) Description() string { return "string slice" }
 
 // StringSlice accepts a string from a user and adds it to a slice. Pretty self explanatory.
 func StringSlice() (Value, error)        { return stringSliceNew(nil), nil }
 func (v *stringSliceV) Get() interface{} { return []string(*v) }
 func (v *stringSliceV) String() string   { return fmt.Sprint([]string(*v)) }
+func (v *stringSliceV) StringSlice() []string {
+	var ret []string
+	for _, e := range []string(*v) {
+		ret = append(ret, fmt.Sprint(e))
+	}
+	return ret
+}
 func (v *stringSliceV) Update(val string) error {
 	*v = append(*v, val)
 	return nil

@@ -3,7 +3,6 @@ package warg
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"strings"
@@ -33,7 +32,7 @@ type App struct {
 	// Note that this can be ""
 	helpFlagAlias string
 	helpMappings  []HelpFlagMapping
-	helpWriter    io.Writer
+	helpWriter    *os.File
 
 	// rootSection holds the good stuff!
 	rootSection s.Section
@@ -47,7 +46,7 @@ type HelpFlagMapping struct {
 
 func OverrideHelpFlag(
 	mappings []HelpFlagMapping,
-	helpWriter io.Writer,
+	helpWriter *os.File,
 	flagName string,
 	flagHelp string,
 	flagOpts ...f.FlagOpt,
@@ -116,7 +115,7 @@ func New(name string, rootSection s.Section, opts ...AppOpt) App {
 			[]HelpFlagMapping{
 				{Name: "default", CommandHelp: help.DefaultCommandHelp, SectionHelp: help.DefaultSectionHelp},
 			},
-			os.Stderr,
+			os.Stdout,
 			"--help",
 			"Print help",
 			f.Alias("-h"),
@@ -474,6 +473,13 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		}
 	}
 
+	pfs := make(f.PassedFlags)
+	for name, flag := range ftar.AllowedFlags {
+		if flag.SetBy != "" {
+			pfs[name] = flag.Value.Get()
+		}
+	}
+
 	// OK! Let's make the ParseResult for each case and gtfo
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
@@ -483,7 +489,9 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		for _, e := range app.helpMappings {
 			if e.Name == helpType {
 				pr := ParseResult{
-					Action: e.SectionHelp(app.helpWriter, *ftar.Section, helpInfo),
+					Path:        gar.Path,
+					PassedFlags: pfs,
+					Action:      e.SectionHelp(app.helpWriter, *ftar.Section, helpInfo),
 				}
 				return &pr, nil
 			}
@@ -497,23 +505,19 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 			for _, e := range app.helpMappings {
 				if e.Name == helpType {
 					pr := ParseResult{
-						Action: e.CommandHelp(app.helpWriter, *ftar.Command, helpInfo),
+						Path:        gar.Path,
+						PassedFlags: pfs,
+						Action:      e.CommandHelp(app.helpWriter, *ftar.Command, helpInfo),
 					}
 					return &pr, nil
 				}
 			}
 			return nil, fmt.Errorf("some problem with section help: info: %v", helpInfo)
 		} else {
-			fvs := make(f.PassedFlags)
-			for name, flag := range ftar.AllowedFlags {
-				if flag.SetBy != "" {
-					fvs[name] = flag.Value.Get()
-				}
-			}
 
 			pr := ParseResult{
 				Path:        gar.Path,
-				PassedFlags: fvs,
+				PassedFlags: pfs,
 				Action:      ftar.Action,
 			}
 			return &pr, nil

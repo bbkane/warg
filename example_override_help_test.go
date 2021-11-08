@@ -2,7 +2,6 @@ package warg_test
 
 import (
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/bbkane/warg"
@@ -29,16 +28,16 @@ func exampleOverrideHelpFlaglogin(pf flag.PassedFlags) error {
 	return nil
 }
 
-func exampleOverrideHelpFlagCustomCommandHelp(w io.Writer, _ command.Command, _ help.HelpInfo) command.Action {
+func exampleOverrideHelpFlagCustomCommandHelp(file *os.File, _ command.Command, _ help.HelpInfo) command.Action {
 	return func(_ flag.PassedFlags) error {
-		fmt.Fprintln(w, "Custom command help")
+		fmt.Fprintln(file, "Custom command help")
 		return nil
 	}
 }
 
-func exampleOverrideHelpFlagCustomSectionHelp(w io.Writer, _ section.Section, _ help.HelpInfo) command.Action {
+func exampleOverrideHelpFlagCustomSectionHelp(file *os.File, _ section.Section, _ help.HelpInfo) command.Action {
 	return func(_ flag.PassedFlags) error {
-		fmt.Fprintln(w, "Custom section help")
+		fmt.Fprintln(file, "Custom section help")
 		return nil
 	}
 }

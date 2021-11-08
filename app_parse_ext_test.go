@@ -37,7 +37,7 @@ func TestApp_Parse(t *testing.T) {
 		expectedErr              bool
 	}{
 		{
-			name: "from main",
+			name: "fromMain",
 			app: warg.New(
 				"test",
 				s.New(
@@ -72,7 +72,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedErr:              false,
 		},
 		{
-			name: "no section",
+			name: "noSection",
 			app: warg.New(
 				"test",
 				s.New(
@@ -87,11 +87,11 @@ func TestApp_Parse(t *testing.T) {
 			args:                     []string{"app"},
 			lookup:                   warg.LookupMap(nil),
 			expectedPassedPath:       nil,
-			expectedPassedFlagValues: nil,
+			expectedPassedFlagValues: map[string]interface{}{"--help": "default"},
 			expectedErr:              false,
 		},
 		{
-			name: "flag default",
+			name: "flagDefault",
 			app: warg.New(
 				"test",
 				s.New(
@@ -116,7 +116,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedErr:              false,
 		},
 		{
-			name: "extra_flag",
+			name: "extraFlag",
 			app: warg.New(
 				"test",
 				s.New(
@@ -141,7 +141,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedErr:              true,
 		},
 		{
-			name: "config_flag",
+			name: "configFlag",
 			app: warg.New(
 				"test",
 				s.New(
@@ -186,7 +186,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedErr: false,
 		},
 		{
-			name: "section flag",
+			name: "sectionFlag",
 			app: warg.New(
 				"test",
 				s.New(
@@ -214,7 +214,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedErr: false,
 		},
 		{
-			name: "simple JSON config",
+			name: "simpleJSONConfig",
 			app: warg.New(
 				"test",
 				s.New("help for test",
@@ -251,7 +251,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedErr: false,
 		},
 		{
-			name: "config_slice",
+			name: "configSlice",
 			app: warg.New(
 				"test",
 				s.New(

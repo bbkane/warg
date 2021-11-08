@@ -15,10 +15,11 @@ func pathNew(val string) (*pathV, error) {
 	}
 	return (*pathV)(&expanded), nil
 }
-func (v *pathV) Get() interface{}    { return string(*v) }
-func (v *pathV) String() string      { return fmt.Sprint(string(*v)) }
-func (v *pathV) TypeInfo() typeInfo  { return TypeInfoScalar }
-func (v *pathV) Description() string { return "path" }
+func (v *pathV) Get() interface{}      { return string(*v) }
+func (v *pathV) String() string        { return fmt.Sprint(string(*v)) }
+func (v *pathV) StringSlice() []string { return nil }
+func (v *pathV) TypeInfo() TypeInfo    { return TypeInfoScalar }
+func (v *pathV) Description() string   { return "path" }
 
 func (v *pathV) Update(s string) error {
 	new, err := pathNew(s)
@@ -56,6 +57,13 @@ type pathSliceV []string
 
 func (v *pathSliceV) Get() interface{} { return []string(*v) }
 func (v *pathSliceV) String() string   { return fmt.Sprint([]string(*v)) }
+func (v *pathSliceV) StringSlice() []string {
+	var ret []string
+	for _, e := range []string(*v) {
+		ret = append(ret, fmt.Sprint(e))
+	}
+	return ret
+}
 func (v *pathSliceV) Update(val string) error {
 	expanded, err := homedir.Expand(val)
 	if err != nil {
@@ -77,7 +85,7 @@ func (v *pathSliceV) UpdateFromInterface(iFace interface{}) error {
 	return nil
 }
 
-func (v *pathSliceV) TypeInfo() typeInfo  { return TypeInfoSlice }
+func (v *pathSliceV) TypeInfo() TypeInfo  { return TypeInfoSlice }
 func (v *pathSliceV) Description() string { return "path slice" }
 
 // PathSlice autoexpands ~ when updated and otherwise behaves like a []string
@@ -95,7 +103,6 @@ func (v *pathSliceV) ReplaceFromInterface(iFace interface{}) error {
 			return fmt.Errorf("could not expand: %v: %w", e, err)
 		}
 	}
-	// TODO: does this even work?
 	new2 := new.Get().([]string)
 	*v = *(*pathSliceV)(&new2)
 	return nil

@@ -5,11 +5,14 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 
+	"github.com/bbkane/go-color"
 	c "github.com/bbkane/warg/command"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
+	"github.com/mattn/go-isatty"
 )
 
 // HelpInfo lists common information available to a help function
@@ -25,8 +28,8 @@ type HelpInfo struct {
 	RootSection s.Section
 }
 
-type CommandHelp = func(w io.Writer, cur c.Command, helpInfo HelpInfo) c.Action
-type SectionHelp = func(w io.Writer, cur s.Section, helpInfo HelpInfo) c.Action
+type CommandHelp = func(file *os.File, cur c.Command, helpInfo HelpInfo) c.Action
+type SectionHelp = func(file *os.File, cur s.Section, helpInfo HelpInfo) c.Action
 
 func printFlag(w io.Writer, name string, flag *f.Flag) {
 	fmt.Fprintf(w, "  %s : %s\n", name, flag.Help)
@@ -50,9 +53,9 @@ func printFlag(w io.Writer, name string, flag *f.Flag) {
 	fmt.Fprintln(w)
 }
 
-func DefaultCommandHelp(w io.Writer, cur c.Command, helpInfo HelpInfo) c.Action {
-	return func(fv f.PassedFlags) error {
-		f := bufio.NewWriter(w)
+func DefaultCommandHelp(file *os.File, cur c.Command, helpInfo HelpInfo) c.Action {
+	return func(_ f.PassedFlags) error {
+		f := bufio.NewWriter(file)
 		defer f.Flush()
 		// Print top help section
 		if cur.HelpLong == "" {
@@ -101,10 +104,24 @@ func DefaultCommandHelp(w io.Writer, cur c.Command, helpInfo HelpInfo) c.Action 
 	}
 }
 
-func DefaultSectionHelp(w io.Writer, cur s.Section, _ HelpInfo) c.Action {
-	return func(fv f.PassedFlags) error {
-		f := bufio.NewWriter(w)
+func DefaultSectionHelp(file *os.File, cur s.Section, _ HelpInfo) c.Action {
+	return func(pf f.PassedFlags) error {
+
+		f := bufio.NewWriter(file)
 		defer f.Flush()
+
+		// default to trying to use color
+		useColor := "auto"
+		// respect a --color string
+		if useColorI, exists := pf["--color"]; exists {
+			if useColorUnder, isStr := useColorI.(string); isStr {
+				useColor = useColorUnder
+			}
+		}
+
+		if useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd())) {
+			color.Enable()
+		}
 
 		// Print top help section
 		if cur.HelpLong == "" {
@@ -117,7 +134,7 @@ func DefaultSectionHelp(w io.Writer, cur s.Section, _ HelpInfo) c.Action {
 
 		// Print sections
 		if len(cur.Sections) > 0 {
-			fmt.Fprintf(f, "Sections:\n")
+			fmt.Fprintln(f, color.Add(color.Underline+color.Bold, "Sections"))
 			fmt.Fprintln(f)
 
 			keys := make([]string, 0, len(cur.Sections))
@@ -127,7 +144,12 @@ func DefaultSectionHelp(w io.Writer, cur s.Section, _ HelpInfo) c.Action {
 			sort.Strings(keys)
 
 			for _, k := range keys {
-				fmt.Fprintf(f, "  %s : %s\n", k, cur.Sections[k].Help)
+				fmt.Fprintf(
+					f,
+					"  %s : %s\n",
+					color.Add(color.ForegroundCyan, k),
+					cur.Sections[k].Help,
+				)
 			}
 
 			fmt.Fprintln(f)
@@ -135,7 +157,7 @@ func DefaultSectionHelp(w io.Writer, cur s.Section, _ HelpInfo) c.Action {
 
 		// Print commands
 		if len(cur.Commands) > 0 {
-			fmt.Fprintf(f, "Commands:\n")
+			fmt.Fprintln(f, color.Add(color.Underline+color.Bold, "Commands"))
 			fmt.Fprintln(f)
 
 			keys := make([]string, 0, len(cur.Commands))
@@ -145,11 +167,18 @@ func DefaultSectionHelp(w io.Writer, cur s.Section, _ HelpInfo) c.Action {
 			sort.Strings(keys)
 
 			for _, k := range keys {
-				fmt.Fprintf(f, "  %s : %s\n", k, cur.Commands[k].Help)
+				fmt.Fprintf(
+					f,
+					"  %s : %s\n",
+					color.Add(color.ForegroundGreen, k),
+					cur.Commands[k].Help,
+				)
 			}
 		}
 
 		if cur.Footer != "" {
+			fmt.Fprintln(f)
+			fmt.Fprintln(f, color.Add(color.Underline+color.Bold, "Footer"))
 			fmt.Fprintln(f)
 			fmt.Fprintf(f, "%s\n", cur.Footer)
 		}

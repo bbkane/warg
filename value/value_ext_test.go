@@ -40,6 +40,13 @@ func TestStringSliceValue(t *testing.T) {
 
 	v.Update("hi")
 	require.Equal(t, v.Get().([]string), []string{"hi"})
+
+	v.Update("there")
+	require.Equal(
+		t,
+		v.StringSlice(),
+		[]string{"hi", "there"},
+	)
 }
 
 func TestIntSliceValue(t *testing.T) {
