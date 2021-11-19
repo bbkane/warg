@@ -177,11 +177,21 @@ grabbit                   # app name
 
 Similar to `az`, `grabbit` organizes its capabilities with sections, commands and flags. Sections are used to group commands. Flags defined in a "parent" section are available to child commands. for example, the `config edit` command has access to the parent `--config-path` flag, as does the `grab` command.
 
+## Special Flags
+
+TODO
+
+--config
+
+--help + --color
+
 ## Unsupported CLI Patterns
 
 One of warg's tradeoffs is that it insists on only using sections, commands and flags. This means it is not possible (by design) to build some styles of CLI apps. warg does not support positional arguments. Instead, use a required flag: `git clone <url>` is spelled `git clone --url <url>`.
 
-##  Naming Conventions
+All warg apps must have at least one nested command.  It is not possible to design a warg app such that calling `<appname> --flag <value>` does useful work. Instead, `<appname> <command> --flag <value>` must be used.
+
+##  API Naming Conventions
 
 Replace `XXX` with `Section`, `Command`, or `Flag`:
 
@@ -191,6 +201,9 @@ Replace `XXX` with `Section`, `Command`, or `Flag`:
 
 # TODO
 
+- turn configreader into config and jsonreader.NewJSONConfigReader -> New
+- make config/path package so the code isn't copied
+- replace WithXXX with XXX ? that means renaming the XXX type to something like XXXT (SectionT)
 - add screenshots for --help - colors look way better
 - zsh completion with https://www.dolthub.com/blog/2021-11-15-zsh-completions-with-subcommands/
 - Should I make commands not return an error? Maybe that should be handled by the app author?
