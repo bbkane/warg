@@ -160,8 +160,8 @@ func DefaultCommandHelp(file *os.File, cur c.Command, helpInfo HelpInfo) c.Actio
 		}
 
 		// Print top help section
-		if cur.HelpLong == "" {
-			fmt.Fprintf(f, "%s\n", cur.Help)
+		if cur.HelpLong != "" {
+			fmt.Fprintf(f, "%s\n", cur.HelpLong)
 		} else {
 			fmt.Fprintf(f, "%s\n", cur.Help)
 		}
@@ -188,12 +188,12 @@ func DefaultCommandHelp(file *os.File, cur c.Command, helpInfo HelpInfo) c.Actio
 			}
 
 			if commandFlagHelp.Len() > 0 {
-				fmt.Fprintln(f, color.Add(color.Bold+color.Underline, "Command Flags:"))
+				fmt.Fprintln(f, color.Add(color.Bold+color.Underline, "Command Flags"))
 				fmt.Fprintln(f)
 				commandFlagHelp.WriteTo(f)
 			}
 			if sectionFlagHelp.Len() > 0 {
-				fmt.Fprintln(f, color.Add(color.Bold+color.Underline, "Inherited Section Flags:"))
+				fmt.Fprintln(f, color.Add(color.Bold+color.Underline, "Inherited Section Flags"))
 				fmt.Fprintln(f)
 				sectionFlagHelp.WriteTo(f)
 			}
@@ -226,8 +226,8 @@ func DefaultSectionHelp(file *os.File, cur s.Section, _ HelpInfo) c.Action {
 		}
 
 		// Print top help section
-		if cur.HelpLong == "" {
-			fmt.Fprintf(f, "%s\n", cur.Help)
+		if cur.HelpLong != "" {
+			fmt.Fprintf(f, "%s\n", cur.HelpLong)
 		} else {
 			fmt.Fprintf(f, "%s\n", cur.Help)
 		}

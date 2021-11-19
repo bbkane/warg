@@ -456,8 +456,10 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 			return nil, err
 		}
 
-		if flag.Required && flag.SetBy == "" {
-			return nil, fmt.Errorf("flag required but not set: %s", name)
+		if !gar.HelpPassed {
+			if flag.Required && flag.SetBy == "" {
+				return nil, fmt.Errorf("flag required but not set: %s", name)
+			}
 		}
 
 		ftar.AllowedFlags[name] = flag
