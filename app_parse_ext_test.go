@@ -19,9 +19,9 @@ import (
 // NOTE: this is is a bit of a hack to mock out a configreader
 // NOTE: see https://karthikkaranth.me/blog/functions-implementing-interfaces-in-go/
 // for how to use ConfigReaderFunc in tests
-type ConfigReaderFunc func(path string) (config.ConfigSearchResult, error)
+type ConfigReaderFunc func(path string) (config.SearchResult, error)
 
-func (f ConfigReaderFunc) Search(path string) (config.ConfigSearchResult, error) {
+func (f ConfigReaderFunc) Search(path string) (config.SearchResult, error) {
 	return f(path)
 }
 
@@ -157,16 +157,16 @@ func TestApp_Parse(t *testing.T) {
 				),
 				warg.ConfigFlag(
 					"--config",
-					func(_ string) (config.ConfigReader, error) {
-						var cr ConfigReaderFunc = func(path string) (config.ConfigSearchResult, error) {
+					func(_ string) (config.Reader, error) {
+						var cr ConfigReaderFunc = func(path string) (config.SearchResult, error) {
 							if path == "key" {
-								return config.ConfigSearchResult{
+								return config.SearchResult{
 									IFace:        "mapkeyval",
 									Exists:       true,
 									IsAggregated: false,
 								}, nil
 							}
-							return config.ConfigSearchResult{}, nil
+							return config.SearchResult{}, nil
 						}
 
 						return cr, nil
@@ -232,7 +232,7 @@ func TestApp_Parse(t *testing.T) {
 				),
 				warg.ConfigFlag(
 					"--config",
-					jsonreader.NewJSONConfigReader,
+					jsonreader.New,
 					"path to config",
 					// TODO: make this test work by following the config cases
 					// in the README
@@ -266,7 +266,7 @@ func TestApp_Parse(t *testing.T) {
 				),
 				warg.ConfigFlag(
 					"--config",
-					jsonreader.NewJSONConfigReader,
+					jsonreader.New,
 					"config flag",
 					f.Default("testdata/config_slice.json"),
 				),

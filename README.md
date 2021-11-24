@@ -203,7 +203,6 @@ Replace `XXX` with `Section`, `Command`, or `Flag`:
 
 - put the `:` back at the end of headers in teh default help functions.
 - add a bool value
-- turn configreader into config and jsonreader.NewJSONConfigReader -> New
 - make config/path package so the code isn't copied
 - replace WithXXX with XXX ? that means renaming the XXX type to something like XXXT (SectionT) - also change AddXXX to ExistingXXX
 - add screenshots for --help - colors look way better

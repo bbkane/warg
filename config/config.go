@@ -1,7 +1,7 @@
 package config
 
-// ConfigSearchResult is the result of trying to search through a config for a value
-type ConfigSearchResult struct {
+// SearchResult is the result of trying to search through a config for a value
+type SearchResult struct {
 	// IFace holds the value if found
 	IFace interface{}
 	// Exists indicates whether the value was found or not
@@ -12,10 +12,10 @@ type ConfigSearchResult struct {
 	IsAggregated bool
 }
 
-// ConfigReader searches with a path to try to get a config value.
-type ConfigReader interface {
-	Search(path string) (ConfigSearchResult, error)
+// Reader searches with a path to try to get a config value.
+type Reader interface {
+	Search(path string) (SearchResult, error)
 }
 
-// NewConfigReader constructs a ConfigReader
-type NewConfigReader = func(filePath string) (ConfigReader, error)
+// NewReader constructs a ConfigReader
+type NewReader = func(filePath string) (Reader, error)

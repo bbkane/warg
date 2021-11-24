@@ -15,7 +15,7 @@ func TestSearch(t *testing.T) {
 		filePath             string
 		searchPath           string
 		expectedCreationErr  bool
-		expectedSearchResult config.ConfigSearchResult
+		expectedSearchResult config.SearchResult
 		expectedSearchErr    bool
 	}{
 		{
@@ -23,7 +23,7 @@ func TestSearch(t *testing.T) {
 			filePath:            "testdata/TestSearch.json",
 			searchPath:          "key",
 			expectedCreationErr: false,
-			expectedSearchResult: config.ConfigSearchResult{
+			expectedSearchResult: config.SearchResult{
 				IFace:        "value",
 				Exists:       true,
 				IsAggregated: false,
@@ -35,7 +35,7 @@ func TestSearch(t *testing.T) {
 			filePath:            "non-existant",
 			searchPath:          "non-existant",
 			expectedCreationErr: false, // It's ok to not have a config file
-			expectedSearchResult: config.ConfigSearchResult{
+			expectedSearchResult: config.SearchResult{
 				IFace:        nil,
 				Exists:       false,
 				IsAggregated: false,
@@ -47,7 +47,7 @@ func TestSearch(t *testing.T) {
 			filePath:            "testdata/TestSearch.json",
 			searchPath:          "key1.key2",
 			expectedCreationErr: false,
-			expectedSearchResult: config.ConfigSearchResult{
+			expectedSearchResult: config.SearchResult{
 				IFace:        float64(1),
 				Exists:       true,
 				IsAggregated: false,
@@ -59,7 +59,7 @@ func TestSearch(t *testing.T) {
 			filePath:            "testdata/TestSearch.json",
 			searchPath:          "subreddits[].name",
 			expectedCreationErr: false,
-			expectedSearchResult: config.ConfigSearchResult{
+			expectedSearchResult: config.SearchResult{
 				IFace:        []interface{}([]interface{}{"earthporn", "wallpapers"}),
 				Exists:       true,
 				IsAggregated: true,
@@ -70,7 +70,7 @@ func TestSearch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cr, err := jsonreader.NewJSONConfigReader(tt.filePath)
+			cr, err := jsonreader.New(tt.filePath)
 
 			if tt.expectedCreationErr {
 				require.NotNil(t, err)

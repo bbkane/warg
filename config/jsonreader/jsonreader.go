@@ -13,7 +13,7 @@ type jsonConfigReader struct {
 	data configMap
 }
 
-func NewJSONConfigReader(filePath string) (config.ConfigReader, error) {
+func New(filePath string) (config.Reader, error) {
 	cr := &jsonConfigReader{}
 
 	content, err := ioutil.ReadFile(filePath)
@@ -60,11 +60,11 @@ func tokenize(path string) ([]token, error) {
 	return tokens, nil
 }
 
-func (cr *jsonConfigReader) Search(path string) (config.ConfigSearchResult, error) {
+func (cr *jsonConfigReader) Search(path string) (config.SearchResult, error) {
 	data := cr.data
 	tokens, err := tokenize(path)
 	if err != nil {
-		return config.ConfigSearchResult{}, err
+		return config.SearchResult{}, err
 	}
 
 	lenTokens := len(tokens)
@@ -75,14 +75,14 @@ func (cr *jsonConfigReader) Search(path string) (config.ConfigSearchResult, erro
 			// cast it to a slice, then get all keys from it!
 			sliceOfDicts, ok := current.([]interface{})
 			if !ok {
-				return config.ConfigSearchResult{}, fmt.Errorf(
+				return config.SearchResult{}, fmt.Errorf(
 					"expecting []interface{}: \n  actual type %T\n  actual value: %#v\n   path: %v\n  token: %v",
 					current, current, path, token,
 				)
 			}
 			finalToken := tokens[lenTokens-1]
 			if finalToken.Type != tokenTypeKey {
-				return config.ConfigSearchResult{}, fmt.Errorf(
+				return config.SearchResult{}, fmt.Errorf(
 					"expected TokenTypeKey for last element: path: %v: token: %v",
 					path,
 					token,
@@ -92,26 +92,26 @@ func (cr *jsonConfigReader) Search(path string) (config.ConfigSearchResult, erro
 			for _, e := range sliceOfDicts {
 				cm, ok := e.(configMap)
 				if !ok {
-					return config.ConfigSearchResult{}, fmt.Errorf(
+					return config.SearchResult{}, fmt.Errorf(
 						"expecting ConfigMap: \n  actual type %T\n  actual value: %#v\n  path: %v\n  token: %v",
 						current, current, path, token,
 					)
 				}
 				val, exists := cm[finalToken.Text]
 				if !exists {
-					return config.ConfigSearchResult{}, fmt.Errorf(
+					return config.SearchResult{}, fmt.Errorf(
 						"for the slice operator, ALL elements must contain the key: path: %v: key: %v",
 						path, finalToken.Text,
 					)
 				}
 				ret = append(ret, val)
 			}
-			return config.ConfigSearchResult{IFace: ret, Exists: true, IsAggregated: true}, nil
+			return config.SearchResult{IFace: ret, Exists: true, IsAggregated: true}, nil
 		} else {
 			// outside the special case, we should be able to just index into this thing, and loop again
 			// or, if it's the last one, return
 			if token.Type != tokenTypeKey {
-				return config.ConfigSearchResult{}, fmt.Errorf(
+				return config.SearchResult{}, fmt.Errorf(
 					"expected TokenTypeKey for last element: path: %v: token: %v",
 					path,
 					token,
@@ -128,7 +128,7 @@ func (cr *jsonConfigReader) Search(path string) (config.ConfigSearchResult, erro
 			// but see ~/warg_configreader.md - I'm going to create a new package to do that
 
 			if !ok {
-				return config.ConfigSearchResult{}, fmt.Errorf(
+				return config.SearchResult{}, fmt.Errorf(
 					"expecting ConfigMap: \n  actual type %T\n  actual value: %#v\n  path: %v\n  token: %v",
 					current, current, path, token,
 				)
@@ -138,9 +138,9 @@ func (cr *jsonConfigReader) Search(path string) (config.ConfigSearchResult, erro
 			next, exists := currentMap[token.Text]
 			current = next
 			if !exists {
-				return config.ConfigSearchResult{}, nil
+				return config.SearchResult{}, nil
 			}
 		}
 	}
-	return config.ConfigSearchResult{IFace: current, Exists: true, IsAggregated: false}, nil
+	return config.SearchResult{IFace: current, Exists: true, IsAggregated: false}, nil
 }

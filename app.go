@@ -23,7 +23,7 @@ type AppOpt = func(*App)
 type App struct {
 	// Config()
 	configFlagName  string
-	newConfigReader config.NewConfigReader
+	newConfigReader config.NewReader
 	configFlag      *f.Flag
 
 	// New Help()
@@ -90,7 +90,7 @@ func OverrideHelpFlag(
 func ConfigFlag(
 	// TODO: put the new stuff at the front to be consistent with OverrideHelpFlag
 	configFlagName string,
-	newConfigReader config.NewConfigReader,
+	newConfigReader config.NewReader,
 	helpShort string,
 	flagOpts ...f.FlagOpt,
 ) AppOpt {
@@ -285,7 +285,7 @@ func resolveFlag(
 	flag *f.Flag,
 	name string,
 	flagStrs []flagStr,
-	configReader config.ConfigReader,
+	configReader config.Reader,
 	lookupEnv LookupFunc,
 	aliases flagNameToAlias,
 ) error {
@@ -419,7 +419,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	}
 
 	// fill the flags
-	var configReader config.ConfigReader
+	var configReader config.Reader
 	// get the value of a potential passed --config flag
 	if app.configFlag != nil {
 		// we're gonna make a config map out of this if everything goes well
