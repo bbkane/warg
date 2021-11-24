@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	c "github.com/bbkane/warg/command"
-	"github.com/bbkane/warg/configreader"
+	"github.com/bbkane/warg/config"
 	f "github.com/bbkane/warg/flag"
 	"github.com/bbkane/warg/help"
 	s "github.com/bbkane/warg/section"
@@ -23,7 +23,7 @@ type AppOpt = func(*App)
 type App struct {
 	// Config()
 	configFlagName  string
-	newConfigReader configreader.NewConfigReader
+	newConfigReader config.NewConfigReader
 	configFlag      *f.Flag
 
 	// New Help()
@@ -90,7 +90,7 @@ func OverrideHelpFlag(
 func ConfigFlag(
 	// TODO: put the new stuff at the front to be consistent with OverrideHelpFlag
 	configFlagName string,
-	newConfigReader configreader.NewConfigReader,
+	newConfigReader config.NewConfigReader,
 	helpShort string,
 	flagOpts ...f.FlagOpt,
 ) AppOpt {
@@ -285,7 +285,7 @@ func resolveFlag(
 	flag *f.Flag,
 	name string,
 	flagStrs []flagStr,
-	configReader configreader.ConfigReader,
+	configReader config.ConfigReader,
 	lookupEnv LookupFunc,
 	aliases flagNameToAlias,
 ) error {
@@ -419,7 +419,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	}
 
 	// fill the flags
-	var configReader configreader.ConfigReader
+	var configReader config.ConfigReader
 	// get the value of a potential passed --config flag
 	if app.configFlag != nil {
 		// we're gonna make a config map out of this if everything goes well

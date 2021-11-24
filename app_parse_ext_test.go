@@ -7,8 +7,8 @@ import (
 
 	"github.com/bbkane/warg"
 	c "github.com/bbkane/warg/command"
-	"github.com/bbkane/warg/configreader"
-	"github.com/bbkane/warg/configreader/jsonreader"
+	"github.com/bbkane/warg/config"
+	"github.com/bbkane/warg/config/jsonreader"
 	f "github.com/bbkane/warg/flag"
 	s "github.com/bbkane/warg/section"
 	v "github.com/bbkane/warg/value"
@@ -19,9 +19,9 @@ import (
 // NOTE: this is is a bit of a hack to mock out a configreader
 // NOTE: see https://karthikkaranth.me/blog/functions-implementing-interfaces-in-go/
 // for how to use ConfigReaderFunc in tests
-type ConfigReaderFunc func(path string) (configreader.ConfigSearchResult, error)
+type ConfigReaderFunc func(path string) (config.ConfigSearchResult, error)
 
-func (f ConfigReaderFunc) Search(path string) (configreader.ConfigSearchResult, error) {
+func (f ConfigReaderFunc) Search(path string) (config.ConfigSearchResult, error) {
 	return f(path)
 }
 
@@ -157,16 +157,16 @@ func TestApp_Parse(t *testing.T) {
 				),
 				warg.ConfigFlag(
 					"--config",
-					func(_ string) (configreader.ConfigReader, error) {
-						var cr ConfigReaderFunc = func(path string) (configreader.ConfigSearchResult, error) {
+					func(_ string) (config.ConfigReader, error) {
+						var cr ConfigReaderFunc = func(path string) (config.ConfigSearchResult, error) {
 							if path == "key" {
-								return configreader.ConfigSearchResult{
+								return config.ConfigSearchResult{
 									IFace:        "mapkeyval",
 									Exists:       true,
 									IsAggregated: false,
 								}, nil
 							}
-							return configreader.ConfigSearchResult{}, nil
+							return config.ConfigSearchResult{}, nil
 						}
 
 						return cr, nil

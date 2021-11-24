@@ -1,4 +1,4 @@
-package configreader
+package config
 
 // ConfigSearchResult is the result of trying to search through a config for a value
 type ConfigSearchResult struct {

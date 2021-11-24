@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/bbkane/warg/configreader"
-	"github.com/bbkane/warg/configreader/jsonreader"
+	"github.com/bbkane/warg/config"
+	"github.com/bbkane/warg/config/jsonreader"
 )
 
 func TestSearch(t *testing.T) {
@@ -15,7 +15,7 @@ func TestSearch(t *testing.T) {
 		filePath             string
 		searchPath           string
 		expectedCreationErr  bool
-		expectedSearchResult configreader.ConfigSearchResult
+		expectedSearchResult config.ConfigSearchResult
 		expectedSearchErr    bool
 	}{
 		{
@@ -23,7 +23,7 @@ func TestSearch(t *testing.T) {
 			filePath:            "testdata/TestSearch.json",
 			searchPath:          "key",
 			expectedCreationErr: false,
-			expectedSearchResult: configreader.ConfigSearchResult{
+			expectedSearchResult: config.ConfigSearchResult{
 				IFace:        "value",
 				Exists:       true,
 				IsAggregated: false,
@@ -35,7 +35,7 @@ func TestSearch(t *testing.T) {
 			filePath:            "non-existant",
 			searchPath:          "non-existant",
 			expectedCreationErr: false, // It's ok to not have a config file
-			expectedSearchResult: configreader.ConfigSearchResult{
+			expectedSearchResult: config.ConfigSearchResult{
 				IFace:        nil,
 				Exists:       false,
 				IsAggregated: false,
@@ -47,7 +47,7 @@ func TestSearch(t *testing.T) {
 			filePath:            "testdata/TestSearch.json",
 			searchPath:          "key1.key2",
 			expectedCreationErr: false,
-			expectedSearchResult: configreader.ConfigSearchResult{
+			expectedSearchResult: config.ConfigSearchResult{
 				IFace:        float64(1),
 				Exists:       true,
 				IsAggregated: false,
@@ -59,7 +59,7 @@ func TestSearch(t *testing.T) {
 			filePath:            "testdata/TestSearch.json",
 			searchPath:          "subreddits[].name",
 			expectedCreationErr: false,
-			expectedSearchResult: configreader.ConfigSearchResult{
+			expectedSearchResult: config.ConfigSearchResult{
 				IFace:        []interface{}([]interface{}{"earthporn", "wallpapers"}),
 				Exists:       true,
 				IsAggregated: true,
