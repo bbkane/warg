@@ -201,10 +201,8 @@ Replace `XXX` with `Section`, `Command`, or `Flag`:
 
 # TODO
 
-- Add ExistingFlags/AddFlags(map[string]Flag)
-- extract the usecolor stuff in the helpfuncs to a separate function.
-- helpFlagMapping needs some docs
-- MAKE THE HELPEXAMPLE A LOT SHORTER
+- put the `:` back at the end of headers in teh default help functions.
+- add a bool value
 - turn configreader into config and jsonreader.NewJSONConfigReader -> New
 - make config/path package so the code isn't copied
 - replace WithXXX with XXX ? that means renaming the XXX type to something like XXXT (SectionT) - also change AddXXX to ExistingXXX
@@ -213,7 +211,6 @@ Replace `XXX` with `Section`, `Command`, or `Flag`:
 - Should I make commands not return an error? Maybe that should be handled by the app author?
 - Ensure a flag created with flag.New can be used in multiple places! Probably with lots of tests...
 - make help less verbose...
-- don't skip the --help tests :)
 - make an app.Test() method folks can add to their apps - should test for unique flag names between parent and child sections/commands for one thing
 - go through TODOs in code
 - --help ideas: man, json, web, form, term, lsp, bash-completion, zsh-completion, outline, compact

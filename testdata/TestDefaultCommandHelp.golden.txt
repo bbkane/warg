@@ -1,23 +1,21 @@
 Edit the config. A default config will be created if it doesn't exist
 
-Command Flags:
+Command Flags
 
   --editor : path to editor
     type : string
-    value : emacs
-    setby : envvar
-    default : [vi]
+    default : vi
     configpath : editor
     envvars : [EDITOR]
     required : true
+    value (set by envvar) : emacs
 
-Inherited Section Flags:
+Inherited Section Flags
 
-  --help : Print help information
+  --help , -h : Print help information
     type : stringenum with choices: [default]
-    value : default
-    setby : appdefault
-    default : [default]
+    default : default
+    value (set by appdefault) : default
 
 Examples:
 

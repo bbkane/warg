@@ -32,21 +32,23 @@ type App struct {
 	// Note that this can be ""
 	helpFlagAlias string
 	helpMappings  []HelpFlagMapping
-	helpWriter    *os.File
+	helpFile      *os.File
 
 	// rootSection holds the good stuff!
 	rootSection s.Section
 }
 
+// HelpFlagMapping adds a new option to your --help flag
 type HelpFlagMapping struct {
 	Name        string
 	CommandHelp help.CommandHelp
 	SectionHelp help.SectionHelp
 }
 
+// OverrideHelpFlag customizes your --help. If you write a custom --help function, you'll want to add it to your app here!
 func OverrideHelpFlag(
 	mappings []HelpFlagMapping,
-	helpWriter *os.File,
+	helpFile *os.File,
 	flagName string,
 	flagHelp string,
 	flagOpts ...f.FlagOpt,
@@ -79,7 +81,7 @@ func OverrideHelpFlag(
 		a.helpFlagName = flagName
 		a.helpFlagAlias = helpFlag.Alias
 		a.helpMappings = mappings
-		a.helpWriter = helpWriter
+		a.helpFile = helpFile
 
 	}
 }
@@ -494,7 +496,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 				pr := ParseResult{
 					Path:        gar.Path,
 					PassedFlags: pfs,
-					Action:      e.SectionHelp(app.helpWriter, *ftar.Section, helpInfo),
+					Action:      e.SectionHelp(app.helpFile, *ftar.Section, helpInfo),
 				}
 				return &pr, nil
 			}
@@ -510,7 +512,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 					pr := ParseResult{
 						Path:        gar.Path,
 						PassedFlags: pfs,
-						Action:      e.CommandHelp(app.helpWriter, *ftar.Command, helpInfo),
+						Action:      e.CommandHelp(app.helpFile, *ftar.Command, helpInfo),
 					}
 					return &pr, nil
 				}

@@ -9,22 +9,10 @@ import (
 	"github.com/bbkane/warg/flag"
 	"github.com/bbkane/warg/help"
 	"github.com/bbkane/warg/section"
-	"github.com/bbkane/warg/value"
 )
 
 func exampleOverrideHelpFlaglogin(pf flag.PassedFlags) error {
-	url := pf["--url"].(string)
-
-	// timeout doesn't have a default value,
-	// so we can't rely on it being passed.
-	timeout, exists := pf["--timeout"]
-	if exists {
-		timeout := timeout.(int)
-		fmt.Printf("Logging into %s with timeout %d\n", url, timeout)
-		return nil
-	}
-
-	fmt.Printf("Logging into %s\n", url)
+	fmt.Println("Logging in")
 	return nil
 }
 
@@ -51,30 +39,6 @@ func ExampleOverrideHelpFlag() {
 				"login",
 				"Login to the platform",
 				exampleOverrideHelpFlaglogin,
-			),
-			section.WithFlag(
-				"--timeout",
-				"Optional timeout. Defaults to no timeout",
-				value.Int,
-			),
-			section.WithFlag(
-				"--url",
-				"URL of the blog",
-				value.String,
-				flag.Default("https://www.myblog.com"),
-				flag.EnvVars("BLOG_URL"),
-			),
-			section.WithSection(
-				"comments",
-				"Deal with comments",
-				section.WithCommand(
-					"list",
-					"List all comments",
-					// still prototyping how we want this
-					// command to look,
-					// so use a provided stub action
-					command.DoNothing,
-				),
 			),
 		),
 		warg.OverrideHelpFlag(

@@ -9,108 +9,113 @@ import (
 	"testing"
 
 	"github.com/bbkane/warg"
-	c "github.com/bbkane/warg/command"
-	f "github.com/bbkane/warg/flag"
+	"github.com/bbkane/warg/command"
+	wflag "github.com/bbkane/warg/flag"
 	"github.com/bbkane/warg/help"
-
-	s "github.com/bbkane/warg/section"
-	v "github.com/bbkane/warg/value"
+	"github.com/bbkane/warg/section"
+	"github.com/bbkane/warg/value"
 	"github.com/stretchr/testify/require"
 )
 
 var update = flag.Bool("update", false, "update golden files")
 
-func RequireEqualBytesOrDiff(t *testing.T, expectedFilePath string, actual []byte, msg string) {
-	expectedBytes, readErr := ioutil.ReadFile(expectedFilePath)
-	require.Nil(t, readErr)
-	if bytes.Equal(expectedBytes, actual) {
+func RequireEqualBytesOrDiff(t *testing.T, expectedFilePath string, actualFilePath string, msg string) {
+	expectedBytes, expectedReadErr := ioutil.ReadFile(expectedFilePath)
+	require.Nil(t, expectedReadErr)
+
+	actualBytes, actualReadErr := ioutil.ReadFile(actualFilePath)
+	require.Nil(t, actualReadErr)
+
+	if bytes.Equal(expectedBytes, actualBytes) {
 		return
-	}
-
-	actualTmpFile, err := ioutil.TempFile(os.TempDir(), "go-test-actual-")
-	if err != nil {
-		t.Fatalf("Error creating tmpfile: %v", err)
-	}
-	defer actualTmpFile.Close()
-
-	_, err = actualTmpFile.Write(actual)
-	if err != nil {
-		t.Fatalf("Error writing tmpfile: %v", err)
 	}
 
 	t.Fatalf(
 		"%s: expected != actual. See diff:\n  vimdiff %s %s\n",
 		msg,
 		expectedFilePath,
-		actualTmpFile.Name(),
+		actualFilePath,
 	)
 }
 
 func TestDefaultSectionHelp(t *testing.T) {
-	t.SkipNow() // TODO: rm
-	var actualBuffer bytes.Buffer
+
+	actualHelpTmpFile, err := ioutil.TempFile(os.TempDir(), "go-test-actual-help")
+	if err != nil {
+		t.Fatalf("Error creating tmpfile: %v", err)
+	}
 
 	app := warg.New(
 		"grabbit",
-		s.New(
+		section.New(
 			"grab those images!",
-			s.WithSection(
+			section.WithSection(
 				"config",
 				"change grabbit's config",
-				s.WithCommand(
+				section.WithCommand(
 					"edit",
 					"edit the config",
-					c.DoNothing,
-					c.WithFlag(
+					command.DoNothing,
+					command.WithFlag(
 						"--editor",
 						"path to editor",
-						v.String,
-						f.Default("vi"),
+						value.String,
+						wflag.Default("vi"),
 					),
 				),
 			),
-			s.WithCommand(
+			section.WithCommand(
 				"grab",
 				"do the grabbity grabbity",
-				c.DoNothing,
+				command.DoNothing,
 			),
 		),
 		warg.OverrideHelpFlag(
 			[]warg.HelpFlagMapping{
 				{Name: "default", CommandHelp: help.DefaultCommandHelp, SectionHelp: help.DefaultSectionHelp},
 			},
-			// &actualBuffer,
-			os.Stderr, // TODO: use a tmpfile!
+			actualHelpTmpFile,
 			"--help",
 			"Print help information",
-			f.Default("default"),
-			f.Alias("-h"),
+			wflag.Default("default"),
+			wflag.Alias("-h"),
 		),
 	)
 	args := []string{"grabbit", "--help"}
 	actualErr := app.Run(args, warg.LookupMap(nil))
 	require.Nil(t, actualErr)
 
+	closeErr := actualHelpTmpFile.Close()
+	require.Nil(t, closeErr)
+
+	actualHelpBytes, readErr := ioutil.ReadFile(actualHelpTmpFile.Name())
+	require.Nil(t, readErr)
+
 	golden := filepath.Join("testdata", t.Name()+".golden.txt")
 	if *update {
 		mkdirErr := os.MkdirAll("testdata", 0700)
 		require.Nil(t, mkdirErr)
-		writeErr := ioutil.WriteFile(golden, actualBuffer.Bytes(), 0600)
+
+		writeErr := ioutil.WriteFile(golden, actualHelpBytes, 0600)
 		require.Nil(t, writeErr)
+
 		t.Logf("Wrote: %v\n", golden)
 	}
 
 	RequireEqualBytesOrDiff(
 		t,
 		golden,
-		actualBuffer.Bytes(),
+		actualHelpTmpFile.Name(),
 		t.Name(),
 	)
 }
 
 func TestDefaultCommandHelp(t *testing.T) {
-	t.SkipNow() // TODO: rm
-	var actualBuffer bytes.Buffer
+
+	actualHelpTmpFile, err := ioutil.TempFile(os.TempDir(), "go-test-actual-help")
+	if err != nil {
+		t.Fatalf("Error creating tmpfile: %v", err)
+	}
 
 	rootFooter := `Examples:
 
@@ -133,62 +138,69 @@ grabbit config edit --config-path /path/to/config --editor code
 
 	app := warg.New(
 		"grabbit",
-		s.New(
+		section.New(
 			"grab those images!",
-			s.WithSection(
+			section.WithSection(
 				"config",
 				"Change grabbit's config",
-				s.Footer(rootFooter),
-				s.WithCommand(
+				section.Footer(rootFooter),
+				section.WithCommand(
 					"edit",
 					"Edit the config. A default config will be created if it doesn't exist",
-					c.DoNothing,
-					c.Footer(configEditFooter),
-					c.WithFlag(
+					command.DoNothing,
+					command.Footer(configEditFooter),
+					command.WithFlag(
 						"--editor",
 						"path to editor",
-						v.String,
-						f.Default("vi"),
-						f.ConfigPath("editor"),
-						f.EnvVars("EDITOR"),
-						f.Required(),
+						value.String,
+						wflag.Default("vi"),
+						wflag.ConfigPath("editor"),
+						wflag.EnvVars("EDITOR"),
+						wflag.Required(),
 					),
 				),
 			),
-			s.WithCommand(
+			section.WithCommand(
 				"grab",
 				"do the grabbity grabbity",
-				c.DoNothing,
+				command.DoNothing,
 			),
 		),
 		warg.OverrideHelpFlag(
 			[]warg.HelpFlagMapping{
 				{Name: "default", CommandHelp: help.DefaultCommandHelp, SectionHelp: help.DefaultSectionHelp},
 			},
-			// &actualBuffer,
-			os.Stderr, // TODO: use a tempfile so I can actually compare stuff
+			actualHelpTmpFile,
 			"--help",
 			"Print help information",
-			f.Default("default"),
-			f.Alias("-h"),
+			wflag.Default("default"),
+			wflag.Alias("-h"),
 		),
 	)
 	args := []string{"grabbit", "config", "edit", "--help"}
 	actualErr := app.Run(args, warg.LookupMap(map[string]string{"EDITOR": "emacs"}))
 	require.Nil(t, actualErr)
 
+	closeErr := actualHelpTmpFile.Close()
+	require.Nil(t, closeErr)
+
+	actualHelpBytes, readErr := ioutil.ReadFile(actualHelpTmpFile.Name())
+	require.Nil(t, readErr)
+
 	golden := filepath.Join("testdata", t.Name()+".golden.txt")
 	if *update {
 		mkdirErr := os.MkdirAll("testdata", 0700)
 		require.Nil(t, mkdirErr)
-		writeErr := ioutil.WriteFile(golden, actualBuffer.Bytes(), 0600)
+
+		writeErr := ioutil.WriteFile(golden, actualHelpBytes, 0600)
 		require.Nil(t, writeErr)
+
 		t.Logf("Wrote: %v\n", golden)
 	}
 	RequireEqualBytesOrDiff(
 		t,
 		golden,
-		actualBuffer.Bytes(),
+		actualHelpTmpFile.Name(),
 		t.Name(),
 	)
 }
