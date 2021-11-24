@@ -3,39 +3,12 @@ package yamlreader
 import (
 	"fmt"
 	"io/ioutil"
-	"strings"
 
 	"github.com/bbkane/warg/config"
+	"github.com/bbkane/warg/config/tokenize"
+
 	"gopkg.in/yaml.v2"
 )
-
-const tokenTypeKey = "tokenTypeKey"
-const tokenTypeSlice = "tokenTypeSlice"
-
-type token struct {
-	Text string
-	Type string
-}
-
-func tokenize(path string) ([]token, error) {
-	// TODO: make this better :) - I'm only checking for [] at the end of strings and not looking for escaped dots or anything
-	pathElements := strings.Split(path, ".")
-	lenPathElemennts := len(pathElements)
-
-	var tokens []token
-	for i, el := range pathElements {
-		if strings.HasSuffix(el, "[]") {
-			if i != lenPathElemennts-2 {
-				return nil, fmt.Errorf("[] is only allowed as an element before the last element: path: %#v", path)
-			}
-			tokens = append(tokens, token{Text: el[:len(el)-2], Type: tokenTypeKey})
-			tokens = append(tokens, token{Text: "[]", Type: tokenTypeSlice})
-		} else {
-			tokens = append(tokens, token{Text: el, Type: tokenTypeKey})
-		}
-	}
-	return tokens, nil
-}
 
 type configMap = map[interface{}]interface{}
 
@@ -63,7 +36,7 @@ func New(filePath string) (config.Reader, error) {
 
 func (cr *yamlConfigReader) Search(path string) (config.SearchResult, error) {
 	data := cr.data
-	tokens, err := tokenize(path)
+	tokens, err := tokenize.Tokenize(path)
 	if err != nil {
 		return config.SearchResult{}, err
 	}
@@ -71,7 +44,7 @@ func (cr *yamlConfigReader) Search(path string) (config.SearchResult, error) {
 	lenTokens := len(tokens)
 	var current interface{} = data
 	for i, token := range tokens {
-		if i == lenTokens-2 && token.Type == tokenTypeSlice {
+		if i == lenTokens-2 && token.Type == tokenize.TokenTypeSlice {
 			// we're at the second to last token, so current should also be a slice
 			// cast it to a slice, then get all keys from it!
 			sliceOfDicts, ok := current.([]interface{})
@@ -82,7 +55,7 @@ func (cr *yamlConfigReader) Search(path string) (config.SearchResult, error) {
 				)
 			}
 			finalToken := tokens[lenTokens-1]
-			if finalToken.Type != tokenTypeKey {
+			if finalToken.Type != tokenize.TokenTypeKey {
 				return config.SearchResult{}, fmt.Errorf(
 					"expected TokenTypeKey for last element: path: %v: token: %v",
 					path,
@@ -111,7 +84,7 @@ func (cr *yamlConfigReader) Search(path string) (config.SearchResult, error) {
 		} else {
 			// outside the special case, we should be able to just index into this thing, and loop again
 			// or, if it's the last one, return
-			if token.Type != tokenTypeKey {
+			if token.Type != tokenize.TokenTypeKey {
 				return config.SearchResult{}, fmt.Errorf(
 					"expected TokenTypeKey for last element: path: %v: token: %v",
 					path,
