@@ -201,9 +201,13 @@ Replace `XXX` with `Section`, `Command`, or `Flag`:
 
 # TODO
 
+- Add ExistingFlags/AddFlags(map[string]Flag)
+- extract the usecolor stuff in the helpfuncs to a separate function.
+- helpFlagMapping needs some docs
+- MAKE THE HELPEXAMPLE A LOT SHORTER
 - turn configreader into config and jsonreader.NewJSONConfigReader -> New
 - make config/path package so the code isn't copied
-- replace WithXXX with XXX ? that means renaming the XXX type to something like XXXT (SectionT)
+- replace WithXXX with XXX ? that means renaming the XXX type to something like XXXT (SectionT) - also change AddXXX to ExistingXXX
 - add screenshots for --help - colors look way better
 - zsh completion with https://www.dolthub.com/blog/2021-11-15-zsh-completions-with-subcommands/
 - Should I make commands not return an error? Maybe that should be handled by the app author?

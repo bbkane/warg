@@ -141,23 +141,30 @@ func printFlag(w io.Writer, name string, flag *f.Flag) {
 	fmt.Fprintln(w)
 }
 
+// SetColor looks for a passed --color flag with an underlying string value. If
+// it exists and is set to "true", color is enabled. If it exists, is set to
+// "auto", and the passed file is a terminal, color is enabled
+func ConditionallyEnableColor(pf f.PassedFlags, file *os.File) {
+	// default to trying to use color
+	useColor := "auto"
+	// respect a --color string
+	if useColorI, exists := pf["--color"]; exists {
+		if useColorUnder, isStr := useColorI.(string); isStr {
+			useColor = useColorUnder
+		}
+	}
+
+	if useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd())) {
+		color.Enable()
+	}
+}
+
 func DefaultCommandHelp(file *os.File, cur c.Command, helpInfo HelpInfo) c.Action {
 	return func(pf f.PassedFlags) error {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		// default to trying to use color
-		useColor := "auto"
-		// respect a --color string
-		if useColorI, exists := pf["--color"]; exists {
-			if useColorUnder, isStr := useColorI.(string); isStr {
-				useColor = useColorUnder
-			}
-		}
-
-		if useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd())) {
-			color.Enable()
-		}
+		ConditionallyEnableColor(pf, file)
 
 		// Print top help section
 		if cur.HelpLong != "" {
@@ -212,18 +219,7 @@ func DefaultSectionHelp(file *os.File, cur s.Section, _ HelpInfo) c.Action {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		// default to trying to use color
-		useColor := "auto"
-		// respect a --color string
-		if useColorI, exists := pf["--color"]; exists {
-			if useColorUnder, isStr := useColorI.(string); isStr {
-				useColor = useColorUnder
-			}
-		}
-
-		if useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd())) {
-			color.Enable()
-		}
+		ConditionallyEnableColor(pf, file)
 
 		// Print top help section
 		if cur.HelpLong != "" {

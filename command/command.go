@@ -4,12 +4,12 @@ import (
 	"log"
 	"strings"
 
-	f "github.com/bbkane/warg/flag"
-	v "github.com/bbkane/warg/value"
+	"github.com/bbkane/warg/flag"
+	"github.com/bbkane/warg/value"
 )
 
 // An Action is run as the result of a command
-type Action = func(f.PassedFlags) error
+type Action = func(flag.PassedFlags) error
 
 // A CommandMap holds Commands and is used by Sections
 type CommandMap = map[string]Command
@@ -22,7 +22,7 @@ type CommandOpt = func(*Command)
 // It should not be constructed directly - use AddCommand/NewCommand/WithCommand functions
 type Command struct {
 	Action Action
-	Flags  f.FlagMap
+	Flags  flag.FlagMap
 	// Help is a required one-line description
 	Help string
 	// Footer is yet another optional longer description.
@@ -33,7 +33,7 @@ type Command struct {
 
 // DoNothing is a command action that simply returns nil
 // Useful for prototyping
-func DoNothing(_ f.PassedFlags) error {
+func DoNothing(_ flag.PassedFlags) error {
 	return nil
 }
 
@@ -42,7 +42,7 @@ func New(helpShort string, action Action, opts ...CommandOpt) Command {
 	command := Command{
 		Help:   helpShort,
 		Action: action,
-		Flags:  make(map[string]f.Flag),
+		Flags:  make(map[string]flag.Flag),
 	}
 	for _, opt := range opts {
 		opt(&command)
@@ -51,7 +51,7 @@ func New(helpShort string, action Action, opts ...CommandOpt) Command {
 }
 
 // AddFlag adds an existing flag to a Command. It panics if a flag with the same name exists
-func AddFlag(name string, value f.Flag) CommandOpt {
+func AddFlag(name string, value flag.Flag) CommandOpt {
 	if !strings.HasPrefix(name, "-") {
 		log.Panicf("flags should start with '-': %#v\n", name)
 	}
@@ -64,9 +64,27 @@ func AddFlag(name string, value f.Flag) CommandOpt {
 	}
 }
 
+func AddFlags(flagMap flag.FlagMap) CommandOpt {
+	// TODO: can I abstract this somehow? Until then - copy paste!
+	for name := range flagMap {
+		if !strings.HasPrefix(name, "-") {
+			log.Panicf("helpFlags should start with '-': %#v\n", name)
+		}
+	}
+	return func(sec *Command) {
+		for name, value := range flagMap {
+			if _, alreadyThere := sec.Flags[name]; !alreadyThere {
+				sec.Flags[name] = value
+			} else {
+				log.Panicf("flag already exists: %#v\n", name)
+			}
+		}
+	}
+}
+
 // WithFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
-func WithFlag(name string, helpShort string, empty v.EmptyConstructor, opts ...f.FlagOpt) CommandOpt {
-	return AddFlag(name, f.New(helpShort, empty, opts...))
+func WithFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
+	return AddFlag(name, flag.New(helpShort, empty, opts...))
 }
 
 // Footer adds an Help string to the command - useful from a help function

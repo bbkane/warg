@@ -2,6 +2,7 @@ module github.com/bbkane/warg
 
 go 1.16
 
+
 require (
 	github.com/bbkane/go-color v0.0.4
 	github.com/mattn/go-isatty v0.0.14

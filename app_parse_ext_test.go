@@ -410,6 +410,62 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: nil,
 			expectedErr:              true,
 		},
+		{
+			name: "addSectionFlags",
+			app: func() warg.App {
+				fm := map[string]f.Flag{
+					"--flag1": f.New("--flag1 value", v.String),
+					"--flag2": f.New("--flag1 value", v.String),
+				}
+				app := warg.New(
+					t.Name(),
+					s.New(
+						"help for section",
+						s.AddFlags(fm),
+						s.WithCommand(
+							"test",
+							"help for test",
+							c.DoNothing,
+						),
+					),
+				)
+				return app
+			}(),
+
+			args:                     []string{t.Name(), "test", "--flag1", "val1"},
+			lookup:                   warg.LookupMap(nil),
+			expectedPassedPath:       []string{"test"},
+			expectedPassedFlagValues: f.PassedFlags{"--flag1": "val1", "--help": "default"},
+			expectedErr:              false,
+		},
+		{
+			name: "addCommandFlags",
+			app: func() warg.App {
+				fm := map[string]f.Flag{
+					"--flag1": f.New("--flag1 value", v.String),
+					"--flag2": f.New("--flag1 value", v.String),
+				}
+				app := warg.New(
+					t.Name(),
+					s.New(
+						"help for section",
+						s.WithCommand(
+							"test",
+							"help for test",
+							c.DoNothing,
+							c.AddFlags(fm),
+						),
+					),
+				)
+				return app
+			}(),
+
+			args:                     []string{t.Name(), "test", "--flag1", "val1"},
+			lookup:                   warg.LookupMap(nil),
+			expectedPassedPath:       []string{"test"},
+			expectedPassedFlagValues: f.PassedFlags{"--flag1": "val1", "--help": "default"},
+			expectedErr:              false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

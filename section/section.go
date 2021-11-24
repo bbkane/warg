@@ -4,9 +4,9 @@ import (
 	"log"
 	"strings"
 
-	c "github.com/bbkane/warg/command"
-	f "github.com/bbkane/warg/flag"
-	v "github.com/bbkane/warg/value"
+	"github.com/bbkane/warg/command"
+	"github.com/bbkane/warg/flag"
+	"github.com/bbkane/warg/value"
 )
 
 // SectionMap holds Sections - used by other Sections
@@ -20,9 +20,9 @@ type SectionOpt = func(*Section)
 // Sections should not be created in place - use New/With/AddSection functions
 type Section struct {
 	// Flags holds flags available to this Section and all subsections and Commands
-	Flags f.FlagMap
+	Flags flag.FlagMap
 	// Commands holds the Commands under this Section
-	Commands c.CommandMap
+	Commands command.CommandMap
 	// Sections holds the Sections under this Section
 	Sections SectionMap
 	// Help is a required one-line descripiton of this section
@@ -37,9 +37,9 @@ type Section struct {
 func New(helpShort string, opts ...SectionOpt) Section {
 	section := Section{
 		Help:     helpShort,
-		Flags:    make(map[string]f.Flag),
+		Flags:    make(map[string]flag.Flag),
 		Sections: make(map[string]Section),
-		Commands: make(map[string]c.Command),
+		Commands: make(map[string]command.Command),
 	}
 	for _, opt := range opts {
 		opt(&section)
@@ -59,7 +59,7 @@ func AddSection(name string, value Section) SectionOpt {
 }
 
 // AddCommand adds an existing Command underneath this Section. Panics if a Command with the same name already exists
-func AddCommand(name string, value c.Command) SectionOpt {
+func AddCommand(name string, value command.Command) SectionOpt {
 	return func(app *Section) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
@@ -70,17 +70,35 @@ func AddCommand(name string, value c.Command) SectionOpt {
 }
 
 // AddFlag adds an existing Flag to be made availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
-func AddFlag(name string, value f.Flag) SectionOpt {
+func AddFlag(name string, value flag.Flag) SectionOpt {
 	if !strings.HasPrefix(name, "-") {
 		log.Panicf("helpFlags should start with '-': %#v\n", name)
 	}
-	return func(app *Section) {
-		if _, alreadyThere := app.Flags[name]; !alreadyThere {
-			app.Flags[name] = value
+	return func(sec *Section) {
+		if _, alreadyThere := sec.Flags[name]; !alreadyThere {
+			sec.Flags[name] = value
 		} else {
 			log.Panicf("flag already exists: %#v\n", name)
 		}
 
+	}
+}
+
+func AddFlags(flagMap flag.FlagMap) SectionOpt {
+	// TODO: can I abstract this somehow? Until then - copy paste!
+	for name := range flagMap {
+		if !strings.HasPrefix(name, "-") {
+			log.Panicf("helpFlags should start with '-': %#v\n", name)
+		}
+	}
+	return func(sec *Section) {
+		for name, value := range flagMap {
+			if _, alreadyThere := sec.Flags[name]; !alreadyThere {
+				sec.Flags[name] = value
+			} else {
+				log.Panicf("flag already exists: %#v\n", name)
+			}
+		}
 	}
 }
 
@@ -90,13 +108,13 @@ func WithSection(name string, helpShort string, opts ...SectionOpt) SectionOpt {
 }
 
 // WithFlag creates a Flag and makes it availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
-func WithFlag(name string, helpShort string, empty v.EmptyConstructor, opts ...f.FlagOpt) SectionOpt {
-	return AddFlag(name, f.New(helpShort, empty, opts...))
+func WithFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) SectionOpt {
+	return AddFlag(name, flag.New(helpShort, empty, opts...))
 }
 
 // WithCommand creates a Command and adds it underneath this Section. Panics if a Command with the same name already exists
-func WithCommand(name string, helpShort string, action c.Action, opts ...c.CommandOpt) SectionOpt {
-	return AddCommand(name, c.New(helpShort, action, opts...))
+func WithCommand(name string, helpShort string, action command.Action, opts ...command.CommandOpt) SectionOpt {
+	return AddCommand(name, command.New(helpShort, action, opts...))
 }
 
 // Footer adds an optional help string to this Section
