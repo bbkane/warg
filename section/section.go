@@ -10,15 +10,16 @@ import (
 )
 
 // SectionMap holds Sections - used by other Sections
-type SectionMap = map[string]Section
+type SectionMap = map[string]SectionT
 
 // SectionOpt customizes a Section on creation
-type SectionOpt = func(*Section)
+type SectionOpt = func(*SectionT)
 
 // Sections are like "folders" for Commmands.
 // They should have noun names.
-// Sections should not be created in place - use New/With/AddSection functions
-type Section struct {
+// Sections should not be created in place - use New/With/AddSection functions.
+// SectionT is the type name because we need the more user-visible `Section` as a function name
+type SectionT struct {
 	// Flags holds flags available to this Section and all subsections and Commands
 	Flags flag.FlagMap
 	// Commands holds the Commands under this Section
@@ -34,11 +35,11 @@ type Section struct {
 }
 
 // New creates a Section!
-func New(helpShort string, opts ...SectionOpt) Section {
-	section := Section{
+func New(helpShort string, opts ...SectionOpt) SectionT {
+	section := SectionT{
 		Help:     helpShort,
 		Flags:    make(map[string]flag.Flag),
-		Sections: make(map[string]Section),
+		Sections: make(map[string]SectionT),
 		Commands: make(map[string]command.Command),
 	}
 	for _, opt := range opts {
@@ -47,9 +48,9 @@ func New(helpShort string, opts ...SectionOpt) Section {
 	return section
 }
 
-// AddSection adds an existing Section underneath this Section. Panics if a Section with the same name already exists
-func AddSection(name string, value Section) SectionOpt {
-	return func(app *Section) {
+// ExistingSection adds an existing Section underneath this Section. Panics if a Section with the same name already exists
+func ExistingSection(name string, value SectionT) SectionOpt {
+	return func(app *SectionT) {
 		if _, alreadyThere := app.Sections[name]; !alreadyThere {
 			app.Sections[name] = value
 		} else {
@@ -58,9 +59,9 @@ func AddSection(name string, value Section) SectionOpt {
 	}
 }
 
-// AddCommand adds an existing Command underneath this Section. Panics if a Command with the same name already exists
-func AddCommand(name string, value command.Command) SectionOpt {
-	return func(app *Section) {
+// ExistingCommand adds an existing Command underneath this Section. Panics if a Command with the same name already exists
+func ExistingCommand(name string, value command.Command) SectionOpt {
+	return func(app *SectionT) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
 		} else {
@@ -69,12 +70,12 @@ func AddCommand(name string, value command.Command) SectionOpt {
 	}
 }
 
-// AddFlag adds an existing Flag to be made availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
-func AddFlag(name string, value flag.Flag) SectionOpt {
+// ExistingFlag adds an existing Flag to be made availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
+func ExistingFlag(name string, value flag.Flag) SectionOpt {
 	if !strings.HasPrefix(name, "-") {
 		log.Panicf("helpFlags should start with '-': %#v\n", name)
 	}
-	return func(sec *Section) {
+	return func(sec *SectionT) {
 		if _, alreadyThere := sec.Flags[name]; !alreadyThere {
 			sec.Flags[name] = value
 		} else {
@@ -84,14 +85,14 @@ func AddFlag(name string, value flag.Flag) SectionOpt {
 	}
 }
 
-func AddFlags(flagMap flag.FlagMap) SectionOpt {
+func ExistingFlags(flagMap flag.FlagMap) SectionOpt {
 	// TODO: can I abstract this somehow? Until then - copy paste!
 	for name := range flagMap {
 		if !strings.HasPrefix(name, "-") {
 			log.Panicf("helpFlags should start with '-': %#v\n", name)
 		}
 	}
-	return func(sec *Section) {
+	return func(sec *SectionT) {
 		for name, value := range flagMap {
 			if _, alreadyThere := sec.Flags[name]; !alreadyThere {
 				sec.Flags[name] = value
@@ -102,31 +103,31 @@ func AddFlags(flagMap flag.FlagMap) SectionOpt {
 	}
 }
 
-// WithSection creates a Section and adds it underneath this Section. Panics if a Section with the same name already exists
-func WithSection(name string, helpShort string, opts ...SectionOpt) SectionOpt {
-	return AddSection(name, New(helpShort, opts...))
+// Section creates a Section and adds it underneath this Section. Panics if a Section with the same name already exists
+func Section(name string, helpShort string, opts ...SectionOpt) SectionOpt {
+	return ExistingSection(name, New(helpShort, opts...))
 }
 
-// WithFlag creates a Flag and makes it availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
-func WithFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) SectionOpt {
-	return AddFlag(name, flag.New(helpShort, empty, opts...))
+// Flag creates a Flag and makes it availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
+func Flag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) SectionOpt {
+	return ExistingFlag(name, flag.New(helpShort, empty, opts...))
 }
 
-// WithCommand creates a Command and adds it underneath this Section. Panics if a Command with the same name already exists
-func WithCommand(name string, helpShort string, action command.Action, opts ...command.CommandOpt) SectionOpt {
-	return AddCommand(name, command.New(helpShort, action, opts...))
+// Command creates a Command and adds it underneath this Section. Panics if a Command with the same name already exists
+func Command(name string, helpShort string, action command.Action, opts ...command.CommandOpt) SectionOpt {
+	return ExistingCommand(name, command.New(helpShort, action, opts...))
 }
 
 // Footer adds an optional help string to this Section
 func Footer(footer string) SectionOpt {
-	return func(cat *Section) {
+	return func(cat *SectionT) {
 		cat.Footer = footer
 	}
 }
 
 // HelpLong adds an optional help string to this Section
 func HelpLong(helpLong string) SectionOpt {
-	return func(cat *Section) {
+	return func(cat *SectionT) {
 		cat.HelpLong = helpLong
 	}
 }

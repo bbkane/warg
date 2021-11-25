@@ -49,14 +49,14 @@ func TestDefaultSectionHelp(t *testing.T) {
 		"grabbit",
 		section.New(
 			"grab those images!",
-			section.WithSection(
+			section.Section(
 				"config",
 				"change grabbit's config",
-				section.WithCommand(
+				section.Command(
 					"edit",
 					"edit the config",
 					command.DoNothing,
-					command.WithFlag(
+					command.Flag(
 						"--editor",
 						"path to editor",
 						value.String,
@@ -64,7 +64,7 @@ func TestDefaultSectionHelp(t *testing.T) {
 					),
 				),
 			),
-			section.WithCommand(
+			section.Command(
 				"grab",
 				"do the grabbity grabbity",
 				command.DoNothing,
@@ -140,16 +140,16 @@ grabbit config edit --config-path /path/to/config --editor code
 		"grabbit",
 		section.New(
 			"grab those images!",
-			section.WithSection(
+			section.Section(
 				"config",
 				"Change grabbit's config",
 				section.Footer(rootFooter),
-				section.WithCommand(
+				section.Command(
 					"edit",
 					"Edit the config. A default config will be created if it doesn't exist",
 					command.DoNothing,
 					command.Footer(configEditFooter),
-					command.WithFlag(
+					command.Flag(
 						"--editor",
 						"path to editor",
 						value.String,
@@ -160,7 +160,7 @@ grabbit config edit --config-path /path/to/config --editor code
 					),
 				),
 			),
-			section.WithCommand(
+			section.Command(
 				"grab",
 				"do the grabbity grabbity",
 				command.DoNothing,

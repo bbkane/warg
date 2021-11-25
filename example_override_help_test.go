@@ -23,7 +23,7 @@ func exampleOverrideHelpFlagCustomCommandHelp(file *os.File, _ command.Command, 
 	}
 }
 
-func exampleOverrideHelpFlagCustomSectionHelp(file *os.File, _ section.Section, _ help.HelpInfo) command.Action {
+func exampleOverrideHelpFlagCustomSectionHelp(file *os.File, _ section.SectionT, _ help.HelpInfo) command.Action {
 	return func(_ flag.PassedFlags) error {
 		fmt.Fprintln(file, "Custom section help")
 		return nil
@@ -35,7 +35,7 @@ func ExampleOverrideHelpFlag() {
 		"blog",
 		section.New(
 			"work with a fictional blog platform",
-			section.WithCommand(
+			section.Command(
 				"login",
 				"Login to the platform",
 				exampleOverrideHelpFlaglogin,

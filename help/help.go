@@ -26,11 +26,11 @@ type HelpInfo struct {
 	// All flags are Resolved if possible (i.e., flag.SetBy != "")
 	AvailableFlags f.FlagMap
 	// RootSection of the app. Especially useful for printing all sections and commands
-	RootSection s.Section
+	RootSection s.SectionT
 }
 
 type CommandHelp = func(file *os.File, cur c.Command, helpInfo HelpInfo) c.Action
-type SectionHelp = func(file *os.File, cur s.Section, helpInfo HelpInfo) c.Action
+type SectionHelp = func(file *os.File, cur s.SectionT, helpInfo HelpInfo) c.Action
 
 // https://stackoverflow.com/a/45456649/2958070
 func leftPad(s string, pad string, plength int) string {
@@ -213,7 +213,7 @@ func DefaultCommandHelp(file *os.File, cur c.Command, helpInfo HelpInfo) c.Actio
 	}
 }
 
-func DefaultSectionHelp(file *os.File, cur s.Section, _ HelpInfo) c.Action {
+func DefaultSectionHelp(file *os.File, cur s.SectionT, _ HelpInfo) c.Action {
 	return func(pf f.PassedFlags) error {
 
 		f := bufio.NewWriter(file)

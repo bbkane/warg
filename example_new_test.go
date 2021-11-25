@@ -32,27 +32,27 @@ func ExampleNew() {
 		"blog",
 		section.New(
 			"work with a fictional blog platform",
-			section.WithCommand(
+			section.Command(
 				"login",
 				"Login to the platform",
 				login,
 			),
-			section.WithFlag(
+			section.Flag(
 				"--timeout",
 				"Optional timeout. Defaults to no timeout",
 				value.Int,
 			),
-			section.WithFlag(
+			section.Flag(
 				"--url",
 				"URL of the blog",
 				value.String,
 				flag.Default("https://www.myblog.com"),
 				flag.EnvVars("BLOG_URL"),
 			),
-			section.WithSection(
+			section.Section(
 				"comments",
 				"Deal with comments",
-				section.WithCommand(
+				section.Command(
 					"list",
 					"List all comments",
 					// still prototyping how we want this

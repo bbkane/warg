@@ -191,20 +191,10 @@ One of warg's tradeoffs is that it insists on only using sections, commands and 
 
 All warg apps must have at least one nested command.  It is not possible to design a warg app such that calling `<appname> --flag <value>` does useful work. Instead, `<appname> <command> --flag <value>` must be used.
 
-##  API Naming Conventions
-
-Replace `XXX` with `Section`, `Command`, or `Flag`:
-
-- `xxx.New`: Create an `XXX` from options
-- `AddXXX`: Add a created `XXX` to your tree
-- `WithXXX`: Create and add an `XXX` to your tree
-
 # TODO
 
 - put the `:` back at the end of headers in teh default help functions.
 - add a bool value
-- make config/path package so the code isn't copied
-- replace WithXXX with XXX ? that means renaming the XXX type to something like XXXT (SectionT) - also change AddXXX to ExistingXXX
 - add screenshots for --help - colors look way better
 - zsh completion with https://www.dolthub.com/blog/2021-11-15-zsh-completions-with-subcommands/
 - Should I make commands not return an error? Maybe that should be handled by the app author?

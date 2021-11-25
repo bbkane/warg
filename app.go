@@ -35,7 +35,7 @@ type App struct {
 	helpFile      *os.File
 
 	// rootSection holds the good stuff!
-	rootSection s.Section
+	rootSection s.SectionT
 }
 
 // HelpFlagMapping adds a new option to your --help flag
@@ -103,7 +103,7 @@ func ConfigFlag(
 }
 
 // New builds a new App!
-func New(name string, rootSection s.Section, opts ...AppOpt) App {
+func New(name string, rootSection s.SectionT, opts ...AppOpt) App {
 	app := App{
 		name:        name,
 		rootSection: rootSection,
@@ -217,7 +217,7 @@ type flagNameToAlias map[string]string
 // fitToAppResult holds the result of fitToApp
 // Exactly one of Section or Command should hold something. The other should be nil
 type fitToAppResult struct {
-	Section            *s.Section
+	Section            *s.SectionT
 	Command            *c.Command
 	Action             c.Action
 	AllowedFlags       f.FlagMap
@@ -225,7 +225,7 @@ type fitToAppResult struct {
 }
 
 // fitToApp takes the command entered by a user and uses it to "walk" down the apps command tree
-func fitToApp(rootSection s.Section, path []string) (*fitToAppResult, error) {
+func fitToApp(rootSection s.SectionT, path []string) (*fitToAppResult, error) {
 	// validate passed command and get available flags
 	ftar := fitToAppResult{
 		Section:            &rootSection,

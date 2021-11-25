@@ -50,8 +50,8 @@ func New(helpShort string, action Action, opts ...CommandOpt) Command {
 	return command
 }
 
-// AddFlag adds an existing flag to a Command. It panics if a flag with the same name exists
-func AddFlag(name string, value flag.Flag) CommandOpt {
+// ExistingFlag adds an existing flag to a Command. It panics if a flag with the same name exists
+func ExistingFlag(name string, value flag.Flag) CommandOpt {
 	if !strings.HasPrefix(name, "-") {
 		log.Panicf("flags should start with '-': %#v\n", name)
 	}
@@ -64,7 +64,7 @@ func AddFlag(name string, value flag.Flag) CommandOpt {
 	}
 }
 
-func AddFlags(flagMap flag.FlagMap) CommandOpt {
+func ExistingFlags(flagMap flag.FlagMap) CommandOpt {
 	// TODO: can I abstract this somehow? Until then - copy paste!
 	for name := range flagMap {
 		if !strings.HasPrefix(name, "-") {
@@ -82,9 +82,9 @@ func AddFlags(flagMap flag.FlagMap) CommandOpt {
 	}
 }
 
-// WithFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
-func WithFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
-	return AddFlag(name, flag.New(helpShort, empty, opts...))
+// Flag builds a flag and adds it to a Command. It panics if a flag with the same name exists
+func Flag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
+	return ExistingFlag(name, flag.New(helpShort, empty, opts...))
 }
 
 // Footer adds an Help string to the command - useful from a help function
