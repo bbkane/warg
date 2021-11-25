@@ -96,3 +96,15 @@ func TestStringEnumV(t *testing.T) {
 	err = v.Update("notachoice")
 	require.NotNil(t, err)
 }
+
+func TestBoolV(t *testing.T) {
+	v, err := value.Bool()
+	require.Nil(t, err)
+
+	err = v.Update("true")
+	require.Nil(t, err)
+	require.Equal(t, v.Get().(bool), true)
+
+	err = v.Update("bob")
+	require.NotNil(t, err)
+}
