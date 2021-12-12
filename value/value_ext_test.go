@@ -108,3 +108,14 @@ func TestBoolV(t *testing.T) {
 	err = v.Update("bob")
 	require.NotNil(t, err)
 }
+
+func TestDurationV(t *testing.T) {
+	v, err := value.Duration()
+	require.Nil(t, err)
+
+	err = v.Update("2m")
+	require.Nil(t, err)
+
+	err = v.ReplaceFromInterface("4m")
+	require.Nil(t, err)
+}
