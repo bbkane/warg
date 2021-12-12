@@ -82,7 +82,9 @@ func TestDefaultSectionHelp(t *testing.T) {
 		),
 	)
 	args := []string{"grabbit", "--help"}
-	actualErr := app.Run(args, warg.LookupMap(nil))
+	pr, parseErr := app.Parse(args, warg.LookupMap(nil))
+	require.Nil(t, parseErr)
+	actualErr := pr.Action(pr.PassedFlags)
 	require.Nil(t, actualErr)
 
 	closeErr := actualHelpTmpFile.Close()
@@ -178,7 +180,9 @@ grabbit config edit --config-path /path/to/config --editor code
 		),
 	)
 	args := []string{"grabbit", "config", "edit", "--help"}
-	actualErr := app.Run(args, warg.LookupMap(map[string]string{"EDITOR": "emacs"}))
+	pr, parseErr := app.Parse(args, warg.LookupMap(map[string]string{"EDITOR": "emacs"}))
+	require.Nil(t, parseErr)
+	actualErr := pr.Action(pr.PassedFlags)
 	require.Nil(t, actualErr)
 
 	closeErr := actualHelpTmpFile.Close()

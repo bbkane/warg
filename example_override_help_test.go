@@ -63,11 +63,7 @@ func ExampleOverrideHelpFlag() {
 		),
 	)
 
-	err := app.Run([]string{"blog.exe", "-h", "custom"}, os.LookupEnv)
-	if err != nil {
-		fmt.Fprintln(os.Stdout, err)
-		os.Exit(1)
-	}
+	app.MustRun([]string{"blog.exe", "-h", "custom"}, os.LookupEnv)
 	// Output:
 	// Custom section help
 }

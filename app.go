@@ -532,25 +532,18 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	}
 }
 
-// Run parses the args, runs the action for the command passed,
-// and returns any errors encountered.
-func (app *App) Run(osArgs []string, osLookupEnv LookupFunc) error {
+// MustRun runs the app.
+// Any errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
+// If there are no errors, os.Exit(0) is called. For more control,
+// check out app.Parse().
+func (app *App) MustRun(osArgs []string, osLookupEnv LookupFunc) {
 	pr, err := app.Parse(osArgs, osLookupEnv)
 	if err != nil {
-		return err
+		fmt.Fprintln(os.Stderr, err)
+		// https://unix.stackexchange.com/a/254747/185953
+		os.Exit(64)
 	}
 	err = pr.Action(pr.PassedFlags)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// MustRun runs the app.
-// If there's an error, it will be printed to stderr and os.Exit(1)
-// will be called
-func (app *App) MustRun(osArgs []string, osLookupEnv LookupFunc) {
-	err := app.Run(osArgs, osLookupEnv)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

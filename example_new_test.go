@@ -71,11 +71,7 @@ func ExampleNew() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	err = app.Run([]string{"blog.exe", "login"}, os.LookupEnv)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	app.MustRun([]string{"blog.exe", "login"}, os.LookupEnv)
 	// Output:
 	// Logging into https://envvar.com
 }
