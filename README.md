@@ -193,6 +193,7 @@ All warg apps must have at least one nested command.  It is not possible to desi
 
 # TODO
 
+- use https://stackoverflow.com/a/16946478/2958070 for better number handling?
 - put the `:` back at the end of headers in teh default help functions.
 - add a bool value
 - add screenshots for --help - colors look way better
