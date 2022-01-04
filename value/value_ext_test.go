@@ -15,7 +15,9 @@ func TestIntValue(t *testing.T) {
 	v, err := value.Int()
 	require.Nil(t, err)
 	require.Equal(t, v.Get().(int), 0)
-	v.Update("2")
+
+	err = v.Update("2")
+	require.Nil(t, err)
 	require.Equal(t, v.Get().(int), 2)
 }
 
@@ -23,7 +25,9 @@ func TestStringValue(t *testing.T) {
 	var v value.Value
 	v, err := value.String()
 	require.Nil(t, err)
-	v.ReplaceFromInterface("hi")
+
+	err = v.ReplaceFromInterface("hi")
+	require.Nil(t, err)
 	require.Equal(t, "hi", v.Get())
 }
 
@@ -38,10 +42,12 @@ func TestStringSliceValue(t *testing.T) {
 	// actual  : <nil>(<nil>)
 	// assert.Equal(t, v.Get().([]string), nil)
 
-	v.Update("hi")
+	err = v.Update("hi")
+	require.Nil(t, err)
 	require.Equal(t, v.Get().([]string), []string{"hi"})
 
-	v.Update("there")
+	err = v.Update("there")
+	require.Nil(t, err)
 	require.Equal(
 		t,
 		v.StringSlice(),
@@ -51,10 +57,27 @@ func TestStringSliceValue(t *testing.T) {
 
 func TestIntSliceValue(t *testing.T) {
 	var v value.Value
+
 	v, err := value.IntSlice()
 	require.Nil(t, err)
-	v.Update("1")
-	require.Equal(t, v.Get().([]int), []int{1})
+
+	err = v.Update("1")
+	require.Nil(t, err)
+	require.Equal(
+		t,
+		[]int{1},
+		v.Get().([]int),
+	)
+
+	err = v.ReplaceFromInterface(
+		[]interface{}{1, 2},
+	)
+	require.Nil(t, err)
+	require.Equal(
+		t,
+		[]int{1, 2},
+		v.Get().([]int),
+	)
 }
 
 func TestPathValue(t *testing.T) {
@@ -64,6 +87,7 @@ func TestPathValue(t *testing.T) {
 	var v value.Value
 	v, err = value.Path()
 	require.Nil(t, err)
+
 	err = v.Update("~/tmp")
 	require.Nil(t, err)
 	require.Equal(t,
@@ -77,12 +101,12 @@ func TestPathSliceValue(t *testing.T) {
 	var v value.Value
 	v, err := value.PathSlice()
 	require.Nil(t, err)
-	v.ReplaceFromInterface(
-		[]string{"hi"},
+
+	err = v.ReplaceFromInterface(
+		[]interface{}{"hi", "there"},
 	)
-
-	require.Equal(t, v.Get().([]string), []string{"hi"})
-
+	require.Nil(t, err)
+	require.Equal(t, v.Get().([]string), []string{"hi", "there"})
 }
 
 func TestStringEnumV(t *testing.T) {

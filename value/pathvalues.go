@@ -92,13 +92,18 @@ func (v *pathSliceV) Description() string { return "path slice" }
 func PathSlice() (Value, error) { return &pathSliceV{}, nil }
 
 func (v *pathSliceV) ReplaceFromInterface(iFace interface{}) error {
-	under, ok := iFace.([]string)
+	under, ok := iFace.([]interface{})
 	if !ok {
 		return ErrIncompatibleInterface
 	}
+
 	new, _ := PathSlice()
 	for _, e := range under {
-		err := new.Update(e)
+		eUnder, ok := e.(string)
+		if !ok {
+			return ErrIncompatibleInterface
+		}
+		err := new.Update(eUnder)
 		if err != nil {
 			return fmt.Errorf("could not expand: %v: %w", e, err)
 		}

@@ -45,39 +45,43 @@ func (v *intV) UpdateFromInterface(iFace interface{}) error {
 	return v.ReplaceFromInterface(iFace)
 }
 
-// intSlice is updateable from a float or int. If a float is passed, it will be truncated.
+// intSliceV is updateable from a float or int. If a float is passed, it will be truncated.
 // Example: 4.5 -> 4, 3.99 -> 3
-type intSlice []int
+type intSliceV []int
 
-func intSliceNew(vals []int) *intSlice {
-	return (*intSlice)(&vals)
+func intSliceNew(vals []int) *intSliceV {
+	return (*intSliceV)(&vals)
 }
 
 // IntSlice is updateable from a float or int. If a float is passed, it will be truncated.
 // Example: 4.5 -> 4, 3.99 -> 3
-func IntSlice() (Value, error)       { return intSliceNew(nil), nil }
-func (v *intSlice) Get() interface{} { return []int(*v) }
+func IntSlice() (Value, error)        { return intSliceNew(nil), nil }
+func (v *intSliceV) Get() interface{} { return []int(*v) }
 
-func (v *intSlice) ReplaceFromInterface(iFace interface{}) error {
-	switch under := iFace.(type) {
-	case []int:
-		*v = *intSliceNew(under)
-	case []float64:
-		var ret []int
-		for _, e := range under {
-			ret = append(ret, int(e))
-		}
-		*v = *intSliceNew(ret)
-	default:
+func (v *intSliceV) ReplaceFromInterface(iFace interface{}) error {
+	// NOTE: this is the most up to date ReplaceFromInterface :)
+	// it uses UpdateFromInterface
+	under, ok := iFace.([]interface{})
+	if !ok {
 		return ErrIncompatibleInterface
 	}
+
+	new, _ := IntSlice()
+	for _, e := range under {
+		err := new.UpdateFromInterface(e)
+		if err != nil {
+			return err
+		}
+	}
+	new2 := new.Get().([]int)
+	*v = *(*intSliceV)(&new2)
 	return nil
 }
-func (v *intSlice) TypeInfo() TypeInfo  { return TypeInfoSlice }
-func (v *intSlice) Description() string { return "int slice" }
+func (v *intSliceV) TypeInfo() TypeInfo  { return TypeInfoSlice }
+func (v *intSliceV) Description() string { return "int slice" }
 
-func (v *intSlice) String() string { return fmt.Sprint([]int(*v)) }
-func (v *intSlice) StringSlice() []string {
+func (v *intSliceV) String() string { return fmt.Sprint([]int(*v)) }
+func (v *intSliceV) StringSlice() []string {
 	var ret []string
 	for _, e := range []int(*v) {
 		ret = append(ret, fmt.Sprint(e))
@@ -85,7 +89,7 @@ func (v *intSlice) StringSlice() []string {
 	return ret
 }
 
-func (v *intSlice) Update(s string) error {
+func (v *intSliceV) Update(s string) error {
 	decoded, err := strconv.ParseInt(s, 0, strconv.IntSize)
 	if err != nil {
 		return err
@@ -93,7 +97,7 @@ func (v *intSlice) Update(s string) error {
 	*v = append(*v, int(decoded))
 	return nil
 }
-func (v *intSlice) UpdateFromInterface(iFace interface{}) error {
+func (v *intSliceV) UpdateFromInterface(iFace interface{}) error {
 	switch under := iFace.(type) {
 	case int:
 		*v = append(*v, under)
