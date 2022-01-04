@@ -92,11 +92,19 @@ type stringSliceV []string
 func stringSliceNew(vals []string) *stringSliceV { return (*stringSliceV)(&vals) }
 
 func (v *stringSliceV) ReplaceFromInterface(iFace interface{}) error {
-	under, ok := iFace.([]string)
+	decoded := []string{}
+	under, ok := iFace.([]interface{})
 	if !ok {
 		return ErrIncompatibleInterface
 	}
-	*v = *stringSliceNew(under)
+	for _, val := range under {
+		valUnder, ok := val.(string)
+		if !ok {
+			return ErrIncompatibleInterface
+		}
+		decoded = append(decoded, valUnder)
+	}
+	*v = *stringSliceNew(decoded)
 	return nil
 }
 func (v *stringSliceV) TypeInfo() TypeInfo  { return TypeInfoSlice }

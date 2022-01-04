@@ -3,12 +3,14 @@ package warg_test
 // external tests - import warg like it's an external package
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/bbkane/warg"
 	"github.com/bbkane/warg/command"
 	"github.com/bbkane/warg/config"
 	"github.com/bbkane/warg/config/jsonreader"
+	"github.com/bbkane/warg/config/yamlreader"
 	"github.com/bbkane/warg/flag"
 	"github.com/bbkane/warg/section"
 	"github.com/bbkane/warg/value"
@@ -23,6 +25,11 @@ type ConfigReaderFunc func(path string) (config.SearchResult, error)
 
 func (f ConfigReaderFunc) Search(path string) (config.SearchResult, error) {
 	return f(path)
+}
+
+// testDataFilePath generates a path to a file needed for a test
+func testDataFilePath(testName string, subTestName string, fileName string) string {
+	return filepath.Join("testdata", testName, subTestName, fileName)
 }
 
 func TestApp_Parse(t *testing.T) {
@@ -465,6 +472,76 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedPath:       []string{"test"},
 			expectedPassedFlagValues: flag.PassedFlags{"--flag1": "val1", "--help": "default"},
 			expectedErr:              false,
+		},
+		{
+			name: "JSONConfigStringSlice",
+			app: warg.New(
+				"test",
+				section.New("help for test",
+					section.Flag(
+						"--val",
+						"flag help",
+						value.StringSlice,
+						flag.ConfigPath("val"),
+					),
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+					),
+				),
+				warg.ConfigFlag(
+					"--config",
+					jsonreader.New,
+					"path to config",
+					flag.Default(testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json")),
+				),
+			),
+
+			args:               []string{"app", "com"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"com"},
+			expectedPassedFlagValues: flag.PassedFlags{
+				"--config": testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json"),
+				"--val":    []string{"from", "config"},
+				"--help":   "default",
+			},
+			expectedErr: false,
+		},
+		{
+			name: "YAMLConfigStringSlice",
+			app: warg.New(
+				"test",
+				section.New("help for test",
+					section.Flag(
+						"--val",
+						"flag help",
+						value.StringSlice,
+						flag.ConfigPath("val"),
+					),
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+					),
+				),
+				warg.ConfigFlag(
+					"--config",
+					yamlreader.New,
+					"path to config",
+					flag.Default(testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml")),
+				),
+			),
+
+			args:               []string{"app", "com"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"com"},
+			expectedPassedFlagValues: flag.PassedFlags{
+				"--config": testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml"),
+				"--val":    []string{"from", "config"},
+				"--help":   "default",
+			},
+			expectedErr: false,
 		},
 	}
 	for _, tt := range tests {

@@ -338,7 +338,12 @@ func resolveFlag(
 				if !fpr.IsAggregated {
 					err := flag.Value.ReplaceFromInterface(fpr.IFace)
 					if err != nil {
-						return err
+						return fmt.Errorf(
+							"could not replace container type value: val: %#v , replacement: %#v, err: %w",
+							flag.Value,
+							fpr.IFace,
+							err,
+						)
 					}
 					flag.SetBy = "config"
 				} else {
@@ -349,7 +354,7 @@ func resolveFlag(
 					for _, e := range under {
 						err = flag.Value.UpdateFromInterface(e)
 						if err != nil {
-							return fmt.Errorf("could not update container type value: %w", err)
+							return fmt.Errorf("could not update container type value: err: %w", err)
 						}
 					}
 					flag.SetBy = "config"
