@@ -7,14 +7,17 @@ import (
 	"github.com/bbkane/warg/value"
 )
 
+// Name of a flag
+type Name string
+
 // FlagMap holds flags - used by Commands and Sections
-type FlagMap = map[string]Flag
+type FlagMap = map[Name]Flag
 
 // FlagOpt customizes a Flag on creation
 type FlagOpt = func(*Flag)
 
 // PassedFlags holds a map of flag names to flag Values and is passed to a command's Action
-type PassedFlags = map[string]interface{}
+type PassedFlags = map[string]interface{} // This can just stay a string for the convenience of the user.
 
 type Flag struct {
 	// Alias is an alternative name for a flag, usually shorter :)

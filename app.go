@@ -22,7 +22,7 @@ type AppOpt = func(*App)
 // Create a new App with New()
 type App struct {
 	// Config()
-	configFlagName  string
+	configFlagName  flag.Name
 	newConfigReader config.NewReader
 	configFlag      *flag.Flag
 
@@ -49,13 +49,13 @@ type HelpFlagMapping struct {
 func OverrideHelpFlag(
 	mappings []HelpFlagMapping,
 	helpFile *os.File,
-	flagName string,
+	flagName flag.Name,
 	flagHelp string,
 	flagOpts ...flag.FlagOpt,
 ) AppOpt {
 	return func(a *App) {
 
-		if !strings.HasPrefix(flagName, "-") {
+		if !strings.HasPrefix(string(flagName), "-") {
 			log.Panicf("flagName should start with '-': %#v\n", flagName)
 		}
 
@@ -78,7 +78,8 @@ func OverrideHelpFlag(
 		}
 
 		a.rootSection.Flags[flagName] = helpFlag
-		a.helpFlagName = flagName
+		// This is used in parsing, so no need to strongly type it
+		a.helpFlagName = string(flagName)
 		a.helpFlagAlias = helpFlag.Alias
 		a.helpMappings = mappings
 		a.helpFile = helpFile
@@ -89,7 +90,7 @@ func OverrideHelpFlag(
 // ConfigFlag lets you customize your config flag. Especially useful for changing the config reader (for example to choose whether to use a JSON or YAML structured config)
 func ConfigFlag(
 	// TODO: put the new stuff at the front to be consistent with OverrideHelpFlag
-	configFlagName string,
+	configFlagName flag.Name,
 	newConfigReader config.NewReader,
 	helpShort string,
 	flagOpts ...flag.FlagOpt,
@@ -238,13 +239,13 @@ func fitToApp(rootSection section.SectionT, path []string) (*fitToAppResult, err
 	// Wonder if I could put all this in one part of the code...
 	for flagName, fl := range ftar.AllowedFlags {
 		if fl.Alias != "" {
-			ftar.AllowedFlagAliases[flagName] = fl.Alias
+			ftar.AllowedFlagAliases[string(flagName)] = fl.Alias
 		}
 	}
 	childCommands := rootSection.Commands
 	childSections := rootSection.Sections
 	for _, word := range path {
-		if command, exists := childCommands[word]; exists {
+		if command, exists := childCommands[command.Name(word)]; exists {
 			ftar.Command = &command
 			ftar.Section = nil
 			ftar.Action = command.Action
@@ -255,19 +256,19 @@ func fitToApp(rootSection section.SectionT, path []string) (*fitToAppResult, err
 			for flagName, fl := range command.Flags {
 				// TODO: check if name exists already
 				if fl.Alias != "" {
-					ftar.AllowedFlagAliases[flagName] = fl.Alias
+					ftar.AllowedFlagAliases[string(flagName)] = fl.Alias
 				}
 				fl.IsCommandFlag = true
 				ftar.AllowedFlags[flagName] = fl
 			}
-		} else if section, exists := childSections[word]; exists {
+		} else if section, exists := childSections[section.Name(word)]; exists {
 			ftar.Section = &section
 			childCommands = section.Commands
 			childSections = section.Sections
 			for flagName, fl := range section.Flags {
 				// TODO: check if key exists already
 				if fl.Alias != "" {
-					ftar.AllowedFlagAliases[flagName] = fl.Alias
+					ftar.AllowedFlagAliases[string(flagName)] = fl.Alias
 				}
 				ftar.AllowedFlags[flagName] = fl
 			}
@@ -283,7 +284,7 @@ func fitToApp(rootSection section.SectionT, path []string) (*fitToAppResult, err
 // default value. flag should not be nil. deletes from flagStrs
 func resolveFlag(
 	fl *flag.Flag,
-	name string,
+	name flag.Name,
 	flagStrs []flagStr,
 	configReader config.Reader,
 	lookupEnv LookupFunc,
@@ -306,7 +307,7 @@ func resolveFlag(
 	{
 		strValues := []string{}
 		for i := range flagStrs {
-			if flagStrs[i].NameOrAlias == name || flagStrs[i].NameOrAlias == aliases[name] {
+			if flagStrs[i].NameOrAlias == string(name) || flagStrs[i].NameOrAlias == aliases[string(name)] {
 				strValues = append(strValues, flagStrs[i].Value)
 				flagStrs[i].Consumed = true
 			}
@@ -486,7 +487,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	pfs := make(flag.PassedFlags)
 	for name, fl := range ftar.AllowedFlags {
 		if fl.SetBy != "" {
-			pfs[name] = fl.Value.Get()
+			pfs[string(name)] = fl.Value.Get()
 		}
 	}
 
@@ -495,7 +496,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		// no legit actions, just print the help
 		helpInfo := help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}
 		// We know the helpFlag has a default so this is safe
-		helpType := ftar.AllowedFlags[app.helpFlagName].Value.Get().(string)
+		helpType := ftar.AllowedFlags[flag.Name(app.helpFlagName)].Value.Get().(string)
 		for _, e := range app.helpMappings {
 			if e.Name == helpType {
 				pr := ParseResult{
@@ -511,7 +512,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		if gar.HelpPassed {
 			helpInfo := help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}
 			// We know the helpFlag has a default so this is safe
-			helpType := ftar.AllowedFlags[app.helpFlagName].Value.Get().(string)
+			helpType := ftar.AllowedFlags[flag.Name(app.helpFlagName)].Value.Get().(string)
 			for _, e := range app.helpMappings {
 				if e.Name == helpType {
 					pr := ParseResult{

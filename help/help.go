@@ -180,13 +180,14 @@ func DefaultCommandHelp(file *os.File, cur command.Command, helpInfo HelpInfo) c
 		var commandFlagHelp bytes.Buffer
 		var sectionFlagHelp bytes.Buffer
 		{
+			// we need to sort these things so we need to use strings here
 			keys := make([]string, 0, len(helpInfo.AvailableFlags))
 			for k := range helpInfo.AvailableFlags {
-				keys = append(keys, k)
+				keys = append(keys, string(k))
 			}
 			sort.Strings(keys)
 			for _, name := range keys {
-				f := helpInfo.AvailableFlags[name]
+				f := helpInfo.AvailableFlags[flag.Name(name)]
 				if f.IsCommandFlag {
 					printFlag(&commandFlagHelp, name, &f)
 				} else {
@@ -237,7 +238,7 @@ func DefaultSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) command
 
 			keys := make([]string, 0, len(cur.Sections))
 			for k := range cur.Sections {
-				keys = append(keys, k)
+				keys = append(keys, string(k))
 			}
 			sort.Strings(keys)
 
@@ -246,7 +247,7 @@ func DefaultSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) command
 					f,
 					"  %s : %s\n",
 					color.Add(color.Bold+color.ForegroundCyan, k),
-					cur.Sections[k].Help,
+					cur.Sections[section.Name(k)].Help,
 				)
 			}
 
@@ -260,7 +261,7 @@ func DefaultSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) command
 
 			keys := make([]string, 0, len(cur.Commands))
 			for k := range cur.Commands {
-				keys = append(keys, k)
+				keys = append(keys, string(k))
 			}
 			sort.Strings(keys)
 
@@ -269,7 +270,7 @@ func DefaultSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) command
 					f,
 					"  %s : %s\n",
 					color.Add(color.Bold+color.ForegroundGreen, k),
-					cur.Commands[k].Help,
+					cur.Commands[command.Name(k)].Help,
 				)
 			}
 		}

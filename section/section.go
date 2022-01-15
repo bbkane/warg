@@ -9,8 +9,11 @@ import (
 	"github.com/bbkane/warg/value"
 )
 
+// Name of the section
+type Name string
+
 // SectionMap holds Sections - used by other Sections
-type SectionMap = map[string]SectionT
+type SectionMap = map[Name]SectionT
 
 // SectionOpt customizes a Section on creation
 type SectionOpt = func(*SectionT)
@@ -38,9 +41,9 @@ type SectionT struct {
 func New(helpShort string, opts ...SectionOpt) SectionT {
 	section := SectionT{
 		Help:     helpShort,
-		Flags:    make(map[string]flag.Flag),
-		Sections: make(map[string]SectionT),
-		Commands: make(map[string]command.Command),
+		Flags:    make(flag.FlagMap),
+		Sections: make(SectionMap),
+		Commands: make(command.CommandMap),
 	}
 	for _, opt := range opts {
 		opt(&section)
@@ -49,7 +52,7 @@ func New(helpShort string, opts ...SectionOpt) SectionT {
 }
 
 // ExistingSection adds an existing Section underneath this Section. Panics if a Section with the same name already exists
-func ExistingSection(name string, value SectionT) SectionOpt {
+func ExistingSection(name Name, value SectionT) SectionOpt {
 	return func(app *SectionT) {
 		if _, alreadyThere := app.Sections[name]; !alreadyThere {
 			app.Sections[name] = value
@@ -60,7 +63,7 @@ func ExistingSection(name string, value SectionT) SectionOpt {
 }
 
 // ExistingCommand adds an existing Command underneath this Section. Panics if a Command with the same name already exists
-func ExistingCommand(name string, value command.Command) SectionOpt {
+func ExistingCommand(name command.Name, value command.Command) SectionOpt {
 	return func(app *SectionT) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
@@ -71,8 +74,8 @@ func ExistingCommand(name string, value command.Command) SectionOpt {
 }
 
 // ExistingFlag adds an existing Flag to be made availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
-func ExistingFlag(name string, value flag.Flag) SectionOpt {
-	if !strings.HasPrefix(name, "-") {
+func ExistingFlag(name flag.Name, value flag.Flag) SectionOpt {
+	if !strings.HasPrefix(string(name), "-") {
 		log.Panicf("helpFlags should start with '-': %#v\n", name)
 	}
 	return func(sec *SectionT) {
@@ -88,7 +91,7 @@ func ExistingFlag(name string, value flag.Flag) SectionOpt {
 func ExistingFlags(flagMap flag.FlagMap) SectionOpt {
 	// TODO: can I abstract this somehow? Until then - copy paste!
 	for name := range flagMap {
-		if !strings.HasPrefix(name, "-") {
+		if !strings.HasPrefix(string(name), "-") {
 			log.Panicf("helpFlags should start with '-': %#v\n", name)
 		}
 	}
@@ -104,17 +107,17 @@ func ExistingFlags(flagMap flag.FlagMap) SectionOpt {
 }
 
 // Section creates a Section and adds it underneath this Section. Panics if a Section with the same name already exists
-func Section(name string, helpShort string, opts ...SectionOpt) SectionOpt {
+func Section(name Name, helpShort string, opts ...SectionOpt) SectionOpt {
 	return ExistingSection(name, New(helpShort, opts...))
 }
 
 // Flag creates a Flag and makes it availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
-func Flag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) SectionOpt {
+func Flag(name flag.Name, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) SectionOpt {
 	return ExistingFlag(name, flag.New(helpShort, empty, opts...))
 }
 
 // Command creates a Command and adds it underneath this Section. Panics if a Command with the same name already exists
-func Command(name string, helpShort string, action command.Action, opts ...command.CommandOpt) SectionOpt {
+func Command(name command.Name, helpShort string, action command.Action, opts ...command.CommandOpt) SectionOpt {
 	return ExistingCommand(name, command.New(helpShort, action, opts...))
 }
 

@@ -50,7 +50,7 @@ func TestApp_Parse(t *testing.T) {
 				section.New(
 					"help for test",
 					section.Flag(
-						"--af1",
+						flag.Name("--af1"),
 						"flag help",
 						value.Int,
 					),
@@ -420,7 +420,7 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "addSectionFlags",
 			app: func() warg.App {
-				fm := map[string]flag.Flag{
+				fm := flag.FlagMap{
 					"--flag1": flag.New("--flag1 value", value.String),
 					"--flag2": flag.New("--flag1 value", value.String),
 				}
@@ -448,7 +448,7 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "addCommandFlags",
 			app: func() warg.App {
-				fm := map[string]flag.Flag{
+				fm := flag.FlagMap{
 					"--flag1": flag.New("--flag1 value", value.String),
 					"--flag2": flag.New("--flag1 value", value.String),
 				}

@@ -11,8 +11,11 @@ import (
 // An Action is run as the result of a command
 type Action = func(flag.PassedFlags) error
 
+// Name of the command
+type Name string
+
 // A CommandMap holds Commands and is used by Sections
-type CommandMap = map[string]Command
+type CommandMap = map[Name]Command
 
 // A CommandOpt customizes a Command
 type CommandOpt = func(*Command)
@@ -42,7 +45,7 @@ func New(helpShort string, action Action, opts ...CommandOpt) Command {
 	command := Command{
 		Help:   helpShort,
 		Action: action,
-		Flags:  make(map[string]flag.Flag),
+		Flags:  make(flag.FlagMap),
 	}
 	for _, opt := range opts {
 		opt(&command)
@@ -51,8 +54,8 @@ func New(helpShort string, action Action, opts ...CommandOpt) Command {
 }
 
 // ExistingFlag adds an existing flag to a Command. It panics if a flag with the same name exists
-func ExistingFlag(name string, value flag.Flag) CommandOpt {
-	if !strings.HasPrefix(name, "-") {
+func ExistingFlag(name flag.Name, value flag.Flag) CommandOpt {
+	if !strings.HasPrefix(string(name), "-") {
 		log.Panicf("flags should start with '-': %#v\n", name)
 	}
 	return func(app *Command) {
@@ -67,7 +70,7 @@ func ExistingFlag(name string, value flag.Flag) CommandOpt {
 func ExistingFlags(flagMap flag.FlagMap) CommandOpt {
 	// TODO: can I abstract this somehow? Until then - copy paste!
 	for name := range flagMap {
-		if !strings.HasPrefix(name, "-") {
+		if !strings.HasPrefix(string(name), "-") {
 			log.Panicf("helpFlags should start with '-': %#v\n", name)
 		}
 	}
@@ -83,7 +86,7 @@ func ExistingFlags(flagMap flag.FlagMap) CommandOpt {
 }
 
 // Flag builds a flag and adds it to a Command. It panics if a flag with the same name exists
-func Flag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
+func Flag(name flag.Name, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
 	return ExistingFlag(name, flag.New(helpShort, empty, opts...))
 }
 
