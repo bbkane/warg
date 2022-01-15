@@ -7,12 +7,12 @@ import (
 	"os"
 	"strings"
 
-	c "github.com/bbkane/warg/command"
+	"github.com/bbkane/warg/command"
 	"github.com/bbkane/warg/config"
-	f "github.com/bbkane/warg/flag"
+	"github.com/bbkane/warg/flag"
 	"github.com/bbkane/warg/help"
-	s "github.com/bbkane/warg/section"
-	v "github.com/bbkane/warg/value"
+	"github.com/bbkane/warg/section"
+	"github.com/bbkane/warg/value"
 )
 
 // AppOpt let's you customize the app. It panics if there is an error
@@ -24,7 +24,7 @@ type App struct {
 	// Config()
 	configFlagName  string
 	newConfigReader config.NewReader
-	configFlag      *f.Flag
+	configFlag      *flag.Flag
 
 	// New Help()
 	name         string
@@ -35,7 +35,7 @@ type App struct {
 	helpFile      *os.File
 
 	// rootSection holds the good stuff!
-	rootSection s.SectionT
+	rootSection section.SectionT
 }
 
 // HelpFlagMapping adds a new option to your --help flag
@@ -51,7 +51,7 @@ func OverrideHelpFlag(
 	helpFile *os.File,
 	flagName string,
 	flagHelp string,
-	flagOpts ...f.FlagOpt,
+	flagOpts ...flag.FlagOpt,
 ) AppOpt {
 	return func(a *App) {
 
@@ -67,9 +67,9 @@ func OverrideHelpFlag(
 			helpValues[i] = mappings[i].Name
 		}
 
-		helpFlag := f.New(
+		helpFlag := flag.New(
 			flagHelp,
-			v.StringEnum(helpValues...),
+			value.StringEnum(helpValues...),
 			flagOpts...,
 		)
 
@@ -92,18 +92,18 @@ func ConfigFlag(
 	configFlagName string,
 	newConfigReader config.NewReader,
 	helpShort string,
-	flagOpts ...f.FlagOpt,
+	flagOpts ...flag.FlagOpt,
 ) AppOpt {
 	return func(app *App) {
 		app.configFlagName = configFlagName
 		app.newConfigReader = newConfigReader
-		configFlag := f.New(helpShort, v.Path, flagOpts...)
+		configFlag := flag.New(helpShort, value.Path, flagOpts...)
 		app.configFlag = &configFlag
 	}
 }
 
 // New builds a new App!
-func New(name string, rootSection s.SectionT, opts ...AppOpt) App {
+func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 	app := App{
 		name:        name,
 		rootSection: rootSection,
@@ -120,8 +120,8 @@ func New(name string, rootSection s.SectionT, opts ...AppOpt) App {
 			os.Stdout,
 			"--help",
 			"Print help",
-			f.Alias("-h"),
-			f.Default("default"),
+			flag.Alias("-h"),
+			flag.Default("default"),
 		)(&app)
 	}
 
@@ -217,15 +217,15 @@ type flagNameToAlias map[string]string
 // fitToAppResult holds the result of fitToApp
 // Exactly one of Section or Command should hold something. The other should be nil
 type fitToAppResult struct {
-	Section            *s.SectionT
-	Command            *c.Command
-	Action             c.Action
-	AllowedFlags       f.FlagMap
+	Section            *section.SectionT
+	Command            *command.Command
+	Action             command.Action
+	AllowedFlags       flag.FlagMap
 	AllowedFlagAliases flagNameToAlias
 }
 
 // fitToApp takes the command entered by a user and uses it to "walk" down the apps command tree
-func fitToApp(rootSection s.SectionT, path []string) (*fitToAppResult, error) {
+func fitToApp(rootSection section.SectionT, path []string) (*fitToAppResult, error) {
 	// validate passed command and get available flags
 	ftar := fitToAppResult{
 		Section:            &rootSection,
@@ -236,9 +236,9 @@ func fitToApp(rootSection s.SectionT, path []string) (*fitToAppResult, error) {
 	}
 	// Add any root flag aliases to AllowedFlagAliases
 	// Wonder if I could put all this in one part of the code...
-	for flagName, flag := range ftar.AllowedFlags {
-		if flag.Alias != "" {
-			ftar.AllowedFlagAliases[flagName] = flag.Alias
+	for flagName, fl := range ftar.AllowedFlags {
+		if fl.Alias != "" {
+			ftar.AllowedFlagAliases[flagName] = fl.Alias
 		}
 	}
 	childCommands := rootSection.Commands
@@ -252,24 +252,24 @@ func fitToApp(rootSection s.SectionT, path []string) (*fitToAppResult, error) {
 			// commands have no child commands or child sections
 			childCommands = nil
 			childSections = nil
-			for flagName, flag := range command.Flags {
+			for flagName, fl := range command.Flags {
 				// TODO: check if name exists already
-				if flag.Alias != "" {
-					ftar.AllowedFlagAliases[flagName] = flag.Alias
+				if fl.Alias != "" {
+					ftar.AllowedFlagAliases[flagName] = fl.Alias
 				}
-				flag.IsCommandFlag = true
-				ftar.AllowedFlags[flagName] = flag
+				fl.IsCommandFlag = true
+				ftar.AllowedFlags[flagName] = fl
 			}
 		} else if section, exists := childSections[word]; exists {
 			ftar.Section = &section
 			childCommands = section.Commands
 			childSections = section.Sections
-			for flagName, flag := range section.Flags {
+			for flagName, fl := range section.Flags {
 				// TODO: check if key exists already
-				if flag.Alias != "" {
-					ftar.AllowedFlagAliases[flagName] = flag.Alias
+				if fl.Alias != "" {
+					ftar.AllowedFlagAliases[flagName] = fl.Alias
 				}
-				ftar.AllowedFlags[flagName] = flag
+				ftar.AllowedFlags[flagName] = fl
 			}
 		} else {
 			retErr := fmt.Errorf("expected command or section, but got %#v, try --help", word)
@@ -282,7 +282,7 @@ func fitToApp(rootSection s.SectionT, path []string) (*fitToAppResult, error) {
 // resolveFlag updates a flag's value from the command line, and then from the
 // default value. flag should not be nil. deletes from flagStrs
 func resolveFlag(
-	flag *f.Flag,
+	fl *flag.Flag,
 	name string,
 	flagStrs []flagStr,
 	configReader config.Reader,
@@ -292,13 +292,13 @@ func resolveFlag(
 	// TODO: can I delete from flagStrs in the caller? then I wouldn't need to pass
 	// flagStrs (just a potential strValues) into here and it's a more pure function
 
-	val, err := flag.EmptyValueConstructor()
+	val, err := fl.EmptyValueConstructor()
 	if err != nil {
 		return fmt.Errorf("flag error: %v: %w", name, err)
 	}
-	flag.Value = val
-	flag.TypeDescription = val.Description()
-	flag.TypeInfo = val.TypeInfo()
+	fl.Value = val
+	fl.TypeDescription = val.Description()
+	fl.TypeInfo = val.TypeInfo()
 
 	// try to update from command line and consume from flagStrs
 	// need to check flag.SetBy even in the first case because we could be resolving
@@ -312,52 +312,52 @@ func resolveFlag(
 			}
 		}
 
-		if flag.SetBy == "" && len(strValues) > 0 {
-			if val.TypeInfo() == v.TypeInfoScalar && len(strValues) > 1 {
-				return fmt.Errorf("flag error: %v: flag passed multiple times, it's value (type %v), can only be updated once", name, flag.TypeDescription)
+		if fl.SetBy == "" && len(strValues) > 0 {
+			if val.TypeInfo() == value.TypeInfoScalar && len(strValues) > 1 {
+				return fmt.Errorf("flag error: %v: flag passed multiple times, it's value (type %v), can only be updated once", name, fl.TypeDescription)
 			}
 
 			for _, v := range strValues {
-				err = flag.Value.Update(v)
+				err = fl.Value.Update(v)
 				if err != nil {
 					return fmt.Errorf("error updating flag %v from passed flag value %v: %w", name, v, err)
 				}
 			}
-			flag.SetBy = "passedflag"
+			fl.SetBy = "passedflag"
 		}
 	}
 
 	// update from config
 	{
-		if flag.SetBy == "" && configReader != nil {
-			fpr, err := configReader.Search(flag.ConfigPath)
+		if fl.SetBy == "" && configReader != nil {
+			fpr, err := configReader.Search(fl.ConfigPath)
 			if err != nil {
 				return err
 			}
 			if fpr.Exists {
 				if !fpr.IsAggregated {
-					err := flag.Value.ReplaceFromInterface(fpr.IFace)
+					err := fl.Value.ReplaceFromInterface(fpr.IFace)
 					if err != nil {
 						return fmt.Errorf(
 							"could not replace container type value: val: %#v , replacement: %#v, err: %w",
-							flag.Value,
+							fl.Value,
 							fpr.IFace,
 							err,
 						)
 					}
-					flag.SetBy = "config"
+					fl.SetBy = "config"
 				} else {
 					under, ok := fpr.IFace.([]interface{})
 					if !ok {
 						return fmt.Errorf("expected []interface{}, got: %#v", under)
 					}
 					for _, e := range under {
-						err = flag.Value.UpdateFromInterface(e)
+						err = fl.Value.UpdateFromInterface(e)
 						if err != nil {
 							return fmt.Errorf("could not update container type value: err: %w", err)
 						}
 					}
-					flag.SetBy = "config"
+					fl.SetBy = "config"
 				}
 			}
 		}
@@ -365,15 +365,15 @@ func resolveFlag(
 
 	// update from envvars
 	{
-		if flag.SetBy == "" && len(flag.EnvVars) > 0 {
-			for _, e := range flag.EnvVars {
+		if fl.SetBy == "" && len(fl.EnvVars) > 0 {
+			for _, e := range fl.EnvVars {
 				val, exists := lookupEnv(e)
 				if exists {
-					err = flag.Value.Update(val)
+					err = fl.Value.Update(val)
 					if err != nil {
 						return fmt.Errorf("error updating flag %v from envvar %v: %w", name, val, err)
 					}
-					flag.SetBy = "envvar"
+					fl.SetBy = "envvar"
 					break // stop looking for envvars
 				}
 
@@ -383,14 +383,14 @@ func resolveFlag(
 
 	// update from default
 	{
-		if flag.SetBy == "" && len(flag.DefaultValues) > 0 {
-			for _, v := range flag.DefaultValues {
-				err = flag.Value.Update(v)
+		if fl.SetBy == "" && len(fl.DefaultValues) > 0 {
+			for _, v := range fl.DefaultValues {
+				err = fl.Value.Update(v)
 				if err != nil {
 					return fmt.Errorf("internal error updating flag %v from appdefault %v: %w", name, val, err)
 				}
 			}
-			flag.SetBy = "appdefault"
+			fl.SetBy = "appdefault"
 		}
 	}
 
@@ -402,9 +402,9 @@ type ParseResult struct {
 	// Path to the command invoked. Does not include executable name (os.Args[0])
 	Path []string
 	// PassedFlags holds the set flags!
-	PassedFlags f.PassedFlags
+	PassedFlags flag.PassedFlags
 	// Action holds the passed command's action to execute.
-	Action c.Action
+	Action command.Action
 }
 
 // Parse parses the args, but does not execute anything.
@@ -449,10 +449,10 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	}
 
 	// Loop over allowed flags for the passed command and try to resolve them
-	for name, flag := range ftar.AllowedFlags {
+	for name, fl := range ftar.AllowedFlags {
 
 		err = resolveFlag(
-			&flag,
+			&fl,
 			name,
 			gar.FlagStrs,
 			configReader,
@@ -464,12 +464,12 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		}
 
 		if !gar.HelpPassed {
-			if flag.Required && flag.SetBy == "" {
+			if fl.Required && fl.SetBy == "" {
 				return nil, fmt.Errorf("flag required but not set: %s", name)
 			}
 		}
 
-		ftar.AllowedFlags[name] = flag
+		ftar.AllowedFlags[name] = fl
 	}
 
 	// add the config flag so both help and actions can see it
@@ -483,10 +483,10 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		}
 	}
 
-	pfs := make(f.PassedFlags)
-	for name, flag := range ftar.AllowedFlags {
-		if flag.SetBy != "" {
-			pfs[name] = flag.Value.Get()
+	pfs := make(flag.PassedFlags)
+	for name, fl := range ftar.AllowedFlags {
+		if fl.SetBy != "" {
+			pfs[name] = fl.Value.Get()
 		}
 	}
 
