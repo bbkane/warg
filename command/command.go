@@ -11,6 +11,8 @@ import (
 // An Action is run as the result of a command
 type Action = func(flag.PassedFlags) error
 
+type HelpShort string
+
 // Name of the command
 type Name string
 
@@ -26,8 +28,8 @@ type CommandOpt = func(*Command)
 type Command struct {
 	Action Action
 	Flags  flag.FlagMap
-	// Help is a required one-line description
-	Help string
+	// HelpShort is a required one-line description
+	HelpShort HelpShort
 	// Footer is yet another optional longer description.
 	Footer string
 	// HelpLong is an optional longer description
@@ -41,11 +43,11 @@ func DoNothing(_ flag.PassedFlags) error {
 }
 
 // New builds a Command
-func New(helpShort string, action Action, opts ...CommandOpt) Command {
+func New(helpShort HelpShort, action Action, opts ...CommandOpt) Command {
 	command := Command{
-		Help:   helpShort,
-		Action: action,
-		Flags:  make(flag.FlagMap),
+		HelpShort: helpShort,
+		Action:    action,
+		Flags:     make(flag.FlagMap),
 	}
 	for _, opt := range opts {
 		opt(&command)
@@ -86,7 +88,7 @@ func ExistingFlags(flagMap flag.FlagMap) CommandOpt {
 }
 
 // Flag builds a flag and adds it to a Command. It panics if a flag with the same name exists
-func Flag(name flag.Name, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
+func Flag(name flag.Name, helpShort flag.HelpShort, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
 	return ExistingFlag(name, flag.New(helpShort, empty, opts...))
 }
 

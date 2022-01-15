@@ -10,6 +10,9 @@ import (
 // Name of a flag
 type Name string
 
+// HelpShort is a description of what this flag does.
+type HelpShort string
+
 // FlagMap holds flags - used by Commands and Sections
 type FlagMap = map[Name]Flag
 
@@ -36,8 +39,8 @@ type Flag struct {
 	// EmptyConstructor tells flag how to make a value
 	EmptyValueConstructor value.EmptyConstructor
 
-	// Help is a message for the user on how to use this flag
-	Help string
+	// HelpShort is a message for the user on how to use this flag
+	HelpShort HelpShort
 
 	// Required means the user MUST fill this flag
 	Required bool
@@ -61,9 +64,9 @@ type Flag struct {
 }
 
 // New creates a Flag with options!
-func New(help string, empty value.EmptyConstructor, opts ...FlagOpt) Flag {
+func New(helpShort HelpShort, empty value.EmptyConstructor, opts ...FlagOpt) Flag {
 	flag := Flag{
-		Help:                  help,
+		HelpShort:             helpShort,
 		EmptyValueConstructor: empty,
 	}
 	for _, opt := range opts {
@@ -98,7 +101,7 @@ func Default(values ...string) FlagOpt {
 			log.Panicf("cannot create empty flag value when checking default: %v", flag)
 		}
 		if empty.TypeInfo() == value.TypeInfoScalar && len(values) != 1 {
-			log.Panicf("a scalar flag should only have one default value: We don't know the name of the type, but here's the Help: %#v", flag.Help)
+			log.Panicf("a scalar flag should only have one default value: We don't know the name of the type, but here's the Help: %#v", flag.HelpShort)
 		}
 		flag.DefaultValues = values
 	}

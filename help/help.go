@@ -47,14 +47,14 @@ func printFlag(w io.Writer, name string, f *flag.Flag) {
 			"  %s , %s : %s\n",
 			color.Add(color.Bold+color.ForegroundYellow, name),
 			color.Add(color.Bold+color.ForegroundYellow, f.Alias),
-			f.Help,
+			f.HelpShort,
 		)
 	} else {
 		fmt.Fprintf(
 			w,
 			"  %s : %s\n",
 			color.Add(color.Bold+color.ForegroundYellow, name),
-			f.Help,
+			f.HelpShort,
 		)
 	}
 	fmt.Fprintf(
@@ -170,7 +170,7 @@ func DetailedCommandHelp(file *os.File, cur command.Command, helpInfo HelpInfo) 
 		if cur.HelpLong != "" {
 			fmt.Fprintf(f, "%s\n", cur.HelpLong)
 		} else {
-			fmt.Fprintf(f, "%s\n", cur.Help)
+			fmt.Fprintf(f, "%s\n", cur.HelpShort)
 		}
 
 		fmt.Fprintln(f)
@@ -226,7 +226,7 @@ func DetailedSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) comman
 		if cur.HelpLong != "" {
 			fmt.Fprintf(f, "%s\n", cur.HelpLong)
 		} else {
-			fmt.Fprintf(f, "%s\n", cur.Help)
+			fmt.Fprintf(f, "%s\n", cur.HelpShort)
 		}
 
 		fmt.Fprintln(f)
@@ -247,7 +247,7 @@ func DetailedSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) comman
 					f,
 					"  %s : %s\n",
 					color.Add(color.Bold+color.ForegroundCyan, k),
-					cur.Sections[section.Name(k)].Help,
+					cur.Sections[section.Name(k)].HelpShort,
 				)
 			}
 
@@ -270,7 +270,7 @@ func DetailedSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) comman
 					f,
 					"  %s : %s\n",
 					color.Add(color.Bold+color.ForegroundGreen, k),
-					cur.Commands[command.Name(k)].Help,
+					cur.Commands[command.Name(k)].HelpShort,
 				)
 			}
 		}

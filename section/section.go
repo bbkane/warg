@@ -12,6 +12,9 @@ import (
 // Name of the section
 type Name string
 
+// HelpShort is a required short description of the section
+type HelpShort string
+
 // SectionMap holds Sections - used by other Sections
 type SectionMap = map[Name]SectionT
 
@@ -29,8 +32,8 @@ type SectionT struct {
 	Commands command.CommandMap
 	// Sections holds the Sections under this Section
 	Sections SectionMap
-	// Help is a required one-line descripiton of this section
-	Help string
+	// HelpShort is a required one-line descripiton of this section
+	HelpShort HelpShort
 	// HelpLong is an optional longer description of this section
 	HelpLong string
 	// Footer is yet another optional longer description.
@@ -38,12 +41,12 @@ type SectionT struct {
 }
 
 // New creates a Section!
-func New(helpShort string, opts ...SectionOpt) SectionT {
+func New(helpShort HelpShort, opts ...SectionOpt) SectionT {
 	section := SectionT{
-		Help:     helpShort,
-		Flags:    make(flag.FlagMap),
-		Sections: make(SectionMap),
-		Commands: make(command.CommandMap),
+		HelpShort: helpShort,
+		Flags:     make(flag.FlagMap),
+		Sections:  make(SectionMap),
+		Commands:  make(command.CommandMap),
 	}
 	for _, opt := range opts {
 		opt(&section)
@@ -107,17 +110,17 @@ func ExistingFlags(flagMap flag.FlagMap) SectionOpt {
 }
 
 // Section creates a Section and adds it underneath this Section. Panics if a Section with the same name already exists
-func Section(name Name, helpShort string, opts ...SectionOpt) SectionOpt {
+func Section(name Name, helpShort HelpShort, opts ...SectionOpt) SectionOpt {
 	return ExistingSection(name, New(helpShort, opts...))
 }
 
 // Flag creates a Flag and makes it availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
-func Flag(name flag.Name, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) SectionOpt {
+func Flag(name flag.Name, helpShort flag.HelpShort, empty value.EmptyConstructor, opts ...flag.FlagOpt) SectionOpt {
 	return ExistingFlag(name, flag.New(helpShort, empty, opts...))
 }
 
 // Command creates a Command and adds it underneath this Section. Panics if a Command with the same name already exists
-func Command(name command.Name, helpShort string, action command.Action, opts ...command.CommandOpt) SectionOpt {
+func Command(name command.Name, helpShort command.HelpShort, action command.Action, opts ...command.CommandOpt) SectionOpt {
 	return ExistingCommand(name, command.New(helpShort, action, opts...))
 }
 

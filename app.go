@@ -50,7 +50,7 @@ func OverrideHelpFlag(
 	mappings []HelpFlagMapping,
 	helpFile *os.File,
 	flagName flag.Name,
-	flagHelp string,
+	flagHelp flag.HelpShort,
 	flagOpts ...flag.FlagOpt,
 ) AppOpt {
 	return func(a *App) {
@@ -92,7 +92,7 @@ func ConfigFlag(
 	// TODO: put the new stuff at the front to be consistent with OverrideHelpFlag
 	configFlagName flag.Name,
 	newConfigReader config.NewReader,
-	helpShort string,
+	helpShort flag.HelpShort,
 	flagOpts ...flag.FlagOpt,
 ) AppOpt {
 	return func(app *App) {

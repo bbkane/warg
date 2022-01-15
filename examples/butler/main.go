@@ -22,14 +22,14 @@ func main() {
 	app := warg.New(
 		"butler",
 		section.New(
-			"A virtual assistant",
+			section.HelpShort("A virtual assistant"),
 			section.Command(
 				command.Name("present"),
-				("Formally present a guest (guests are never introduced, always presented)."),
+				command.HelpShort("Formally present a guest (guests are never introduced, always presented)."),
 				present,
 				command.Flag(
 					flag.Name("--name"),
-					"Guest to address.",
+					flag.HelpShort("Guest to address."),
 					value.String,
 					flag.Alias("-n"),
 					flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),

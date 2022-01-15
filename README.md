@@ -8,11 +8,13 @@ Build heirarchical CLI applications with warg!
 - warg is easy to add to, maintain, and remove from your project (if necessary). This follows mostly from warg being terse and declarative. If you decide to remove warg, simply remove the app declaration and turn the passed flags into other types of function arguments for your command handlers. Done!
 
 
-# Hello World
+## Examples
 
-Also see the examples in [the docs](https://pkg.go.dev/github.com/bbkane/warg).
+### Butler
 
-## Code
+See [source code](./examples/butler/main.go).
+
+TODO: update this!
 
 ```go
 package main
@@ -28,28 +30,28 @@ import (
 	"github.com/bbkane/warg/value"
 )
 
-func hello(pf flag.PassedFlags) error {
+func present(pf flag.PassedFlags) error {
 	// this is a required flag, so we know it exists
 	name := pf["--name"].(string)
-	fmt.Printf("Hello %s!\n", name)
+	fmt.Printf("May I present to you %s.\n", name)
 	return nil
 }
 
 func main() {
 	app := warg.New(
-		"say",
+		"butler",
 		section.New(
-			"Make the terminal say things!!",
+			"A virtual assistant",
 			section.Command(
-				"hello",
-				"Say hello",
-				hello,
+				"present",
+				"Formally present a guest (guests are never introduced, always presented).",
+				present,
 				command.Flag(
 					"--name",
-					"Person we're talking to",
+					"Guest to address.",
 					value.String,
 					flag.Alias("-n"),
-					flag.EnvVars("SAY_NAME"),
+					flag.EnvVars("BUTLER_PRESENT_NAME"),
 					flag.Required(),
 				),
 			),
@@ -60,6 +62,8 @@ func main() {
 ```
 
 ## Run
+
+TODO: fix this!
 
 By default, these help messages are in color. You'll have to imagine that within this README :)
 
