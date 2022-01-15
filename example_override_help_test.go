@@ -45,8 +45,8 @@ func ExampleOverrideHelpFlag() {
 			[]warg.HelpFlagMapping{
 				{
 					Name:        "default",
-					CommandHelp: help.DefaultCommandHelp,
-					SectionHelp: help.DefaultSectionHelp,
+					CommandHelp: help.DetailedCommandHelp,
+					SectionHelp: help.DetailedSectionHelp,
 				},
 				{
 					Name:        "custom",

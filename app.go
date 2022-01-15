@@ -116,13 +116,13 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 	if app.helpFlagName == "" {
 		OverrideHelpFlag(
 			[]HelpFlagMapping{
-				{Name: "default", CommandHelp: help.DefaultCommandHelp, SectionHelp: help.DefaultSectionHelp},
+				{Name: "detailed", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
 			},
 			os.Stdout,
 			"--help",
 			"Print help",
 			flag.Alias("-h"),
-			flag.Default("default"),
+			flag.Default("detailed"),
 		)(&app)
 	}
 

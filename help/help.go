@@ -159,7 +159,7 @@ func ConditionallyEnableColor(pf flag.PassedFlags, file *os.File) {
 	}
 }
 
-func DefaultCommandHelp(file *os.File, cur command.Command, helpInfo HelpInfo) command.Action {
+func DetailedCommandHelp(file *os.File, cur command.Command, helpInfo HelpInfo) command.Action {
 	return func(pf flag.PassedFlags) error {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
@@ -214,7 +214,7 @@ func DefaultCommandHelp(file *os.File, cur command.Command, helpInfo HelpInfo) c
 	}
 }
 
-func DefaultSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) command.Action {
+func DetailedSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) command.Action {
 	return func(pf flag.PassedFlags) error {
 
 		f := bufio.NewWriter(file)
