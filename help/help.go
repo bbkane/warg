@@ -9,9 +9,9 @@ import (
 	"sort"
 
 	"github.com/bbkane/go-color"
-	c "github.com/bbkane/warg/command"
-	f "github.com/bbkane/warg/flag"
-	s "github.com/bbkane/warg/section"
+	"github.com/bbkane/warg/command"
+	"github.com/bbkane/warg/flag"
+	"github.com/bbkane/warg/section"
 	"github.com/bbkane/warg/value"
 	"github.com/mattn/go-isatty"
 )
@@ -24,13 +24,13 @@ type HelpInfo struct {
 	Path []string
 	// AvailableFlags for the section or commmand.
 	// All flags are Resolved if possible (i.e., flag.SetBy != "")
-	AvailableFlags f.FlagMap
+	AvailableFlags flag.FlagMap
 	// RootSection of the app. Especially useful for printing all sections and commands
-	RootSection s.SectionT
+	RootSection section.SectionT
 }
 
-type CommandHelp = func(file *os.File, cur c.Command, helpInfo HelpInfo) c.Action
-type SectionHelp = func(file *os.File, cur s.SectionT, helpInfo HelpInfo) c.Action
+type CommandHelp = func(file *os.File, cur command.Command, helpInfo HelpInfo) command.Action
+type SectionHelp = func(file *os.File, cur section.SectionT, helpInfo HelpInfo) command.Action
 
 // https://stackoverflow.com/a/45456649/2958070
 func leftPad(s string, pad string, plength int) string {
@@ -40,83 +40,83 @@ func leftPad(s string, pad string, plength int) string {
 	return s
 }
 
-func printFlag(w io.Writer, name string, flag *f.Flag) {
-	if flag.Alias != "" {
+func printFlag(w io.Writer, name string, f *flag.Flag) {
+	if f.Alias != "" {
 		fmt.Fprintf(
 			w,
 			"  %s , %s : %s\n",
 			color.Add(color.Bold+color.ForegroundYellow, name),
-			color.Add(color.Bold+color.ForegroundYellow, flag.Alias),
-			flag.Help,
+			color.Add(color.Bold+color.ForegroundYellow, f.Alias),
+			f.Help,
 		)
 	} else {
 		fmt.Fprintf(
 			w,
 			"  %s : %s\n",
 			color.Add(color.Bold+color.ForegroundYellow, name),
-			flag.Help,
+			f.Help,
 		)
 	}
 	fmt.Fprintf(
 		w,
 		"    %s : %s\n",
 		color.Add(color.Bold, "type"),
-		flag.TypeDescription,
+		f.TypeDescription,
 	)
 
 	// TODO: should I print these one by one like I do value?
-	if len(flag.DefaultValues) > 0 {
-		if flag.TypeInfo == value.TypeInfoScalar {
+	if len(f.DefaultValues) > 0 {
+		if f.TypeInfo == value.TypeInfoScalar {
 			fmt.Fprintf(
 				w,
 				"    %s : %s\n",
 				color.Add(color.Bold, "default"),
-				flag.DefaultValues[0],
+				f.DefaultValues[0],
 			)
 		} else {
 			fmt.Fprintf(
 				w,
 				"    %s : %s\n",
 				color.Add(color.Bold, "default"),
-				flag.DefaultValues,
+				f.DefaultValues,
 			)
 		}
 	}
-	if flag.ConfigPath != "" {
+	if f.ConfigPath != "" {
 		fmt.Fprintf(
 			w,
 			"    %s : %s\n",
 			color.Add(color.Bold, "configpath"),
-			flag.ConfigPath,
+			f.ConfigPath,
 		)
 	}
-	if len(flag.EnvVars) > 0 {
+	if len(f.EnvVars) > 0 {
 		fmt.Fprintf(w,
 			"    %s : %s\n",
 			color.Add(color.Bold, "envvars"),
-			flag.EnvVars,
+			f.EnvVars,
 		)
 	}
 
 	// TODO: it would be nice if this were red when the value isn't set
-	if flag.Required {
+	if f.Required {
 		fmt.Fprintf(w,
 			"    %s : true\n",
 			color.Add(color.Bold, "required"),
 		)
 	}
 
-	if flag.SetBy != "" {
-		if flag.TypeInfo == value.TypeInfoSlice {
+	if f.SetBy != "" {
+		if f.TypeInfo == value.TypeInfoSlice {
 
-			width := len(fmt.Sprint(len(flag.Value.StringSlice())))
+			width := len(fmt.Sprint(len(f.Value.StringSlice())))
 			fmt.Fprintf(w,
 				"    %s (set by %s) :\n",
 				color.Add(color.Bold, "value"),
-				color.Add(color.Bold, flag.SetBy),
+				color.Add(color.Bold, f.SetBy),
 			)
 
-			for i, e := range flag.Value.StringSlice() {
+			for i, e := range f.Value.StringSlice() {
 				fmt.Fprintf(
 					w,
 					"      %s %s\n",
@@ -132,8 +132,8 @@ func printFlag(w io.Writer, name string, flag *f.Flag) {
 				w,
 				"    %s (set by %s) : %s\n",
 				color.Add(color.Bold, "value"),
-				color.Add(color.Bold, flag.SetBy),
-				flag.Value,
+				color.Add(color.Bold, f.SetBy),
+				f.Value,
 			)
 		}
 	}
@@ -144,7 +144,7 @@ func printFlag(w io.Writer, name string, flag *f.Flag) {
 // SetColor looks for a passed --color flag with an underlying string value. If
 // it exists and is set to "true", color is enabled. If it exists, is set to
 // "auto", and the passed file is a terminal, color is enabled
-func ConditionallyEnableColor(pf f.PassedFlags, file *os.File) {
+func ConditionallyEnableColor(pf flag.PassedFlags, file *os.File) {
 	// default to trying to use color
 	useColor := "auto"
 	// respect a --color string
@@ -159,8 +159,8 @@ func ConditionallyEnableColor(pf f.PassedFlags, file *os.File) {
 	}
 }
 
-func DefaultCommandHelp(file *os.File, cur c.Command, helpInfo HelpInfo) c.Action {
-	return func(pf f.PassedFlags) error {
+func DefaultCommandHelp(file *os.File, cur command.Command, helpInfo HelpInfo) command.Action {
+	return func(pf flag.PassedFlags) error {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
@@ -186,11 +186,11 @@ func DefaultCommandHelp(file *os.File, cur c.Command, helpInfo HelpInfo) c.Actio
 			}
 			sort.Strings(keys)
 			for _, name := range keys {
-				flag := helpInfo.AvailableFlags[name]
-				if flag.IsCommandFlag {
-					printFlag(&commandFlagHelp, name, &flag)
+				f := helpInfo.AvailableFlags[name]
+				if f.IsCommandFlag {
+					printFlag(&commandFlagHelp, name, &f)
 				} else {
-					printFlag(&sectionFlagHelp, name, &flag)
+					printFlag(&sectionFlagHelp, name, &f)
 				}
 			}
 
@@ -213,8 +213,8 @@ func DefaultCommandHelp(file *os.File, cur c.Command, helpInfo HelpInfo) c.Actio
 	}
 }
 
-func DefaultSectionHelp(file *os.File, cur s.SectionT, _ HelpInfo) c.Action {
-	return func(pf f.PassedFlags) error {
+func DefaultSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) command.Action {
+	return func(pf flag.PassedFlags) error {
 
 		f := bufio.NewWriter(file)
 		defer f.Flush()

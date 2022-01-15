@@ -2,7 +2,7 @@ package warg_test
 
 import (
 	"bytes"
-	"flag"
+	stdlibflag "flag"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -10,14 +10,14 @@ import (
 
 	"github.com/bbkane/warg"
 	"github.com/bbkane/warg/command"
-	wflag "github.com/bbkane/warg/flag"
+	"github.com/bbkane/warg/flag"
 	"github.com/bbkane/warg/help"
 	"github.com/bbkane/warg/section"
 	"github.com/bbkane/warg/value"
 	"github.com/stretchr/testify/require"
 )
 
-var update = flag.Bool("update", false, "update golden files")
+var update = stdlibflag.Bool("update", false, "update golden files")
 
 func RequireEqualBytesOrDiff(t *testing.T, expectedFilePath string, actualFilePath string, msg string) {
 	expectedBytes, expectedReadErr := ioutil.ReadFile(expectedFilePath)
@@ -60,7 +60,7 @@ func TestDefaultSectionHelp(t *testing.T) {
 						"--editor",
 						"path to editor",
 						value.String,
-						wflag.Default("vi"),
+						flag.Default("vi"),
 					),
 				),
 			),
@@ -77,8 +77,8 @@ func TestDefaultSectionHelp(t *testing.T) {
 			actualHelpTmpFile,
 			"--help",
 			"Print help information",
-			wflag.Default("default"),
-			wflag.Alias("-h"),
+			flag.Default("default"),
+			flag.Alias("-h"),
 		),
 	)
 	args := []string{"grabbit", "--help"}
@@ -155,10 +155,10 @@ grabbit config edit --config-path /path/to/config --editor code
 						"--editor",
 						"path to editor",
 						value.String,
-						wflag.Default("vi"),
-						wflag.ConfigPath("editor"),
-						wflag.EnvVars("EDITOR"),
-						wflag.Required(),
+						flag.Default("vi"),
+						flag.ConfigPath("editor"),
+						flag.EnvVars("EDITOR"),
+						flag.Required(),
 					),
 				),
 			),
@@ -175,8 +175,8 @@ grabbit config edit --config-path /path/to/config --editor code
 			actualHelpTmpFile,
 			"--help",
 			"Print help information",
-			wflag.Default("default"),
-			wflag.Alias("-h"),
+			flag.Default("default"),
+			flag.Alias("-h"),
 		),
 	)
 	args := []string{"grabbit", "config", "edit", "--help"}

@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	v "github.com/bbkane/warg/value"
+	"github.com/bbkane/warg/value"
 )
 
 // FlagMap holds flags - used by Commands and Sections
@@ -31,7 +31,7 @@ type Flag struct {
 	EnvVars []string
 
 	// EmptyConstructor tells flag how to make a value
-	EmptyValueConstructor v.EmptyConstructor
+	EmptyValueConstructor value.EmptyConstructor
 
 	// Help is a message for the user on how to use this flag
 	Help string
@@ -51,14 +51,14 @@ type Flag struct {
 	TypeDescription string
 
 	// TypeInfo is set when parsing. Describes the "shape" of the type
-	TypeInfo v.TypeInfo
+	TypeInfo value.TypeInfo
 
 	// Value might be set when parsing. The interface returned by updating a flag
-	Value v.Value
+	Value value.Value
 }
 
 // New creates a Flag with options!
-func New(help string, empty v.EmptyConstructor, opts ...FlagOpt) Flag {
+func New(help string, empty value.EmptyConstructor, opts ...FlagOpt) Flag {
 	flag := Flag{
 		Help:                  help,
 		EmptyValueConstructor: empty,
@@ -94,7 +94,7 @@ func Default(values ...string) FlagOpt {
 		if err != nil {
 			log.Panicf("cannot create empty flag value when checking default: %v", flag)
 		}
-		if empty.TypeInfo() == v.TypeInfoScalar && len(values) != 1 {
+		if empty.TypeInfo() == value.TypeInfoScalar && len(values) != 1 {
 			log.Panicf("a scalar flag should only have one default value: We don't know the name of the type, but here's the Help: %#v", flag.Help)
 		}
 		flag.DefaultValues = values
