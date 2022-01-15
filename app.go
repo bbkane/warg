@@ -87,7 +87,7 @@ func OverrideHelpFlag(
 	}
 }
 
-// ConfigFlag lets you customize your config flag. Especially useful for changing the config reader (for example to choose whether to use a JSON or YAML structured config)
+// Use ConfigFlag in conjunction with flag.ConfigPath to allow users to override flag defaults with values from a config.
 func ConfigFlag(
 	// TODO: put the new stuff at the front to be consistent with OverrideHelpFlag
 	configFlagName flag.Name,
@@ -225,7 +225,7 @@ type fitToAppResult struct {
 	AllowedFlagAliases flagNameToAlias
 }
 
-// fitToApp takes the command entered by a user and uses it to "walk" down the apps command tree
+// fitToApp takes the command entered by a user and uses it to "walk" down the apps command tree to build what the command was and what the available flags are.
 func fitToApp(rootSection section.SectionT, path []string) (*fitToAppResult, error) {
 	// validate passed command and get available flags
 	ftar := fitToAppResult{
@@ -426,8 +426,15 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 
 	// fill the flags
 	var configReader config.Reader
-	// get the value of a potential passed --config flag
+	// get the value of a potential passed --config flag first so we can use it
+	// to resolve further flags
 	if app.configFlag != nil {
+
+		// Maybe this should go in fitToApp?
+		if app.configFlag.Alias != "" {
+			ftar.AllowedFlagAliases[string(app.configFlagName)] = app.configFlag.Alias
+		}
+
 		// we're gonna make a config map out of this if everything goes well
 		// so pass nil for the configreader now
 		err = resolveFlag(
@@ -480,7 +487,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 
 	for _, e := range gar.FlagStrs {
 		if !e.Consumed {
-			return nil, fmt.Errorf("unrecognized flag: %v -> %v", e.NameOrAlias, e.Consumed)
+			return nil, fmt.Errorf("unrecognized flag: %v -> %v", e.NameOrAlias, e.Value)
 		}
 	}
 
@@ -539,9 +546,8 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 }
 
 // MustRun runs the app.
-// Any errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
-// If there are no errors, os.Exit(0) is called. For more control,
-// check out app.Parse().
+// Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
+// Any errors on an Action will be printed to stderr and os.Exit(1) will be called.
 func (app *App) MustRun(osArgs []string, osLookupEnv LookupFunc) {
 	pr, err := app.Parse(osArgs, osLookupEnv)
 	if err != nil {

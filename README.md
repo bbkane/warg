@@ -40,11 +40,11 @@ func main() {
 		"say",
 		section.New(
 			"Make the terminal say things!!",
-			section.WithCommand(
+			section.Command(
 				"hello",
 				"Say hello",
 				hello,
-				command.WithFlag(
+				command.Flag(
 					"--name",
 					"Person we're talking to",
 					value.String,
