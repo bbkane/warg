@@ -11,28 +11,28 @@ import (
 	"github.com/bbkane/warg/value"
 )
 
-func hello(pf flag.PassedFlags) error {
+func present(pf flag.PassedFlags) error {
 	// this is a required flag, so we know it exists
 	name := pf["--name"].(string)
-	fmt.Printf("Hello %s!\n", name)
+	fmt.Printf("May I present to you %s.\n", name)
 	return nil
 }
 
 func main() {
 	app := warg.New(
-		"say",
+		"butler",
 		section.New(
-			"Make the terminal say things!!",
+			"A virtual assistant",
 			section.Command(
-				"hello",
-				"Say hello",
-				hello,
+				command.Name("present"),
+				("Formally present a guest (guests are never introduced, always presented)."),
+				present,
 				command.Flag(
-					"--name",
-					"Person we're talking to",
+					flag.Name("--name"),
+					"Guest to address.",
 					value.String,
 					flag.Alias("-n"),
-					flag.EnvVars("SAY_NAME"),
+					flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),
 					flag.Required(),
 				),
 			),
