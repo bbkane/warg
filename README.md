@@ -7,120 +7,55 @@ Build heirarchical CLI applications with warg!
 - warg is customizable. Add new types of flag values, config file formats, or --help outputs using the public API.
 - warg is easy to add to, maintain, and remove from your project (if necessary). This follows mostly from warg being terse and declarative. If you decide to remove warg, simply remove the app declaration and turn the passed flags into other types of function arguments for your command handlers. Done!
 
+## Butler Example
 
-## Examples
-
-### Butler
-
-See [source code](./examples/butler/main.go).
-
-TODO: update this!
+In addition to a few [examples in the docs](https://pkg.go.dev/github.com/bbkane/warg#pkg-examples), warg includes a small example `butler` program. See the [full source code](./examples/butler/main.go).
 
 ```go
-package main
-
-import (
-	"fmt"
-	"os"
-
-	"github.com/bbkane/warg"
-	"github.com/bbkane/warg/command"
-	"github.com/bbkane/warg/flag"
-	"github.com/bbkane/warg/section"
-	"github.com/bbkane/warg/value"
-)
-
-func present(pf flag.PassedFlags) error {
-	// this is a required flag, so we know it exists
-	name := pf["--name"].(string)
-	fmt.Printf("May I present to you %s.\n", name)
-	return nil
-}
-
-func main() {
-	app := warg.New(
-		"butler",
-		section.New(
-			"A virtual assistant",
-			section.Command(
-				"present",
-				"Formally present a guest (guests are never introduced, always presented).",
-				present,
-				command.Flag(
-					"--name",
-					"Guest to address.",
-					value.String,
-					flag.Alias("-n"),
-					flag.EnvVars("BUTLER_PRESENT_NAME"),
-					flag.Required(),
-				),
+app := warg.New(
+	"butler",
+	section.New(
+		section.HelpShort("A virtual assistant"),
+		section.Command(
+			command.Name("present"),
+			command.HelpShort("Formally present a guest (guests are never introduced, always presented)."),
+			present,
+			command.Flag(
+				flag.Name("--name"),
+				flag.HelpShort("Guest to address."),
+				value.String,
+				flag.Alias("-n"),
+				flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),
+				flag.Required(),
 			),
 		),
-	)
-	app.MustRun(os.Args, os.LookupEnv)
-}
+	),
+)
 ```
 
-## Run
+## Run Butler
 
-TODO: fix this!
+Color can be toggled on/off/auto with the `--color` flag:
 
-By default, these help messages are in color. You'll have to imagine that within this README :)
-
-```
-$ ./say -h
-Make the terminal say things!!
-
-Commands
-
-  hello : Say hello
-```
+<p align="center">
+  <img src="image-20220114210824919.png" alt="Sublime's custom image"/>
+</p>
 
 The default help for a command dynamically includes each flag's **current** value and how it was was set (passed flag, config, envvar, app default).
 
-```
-$ ./say hello --name World -h
-Say hello
+<p align="center">
+  <img src="image-20220114212104654.png" alt="Sublime's custom image"/>
+</p>
 
-Command Flags:
+<p align="center">
+  <img src="image-20220114212309862.png" alt="Sublime's custom image"/>
+</p>
 
-  --name , -n : Person we're talking to
-    type : string
-    envvars : [SAY_NAME]
-    required : true
-    value (set by passedflag) : World
+## Apps Using Warg
 
-Inherited Section Flags:
-
-  --help , -h : Print help
-    type : stringenum with choices: [default]
-    default : default
-    value (set by appdefault) : default
-```
-```
-$ SAY_NAME=Bob ./say hello -h
-Say hello
-
-Command Flags:
-
-  --name , -n : Person we're talking to
-    type : string
-    envvars : [SAY_NAME]
-    required : true
-    value (set by envvar) : Bob
-
-Inherited Section Flags:
-
-  --help , -h : Print help
-    type : stringenum with choices: [default]
-    default : default
-    value (set by appdefault) : default
-```
-
-```
-$ ./say hello --name World
-Hello World!
-```
+- [fling](https://github.com/bbkane/fling/) - GNU Stow replacement to manage my dotfiles
+- [grabbit](https://github.com/bbkane/grabbit) - Grab images from Reddit
+- [starghaze](https://github.com/bbkane/starghaze/) - Save GitHub Starred repos to GSheets, Zinc
 
 # Should You Use warg?
 

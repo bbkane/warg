@@ -112,7 +112,7 @@ func printFlag(w io.Writer, name string, f *flag.Flag) {
 			width := len(fmt.Sprint(len(f.Value.StringSlice())))
 			fmt.Fprintf(w,
 				"    %s (set by %s) :\n",
-				color.Add(color.Bold, "value"),
+				color.Add(color.Bold, "currentvalue"),
 				color.Add(color.Bold, f.SetBy),
 			)
 
@@ -131,7 +131,7 @@ func printFlag(w io.Writer, name string, f *flag.Flag) {
 			fmt.Fprintf(
 				w,
 				"    %s (set by %s) : %s\n",
-				color.Add(color.Bold, "value"),
+				color.Add(color.Bold, "currentvalue"),
 				color.Add(color.Bold, f.SetBy),
 				f.Value,
 			)
