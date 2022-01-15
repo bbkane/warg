@@ -38,17 +38,19 @@ app := warg.New(
 Color can be toggled on/off/auto with the `--color` flag:
 
 <p align="center">
-  <img src="image-20220114210824919.png" alt="Sublime's custom image"/>
+  <img src="img/image-20220114210824919.png" alt="Sublime's custom image"/>
 </p>
 
 The default help for a command dynamically includes each flag's **current** value and how it was was set (passed flag, config, envvar, app default).
 
 <p align="center">
-  <img src="image-20220114212104654.png" alt="Sublime's custom image"/>
+  <img src="img/image-20220114212104654.png" alt="Sublime's custom image"/>
 </p>
 
+Of course, running it with the flag also works
+
 <p align="center">
-  <img src="image-20220114212309862.png" alt="Sublime's custom image"/>
+  <img src="img/image-20220114212309862.png" alt="Sublime's custom image"/>
 </p>
 
 ## Apps Using Warg
