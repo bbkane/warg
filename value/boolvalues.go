@@ -15,7 +15,7 @@ func (v *boolV) Get() interface{}      { return bool(*v) }
 func (v *boolV) String() string        { return fmt.Sprint(bool(*v)) }
 func (v *boolV) StringSlice() []string { return nil }
 func (v *boolV) TypeInfo() TypeInfo    { return TypeInfoScalar }
-func (v *boolV) Description() string   { return "int" }
+func (v *boolV) Description() string   { return "bool" }
 
 func (v *boolV) ReplaceFromInterface(iFace interface{}) error {
 	switch under := iFace.(type) {

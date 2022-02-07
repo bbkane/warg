@@ -8,7 +8,8 @@ import (
 	"os"
 	"sort"
 
-	"github.com/bbkane/go-color"
+	"github.com/bbkane/gocolor"
+
 	"github.com/bbkane/warg/command"
 	"github.com/bbkane/warg/flag"
 	"github.com/bbkane/warg/section"
@@ -40,20 +41,20 @@ func leftPad(s string, pad string, plength int) string {
 	return s
 }
 
-func printFlag(w io.Writer, name string, f *flag.Flag) {
+func printFlag(w io.Writer, color *gocolor.Color, name string, f *flag.Flag) {
 	if f.Alias != "" {
 		fmt.Fprintf(
 			w,
 			"  %s , %s : %s\n",
-			color.Add(color.Bold+color.ForegroundYellow, name),
-			color.Add(color.Bold+color.ForegroundYellow, f.Alias),
+			color.Add(color.Bold+color.FgYellow, name),
+			color.Add(color.Bold+color.FgYellow, f.Alias),
 			f.HelpShort,
 		)
 	} else {
 		fmt.Fprintf(
 			w,
 			"  %s : %s\n",
-			color.Add(color.Bold+color.ForegroundYellow, name),
+			color.Add(color.Bold+color.FgYellow, name),
 			f.HelpShort,
 		)
 	}
@@ -142,9 +143,9 @@ func printFlag(w io.Writer, name string, f *flag.Flag) {
 }
 
 // SetColor looks for a passed --color flag with an underlying string value. If
-// it exists and is set to "true", color is enabled. If it exists, is set to
-// "auto", and the passed file is a terminal, color is enabled
-func ConditionallyEnableColor(pf flag.PassedFlags, file *os.File) {
+// it exists and is set to "true", or if it exists, is set to "auto",
+// and the passed file is a TTY, an enabled Color is returned.
+func ConditionallyEnableColor(pf flag.PassedFlags, file *os.File) (gocolor.Color, error) {
 	// default to trying to use color
 	useColor := "auto"
 	// respect a --color string
@@ -154,9 +155,9 @@ func ConditionallyEnableColor(pf flag.PassedFlags, file *os.File) {
 		}
 	}
 
-	if useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd())) {
-		color.Enable()
-	}
+	startEnabled := useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd()))
+	return gocolor.Prepare(startEnabled)
+
 }
 
 func DetailedCommandHelp(file *os.File, cur command.Command, helpInfo HelpInfo) command.Action {
@@ -164,7 +165,10 @@ func DetailedCommandHelp(file *os.File, cur command.Command, helpInfo HelpInfo) 
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		ConditionallyEnableColor(pf, file)
+		col, err := ConditionallyEnableColor(pf, file)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
+		}
 
 		// Print top help section
 		if cur.HelpLong != "" {
@@ -189,19 +193,19 @@ func DetailedCommandHelp(file *os.File, cur command.Command, helpInfo HelpInfo) 
 			for _, name := range keys {
 				f := helpInfo.AvailableFlags[flag.Name(name)]
 				if f.IsCommandFlag {
-					printFlag(&commandFlagHelp, name, &f)
+					printFlag(&commandFlagHelp, &col, name, &f)
 				} else {
-					printFlag(&sectionFlagHelp, name, &f)
+					printFlag(&sectionFlagHelp, &col, name, &f)
 				}
 			}
 
 			if commandFlagHelp.Len() > 0 {
-				fmt.Fprintln(f, color.Add(color.Bold+color.Underline, "Command Flags"))
+				fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Command Flags"))
 				fmt.Fprintln(f)
 				commandFlagHelp.WriteTo(f)
 			}
 			if sectionFlagHelp.Len() > 0 {
-				fmt.Fprintln(f, color.Add(color.Bold+color.Underline, "Inherited Section Flags"))
+				fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Inherited Section Flags"))
 				fmt.Fprintln(f)
 				sectionFlagHelp.WriteTo(f)
 			}
@@ -220,7 +224,10 @@ func DetailedSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) comman
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		ConditionallyEnableColor(pf, file)
+		col, err := ConditionallyEnableColor(pf, file)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
+		}
 
 		// Print top help section
 		if cur.HelpLong != "" {
@@ -233,7 +240,7 @@ func DetailedSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) comman
 
 		// Print sections
 		if len(cur.Sections) > 0 {
-			fmt.Fprintln(f, color.Add(color.Underline+color.Bold, "Sections"))
+			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Sections")+":")
 			fmt.Fprintln(f)
 
 			keys := make([]string, 0, len(cur.Sections))
@@ -246,7 +253,7 @@ func DetailedSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) comman
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					color.Add(color.Bold+color.ForegroundCyan, k),
+					col.Add(col.Bold+col.FgCyan, k),
 					cur.Sections[section.Name(k)].HelpShort,
 				)
 			}
@@ -256,7 +263,7 @@ func DetailedSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) comman
 
 		// Print commands
 		if len(cur.Commands) > 0 {
-			fmt.Fprintln(f, color.Add(color.Underline+color.Bold, "Commands"))
+			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Commands")+":")
 			fmt.Fprintln(f)
 
 			keys := make([]string, 0, len(cur.Commands))
@@ -269,7 +276,7 @@ func DetailedSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) comman
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					color.Add(color.Bold+color.ForegroundGreen, k),
+					col.Add(col.Bold+col.FgGreen, k),
 					cur.Commands[command.Name(k)].HelpShort,
 				)
 			}
@@ -277,7 +284,7 @@ func DetailedSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) comman
 
 		if cur.Footer != "" {
 			fmt.Fprintln(f)
-			fmt.Fprintln(f, color.Add(color.Underline+color.Bold, "Footer"))
+			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Footer"))
 			fmt.Fprintln(f)
 			fmt.Fprintf(f, "%s\n", cur.Footer)
 		}

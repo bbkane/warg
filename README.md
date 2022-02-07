@@ -2,7 +2,7 @@
 
 Build heirarchical CLI applications with warg!
 
-- warg uses [funcopt](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis) style APIs to keep CLI declaration readable and terse. It does not require code generation. Nested CLI command are indented, which makes apps easy to debug.
+- warg uses [funcopt](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis) style declarative APIs to keep CLIs readable and terse. It does not require code generation. Nested CLI command are indented, which makes apps easy to debug.
 - warg is extremely interested in getting information into your app. Ensure a flag can be set from an environmental variable, configuration file, or default value by adding a single line to the flag (configuration files also take some app-level config).
 - warg is customizable. Add new types of flag values, config file formats, or --help outputs using the public API.
 - warg is easy to add to, maintain, and remove from your project (if necessary). This follows mostly from warg being terse and declarative. If you decide to remove warg, simply remove the app declaration and turn the passed flags into other types of function arguments for your command handlers. Done!
