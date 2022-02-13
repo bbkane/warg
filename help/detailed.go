@@ -21,15 +21,15 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *flag.F
 		fmt.Fprintf(
 			w,
 			"  %s , %s : %s\n",
-			color.Add(color.Bold+color.FgYellow, name),
-			color.Add(color.Bold+color.FgYellow, f.Alias),
+			fmtFlagName(color, name),
+			fmtFlagName(color, f.Alias),
 			f.HelpShort,
 		)
 	} else {
 		fmt.Fprintf(
 			w,
 			"  %s : %s\n",
-			color.Add(color.Bold+color.FgYellow, name),
+			fmtFlagName(color, name),
 			f.HelpShort,
 		)
 	}
@@ -219,7 +219,7 @@ func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ HelpInfo) comma
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					col.Add(col.Bold+col.FgCyan, k),
+					fmtSectionName(&col, k),
 					cur.Sections[section.Name(k)].HelpShort,
 				)
 			}
@@ -242,7 +242,7 @@ func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ HelpInfo) comma
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					col.Add(col.Bold+col.FgGreen, k),
+					fmtCommandName(&col, k),
 					cur.Commands[command.Name(k)].HelpShort,
 				)
 			}

@@ -55,3 +55,15 @@ func ConditionallyEnableColor(pf flag.PassedFlags, file *os.File) (gocolor.Color
 	return gocolor.Prepare(startEnabled)
 
 }
+
+func fmtSectionName(col *gocolor.Color, sectionName string) string {
+	return col.Add(col.Bold+col.FgCyan, sectionName)
+}
+
+func fmtCommandName(col *gocolor.Color, commandName string) string {
+	return col.Add(col.Bold+col.FgGreen, commandName)
+}
+
+func fmtFlagName(col *gocolor.Color, flagName string) string {
+	return col.Add(col.Bold+col.FgYellow, flagName)
+}
