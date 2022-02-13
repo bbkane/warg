@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"sort"
 
@@ -84,7 +85,14 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *flag.F
 	if f.SetBy != "" {
 		if f.TypeInfo == value.TypeInfoSlice {
 
-			width := len(fmt.Sprint(len(f.Value.StringSlice())))
+			sliceLen := len(fmt.Sprint(len(f.Value.StringSlice())))
+
+			// Find the max padding for a specified length
+			// 0 - 9 : 0  # no padding needed
+			// 10 - 99 : 1  # need 0 for single digit numbers
+			//  100 - 999 : 2
+			maxPadding := int(math.Ceil(math.Log10(float64(sliceLen)))) + 1
+
 			fmt.Fprintf(w,
 				"    %s (set by %s) :\n",
 				color.Add(color.Bold, "currentvalue"),
@@ -92,12 +100,14 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *flag.F
 			)
 
 			for i, e := range f.Value.StringSlice() {
+				indexStr := fmt.Sprint(i)
+				padding := maxPadding - len(indexStr)
 				fmt.Fprintf(
 					w,
 					"      %s %s\n",
 					color.Add(
 						color.Bold,
-						leftPad(fmt.Sprint(i), "0", width)+")",
+						leftPad(indexStr, "0", padding)+")",
 					),
 					e,
 				)
@@ -240,7 +250,7 @@ func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ HelpInfo) comma
 
 		if cur.Footer != "" {
 			fmt.Fprintln(f)
-			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Footer"))
+			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Footer")+":")
 			fmt.Fprintln(f)
 			fmt.Fprintf(f, "%s\n", cur.Footer)
 		}

@@ -28,10 +28,11 @@ type CommandHelp = func(file *os.File, cur *command.Command, helpInfo HelpInfo) 
 type SectionHelp = func(file *os.File, cur *section.SectionT, helpInfo HelpInfo) command.Action
 
 // leftPad pads a string `s` with pad `pad` `plength` times
+//
 // In Python: (pad * plength) + s
 func leftPad(s string, pad string, plength int) string {
 	// https://stackoverflow.com/a/45456649/2958070
-	for i := len(s); i < plength; i++ {
+	for i := 0; i < plength; i++ {
 		s = pad + s
 	}
 	return s
