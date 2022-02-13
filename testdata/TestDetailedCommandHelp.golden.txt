@@ -8,14 +8,14 @@ Command Flags
     configpath : editor
     envvars : [EDITOR]
     required : true
-    value (set by envvar) : emacs
+    currentvalue (set by envvar) : emacs
 
 Inherited Section Flags
 
   --help , -h : Print help information
-    type : stringenum with choices: [default]
-    default : default
-    value (set by appdefault) : default
+    type : stringenum with choices: [detailed]
+    default : detailed
+    currentvalue (set by appdefault) : detailed
 
 Examples:
 

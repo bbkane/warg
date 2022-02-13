@@ -38,7 +38,7 @@ func RequireEqualBytesOrDiff(t *testing.T, expectedFilePath string, actualFilePa
 	)
 }
 
-func TestDefaultSectionHelp(t *testing.T) {
+func TestDetailedSectionHelp(t *testing.T) {
 
 	actualHelpTmpFile, err := ioutil.TempFile(os.TempDir(), "go-test-actual-help")
 	if err != nil {
@@ -72,12 +72,12 @@ func TestDefaultSectionHelp(t *testing.T) {
 		),
 		warg.OverrideHelpFlag(
 			[]warg.HelpFlagMapping{
-				{Name: "default", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
+				{Name: "detailed", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
 			},
 			actualHelpTmpFile,
 			"--help",
 			"Print help information",
-			flag.Default("default"),
+			flag.Default("detailed"),
 			flag.Alias("-h"),
 		),
 	)
@@ -112,7 +112,7 @@ func TestDefaultSectionHelp(t *testing.T) {
 	)
 }
 
-func TestDefaultCommandHelp(t *testing.T) {
+func TestDetailedCommandHelp(t *testing.T) {
 
 	actualHelpTmpFile, err := ioutil.TempFile(os.TempDir(), "go-test-actual-help")
 	if err != nil {
@@ -170,12 +170,12 @@ grabbit config edit --config-path /path/to/config --editor code
 		),
 		warg.OverrideHelpFlag(
 			[]warg.HelpFlagMapping{
-				{Name: "default", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
+				{Name: "detailed", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
 			},
 			actualHelpTmpFile,
 			"--help",
 			"Print help information",
-			flag.Default("default"),
+			flag.Default("detailed"),
 			flag.Alias("-h"),
 		),
 	)
