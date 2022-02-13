@@ -117,6 +117,7 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 		OverrideHelpFlag(
 			[]HelpFlagMapping{
 				{Name: "detailed", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
+				{Name: "outline", CommandHelp: help.OutlineCommandHelp, SectionHelp: help.OutlineSectionHelp},
 			},
 			os.Stdout,
 			"--help",
@@ -509,7 +510,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 				pr := ParseResult{
 					Path:        gar.Path,
 					PassedFlags: pfs,
-					Action:      e.SectionHelp(app.helpFile, *ftar.Section, helpInfo),
+					Action:      e.SectionHelp(app.helpFile, ftar.Section, helpInfo),
 				}
 				return &pr, nil
 			}
@@ -525,7 +526,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 					pr := ParseResult{
 						Path:        gar.Path,
 						PassedFlags: pfs,
-						Action:      e.CommandHelp(app.helpFile, *ftar.Command, helpInfo),
+						Action:      e.CommandHelp(app.helpFile, ftar.Command, helpInfo),
 					}
 					return &pr, nil
 				}

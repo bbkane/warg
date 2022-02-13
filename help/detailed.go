@@ -116,7 +116,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *flag.F
 	fmt.Fprintln(w)
 }
 
-func DetailedCommandHelp(file *os.File, cur command.Command, helpInfo HelpInfo) command.Action {
+func DetailedCommandHelp(file *os.File, cur *command.Command, helpInfo HelpInfo) command.Action {
 	return func(pf flag.PassedFlags) error {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
@@ -174,7 +174,7 @@ func DetailedCommandHelp(file *os.File, cur command.Command, helpInfo HelpInfo) 
 	}
 }
 
-func DetailedSectionHelp(file *os.File, cur section.SectionT, _ HelpInfo) command.Action {
+func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ HelpInfo) command.Action {
 	return func(pf flag.PassedFlags) error {
 
 		f := bufio.NewWriter(file)
