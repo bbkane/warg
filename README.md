@@ -134,14 +134,10 @@ All warg apps must have at least one nested command.  It is not possible to desi
 
 # TODO
 
+- table driven tests for help functions (--outline is untested)
+- Add a sentinal value to be used with optional flags that unsets the flag? sets the flag to the default value? So I can use fling without passing -i 'README.*' all the time :)
 - use https://stackoverflow.com/a/16946478/2958070 for better number handling?
-- put the `:` back at the end of headers in teh default help functions.
-- add a bool value
-- add screenshots for --help - colors look way better
 - zsh completion with https://www.dolthub.com/blog/2021-11-15-zsh-completions-with-subcommands/
-- Should I make commands not return an error? Maybe that should be handled by the app author?
-- Ensure a flag created with flag.New can be used in multiple places! Probably with lots of tests...
-- make help less verbose...
 - make an app.Test() method folks can add to their apps - should test for unique flag names between parent and child sections/commands for one thing
 - go through TODOs in code
-- --help ideas: man, json, web, form, term, lsp, bash-completion, zsh-completion, outline, compact
+- --help ideas: man, json, web, form, term, lsp, bash-completion, zsh-completion, compact

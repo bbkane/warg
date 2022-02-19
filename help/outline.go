@@ -14,10 +14,11 @@ import (
 )
 
 func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f flag.Flag, indent int) {
-	fmt.Fprintf(
+	str := fmtFlagName(color, string(flagName)) + " , " + fmtFlagAlias(color, f.Alias)
+	fmt.Fprintln(w, leftPad("# "+string(f.HelpShort), "  ", indent))
+	fmt.Fprintln(
 		w,
-		"%s\n",
-		leftPad(fmtFlagName(color, string(flagName)), "  ", indent),
+		leftPad(str, "  ", indent),
 	)
 }
 
@@ -42,13 +43,13 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, inde
 		}
 		sort.Strings(comKeys)
 		for _, comName := range comKeys {
-			fmt.Fprintf(
+			com := sec.Commands[command.Name(comName)]
+			fmt.Fprintln(w, leftPad("# "+string(com.HelpShort), "  ", indent))
+			fmt.Fprintln(
 				w,
-				"%s\n",
 				leftPad(fmtCommandName(color, comName), "  ", indent),
 			)
 			// command flags
-			com := sec.Commands[command.Name(comName)]
 			flagKeys := make([]string, 0, len(com.Flags))
 			for flagName := range com.Flags {
 				flagKeys = append(flagKeys, string(flagName))
@@ -69,12 +70,16 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, inde
 		}
 		sort.Strings(keys)
 		for _, k := range keys {
-			fmt.Fprintf(
+			childSec := sec.Sections[section.Name(k)]
+			fmt.Fprintln(
 				w,
-				"%s\n",
+				leftPad(string(childSec.HelpShort), "  ", indent),
+			)
+			fmt.Fprintln(
+				w,
 				leftPad(fmtSectionName(color, k), "  ", indent),
 			)
-			outlineHelper(w, color, sec.Sections[section.Name(k)], indent+1)
+			outlineHelper(w, color, childSec, indent+1)
 		}
 	}
 }
@@ -89,6 +94,7 @@ func OutlineSectionHelp(file *os.File, _ *section.SectionT, hi HelpInfo) command
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
 
+		fmt.Fprintln(f, "# "+string(hi.RootSection.HelpShort))
 		fmt.Fprintf(f, "%s\n", fmtSectionName(&col, hi.AppName))
 
 		outlineHelper(f, &col, hi.RootSection, 1)

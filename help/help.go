@@ -27,6 +27,22 @@ type HelpInfo struct {
 type CommandHelp = func(file *os.File, cur *command.Command, helpInfo HelpInfo) command.Action
 type SectionHelp = func(file *os.File, cur *section.SectionT, helpInfo HelpInfo) command.Action
 
+// HelpFlagMapping adds a new option to your --help flag
+type HelpFlagMapping struct {
+	Name        string
+	CommandHelp CommandHelp
+	SectionHelp SectionHelp
+}
+
+// BuiltinHelpFlagMappings is a convenience method that contains help flag mappings built into warg.
+// Feel free to use it as a base to custimize help functions for your users
+func BuiltinHelpFlagMappings() []HelpFlagMapping {
+	return []HelpFlagMapping{
+		{Name: "detailed", CommandHelp: DetailedCommandHelp, SectionHelp: DetailedSectionHelp},
+		{Name: "outline", CommandHelp: OutlineCommandHelp, SectionHelp: OutlineSectionHelp},
+	}
+}
+
 // leftPad pads a string `s` with pad `pad` `plength` times
 //
 // In Python: (pad * plength) + s
@@ -66,4 +82,8 @@ func fmtCommandName(col *gocolor.Color, commandName string) string {
 
 func fmtFlagName(col *gocolor.Color, flagName string) string {
 	return col.Add(col.Bold+col.FgYellow, flagName)
+}
+
+func fmtFlagAlias(col *gocolor.Color, flagAlias string) string {
+	return col.Add(col.Bold+col.FgYellow, flagAlias)
 }

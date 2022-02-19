@@ -31,23 +31,16 @@ type App struct {
 	helpFlagName string
 	// Note that this can be ""
 	helpFlagAlias string
-	helpMappings  []HelpFlagMapping
+	helpMappings  []help.HelpFlagMapping
 	helpFile      *os.File
 
 	// rootSection holds the good stuff!
 	rootSection section.SectionT
 }
 
-// HelpFlagMapping adds a new option to your --help flag
-type HelpFlagMapping struct {
-	Name        string
-	CommandHelp help.CommandHelp
-	SectionHelp help.SectionHelp
-}
-
 // OverrideHelpFlag customizes your --help. If you write a custom --help function, you'll want to add it to your app here!
 func OverrideHelpFlag(
-	mappings []HelpFlagMapping,
+	mappings []help.HelpFlagMapping,
 	helpFile *os.File,
 	flagName flag.Name,
 	flagHelp flag.HelpShort,
@@ -115,10 +108,7 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 
 	if app.helpFlagName == "" {
 		OverrideHelpFlag(
-			[]HelpFlagMapping{
-				{Name: "detailed", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
-				{Name: "outline", CommandHelp: help.OutlineCommandHelp, SectionHelp: help.OutlineSectionHelp},
-			},
+			help.BuiltinHelpFlagMappings(),
 			os.Stdout,
 			"--help",
 			"Print help",

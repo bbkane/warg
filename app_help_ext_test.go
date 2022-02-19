@@ -71,7 +71,7 @@ func TestDetailedSectionHelp(t *testing.T) {
 			),
 		),
 		warg.OverrideHelpFlag(
-			[]warg.HelpFlagMapping{
+			[]help.HelpFlagMapping{
 				{Name: "detailed", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
 			},
 			actualHelpTmpFile,
@@ -169,7 +169,7 @@ grabbit config edit --config-path /path/to/config --editor code
 			),
 		),
 		warg.OverrideHelpFlag(
-			[]warg.HelpFlagMapping{
+			[]help.HelpFlagMapping{
 				{Name: "detailed", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
 			},
 			actualHelpTmpFile,

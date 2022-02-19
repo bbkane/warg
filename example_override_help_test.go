@@ -42,7 +42,7 @@ func ExampleOverrideHelpFlag() {
 			),
 		),
 		warg.OverrideHelpFlag(
-			[]warg.HelpFlagMapping{
+			[]help.HelpFlagMapping{
 				{
 					Name:        "default",
 					CommandHelp: help.DetailedCommandHelp,

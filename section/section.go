@@ -23,8 +23,8 @@ type SectionOpt = func(*SectionT)
 
 // Sections are like "folders" for Commmands.
 // They should have noun names.
-// Sections should not be created in place - use New/With/AddSection functions.
-// SectionT is the type name because we need the more user-visible `Section` as a function name
+// Sections should not be created in place - New/ExistingSection/Section functions.
+// SectionT is the type name because we need the more user-visible `Section` as a function name.
 type SectionT struct {
 	// Flags holds flags available to this Section and all subsections and Commands
 	Flags flag.FlagMap
