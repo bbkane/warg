@@ -14,7 +14,10 @@ import (
 )
 
 func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f flag.Flag, indent int) {
-	str := fmtFlagName(color, string(flagName)) + " , " + fmtFlagAlias(color, f.Alias)
+	str := fmtFlagName(color, string(flagName))
+	if f.Alias != "" {
+		str = str + " , " + fmtFlagAlias(color, f.Alias)
+	}
 	fmt.Fprintln(w, leftPad("# "+string(f.HelpShort), "  ", indent))
 	fmt.Fprintln(
 		w,
@@ -73,7 +76,7 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, inde
 			childSec := sec.Sections[section.Name(k)]
 			fmt.Fprintln(
 				w,
-				leftPad(string(childSec.HelpShort), "  ", indent),
+				leftPad("# "+string(childSec.HelpShort), "  ", indent),
 			)
 			fmt.Fprintln(
 				w,
