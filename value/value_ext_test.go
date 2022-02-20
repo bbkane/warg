@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/stretchr/testify/require"
 
-	"github.com/bbkane/warg/value"
+	"go.bbkane.com/warg/value"
 )
 
 func TestIntValue(t *testing.T) {

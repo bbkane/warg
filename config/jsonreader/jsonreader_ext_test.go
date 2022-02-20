@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/bbkane/warg/config"
-	"github.com/bbkane/warg/config/jsonreader"
+	"go.bbkane.com/warg/config"
+	"go.bbkane.com/warg/config/jsonreader"
 )
 
 func TestSearch(t *testing.T) {

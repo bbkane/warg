@@ -9,7 +9,7 @@ Build heirarchical CLI applications with warg!
 
 ## Butler Example
 
-In addition to a few [examples in the docs](https://pkg.go.dev/github.com/bbkane/warg#pkg-examples), warg includes a small example `butler` program. See the [full source code](./examples/butler/main.go).
+In addition to a few [examples in the docs](https://pkg.go.dev/go.bbkane.com/warg#pkg-examples), warg includes a small example `butler` program. See the [full source code](./examples/butler/main.go).
 
 ```go
 app := warg.New(

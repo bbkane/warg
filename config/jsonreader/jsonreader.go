@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/bbkane/warg/config"
-	"github.com/bbkane/warg/config/tokenize"
+	"go.bbkane.com/warg/config"
+	"go.bbkane.com/warg/config/tokenize"
 )
 
 type jsonConfigReader struct {

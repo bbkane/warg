@@ -4,9 +4,9 @@ import (
 	"log"
 	"strings"
 
-	"github.com/bbkane/warg/command"
-	"github.com/bbkane/warg/flag"
-	"github.com/bbkane/warg/value"
+	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/value"
 )
 
 // Name of the section

@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/bbkane/warg/value"
+	"go.bbkane.com/warg/value"
 )
 
 // Name of a flag

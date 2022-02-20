@@ -9,11 +9,11 @@ import (
 	"os"
 	"sort"
 
-	"github.com/bbkane/gocolor"
-	"github.com/bbkane/warg/command"
-	"github.com/bbkane/warg/flag"
-	"github.com/bbkane/warg/section"
-	"github.com/bbkane/warg/value"
+	"go.bbkane.com/gocolor"
+	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/section"
+	"go.bbkane.com/warg/value"
 )
 
 func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *flag.Flag) {

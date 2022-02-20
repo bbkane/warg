@@ -3,12 +3,12 @@ package help
 import (
 	"os"
 
-	"github.com/bbkane/gocolor"
+	"go.bbkane.com/gocolor"
 
-	"github.com/bbkane/warg/command"
-	"github.com/bbkane/warg/flag"
-	"github.com/bbkane/warg/section"
 	"github.com/mattn/go-isatty"
+	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/section"
 )
 
 // HelpInfo lists common information available to a help function

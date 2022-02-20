@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/bbkane/warg/config/tokenize"
+	"go.bbkane.com/warg/config/tokenize"
 )
 
 func TestTokenize(t *testing.T) {

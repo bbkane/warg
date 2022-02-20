@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bbkane/warg"
-	"github.com/bbkane/warg/command"
-	"github.com/bbkane/warg/flag"
-	"github.com/bbkane/warg/help"
-	"github.com/bbkane/warg/section"
+	"go.bbkane.com/warg"
+	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/help"
+	"go.bbkane.com/warg/section"
 )
 
 func exampleOverrideHelpFlaglogin(pf flag.PassedFlags) error {

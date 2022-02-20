@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/bbkane/warg/config"
-	"github.com/bbkane/warg/config/yamlreader"
+	"go.bbkane.com/warg/config"
+	"go.bbkane.com/warg/config/yamlreader"
 )
 
 func TestSearch(t *testing.T) {
