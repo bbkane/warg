@@ -208,3 +208,156 @@ grabbit config edit --config-path /path/to/config --editor code
 		t.Name(),
 	)
 }
+
+// A grabbitSection is a simple section to test help
+func grabbitSection() section.SectionT {
+
+	rootFooter := `Examples:
+
+	# Grab without config
+	grabbit grab
+
+	# Edit config, then grab
+	grabbit config edit
+	grabbit grab
+	`
+
+	configEditFooter := `Examples:
+
+	# Use defaults
+	grabbit config edit
+
+	# Override defaults
+	grabbit config edit --config-path /path/to/config --editor code
+	`
+
+	sec := section.New(
+		"grab those images!",
+		section.Section(
+			"config",
+			"Change grabbit's config",
+			section.Footer(rootFooter),
+			section.Command(
+				"edit",
+				"Edit the config. A default config will be created if it doesn't exist",
+				command.DoNothing,
+				command.Footer(configEditFooter),
+				command.Flag(
+					"--editor",
+					"path to editor",
+					value.String,
+					flag.Default("vi"),
+					flag.ConfigPath("editor"),
+					flag.EnvVars("EDITOR"),
+					flag.Required(),
+				),
+			),
+		),
+		section.Command(
+			"grab",
+			"do the grabbity grabbity",
+			command.DoNothing,
+		),
+	)
+	return sec
+}
+
+func tmpFile(t *testing.T) *os.File {
+	actualHelpTmpFile, err := ioutil.TempFile(os.TempDir(), "go-test-actual-help")
+	if err != nil {
+		t.Fatalf("Error creating tmpfile: %v", err)
+	}
+	return actualHelpTmpFile
+}
+
+func TestAppHelp(t *testing.T) {
+	tests := []struct {
+		name     string
+		app      warg.App
+		args     []string
+		lookup   warg.LookupFunc
+		helpFile *os.File
+	}{
+		{
+			name: "detailedSection",
+			app: warg.New(
+				"detailedSection",
+				grabbitSection(),
+				warg.OverrideHelpFlag(
+					[]help.HelpFlagMapping{
+						{Name: "detailed", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
+					},
+					tmpFile(t),
+					"--help",
+					"Print help information",
+					flag.Default("detailed"),
+					flag.Alias("-h"),
+				),
+			),
+			args:   []string{"grabbit", "--help"},
+			lookup: warg.LookupMap(nil),
+		},
+		{
+			name: "detailedCommand",
+			app: warg.New(
+				"detailedCommand",
+				grabbitSection(),
+				warg.OverrideHelpFlag(
+					[]help.HelpFlagMapping{
+						{Name: "detailed", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
+					},
+					tmpFile(t),
+					"--help",
+					"Print help information",
+					flag.Default("detailed"),
+					flag.Alias("-h"),
+				),
+			),
+			args:   []string{"grabbit", "config", "edit", "--help"},
+			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			pr, parseErr := tt.app.Parse(tt.args, tt.lookup)
+			require.Nil(t, parseErr)
+
+			actionErr := pr.Action(pr.PassedFlags)
+			require.Nil(t, actionErr)
+
+			closeErr := tt.app.HelpFile.Close()
+			require.Nil(t, closeErr)
+
+			actualHelpBytes, readErr := ioutil.ReadFile(tt.app.HelpFile.Name())
+			require.Nil(t, readErr)
+
+			goldenDir := filepath.Join("testdata", t.Name())
+			goldenFilePath := filepath.Join(goldenDir, "golden.txt")
+			if *update {
+				mkdirErr := os.MkdirAll(goldenDir, 0700)
+				require.Nil(t, mkdirErr)
+
+				writeErr := ioutil.WriteFile(goldenFilePath, actualHelpBytes, 0600)
+				require.Nil(t, writeErr)
+
+				t.Logf("Wrote: %v\n", goldenFilePath)
+			}
+
+			expectedBytes, expectedReadErr := ioutil.ReadFile(goldenFilePath)
+			require.Nil(t, expectedReadErr)
+
+			actualBytes, actualReadErr := ioutil.ReadFile(tt.app.HelpFile.Name())
+			require.Nil(t, actualReadErr)
+
+			if !bytes.Equal(expectedBytes, actualBytes) {
+				t.Fatalf(
+					"expected != actual. See diff:\n  vimdiff %s %s\n",
+					goldenFilePath,
+					tt.app.HelpFile.Name(),
+				)
+			}
+
+		})
+	}
+}

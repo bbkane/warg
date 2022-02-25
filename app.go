@@ -32,7 +32,9 @@ type App struct {
 	// Note that this can be ""
 	helpFlagAlias string
 	helpMappings  []help.HelpFlagMapping
-	helpFile      *os.File
+
+	// HelpFile contains the file set in OverrideHelpFlag. HelpFile is part of the public API to allow for easier testing. HelpFile is never closed by warg, so if setting it to something other than stderr/stdout, please remember to close HelpFile after using ParseResult.Action (which writes to HelpFile).
+	HelpFile *os.File
 
 	// rootSection holds the good stuff!
 	rootSection section.SectionT
@@ -75,7 +77,7 @@ func OverrideHelpFlag(
 		a.helpFlagName = string(flagName)
 		a.helpFlagAlias = helpFlag.Alias
 		a.helpMappings = mappings
-		a.helpFile = helpFile
+		a.HelpFile = helpFile
 
 	}
 }
@@ -500,7 +502,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 				pr := ParseResult{
 					Path:        gar.Path,
 					PassedFlags: pfs,
-					Action:      e.SectionHelp(app.helpFile, ftar.Section, helpInfo),
+					Action:      e.SectionHelp(app.HelpFile, ftar.Section, helpInfo),
 				}
 				return &pr, nil
 			}
@@ -516,7 +518,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 					pr := ParseResult{
 						Path:        gar.Path,
 						PassedFlags: pfs,
-						Action:      e.CommandHelp(app.helpFile, ftar.Command, helpInfo),
+						Action:      e.CommandHelp(app.HelpFile, ftar.Command, helpInfo),
 					}
 					return &pr, nil
 				}
