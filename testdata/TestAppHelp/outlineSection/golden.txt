@@ -1,0 +1,12 @@
+# grab those images!
+outlineSection
+  # Print help information
+  --help , -h
+  # do the grabbity grabbity
+  grab
+  # Change grabbit's config
+  config
+    # Edit the config. A default config will be created if it doesn't exist
+    edit
+      # path to editor
+      --editor

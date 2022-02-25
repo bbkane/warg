@@ -134,7 +134,6 @@ All warg apps must have at least one nested command.  It is not possible to desi
 
 # TODO
 
-- table driven tests for help functions (--outline is untested)
 - Add a sentinal value to be used with optional flags that unsets the flag? sets the flag to the default value? So I can use fling without passing -i 'README.*' all the time :)
 - use https://stackoverflow.com/a/16946478/2958070 for better number handling?
 - zsh completion with https://www.dolthub.com/blog/2021-11-15-zsh-completions-with-subcommands/

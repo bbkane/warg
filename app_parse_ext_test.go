@@ -241,9 +241,7 @@ func TestApp_Parse(t *testing.T) {
 					"--config",
 					jsonreader.New,
 					"path to config",
-					// TODO: make this test work by following the config cases
-					// in the README
-					flag.Default("testdata/simple_json_config.json"),
+					flag.Default(testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json")),
 				),
 			),
 
@@ -251,7 +249,7 @@ func TestApp_Parse(t *testing.T) {
 			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"com"},
 			expectedPassedFlagValues: flag.PassedFlags{
-				"--config": "testdata/simple_json_config.json",
+				"--config": testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json"),
 				"--val":    "hi",
 				"--help":   "detailed",
 			},
@@ -275,7 +273,7 @@ func TestApp_Parse(t *testing.T) {
 					"--config",
 					jsonreader.New,
 					"config flag",
-					flag.Default("testdata/config_slice.json"),
+					flag.Default(testDataFilePath(t.Name(), "configSlice", "config_slice.json")),
 				),
 			),
 			args:               []string{"test", "print"},
@@ -283,7 +281,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedPath: []string{"print"},
 			expectedPassedFlagValues: flag.PassedFlags{
 				"--subreddits": []string{"earthporn", "wallpapers"},
-				"--config":     "testdata/config_slice.json",
+				"--config":     testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
 				"--help":       "detailed",
 			},
 			expectedErr: false,
