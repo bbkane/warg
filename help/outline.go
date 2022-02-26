@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sort"
 
 	"go.bbkane.com/gocolor"
 	"go.bbkane.com/warg/command"
@@ -13,8 +12,8 @@ import (
 	"go.bbkane.com/warg/section"
 )
 
-func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f flag.Flag, indent int) {
-	str := fmtFlagName(color, string(flagName))
+func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName flag.Name, f flag.Flag, indent int) {
+	str := fmtFlagName(color, flagName)
 	if f.Alias != "" {
 		str = str + " , " + fmtFlagAlias(color, f.Alias)
 	}
@@ -27,64 +26,38 @@ func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f fla
 
 func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, indent int) {
 	// section flags
-	{
-		flagKeys := make([]string, 0, len(sec.Flags))
-		for k := range sec.Flags {
-			flagKeys = append(flagKeys, string(k))
-		}
-		sort.Strings(flagKeys)
-		for _, k := range flagKeys {
-			outlineFlagHelper(w, color, k, sec.Flags[flag.Name(k)], indent)
-		}
+	for _, k := range sec.Flags.SortedNames() {
+		outlineFlagHelper(w, color, k, sec.Flags[flag.Name(k)], indent)
 	}
 
 	// commands and command flags
-	{
-		comKeys := make([]string, 0, len(sec.Commands))
-		for comName := range sec.Commands {
-			comKeys = append(comKeys, string(comName))
+	for _, comName := range sec.Commands.SortedNames() {
+		com := sec.Commands[command.Name(comName)]
+		fmt.Fprintln(w, leftPad("# "+string(com.HelpShort), "  ", indent))
+		fmt.Fprintln(
+			w,
+			leftPad(fmtCommandName(color, command.Name(comName)), "  ", indent),
+		)
+		for _, flagName := range com.Flags.SortedNames() {
+			outlineFlagHelper(w, color, flagName, com.Flags[flagName], indent+1)
 		}
-		sort.Strings(comKeys)
-		for _, comName := range comKeys {
-			com := sec.Commands[command.Name(comName)]
-			fmt.Fprintln(w, leftPad("# "+string(com.HelpShort), "  ", indent))
-			fmt.Fprintln(
-				w,
-				leftPad(fmtCommandName(color, comName), "  ", indent),
-			)
-			// command flags
-			flagKeys := make([]string, 0, len(com.Flags))
-			for flagName := range com.Flags {
-				flagKeys = append(flagKeys, string(flagName))
-			}
-			sort.Strings(flagKeys)
-			for _, flagName := range flagKeys {
-				outlineFlagHelper(w, color, flagName, com.Flags[flag.Name(flagName)], indent+1)
-			}
 
-		}
 	}
 
 	// sections
-	{
-		keys := make([]string, 0, len(sec.Sections))
-		for k := range sec.Sections {
-			keys = append(keys, string(k))
-		}
-		sort.Strings(keys)
-		for _, k := range keys {
-			childSec := sec.Sections[section.Name(k)]
-			fmt.Fprintln(
-				w,
-				leftPad("# "+string(childSec.HelpShort), "  ", indent),
-			)
-			fmt.Fprintln(
-				w,
-				leftPad(fmtSectionName(color, k), "  ", indent),
-			)
-			outlineHelper(w, color, childSec, indent+1)
-		}
+	for _, k := range sec.Sections.SortedNames() {
+		childSec := sec.Sections[k]
+		fmt.Fprintln(
+			w,
+			leftPad("# "+string(childSec.HelpShort), "  ", indent),
+		)
+		fmt.Fprintln(
+			w,
+			leftPad(fmtSectionName(color, k), "  ", indent),
+		)
+		outlineHelper(w, color, childSec, indent+1)
 	}
+
 }
 
 func OutlineSectionHelp(file *os.File, _ *section.SectionT, hi HelpInfo) command.Action {
@@ -98,7 +71,7 @@ func OutlineSectionHelp(file *os.File, _ *section.SectionT, hi HelpInfo) command
 		}
 
 		fmt.Fprintln(f, "# "+string(hi.RootSection.HelpShort))
-		fmt.Fprintf(f, "%s\n", fmtSectionName(&col, hi.AppName))
+		fmt.Fprintf(f, "%s\n", fmtSectionName(&col, section.Name(hi.AppName)))
 
 		outlineHelper(f, &col, hi.RootSection, 1)
 

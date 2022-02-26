@@ -7,7 +7,6 @@ import (
 	"io"
 	"math"
 	"os"
-	"sort"
 
 	"go.bbkane.com/gocolor"
 	"go.bbkane.com/warg/command"
@@ -16,13 +15,13 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
-func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *flag.Flag) {
+func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *flag.Flag) {
 	if f.Alias != "" {
 		fmt.Fprintf(
 			w,
 			"  %s , %s : %s\n",
 			fmtFlagName(color, name),
-			fmtFlagName(color, f.Alias),
+			fmtFlagAlias(color, f.Alias),
 			f.HelpShort,
 		)
 	} else {
@@ -150,14 +149,9 @@ func DetailedCommandHelp(file *os.File, cur *command.Command, helpInfo HelpInfo)
 		var commandFlagHelp bytes.Buffer
 		var sectionFlagHelp bytes.Buffer
 		{
-			// we need to sort these things so we need to use strings here
-			keys := make([]string, 0, len(helpInfo.AvailableFlags))
-			for k := range helpInfo.AvailableFlags {
-				keys = append(keys, string(k))
-			}
-			sort.Strings(keys)
-			for _, name := range keys {
-				f := helpInfo.AvailableFlags[flag.Name(name)]
+
+			for _, name := range helpInfo.AvailableFlags.SortedNames() {
+				f := helpInfo.AvailableFlags[name]
 				if f.IsCommandFlag {
 					detailedPrintFlag(&commandFlagHelp, &col, name, &f)
 				} else {
@@ -209,18 +203,12 @@ func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ HelpInfo) comma
 			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Sections")+":")
 			fmt.Fprintln(f)
 
-			keys := make([]string, 0, len(cur.Sections))
-			for k := range cur.Sections {
-				keys = append(keys, string(k))
-			}
-			sort.Strings(keys)
-
-			for _, k := range keys {
+			for _, k := range cur.Sections.SortedNames() {
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
 					fmtSectionName(&col, k),
-					cur.Sections[section.Name(k)].HelpShort,
+					cur.Sections[k].HelpShort,
 				)
 			}
 
@@ -232,13 +220,7 @@ func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ HelpInfo) comma
 			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Commands")+":")
 			fmt.Fprintln(f)
 
-			keys := make([]string, 0, len(cur.Commands))
-			for k := range cur.Commands {
-				keys = append(keys, string(k))
-			}
-			sort.Strings(keys)
-
-			for _, k := range keys {
+			for _, k := range cur.Commands.SortedNames() {
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",

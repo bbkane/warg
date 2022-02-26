@@ -43,6 +43,21 @@ func grabbitSection() section.SectionT {
 
 	sec := section.New(
 		"grab those images!",
+		section.Command(
+			"grab",
+			"do the grabbity grabbity",
+			command.DoNothing,
+		),
+		section.Command(
+			"command2",
+			"another command",
+			command.DoNothing,
+		),
+		section.Command(
+			"command3",
+			"another command",
+			command.DoNothing,
+		),
 		section.Section(
 			"config",
 			"Change grabbit's config",
@@ -63,10 +78,13 @@ func grabbitSection() section.SectionT {
 				),
 			),
 		),
-		section.Command(
-			"grab",
-			"do the grabbity grabbity",
-			command.DoNothing,
+		section.Section(
+			"section2",
+			"another section",
+		),
+		section.Section(
+			"section3",
+			"another section",
 		),
 	)
 	return sec
@@ -195,10 +213,7 @@ func TestAppHelp(t *testing.T) {
 			expectedBytes, expectedReadErr := ioutil.ReadFile(goldenFilePath)
 			require.Nil(t, expectedReadErr)
 
-			actualBytes, actualReadErr := ioutil.ReadFile(tt.app.HelpFile.Name())
-			require.Nil(t, actualReadErr)
-
-			if !bytes.Equal(expectedBytes, actualBytes) {
+			if !bytes.Equal(expectedBytes, actualHelpBytes) {
 				t.Fatalf(
 					"expected != actual. See diff:\n  vimdiff %s %s\n",
 					goldenFilePath,

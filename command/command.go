@@ -2,6 +2,7 @@ package command
 
 import (
 	"log"
+	"sort"
 	"strings"
 
 	"go.bbkane.com/warg/flag"
@@ -17,7 +18,18 @@ type HelpShort string
 type Name string
 
 // A CommandMap holds Commands and is used by Sections
-type CommandMap = map[Name]Command
+type CommandMap map[Name]Command
+
+func (fm *CommandMap) SortedNames() []Name {
+	keys := make([]Name, 0, len(*fm))
+	for k := range *fm {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return string(keys[i]) < string(keys[j])
+	})
+	return keys
+}
 
 // A CommandOpt customizes a Command
 type CommandOpt = func(*Command)

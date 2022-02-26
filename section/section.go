@@ -2,6 +2,7 @@ package section
 
 import (
 	"log"
+	"sort"
 	"strings"
 
 	"go.bbkane.com/warg/command"
@@ -16,7 +17,18 @@ type Name string
 type HelpShort string
 
 // SectionMap holds Sections - used by other Sections
-type SectionMap = map[Name]SectionT
+type SectionMap map[Name]SectionT
+
+func (fm *SectionMap) SortedNames() []Name {
+	keys := make([]Name, 0, len(*fm))
+	for k := range *fm {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return string(keys[i]) < string(keys[j])
+	})
+	return keys
+}
 
 // SectionOpt customizes a Section on creation
 type SectionOpt = func(*SectionT)

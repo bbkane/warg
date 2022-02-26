@@ -2,6 +2,7 @@ package flag
 
 import (
 	"log"
+	"sort"
 	"strings"
 
 	"go.bbkane.com/warg/value"
@@ -14,7 +15,18 @@ type Name string
 type HelpShort string
 
 // FlagMap holds flags - used by Commands and Sections
-type FlagMap = map[Name]Flag
+type FlagMap map[Name]Flag
+
+func (fm *FlagMap) SortedNames() []Name {
+	keys := make([]Name, 0, len(*fm))
+	for k := range *fm {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return string(keys[i]) < string(keys[j])
+	})
+	return keys
+}
 
 // FlagOpt customizes a Flag on creation
 type FlagOpt = func(*Flag)

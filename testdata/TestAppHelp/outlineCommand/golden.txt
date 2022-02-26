@@ -4,6 +4,10 @@ outlineCommand
   --editor
   # Print help information
   --help , -h
+  # another command
+  command2
+  # another command
+  command3
   # do the grabbity grabbity
   grab
   # Change grabbit's config
@@ -12,3 +16,7 @@ outlineCommand
     edit
       # path to editor
       --editor
+  # another section
+  section2
+  # another section
+  section3

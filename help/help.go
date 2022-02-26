@@ -17,7 +17,7 @@ type HelpInfo struct {
 	AppName string
 	// Path passed either to a command or a section
 	Path []string
-	// AvailableFlags for the section or commmand.
+	// AvailableFlags for the current section or commmand, including inherted flags from parent sections.
 	// All flags are Resolved if possible (i.e., flag.SetBy != "")
 	AvailableFlags flag.FlagMap
 	// RootSection of the app. Especially useful for printing all sections and commands
@@ -72,16 +72,16 @@ func ConditionallyEnableColor(pf flag.PassedFlags, file *os.File) (gocolor.Color
 
 }
 
-func fmtSectionName(col *gocolor.Color, sectionName string) string {
-	return col.Add(col.Bold+col.FgCyan, sectionName)
+func fmtSectionName(col *gocolor.Color, sectionName section.Name) string {
+	return col.Add(col.Bold+col.FgCyan, string(sectionName))
 }
 
-func fmtCommandName(col *gocolor.Color, commandName string) string {
-	return col.Add(col.Bold+col.FgGreen, commandName)
+func fmtCommandName(col *gocolor.Color, commandName command.Name) string {
+	return col.Add(col.Bold+col.FgGreen, string(commandName))
 }
 
-func fmtFlagName(col *gocolor.Color, flagName string) string {
-	return col.Add(col.Bold+col.FgYellow, flagName)
+func fmtFlagName(col *gocolor.Color, flagName flag.Name) string {
+	return col.Add(col.Bold+col.FgYellow, string(flagName))
 }
 
 func fmtFlagAlias(col *gocolor.Color, flagAlias string) string {
