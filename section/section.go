@@ -31,7 +31,7 @@ func (fm *SectionMap) SortedNames() []Name {
 }
 
 // SectionOpt customizes a Section on creation
-type SectionOpt = func(*SectionT)
+type SectionOpt func(*SectionT)
 
 // Sections are like "folders" for Commmands.
 // They should have noun names.

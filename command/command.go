@@ -10,7 +10,7 @@ import (
 )
 
 // An Action is run as the result of a command
-type Action = func(flag.PassedFlags) error
+type Action func(flag.PassedFlags) error
 
 type HelpShort string
 
@@ -32,7 +32,7 @@ func (fm *CommandMap) SortedNames() []Name {
 }
 
 // A CommandOpt customizes a Command
-type CommandOpt = func(*Command)
+type CommandOpt func(*Command)
 
 // A Command will run code for you!
 // The name of a Command should probably be a verb - add , edit, run, ...

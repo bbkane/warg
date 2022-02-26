@@ -24,8 +24,8 @@ type HelpInfo struct {
 	RootSection section.SectionT
 }
 
-type CommandHelp = func(file *os.File, cur *command.Command, helpInfo HelpInfo) command.Action
-type SectionHelp = func(file *os.File, cur *section.SectionT, helpInfo HelpInfo) command.Action
+type CommandHelp func(file *os.File, cur *command.Command, helpInfo HelpInfo) command.Action
+type SectionHelp func(file *os.File, cur *section.SectionT, helpInfo HelpInfo) command.Action
 
 // HelpFlagMapping adds a new option to your --help flag
 type HelpFlagMapping struct {

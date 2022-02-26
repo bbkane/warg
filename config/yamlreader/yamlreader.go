@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type configMap = map[interface{}]interface{}
+type configMap map[interface{}]interface{}
 
 type yamlConfigReader struct {
 	data configMap

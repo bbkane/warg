@@ -59,6 +59,6 @@ type Value interface {
 
 // EmptyConstructur just builds a new value.
 // Useful to create new values as well as initialize them
-type EmptyConstructor = func() (Value, error)
+type EmptyConstructor func() (Value, error)
 
 var ErrIncompatibleInterface = errors.New("could not decode interface into Value")

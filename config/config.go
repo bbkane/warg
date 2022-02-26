@@ -18,4 +18,4 @@ type Reader interface {
 }
 
 // NewReader constructs a ConfigReader
-type NewReader = func(filePath string) (Reader, error)
+type NewReader func(filePath string) (Reader, error)

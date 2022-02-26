@@ -16,7 +16,7 @@ import (
 )
 
 // AppOpt let's you customize the app. It panics if there is an error
-type AppOpt = func(*App)
+type AppOpt func(*App)
 
 // An App contains your defined sections, commands, and flags
 // Create a new App with New()
@@ -556,7 +556,7 @@ func (app *App) MustRun(osArgs []string, osLookupEnv LookupFunc) {
 }
 
 // Look up keys (meant for environment variable parsing) - fulfillable with os.LookupEnv or warg.LookupMap(map)
-type LookupFunc = func(key string) (string, bool)
+type LookupFunc func(key string) (string, bool)
 
 // LookupMap loooks up keys from a provided map. Useful to mock os.LookupEnv when parsing
 func LookupMap(m map[string]string) LookupFunc {
