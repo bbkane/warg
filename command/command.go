@@ -72,12 +72,8 @@ func ExistingFlag(name flag.Name, value flag.Flag) CommandOpt {
 	if !strings.HasPrefix(string(name), "-") {
 		log.Panicf("flags should start with '-': %#v\n", name)
 	}
-	return func(app *Command) {
-		if _, alreadyThere := app.Flags[name]; !alreadyThere {
-			app.Flags[name] = value
-		} else {
-			log.Panicf("flag already exists: %#v\n", name)
-		}
+	return func(com *Command) {
+		com.Flags.AddFlag(name, value)
 	}
 }
 
@@ -88,13 +84,9 @@ func ExistingFlags(flagMap flag.FlagMap) CommandOpt {
 			log.Panicf("helpFlags should start with '-': %#v\n", name)
 		}
 	}
-	return func(sec *Command) {
+	return func(com *Command) {
 		for name, value := range flagMap {
-			if _, alreadyThere := sec.Flags[name]; !alreadyThere {
-				sec.Flags[name] = value
-			} else {
-				log.Panicf("flag already exists: %#v\n", name)
-			}
+			com.Flags.AddFlag(name, value)
 		}
 	}
 }

@@ -79,6 +79,7 @@ func ExistingSection(name Name, value SectionT) SectionOpt {
 
 // ExistingCommand adds an existing Command underneath this Section. Panics if a Command with the same name already exists
 func ExistingCommand(name command.Name, value command.Command) SectionOpt {
+	// TODO: add check that this doesn't start with "-"
 	return func(app *SectionT) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
@@ -90,15 +91,12 @@ func ExistingCommand(name command.Name, value command.Command) SectionOpt {
 
 // ExistingFlag adds an existing Flag to be made availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
 func ExistingFlag(name flag.Name, value flag.Flag) SectionOpt {
+	// TODO: factor this out to a check
 	if !strings.HasPrefix(string(name), "-") {
 		log.Panicf("helpFlags should start with '-': %#v\n", name)
 	}
 	return func(sec *SectionT) {
-		if _, alreadyThere := sec.Flags[name]; !alreadyThere {
-			sec.Flags[name] = value
-		} else {
-			log.Panicf("flag already exists: %#v\n", name)
-		}
+		sec.Flags.AddFlag(name, value)
 
 	}
 }
@@ -112,11 +110,7 @@ func ExistingFlags(flagMap flag.FlagMap) SectionOpt {
 	}
 	return func(sec *SectionT) {
 		for name, value := range flagMap {
-			if _, alreadyThere := sec.Flags[name]; !alreadyThere {
-				sec.Flags[name] = value
-			} else {
-				log.Panicf("flag already exists: %#v\n", name)
-			}
+			sec.Flags.AddFlag(name, value)
 		}
 	}
 }

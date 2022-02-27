@@ -28,6 +28,15 @@ func (fm *FlagMap) SortedNames() []Name {
 	return keys
 }
 
+// AddFlag adds a new flag and panics if it already exists
+func (fm FlagMap) AddFlag(name Name, value Flag) {
+	if _, alreadyThere := (fm)[name]; !alreadyThere {
+		(fm)[name] = value
+	} else {
+		log.Panicf("flag already exists: %#v\n", name)
+	}
+}
+
 // FlagOpt customizes a Flag on creation
 type FlagOpt func(*Flag)
 
