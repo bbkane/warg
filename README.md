@@ -2,8 +2,8 @@
 
 Build heirarchical CLI applications with warg!
 
-- warg uses [funcopt](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis) style declarative APIs to keep CLIs readable and terse. It does not require code generation. Nested CLI command are indented, which makes apps easy to debug.
-- warg is extremely interested in getting information into your app. Ensure a flag can be set from an environmental variable, configuration file, or default value by adding a single line to the flag (configuration files also take some app-level config).
+- warg uses [funcopt](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis) style declarative APIs to keep CLIs readable (nested commands can be indented!) and terse. warg does not require code generation.
+- warg is extremely interested in getting information into your app. Ensure a flag can be set from an environmental variable, configuration file, or default value by adding a single line to the flag declaration (configuration files also take some app-level config).
 - warg is customizable. Add new types of flag values, config file formats, or --help outputs using the public API.
 - warg is easy to add to, maintain, and remove from your project (if necessary). This follows mostly from warg being terse and declarative. If you decide to remove warg, simply remove the app declaration and turn the passed flags into other types of function arguments for your command handlers. Done!
 
@@ -67,7 +67,6 @@ taking a break from developing on warg to develop some CLIs with warg.
 
 ## Known Issues
 
-- warg does not warn you if a child section/command has a flag with the same name as a parent. The child flag essentially overwrites the parent flag. I'd like to check this at test time.
 - lists containing aggregate values ( values in list objects from configs ) should be checked to have the same size and source but that must currently be done by the application ( see [grabbit](https://github.com/bbkane/grabbit/blob/d1f30b87c4e5c8112f08e9889fa541dbeab66842/main.go#L311) )
 - Many more types of values need to implemented. Especially StringEnumSlice, StringMap and Duration
 
@@ -134,9 +133,10 @@ All warg apps must have at least one nested command.  It is not possible to desi
 
 # TODO
 
-- Add a sentinal value to be used with optional flags that unsets the flag? sets the flag to the default value? So I can use fling without passing -i 'README.*' all the time :)
+- app.validate tests, update README
+- should I auto add a color flag, what about a version subcommand. I literally want these in all my apps
+- Add a sentinal value (UNSET?) to be used with optional flags that unsets the flag? sets the flag to the default value? So I can use fling without passing -i 'README.*' all the time :)
 - use https://stackoverflow.com/a/16946478/2958070 for better number handling?
 - zsh completion with https://www.dolthub.com/blog/2021-11-15-zsh-completions-with-subcommands/
-- make an app.Test() method folks can add to their apps - should test for unique flag names between parent and child sections/commands for one thing
 - go through TODOs in code
 - --help ideas: man, json, web, form, term, lsp, bash-completion, zsh-completion, compact

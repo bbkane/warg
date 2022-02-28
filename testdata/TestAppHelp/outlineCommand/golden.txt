@@ -18,5 +18,9 @@ outlineCommand
       --editor
   # another section
   section2
+    # Dummy command to pass validation
+    com
   # another section
   section3
+    # Dummy command to pass validation
+    com

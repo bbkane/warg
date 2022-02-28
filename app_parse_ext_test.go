@@ -70,6 +70,7 @@ func TestApp_Parse(t *testing.T) {
 						),
 					),
 				),
+				warg.SkipValidation(),
 			),
 
 			args:                     []string{"app", "cat1", "com1", "--com1f1", "1"},
@@ -89,7 +90,9 @@ func TestApp_Parse(t *testing.T) {
 						"flag help",
 						value.Int,
 					),
+					section.Command("com", "command for validation", command.DoNothing),
 				),
+				warg.SkipValidation(),
 			),
 			args:                     []string{"app"},
 			lookup:                   warg.LookupMap(nil),
@@ -115,6 +118,7 @@ func TestApp_Parse(t *testing.T) {
 						),
 					),
 				),
+				warg.SkipValidation(),
 			),
 			args:                     []string{"test", "com"},
 			lookup:                   warg.LookupMap(nil),
@@ -140,6 +144,7 @@ func TestApp_Parse(t *testing.T) {
 						),
 					),
 				),
+				warg.SkipValidation(),
 			),
 			args:                     []string{"test", "com", "--unexpected", "value"},
 			lookup:                   warg.LookupMap(nil),
@@ -181,6 +186,7 @@ func TestApp_Parse(t *testing.T) {
 					"config flag",
 					flag.Default("defaultconfigval"),
 				),
+				warg.SkipValidation(),
 			),
 			args:               []string{"test", "print", "--config", "passedconfigval"},
 			lookup:             warg.LookupMap(nil),
@@ -210,6 +216,7 @@ func TestApp_Parse(t *testing.T) {
 						command.DoNothing,
 					),
 				),
+				warg.SkipValidation(),
 			),
 			args:               []string{"test", "com"},
 			lookup:             warg.LookupMap(nil),
@@ -243,6 +250,7 @@ func TestApp_Parse(t *testing.T) {
 					"path to config",
 					flag.Default(testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json")),
 				),
+				warg.SkipValidation(),
 			),
 
 			args:               []string{"app", "com"},
@@ -275,6 +283,7 @@ func TestApp_Parse(t *testing.T) {
 					"config flag",
 					flag.Default(testDataFilePath(t.Name(), "configSlice", "config_slice.json")),
 				),
+				warg.SkipValidation(),
 			),
 			args:               []string{"test", "print"},
 			lookup:             warg.LookupMap(nil),
@@ -304,6 +313,7 @@ func TestApp_Parse(t *testing.T) {
 						command.DoNothing,
 					),
 				),
+				warg.SkipValidation(),
 			),
 			args: []string{t.Name(), "test"},
 			lookup: warg.LookupMap(
@@ -337,6 +347,7 @@ func TestApp_Parse(t *testing.T) {
 						command.DoNothing,
 					),
 				),
+				warg.SkipValidation(),
 			),
 			args: []string{t.Name(), "test"},
 			lookup: warg.LookupMap(
@@ -364,6 +375,7 @@ func TestApp_Parse(t *testing.T) {
 						command.DoNothing,
 					),
 				),
+				warg.SkipValidation(),
 			),
 			args:                     []string{t.Name(), "test", "-f", "val"},
 			lookup:                   warg.LookupMap(nil),
@@ -389,6 +401,7 @@ func TestApp_Parse(t *testing.T) {
 						),
 					),
 				),
+				warg.SkipValidation(),
 			),
 			args:                     []string{t.Name(), "test", "-f", "1", "--flag", "2", "-f", "3", "--flag", "4"},
 			lookup:                   warg.LookupMap(nil),
@@ -408,6 +421,7 @@ func TestApp_Parse(t *testing.T) {
 						command.DoNothing,
 					),
 				),
+				warg.SkipValidation(),
 			),
 			args:                     []string{t.Name(), "test", "-h", "badhelpval"},
 			lookup:                   warg.LookupMap(nil),
@@ -433,6 +447,7 @@ func TestApp_Parse(t *testing.T) {
 							command.DoNothing,
 						),
 					),
+					warg.SkipValidation(),
 				)
 				return app
 			}(),
@@ -461,6 +476,7 @@ func TestApp_Parse(t *testing.T) {
 							command.ExistingFlags(fm),
 						),
 					),
+					warg.SkipValidation(),
 				)
 				return app
 			}(),
@@ -494,6 +510,7 @@ func TestApp_Parse(t *testing.T) {
 					"path to config",
 					flag.Default(testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json")),
 				),
+				warg.SkipValidation(),
 			),
 
 			args:               []string{"app", "com"},
@@ -529,6 +546,7 @@ func TestApp_Parse(t *testing.T) {
 					"path to config",
 					flag.Default(testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml")),
 				),
+				warg.SkipValidation(),
 			),
 
 			args:               []string{"app", "com"},
@@ -544,6 +562,9 @@ func TestApp_Parse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			err := tt.app.Validate()
+			require.Nil(t, err)
 
 			actualPR, actualErr := tt.app.Parse(tt.args, tt.lookup)
 

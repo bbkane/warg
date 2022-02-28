@@ -1,9 +1,7 @@
 package command
 
 import (
-	"log"
 	"sort"
-	"strings"
 
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/value"
@@ -20,9 +18,13 @@ type Name string
 // A CommandMap holds Commands and is used by Sections
 type CommandMap map[Name]Command
 
-func (fm *CommandMap) SortedNames() []Name {
-	keys := make([]Name, 0, len(*fm))
-	for k := range *fm {
+func (fm CommandMap) Empty() bool {
+	return len(fm) == 0
+}
+
+func (fm CommandMap) SortedNames() []Name {
+	keys := make([]Name, 0, len(fm))
+	for k := range fm {
 		keys = append(keys, k)
 	}
 	sort.Slice(keys, func(i, j int) bool {
@@ -36,7 +38,7 @@ type CommandOpt func(*Command)
 
 // A Command will run code for you!
 // The name of a Command should probably be a verb - add , edit, run, ...
-// It should not be constructed directly - use AddCommand/NewCommand/WithCommand functions
+// A Command should not be constructed directly. Use Command / New / ExistingCommand functions
 type Command struct {
 	Action Action
 	Flags  flag.FlagMap
@@ -69,25 +71,14 @@ func New(helpShort HelpShort, action Action, opts ...CommandOpt) Command {
 
 // ExistingFlag adds an existing flag to a Command. It panics if a flag with the same name exists
 func ExistingFlag(name flag.Name, value flag.Flag) CommandOpt {
-	if !strings.HasPrefix(string(name), "-") {
-		log.Panicf("flags should start with '-': %#v\n", name)
-	}
 	return func(com *Command) {
 		com.Flags.AddFlag(name, value)
 	}
 }
 
 func ExistingFlags(flagMap flag.FlagMap) CommandOpt {
-	// TODO: can I abstract this somehow? Until then - copy paste!
-	for name := range flagMap {
-		if !strings.HasPrefix(string(name), "-") {
-			log.Panicf("helpFlags should start with '-': %#v\n", name)
-		}
-	}
 	return func(com *Command) {
-		for name, value := range flagMap {
-			com.Flags.AddFlag(name, value)
-		}
+		com.Flags.AddFlags(flagMap)
 	}
 }
 

@@ -81,17 +81,19 @@ func grabbitSection() section.SectionT {
 		section.Section(
 			"section2",
 			"another section",
+			section.Command("com", "Dummy command to pass validation", command.DoNothing),
 		),
 		section.Section(
 			"section3",
 			"another section",
+			section.Command("com", "Dummy command to pass validation", command.DoNothing),
 		),
 	)
 	return sec
 }
 
 func tmpFile(t *testing.T) *os.File {
-	actualHelpTmpFile, err := ioutil.TempFile(os.TempDir(), "go-test-actual-help")
+	actualHelpTmpFile, err := ioutil.TempFile(os.TempDir(), "warg-test-")
 	if err != nil {
 		t.Fatalf("Error creating tmpfile: %v", err)
 	}
@@ -121,6 +123,7 @@ func TestAppHelp(t *testing.T) {
 					flag.Default("detailed"),
 					flag.Alias("-h"),
 				),
+				warg.SkipValidation(),
 			),
 			args:   []string{"grabbit", "config", "edit", "--help"},
 			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
@@ -140,6 +143,7 @@ func TestAppHelp(t *testing.T) {
 					flag.Default("detailed"),
 					flag.Alias("-h"),
 				),
+				warg.SkipValidation(),
 			),
 			args:   []string{"grabbit", "--help"},
 			lookup: warg.LookupMap(nil),
@@ -159,6 +163,7 @@ func TestAppHelp(t *testing.T) {
 					flag.Default("outline"),
 					flag.Alias("-h"),
 				),
+				warg.SkipValidation(),
 			),
 			args:   []string{"grabbit", "config", "edit", "--help"},
 			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
@@ -178,6 +183,7 @@ func TestAppHelp(t *testing.T) {
 					flag.Default("outline"),
 					flag.Alias("-h"),
 				),
+				warg.SkipValidation(),
 			),
 			args:   []string{"grabbit", "--help"},
 			lookup: warg.LookupMap(nil),
@@ -185,6 +191,9 @@ func TestAppHelp(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			err := tt.app.Validate()
+			require.Nil(t, err)
 
 			pr, parseErr := tt.app.Parse(tt.args, tt.lookup)
 			require.Nil(t, parseErr)
@@ -200,6 +209,9 @@ func TestAppHelp(t *testing.T) {
 
 			goldenDir := filepath.Join("testdata", t.Name())
 			goldenFilePath := filepath.Join(goldenDir, "golden.txt")
+			goldenFilePath, err = filepath.Abs(goldenFilePath)
+			require.Nil(t, err)
+
 			if *update {
 				mkdirErr := os.MkdirAll(goldenDir, 0700)
 				require.Nil(t, mkdirErr)

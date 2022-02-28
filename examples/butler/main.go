@@ -11,14 +11,7 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
-func present(pf flag.PassedFlags) error {
-	// this is a required flag, so we know it exists
-	name := pf["--name"].(string)
-	fmt.Printf("May I present to you %s.\n", name)
-	return nil
-}
-
-func main() {
+func buildApp() warg.App {
 	app := warg.New(
 		"butler",
 		section.New(
@@ -37,6 +30,21 @@ func main() {
 				),
 			),
 		),
+		// Run the validation in a test instead of every
+		// time the app is created.
+		warg.SkipValidation(),
 	)
+	return app
+}
+
+func present(pf flag.PassedFlags) error {
+	// this is a required flag, so we know it exists
+	name := pf["--name"].(string)
+	fmt.Printf("May I present to you %s.\n", name)
+	return nil
+}
+
+func main() {
+	app := buildApp()
 	app.MustRun(os.Args, os.LookupEnv)
 }

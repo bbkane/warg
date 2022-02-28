@@ -3,7 +3,6 @@ package section
 import (
 	"log"
 	"sort"
-	"strings"
 
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
@@ -19,9 +18,13 @@ type HelpShort string
 // SectionMap holds Sections - used by other Sections
 type SectionMap map[Name]SectionT
 
-func (fm *SectionMap) SortedNames() []Name {
-	keys := make([]Name, 0, len(*fm))
-	for k := range *fm {
+func (fm SectionMap) Empty() bool {
+	return len(fm) == 0
+}
+
+func (fm SectionMap) SortedNames() []Name {
+	keys := make([]Name, 0, len(fm))
+	for k := range fm {
 		keys = append(keys, k)
 	}
 	sort.Slice(keys, func(i, j int) bool {
@@ -91,10 +94,6 @@ func ExistingCommand(name command.Name, value command.Command) SectionOpt {
 
 // ExistingFlag adds an existing Flag to be made availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
 func ExistingFlag(name flag.Name, value flag.Flag) SectionOpt {
-	// TODO: factor this out to a check
-	if !strings.HasPrefix(string(name), "-") {
-		log.Panicf("helpFlags should start with '-': %#v\n", name)
-	}
 	return func(sec *SectionT) {
 		sec.Flags.AddFlag(name, value)
 
@@ -102,16 +101,8 @@ func ExistingFlag(name flag.Name, value flag.Flag) SectionOpt {
 }
 
 func ExistingFlags(flagMap flag.FlagMap) SectionOpt {
-	// TODO: can I abstract this somehow? Until then - copy paste!
-	for name := range flagMap {
-		if !strings.HasPrefix(string(name), "-") {
-			log.Panicf("helpFlags should start with '-': %#v\n", name)
-		}
-	}
 	return func(sec *SectionT) {
-		for name, value := range flagMap {
-			sec.Flags.AddFlag(name, value)
-		}
+		sec.Flags.AddFlags(flagMap)
 	}
 }
 
@@ -142,4 +133,76 @@ func HelpLong(helpLong string) SectionOpt {
 	return func(cat *SectionT) {
 		cat.HelpLong = helpLong
 	}
+}
+
+// FlatSection represents a section and relevant parent information
+type FlatSection struct {
+	// InheritedFlags contains combined flags from ancestor sections
+	InheritedFlags flag.FlagMap
+	// Name of this section
+	Name Name
+	// ParentPath is the path from the root section to the section containing this secton.
+	ParentPath []Name
+	// Sec is this section
+	Sec SectionT
+}
+
+// Breadthfirst returns a SectionIterator that yields sections sorted alphabetically breadth-first by path.
+// Yielded sections should never be modified - they can share references to the same inherited flags
+// SectionIterator's Next() method panics if two sections in the path have flags with the same name.
+// Breadthfirst is used by app.Validate and help.AllCommandCommandHelp/help.AllCommandSectionHelp
+func (sec *SectionT) BreadthFirst(rootName Name) SectionIterator {
+
+	queue := make([]FlatSection, 0, 1)
+	queue = append(queue, FlatSection{
+		ParentPath:     make([]Name, 0),
+		InheritedFlags: make(flag.FlagMap),
+		Name:           rootName, // root doesn't need a name :)
+		Sec:            *sec,
+	})
+
+	return SectionIterator{
+		queue: queue,
+	}
+}
+
+// SectionIterator is used in BreadthFirst. See BreadthFirst docs
+type SectionIterator struct {
+	queue []FlatSection
+}
+
+// HasNext is used in BreadthFirst. See BreadthFirst docs
+func (s *SectionIterator) Next() FlatSection {
+	current := s.queue[0]
+	s.queue = s.queue[1:]
+
+	// child.ParentPath = current.childParentPath = current.name
+	childParentPath := make([]Name, len(current.ParentPath)+1)
+	copy(childParentPath, current.ParentPath)
+	childParentPath[len(childParentPath)-1] = current.Name
+
+	// child.inheritedFlags = current.inheritedFlags + current.Flags
+	childInheritedFlags := make(
+		flag.FlagMap,
+		len(current.InheritedFlags)+len(current.Sec.Flags),
+	)
+	childInheritedFlags.AddFlags(current.InheritedFlags)
+	childInheritedFlags.AddFlags(current.Sec.Flags)
+
+	// Add child sections to queue
+	for _, childName := range current.Sec.Sections.SortedNames() {
+		s.queue = append(s.queue, FlatSection{
+			ParentPath:     childParentPath,
+			InheritedFlags: childInheritedFlags,
+			Name:           childName,
+			Sec:            current.Sec.Sections[childName],
+		})
+	}
+
+	return current
+}
+
+// HasNext is used in BreadthFirst. See BreadthFirst docs
+func (s *SectionIterator) HasNext() bool {
+	return len(s.queue) > 0
 }

@@ -3,7 +3,6 @@ package flag
 import (
 	"log"
 	"sort"
-	"strings"
 
 	"go.bbkane.com/warg/value"
 )
@@ -37,6 +36,13 @@ func (fm FlagMap) AddFlag(name Name, value Flag) {
 	}
 }
 
+// AddFlags adds another FlagMap to this one and  and panics if a flag name already exists
+func (fm FlagMap) AddFlags(flagMap FlagMap) {
+	for name, value := range flagMap {
+		fm.AddFlag(name, value)
+	}
+}
+
 // FlagOpt customizes a Flag on creation
 type FlagOpt func(*Flag)
 
@@ -45,7 +51,7 @@ type PassedFlags map[string]interface{} // This can just stay a string for the c
 
 type Flag struct {
 	// Alias is an alternative name for a flag, usually shorter :)
-	Alias string
+	Alias Name
 
 	// ConfigPath is the path from the config to the value the flag updates
 	ConfigPath string
@@ -97,10 +103,7 @@ func New(helpShort HelpShort, empty value.EmptyConstructor, opts ...FlagOpt) Fla
 }
 
 // Alias is an alternative name for a flag, usually shorter :)
-func Alias(alias string) FlagOpt {
-	if !strings.HasPrefix(alias, "-") {
-		log.Panicf("All aliases should start with '-': %v", alias)
-	}
+func Alias(alias Name) FlagOpt {
 	return func(f *Flag) {
 		f.Alias = alias
 	}

@@ -84,6 +84,6 @@ func fmtFlagName(col *gocolor.Color, flagName flag.Name) string {
 	return col.Add(col.Bold+col.FgYellow, string(flagName))
 }
 
-func fmtFlagAlias(col *gocolor.Color, flagAlias string) string {
-	return col.Add(col.Bold+col.FgYellow, flagAlias)
+func fmtFlagAlias(col *gocolor.Color, flagAlias flag.Name) string {
+	return col.Add(col.Bold+col.FgYellow, string(flagAlias))
 }
