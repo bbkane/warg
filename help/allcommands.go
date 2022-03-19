@@ -38,7 +38,15 @@ func AllCommandsSectionHelp(file *os.File, _ *section.SectionT, helpInfo HelpInf
 		fmt.Fprintln(f, fmtHeader(&col, "All Commands")+" (use <cmd> -h to see flag details):")
 		fmt.Fprintln(f)
 
-		it := cur.BreadthFirst(section.Name(helpInfo.AppName))
+		// Let's save this for when I don't use the root section
+		// path := []section.Name{section.Name(helpInfo.AppName)}
+		// for _, e := range helpInfo.Path {
+		// 	path = append(path, section.Name(e))
+		// }
+
+		path := []section.Name{section.Name(helpInfo.AppName)}
+
+		it := cur.BreadthFirst(path)
 		for it.HasNext() {
 			flatSec := it.Next()
 
@@ -52,10 +60,9 @@ func AllCommandsSectionHelp(file *os.File, _ *section.SectionT, helpInfo HelpInf
 
 				// fmt.Fprintln(f, helpInfo.AppName, helpInfo.Path, flatSec.ParentPath, flatSec.Name, name)
 
-				for _, p := range flatSec.ParentPath {
+				for _, p := range flatSec.Path {
 					fmt.Fprintf(f, fmtCommandName(&col, command.Name(p))+" ")
 				}
-				fmt.Fprintf(f, fmtCommandName(&col, command.Name(flatSec.Name))+" ")
 				fmt.Fprintln(f, fmtCommandName(&col, name))
 
 				fmt.Fprintln(f)

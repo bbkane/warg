@@ -31,8 +31,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			expected: []section.FlatSection{
 				{
 					InheritedFlags: make(flag.FlagMap),
-					Name:           "r",
-					ParentPath:     []section.Name{},
+					Path:           []section.Name{"r"},
 					Sec: section.New(
 						"root section help",
 						section.Command("c1", "", nil),
@@ -43,8 +42,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				},
 				{
 					InheritedFlags: make(flag.FlagMap),
-					Name:           "s1",
-					ParentPath:     []section.Name{"r"},
+					Path:           []section.Name{"r", "s1"},
 					Sec: section.New(
 						"", section.Command("c2", "", nil),
 					),
@@ -69,8 +67,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			expected: []section.FlatSection{
 				{
 					InheritedFlags: make(flag.FlagMap),
-					Name:           "r",
-					ParentPath:     []section.Name{},
+					Path:           []section.Name{"r"},
 					Sec: section.New("",
 						section.Section("sc", "",
 							section.Command("c", "", nil),
@@ -85,24 +82,21 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				},
 				{
 					InheritedFlags: make(flag.FlagMap),
-					Name:           "sa",
-					ParentPath:     []section.Name{"r"},
+					Path:           []section.Name{"r", "sa"},
 					Sec: section.New("",
 						section.Command("c", "", nil),
 					),
 				},
 				{
 					InheritedFlags: make(flag.FlagMap),
-					Name:           "sb",
-					ParentPath:     []section.Name{"r"},
+					Path:           []section.Name{"r", "sb"},
 					Sec: section.New("",
 						section.Command("c", "", nil),
 					),
 				},
 				{
 					InheritedFlags: make(flag.FlagMap),
-					Name:           "sc",
-					ParentPath:     []section.Name{"r"},
+					Path:           []section.Name{"r", "sc"},
 					Sec: section.New("",
 						section.Command("c", "", nil),
 					),
@@ -139,8 +133,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			expected: []section.FlatSection{
 				{
 					InheritedFlags: make(flag.FlagMap),
-					Name:           "r",
-					ParentPath:     []section.Name{},
+					Path:           []section.Name{"r"},
 					Sec: section.New("",
 						section.Section("s1", "",
 							section.Command("c1", "", nil),
@@ -154,8 +147,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				},
 				{
 					InheritedFlags: make(flag.FlagMap),
-					Name:           "s1",
-					ParentPath:     []section.Name{"r"},
+					Path:           []section.Name{"r", "s1"},
 					Sec: section.New("",
 						section.Command("c1", "", nil),
 						section.Flag("-f1", "", nil),
@@ -163,8 +155,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				},
 				{
 					InheritedFlags: make(flag.FlagMap),
-					Name:           "s2",
-					ParentPath:     []section.Name{"r"},
+					Path:           []section.Name{"r", "s2"},
 					Sec: section.New("",
 						section.Command("c1", "", nil),
 						section.Flag("-f1", "", nil),
@@ -181,7 +172,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				require.Panics(
 					t,
 					func() {
-						it := tt.sec.BreadthFirst(tt.rootName)
+						it := tt.sec.BreadthFirst([]section.Name{tt.rootName})
 						for it.HasNext() {
 							it.Next()
 						}
@@ -191,7 +182,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			}
 
 			actual := make([]section.FlatSection, 0, 1)
-			it := tt.sec.BreadthFirst(tt.rootName)
+			it := tt.sec.BreadthFirst([]section.Name{tt.rootName})
 			for it.HasNext() {
 				actual = append(actual, it.Next())
 			}

@@ -139,10 +139,9 @@ func HelpLong(helpLong string) SectionOpt {
 type FlatSection struct {
 	// InheritedFlags contains combined flags from ancestor sections
 	InheritedFlags flag.FlagMap
-	// Name of this section
-	Name Name
-	// ParentPath is the path from the root section to the section containing this secton.
-	ParentPath []Name
+
+	// Path to this section
+	Path []Name
 	// Sec is this section
 	Sec SectionT
 }
@@ -151,13 +150,12 @@ type FlatSection struct {
 // Yielded sections should never be modified - they can share references to the same inherited flags
 // SectionIterator's Next() method panics if two sections in the path have flags with the same name.
 // Breadthfirst is used by app.Validate and help.AllCommandCommandHelp/help.AllCommandSectionHelp
-func (sec *SectionT) BreadthFirst(rootName Name) SectionIterator {
+func (sec *SectionT) BreadthFirst(path []Name) SectionIterator {
 
 	queue := make([]FlatSection, 0, 1)
 	queue = append(queue, FlatSection{
-		ParentPath:     make([]Name, 0),
-		InheritedFlags: make(flag.FlagMap),
-		Name:           rootName, // root doesn't need a name :)
+		Path:           path,
+		InheritedFlags: make(flag.FlagMap), // If needed, we could make this a parameter
 		Sec:            *sec,
 	})
 
@@ -176,10 +174,10 @@ func (s *SectionIterator) Next() FlatSection {
 	current := s.queue[0]
 	s.queue = s.queue[1:]
 
-	// child.ParentPath = current.childParentPath = current.name
-	childParentPath := make([]Name, len(current.ParentPath)+1)
-	copy(childParentPath, current.ParentPath)
-	childParentPath[len(childParentPath)-1] = current.Name
+	// // child.ParentPath = current.childParentPath = current.name
+	// childParentPath := make([]Name, len(current.ParentPath)+1)
+	// copy(childParentPath, current.ParentPath)
+	// childParentPath[len(childParentPath)-1] = current.Name
 
 	// child.inheritedFlags = current.inheritedFlags + current.Flags
 	childInheritedFlags := make(
@@ -191,10 +189,15 @@ func (s *SectionIterator) Next() FlatSection {
 
 	// Add child sections to queue
 	for _, childName := range current.Sec.Sections.SortedNames() {
+
+		// child.Path = current.Path + child.name
+		childPath := make([]Name, len(current.Path)+1)
+		copy(childPath, current.Path)
+		childPath[len(childPath)-1] = childName
+
 		s.queue = append(s.queue, FlatSection{
-			ParentPath:     childParentPath,
+			Path:           childPath,
 			InheritedFlags: childInheritedFlags,
-			Name:           childName,
 			Sec:            current.Sec.Sections[childName],
 		})
 	}

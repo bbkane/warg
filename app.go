@@ -236,19 +236,21 @@ func validateFlags(
 //
 // - Flag names and aliases don't collide
 func (app *App) Validate() error {
-	it := app.rootSection.BreadthFirst(section.Name(app.name))
+	rootPath := []section.Name{section.Name(app.name)}
+	it := app.rootSection.BreadthFirst(rootPath)
 
 	for it.HasNext() {
 		flatSec := it.Next()
 
 		// Sections don't start with "-"
-		if strings.HasPrefix(string(flatSec.Name), "-") {
-			return fmt.Errorf("section names must not start with '-': %#v", flatSec.Name)
+		secName := flatSec.Path[len(flatSec.Path)-1]
+		if strings.HasPrefix(string(secName), "-") {
+			return fmt.Errorf("section names must not start with '-': %#v", secName)
 		}
 
 		// Sections must not be leaf nodes
 		if flatSec.Sec.Sections.Empty() && flatSec.Sec.Commands.Empty() {
-			return fmt.Errorf("sections must have either child sections or child commands: %#v", flatSec.Name)
+			return fmt.Errorf("sections must have either child sections or child commands: %#v", secName)
 		}
 
 		// No need to check section flags here; all sections will end in a command
