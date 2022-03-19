@@ -127,7 +127,7 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 			"--help",
 			"Print help",
 			flag.Alias("-h"),
-			flag.Default("detailed"),
+			flag.Default("default"),
 		)(&app)
 	}
 

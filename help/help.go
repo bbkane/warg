@@ -38,8 +38,10 @@ type HelpFlagMapping struct {
 // Feel free to use it as a base to custimize help functions for your users
 func BuiltinHelpFlagMappings() []HelpFlagMapping {
 	return []HelpFlagMapping{
+		{Name: "default", CommandHelp: DetailedCommandHelp, SectionHelp: AllCommandsSectionHelp},
 		{Name: "detailed", CommandHelp: DetailedCommandHelp, SectionHelp: DetailedSectionHelp},
 		{Name: "outline", CommandHelp: OutlineCommandHelp, SectionHelp: OutlineSectionHelp},
+		{Name: "allcommands", CommandHelp: AllCommandsCommandHelp, SectionHelp: AllCommandsSectionHelp},
 	}
 }
 
@@ -70,6 +72,10 @@ func ConditionallyEnableColor(pf flag.PassedFlags, file *os.File) (gocolor.Color
 	startEnabled := useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd()))
 	return gocolor.Prepare(startEnabled)
 
+}
+
+func fmtHeader(col *gocolor.Color, header string) string {
+	return col.Add(col.Bold+col.Underline, header)
 }
 
 func fmtSectionName(col *gocolor.Color, sectionName section.Name) string {

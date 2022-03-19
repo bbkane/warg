@@ -133,6 +133,7 @@ All warg apps must have at least one nested command.  It is not possible to desi
 
 # TODO
 
+- make outline, allcommands helps use current section, not root section. make outline help for a command just show the flags
 - should I auto add a color flag, what about a version subcommand. I literally want these in all my apps
 - Add a sentinal value (UNSET?) to be used with optional flags that unsets the flag? sets the flag to the default value? So I can use fling without passing -i 'README.*' all the time :)
 - use https://stackoverflow.com/a/16946478/2958070 for better number handling?
