@@ -41,7 +41,8 @@ func BuiltinHelpFlagMappings() []HelpFlagMapping {
 		{Name: "default", CommandHelp: DetailedCommandHelp, SectionHelp: AllCommandsSectionHelp},
 		{Name: "detailed", CommandHelp: DetailedCommandHelp, SectionHelp: DetailedSectionHelp},
 		{Name: "outline", CommandHelp: OutlineCommandHelp, SectionHelp: OutlineSectionHelp},
-		{Name: "allcommands", CommandHelp: AllCommandsCommandHelp, SectionHelp: AllCommandsSectionHelp},
+		// allcommands list child commands, so it doesn't really make sense for a command
+		{Name: "allcommands", CommandHelp: DetailedCommandHelp, SectionHelp: AllCommandsSectionHelp},
 	}
 }
 

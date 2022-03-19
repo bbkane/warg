@@ -109,27 +109,7 @@ func TestAppHelp(t *testing.T) {
 		helpFile *os.File
 	}{
 
-		// allcommands
-		{
-			name: "allcommandsCommand",
-			app: warg.New(
-				"allcommandsCommand",
-				grabbitSection(),
-				warg.OverrideHelpFlag(
-					[]help.HelpFlagMapping{
-						{Name: "allcommands", CommandHelp: help.AllCommandsCommandHelp, SectionHelp: help.AllCommandsSectionHelp},
-					},
-					tmpFile(t),
-					"--help",
-					"Print help information",
-					flag.Default("allcommands"),
-					flag.Alias("-h"),
-				),
-				warg.SkipValidation(),
-			),
-			args:   []string{"grabbit", "config", "edit", "--help"},
-			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
-		},
+		// allcommands (no command help)
 		{
 			name: "allcommandsSection",
 			app: warg.New(
@@ -137,7 +117,7 @@ func TestAppHelp(t *testing.T) {
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
-						{Name: "allcommands", CommandHelp: help.AllCommandsCommandHelp, SectionHelp: help.AllCommandsSectionHelp},
+						{Name: "allcommands", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.AllCommandsSectionHelp},
 					},
 					tmpFile(t),
 					"--help",
@@ -147,7 +127,7 @@ func TestAppHelp(t *testing.T) {
 				),
 				warg.SkipValidation(),
 			),
-			args:   []string{"grabbit", "--help"},
+			args:   []string{"grabbit", "config", "--help"},
 			lookup: warg.LookupMap(nil),
 		},
 

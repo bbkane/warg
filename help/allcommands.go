@@ -10,11 +10,7 @@ import (
 	"go.bbkane.com/warg/section"
 )
 
-func AllCommandsCommandHelp(file *os.File, cur *command.Command, helpInfo HelpInfo) command.Action {
-	return AllCommandsSectionHelp(file, nil, helpInfo)
-}
-
-func AllCommandsSectionHelp(file *os.File, _ *section.SectionT, helpInfo HelpInfo) command.Action {
+func AllCommandsSectionHelp(file *os.File, cur *section.SectionT, helpInfo HelpInfo) command.Action {
 	return func(pf flag.PassedFlags) error {
 
 		f := bufio.NewWriter(file)
@@ -25,7 +21,6 @@ func AllCommandsSectionHelp(file *os.File, _ *section.SectionT, helpInfo HelpInf
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
 
-		cur := helpInfo.RootSection // TODO: acutually use cur
 		// Print top help section
 		if cur.HelpLong != "" {
 			fmt.Fprintf(f, "%s\n", cur.HelpLong)
@@ -38,13 +33,10 @@ func AllCommandsSectionHelp(file *os.File, _ *section.SectionT, helpInfo HelpInf
 		fmt.Fprintln(f, fmtHeader(&col, "All Commands")+" (use <cmd> -h to see flag details):")
 		fmt.Fprintln(f)
 
-		// Let's save this for when I don't use the root section
-		// path := []section.Name{section.Name(helpInfo.AppName)}
-		// for _, e := range helpInfo.Path {
-		// 	path = append(path, section.Name(e))
-		// }
-
 		path := []section.Name{section.Name(helpInfo.AppName)}
+		for _, e := range helpInfo.Path {
+			path = append(path, section.Name(e))
+		}
 
 		it := cur.BreadthFirst(path)
 		for it.HasNext() {
@@ -57,8 +49,6 @@ func AllCommandsSectionHelp(file *os.File, _ *section.SectionT, helpInfo HelpInf
 				fmt.Fprintln(f, com.HelpShort)
 
 				fmt.Fprintf(f, "  ")
-
-				// fmt.Fprintln(f, helpInfo.AppName, helpInfo.Path, flatSec.ParentPath, flatSec.Name, name)
 
 				for _, p := range flatSec.Path {
 					fmt.Fprintf(f, fmtCommandName(&col, command.Name(p))+" ")
