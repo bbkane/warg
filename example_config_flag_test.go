@@ -52,7 +52,7 @@ func ExampleConfigFlag() {
 	)
 
 	err := ioutil.WriteFile(
-		"/tmp/calc.yaml",
+		"testdata/ExampleConfigFlag/calc.yaml",
 		[]byte(
 			`
 add:
@@ -66,7 +66,7 @@ add:
 	if err != nil {
 		log.Fatalf("write error: %e", err)
 	}
-	app.MustRun([]string{"calc", "-c", "/tmp/calc.yaml", "add"}, os.LookupEnv)
+	app.MustRun([]string{"calc", "-c", "testdata/ExampleConfigFlag/calc.yaml", "add"}, os.LookupEnv)
 	// Output:
 	// Sum: 6
 }
