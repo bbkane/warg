@@ -1,5 +1,5 @@
 # grab those images!
-outlineCommand
+grabbit
   # path to editor
   --editor
   # Print help information

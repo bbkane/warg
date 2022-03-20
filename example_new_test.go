@@ -29,7 +29,6 @@ func login(pf flag.PassedFlags) error {
 
 func ExampleNew() {
 	app := warg.New(
-		"blog",
 		section.New(
 			"work with a fictional blog platform",
 			section.Command(

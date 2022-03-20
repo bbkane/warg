@@ -1,22 +1,18 @@
-grab those images!
+Change grabbit's config
 
 All Commands (use <cmd> -h to see flag details):
 
-  # another command
-  allcommandsSection command2
-
-  # another command
-  allcommandsSection command3
-
-  # do the grabbity grabbity
-  allcommandsSection grab
-
   # Edit the config. A default config will be created if it doesn't exist
-  allcommandsSection config edit
+  grabbit config edit
 
-  # Dummy command to pass validation
-  allcommandsSection section2 com
+Footer:
 
-  # Dummy command to pass validation
-  allcommandsSection section3 com
+Examples:
 
+	# Grab without config
+	grabbit grab
+
+	# Edit config, then grab
+	grabbit config edit
+	grabbit grab
+	

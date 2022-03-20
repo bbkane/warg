@@ -21,28 +21,26 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "leafSection",
 			app: warg.New(
-				t.Name(),
 				section.New("Help for section"),
 				warg.SkipValidation(),
 			),
 			expectedErr: true,
 		},
-		// TODO: at some point, allow app names to start with a dash?
+		// app.Validate should allow app names with dashes
 		{
 			name: "appNameWithDash",
 			app: warg.New(
-				"-"+t.Name(),
 				section.New("",
 					section.Command("com", "command for validation", command.DoNothing),
 				),
 				warg.SkipValidation(),
+				warg.Name("-"+t.Name()),
 			),
-			expectedErr: true,
+			expectedErr: false,
 		},
 		{
 			name: "sectionNameWithDash",
 			app: warg.New(
-				t.Name(),
 				section.New("",
 					section.Section("-name", "",
 						section.Command("com", "command for validation", command.DoNothing),
@@ -55,7 +53,6 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandNameWithDash",
 			app: warg.New(
-				t.Name(),
 				section.New("",
 					section.Section("name", "",
 						section.Command("-com", "starts with dash", command.DoNothing),
@@ -68,7 +65,6 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "flagNameNoDash",
 			app: warg.New(
-				t.Name(),
 				section.New("",
 					section.Flag("f", "", nil),
 					section.Command("c", "", nil),
@@ -80,7 +76,6 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "aliasNameNoDash",
 			app: warg.New(
-				t.Name(),
 				section.New("",
 					section.Flag("-f", "", value.Bool,
 						flag.Alias("f"),
@@ -95,7 +90,6 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "flagNameAliasConflict",
 			app: warg.New(
-				t.Name(),
 				section.New("",
 					section.Flag("-f", "", value.Bool),
 					section.Command("c", "", command.DoNothing,

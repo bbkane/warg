@@ -26,7 +26,6 @@ func exampleConfigFlagTextAdd(pf flag.PassedFlags) error {
 
 func ExampleConfigFlag() {
 	app := warg.New(
-		"calc",
 		section.New(
 			"do math",
 			section.Command(

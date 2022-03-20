@@ -1,5 +1,5 @@
 # grab those images!
-outlineSection
+grabbit
   # Print help information
   --help , -h
   # another command

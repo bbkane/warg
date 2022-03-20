@@ -46,7 +46,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "fromMain",
 			app: warg.New(
-				"test",
 				section.New(
 					"help for test",
 					section.Flag(
@@ -82,7 +81,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "noSection",
 			app: warg.New(
-				"test",
 				section.New(
 					"help for test",
 					section.Flag(
@@ -103,7 +101,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "flagDefault",
 			app: warg.New(
-				"test",
 				section.New(
 					"help for test",
 					section.Command(
@@ -129,7 +126,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "extraFlag",
 			app: warg.New(
-				"test",
 				section.New(
 					"help for test",
 					section.Command(
@@ -155,7 +151,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "configFlag",
 			app: warg.New(
-				"test",
 				section.New(
 					"help for test",
 					section.Flag(
@@ -201,7 +196,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "sectionFlag",
 			app: warg.New(
-				"test",
 				section.New(
 					"help for test",
 					section.Flag(
@@ -230,7 +224,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "simpleJSONConfig",
 			app: warg.New(
-				"test",
 				section.New("help for test",
 					section.Flag(
 						"--val",
@@ -266,7 +259,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "configSlice",
 			app: warg.New(
-				"test",
 				section.New(
 					"help for test",
 					section.Flag(
@@ -298,7 +290,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "envvar",
 			app: warg.New(
-				t.Name(),
 				section.New(
 					"help for test",
 					section.Flag(
@@ -332,7 +323,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "requiredFlag",
 			app: warg.New(
-				t.Name(),
 				section.New(
 					"help for test",
 					section.Flag(
@@ -360,7 +350,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "flagAlias",
 			app: warg.New(
-				t.Name(),
 				section.New(
 					"help for section",
 					section.Flag(
@@ -386,7 +375,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "flagAliasWithList",
 			app: warg.New(
-				t.Name(),
 				section.New(
 					"help for section",
 					section.Command(
@@ -412,7 +400,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "badHelp",
 			app: warg.New(
-				t.Name(),
 				section.New(
 					"help for section",
 					section.Command(
@@ -437,7 +424,6 @@ func TestApp_Parse(t *testing.T) {
 					"--flag2": flag.New("--flag1 value", value.String),
 				}
 				app := warg.New(
-					t.Name(),
 					section.New(
 						"help for section",
 						section.ExistingFlags(fm),
@@ -466,7 +452,6 @@ func TestApp_Parse(t *testing.T) {
 					"--flag2": flag.New("--flag1 value", value.String),
 				}
 				app := warg.New(
-					t.Name(),
 					section.New(
 						"help for section",
 						section.Command(
@@ -490,7 +475,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "JSONConfigStringSlice",
 			app: warg.New(
-				"test",
 				section.New("help for test",
 					section.Flag(
 						"--val",
@@ -526,7 +510,6 @@ func TestApp_Parse(t *testing.T) {
 		{
 			name: "YAMLConfigStringSlice",
 			app: warg.New(
-				"test",
 				section.New("help for test",
 					section.Flag(
 						"--val",

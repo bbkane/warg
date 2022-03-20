@@ -102,18 +102,16 @@ func tmpFile(t *testing.T) *os.File {
 
 func TestAppHelp(t *testing.T) {
 	tests := []struct {
-		name     string
-		app      warg.App
-		args     []string
-		lookup   warg.LookupFunc
-		helpFile *os.File
+		name   string
+		app    warg.App
+		args   []string
+		lookup warg.LookupFunc
 	}{
 
 		// allcommands (no command help)
 		{
 			name: "allcommandsSection",
 			app: warg.New(
-				"allcommandsSection",
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
@@ -135,7 +133,6 @@ func TestAppHelp(t *testing.T) {
 		{
 			name: "detailedCommand",
 			app: warg.New(
-				"detailedCommand",
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
@@ -155,7 +152,6 @@ func TestAppHelp(t *testing.T) {
 		{
 			name: "detailedSection",
 			app: warg.New(
-				"detailedSection",
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
@@ -177,7 +173,6 @@ func TestAppHelp(t *testing.T) {
 		{
 			name: "outlineCommand",
 			app: warg.New(
-				"outlineCommand",
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
@@ -197,7 +192,6 @@ func TestAppHelp(t *testing.T) {
 		{
 			name: "outlineSection",
 			app: warg.New(
-				"outlineSection",
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{

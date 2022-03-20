@@ -13,7 +13,6 @@ import (
 
 func buildApp() warg.App {
 	app := warg.New(
-		"butler",
 		section.New(
 			section.HelpShort("A virtual assistant"),
 			section.Command(
