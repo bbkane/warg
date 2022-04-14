@@ -3,7 +3,7 @@ package warg_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/alecthomas/assert"
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
@@ -106,10 +106,10 @@ func TestApp_Validate(t *testing.T) {
 			actualErr := tt.app.Validate()
 
 			if tt.expectedErr {
-				require.NotNil(t, actualErr)
+				assert.NotNil(t, actualErr)
 				return
 			} else {
-				require.Nil(t, actualErr)
+				assert.Nil(t, actualErr)
 			}
 		})
 	}

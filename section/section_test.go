@@ -3,13 +3,13 @@ package section_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/alecthomas/assert"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
 )
 
 func TestSectionT_BreadthFirst(t *testing.T) {
-	// NOTE: function equality cannot be compared with require.Equal,
+	// NOTE: function equality cannot be compared with assert.Equal,
 	// so just set action to nil
 	tests := []struct {
 		name          string
@@ -169,7 +169,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			if tt.expectedPanic {
-				require.Panics(
+				assert.Panics(
 					t,
 					func() {
 						it := tt.sec.BreadthFirst([]section.Name{tt.rootName})
@@ -186,7 +186,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			for it.HasNext() {
 				actual = append(actual, it.Next())
 			}
-			require.Equal(t, tt.expected, actual)
+			assert.Equal(t, tt.expected, actual)
 		})
 	}
 }

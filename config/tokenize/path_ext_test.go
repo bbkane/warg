@@ -3,7 +3,7 @@ package tokenize_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/alecthomas/assert"
 
 	"go.bbkane.com/warg/config/tokenize"
 )

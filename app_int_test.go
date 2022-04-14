@@ -5,7 +5,7 @@ package warg
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/alecthomas/assert"
 )
 
 func TestGatherArgs2(t *testing.T) {
@@ -72,11 +72,11 @@ func TestGatherArgs2(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			actualResult, actualErr := gatherArgs(tt.args, tt.helpFlagNames)
 			if tt.expectedErr {
-				require.NotNil(t, actualErr)
+				assert.NotNil(t, actualErr)
 			} else {
-				require.Nil(t, actualErr)
+				assert.Nil(t, actualErr)
 			}
-			require.Equal(t, tt.expectedResult, actualResult)
+			assert.Equal(t, tt.expectedResult, actualResult)
 		})
 	}
 

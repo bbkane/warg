@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/alecthomas/assert"
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
@@ -213,37 +213,37 @@ func TestAppHelp(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			err := tt.app.Validate()
-			require.Nil(t, err)
+			assert.Nil(t, err)
 
 			pr, parseErr := tt.app.Parse(tt.args, tt.lookup)
-			require.Nil(t, parseErr)
+			assert.Nil(t, parseErr)
 
 			actionErr := pr.Action(pr.PassedFlags)
-			require.Nil(t, actionErr)
+			assert.Nil(t, actionErr)
 
 			closeErr := tt.app.HelpFile.Close()
-			require.Nil(t, closeErr)
+			assert.Nil(t, closeErr)
 
 			actualHelpBytes, readErr := ioutil.ReadFile(tt.app.HelpFile.Name())
-			require.Nil(t, readErr)
+			assert.Nil(t, readErr)
 
 			goldenDir := filepath.Join("testdata", t.Name())
 			goldenFilePath := filepath.Join(goldenDir, "golden.txt")
 			goldenFilePath, err = filepath.Abs(goldenFilePath)
-			require.Nil(t, err)
+			assert.Nil(t, err)
 
 			if *update {
 				mkdirErr := os.MkdirAll(goldenDir, 0700)
-				require.Nil(t, mkdirErr)
+				assert.Nil(t, mkdirErr)
 
 				writeErr := ioutil.WriteFile(goldenFilePath, actualHelpBytes, 0600)
-				require.Nil(t, writeErr)
+				assert.Nil(t, writeErr)
 
 				t.Logf("Wrote: %v\n", goldenFilePath)
 			}
 
 			expectedBytes, expectedReadErr := ioutil.ReadFile(goldenFilePath)
-			require.Nil(t, expectedReadErr)
+			assert.Nil(t, expectedReadErr)
 
 			if !bytes.Equal(expectedBytes, actualHelpBytes) {
 				t.Fatalf(
