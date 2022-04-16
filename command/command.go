@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"sort"
 
 	"go.bbkane.com/warg/flag"
@@ -53,7 +54,7 @@ type Command struct {
 // DoNothing is a command action that simply returns nil
 // Useful for prototyping
 func DoNothing(_ flag.PassedFlags) error {
-	return nil
+	return errors.New("TODO: replace this command.DoNothing call")
 }
 
 // New builds a Command
