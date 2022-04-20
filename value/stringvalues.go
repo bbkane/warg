@@ -1,135 +1,63 @@
 package value
 
-import (
-	"fmt"
-)
+import "fmt"
 
-type stringV string
-
-func (v *stringV) Get() interface{}      { return string(*v) }
-func (v *stringV) String() string        { return fmt.Sprint(string(*v)) }
-func (v *stringV) StringSlice() []string { return nil }
-func (v *stringV) TypeInfo() TypeInfo    { return TypeInfoScalar }
-func (v *stringV) Description() string   { return "string" }
-
-func (v *stringV) Update(s string) error {
-	*v = stringV(s)
-	return nil
-}
-func (v *stringV) UpdateFromInterface(iFace interface{}) error {
+func stringFromIFace(iFace interface{}) (string, error) {
 	under, ok := iFace.(string)
 	if !ok {
-		return ErrIncompatibleInterface
+		return "", ErrIncompatibleInterface
 	}
-	*v = stringV(under)
-	return nil
+	return under, nil
 }
 
-func stringNew(val string) *stringV { return (*stringV)(&val) }
+func stringFromString(s string) (string, error) {
+	return s, nil
+}
 
 // String accepts a string from a user. Pretty self explanatory.
-func String() (Value, error) { return stringNew(""), nil }
-
-func (v *stringV) ReplaceFromInterface(iFace interface{}) error {
-	return v.UpdateFromInterface(iFace)
-}
-
-// --
-
-type stringEnumV struct {
-	description string
-	choices     []string
-	current     string
-}
-
-func (v *stringEnumV) Get() interface{}      { return v.current }
-func (v *stringEnumV) String() string        { return v.current }
-func (v *stringEnumV) StringSlice() []string { return nil }
-func (v *stringEnumV) TypeInfo() TypeInfo    { return TypeInfoScalar }
-func (v *stringEnumV) Description() string   { return v.description }
-func (v *stringEnumV) Update(val string) error {
-	var updated bool
-	for _, choice := range v.choices {
-		if val == choice {
-			v.current = choice
-			updated = true
-			break
-		}
-	}
-	if !updated {
-		return fmt.Errorf("string enum update invalid choice: available: %v: choice: %v", v.choices, val)
-	}
-	return nil
-}
-
-func (v *stringEnumV) UpdateFromInterface(iFace interface{}) error {
-	under, ok := iFace.(string)
-	if !ok {
-		return ErrIncompatibleInterface
-	}
-	return v.Update(under)
-}
-
-func (v *stringEnumV) ReplaceFromInterface(iFace interface{}) error {
-	return v.UpdateFromInterface(iFace)
+func String() (Value, error) {
+	s := newScalarValue(
+		"",
+		"string",
+		fromIFaceFunc[string](stringFromIFace),
+		fromStringFunc[string](stringFromString),
+	)
+	return &s, nil
 }
 
 // StringEnum acts just like a string, except it only lets the user update from
 // the choices provided when creating the EmptyConstructor for it.
 func StringEnum(choices ...string) EmptyConstructor {
 	return func() (Value, error) {
-		return &stringEnumV{
-			choices:     choices,
-			description: fmt.Sprintf("stringenum with choices: %v", choices),
-		}, nil
+		s := newScalarValue(
+			"",
+			"string enum with choices "+fmt.Sprint(choices),
+			fromIFaceEnum(stringFromIFace, choices...),
+			fromStringEnum(stringFromString, choices...),
+		)
+		return &s, nil
 	}
 }
-
-// ---
-
-type stringSliceV []string
-
-func stringSliceNew(vals []string) *stringSliceV { return (*stringSliceV)(&vals) }
-
-func (v *stringSliceV) ReplaceFromInterface(iFace interface{}) error {
-	decoded := []string{}
-	under, ok := iFace.([]interface{})
-	if !ok {
-		return ErrIncompatibleInterface
-	}
-	for _, val := range under {
-		valUnder, ok := val.(string)
-		if !ok {
-			return ErrIncompatibleInterface
-		}
-		decoded = append(decoded, valUnder)
-	}
-	*v = *stringSliceNew(decoded)
-	return nil
-}
-func (v *stringSliceV) TypeInfo() TypeInfo  { return TypeInfoSlice }
-func (v *stringSliceV) Description() string { return "string slice" }
 
 // StringSlice accepts a string from a user and adds it to a slice. Pretty self explanatory.
-func StringSlice() (Value, error)        { return stringSliceNew(nil), nil }
-func (v *stringSliceV) Get() interface{} { return []string(*v) }
-func (v *stringSliceV) String() string   { return fmt.Sprint([]string(*v)) }
-func (v *stringSliceV) StringSlice() []string {
-	var ret []string
-	for _, e := range []string(*v) {
-		ret = append(ret, fmt.Sprint(e))
-	}
-	return ret
+func StringSlice() (Value, error) {
+	s := newSliceValue(
+		nil,
+		"string list",
+		fromIFaceFunc[string](stringFromIFace),
+		fromStringFunc[string](stringFromString),
+	)
+	return &s, nil
 }
-func (v *stringSliceV) Update(val string) error {
-	*v = append(*v, val)
-	return nil
-}
-func (v *stringSliceV) UpdateFromInterface(iFace interface{}) error {
-	under, ok := iFace.(string)
-	if !ok {
-		return ErrIncompatibleInterface
+
+func StringEnumSlice(choices ...string) EmptyConstructor {
+	return func() (Value, error) {
+		s := newSliceValue(
+			nil,
+			"string enum slice with choices "+fmt.Sprint(choices),
+			fromIFaceEnum(stringFromIFace, choices...),
+			fromStringEnum(stringFromString, choices...),
+		)
+		return &s, nil
 	}
-	*v = append(*v, under)
-	return nil
 }

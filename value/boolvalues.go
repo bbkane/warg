@@ -1,44 +1,33 @@
 package value
 
-import (
-	"fmt"
-)
+import "fmt"
 
-type boolV bool
-
-func boolNew(val bool) *boolV { return (*boolV)(&val) }
-
-// Bool is updated from "true" or "false"
-func Bool() (Value, error) { return boolNew(false), nil }
-
-func (v *boolV) Get() interface{}      { return bool(*v) }
-func (v *boolV) String() string        { return fmt.Sprint(bool(*v)) }
-func (v *boolV) StringSlice() []string { return nil }
-func (v *boolV) TypeInfo() TypeInfo    { return TypeInfoScalar }
-func (v *boolV) Description() string   { return "bool" }
-
-func (v *boolV) ReplaceFromInterface(iFace interface{}) error {
-	switch under := iFace.(type) {
-	case bool:
-		*v = *boolNew(under)
-	default:
-		return fmt.Errorf("can't create boolValue. Expected: bool, got: %#v", iFace)
+func boolFromIFace(iFace interface{}) (bool, error) {
+	under, ok := iFace.(bool)
+	if !ok {
+		return false, ErrIncompatibleInterface
 	}
-	return nil
+	return under, nil
 }
 
-func (v *boolV) Update(s string) error {
-
+func boolFromString(s string) (bool, error) {
 	switch s {
 	case "true":
-		*v = boolV(true)
+		return true, nil
 	case "false":
-		*v = boolV(false)
+		return false, nil
 	default:
-		return fmt.Errorf("expected \"true\" or \"false\", got %s", s)
+		return false, fmt.Errorf("expected \"true\" or \"false\", got %s", s)
 	}
-	return nil
 }
-func (v *boolV) UpdateFromInterface(iFace interface{}) error {
-	return v.ReplaceFromInterface(iFace)
+
+// Bool is updated from "true" or "false"
+func Bool() (Value, error) {
+	s := newScalarValue(
+		false,
+		"bool",
+		fromIFaceFunc[bool](boolFromIFace),
+		fromStringFunc[bool](boolFromString),
+	)
+	return &s, nil
 }

@@ -8,7 +8,7 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
-	"go.bbkane.com/warg/value"
+	value "go.bbkane.com/warg/value"
 )
 
 func buildApp() warg.App {

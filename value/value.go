@@ -2,6 +2,7 @@ package value
 
 import (
 	"errors"
+	"fmt"
 )
 
 type TypeInfo int64
@@ -62,3 +63,210 @@ type Value interface {
 type EmptyConstructor func() (Value, error)
 
 var ErrIncompatibleInterface = errors.New("could not decode interface into Value")
+
+// -- ScalarValue
+
+type fromIFaceFunc[T any] func(interface{}) (T, error)
+
+func fromIFaceEnum[T comparable](fromIFace fromIFaceFunc[T], choices ...T) fromIFaceFunc[T] {
+	return func(iFace interface{}) (T, error) {
+		val, err := fromIFace(iFace)
+		if err != nil {
+			return val, err
+		}
+		for _, choice := range choices {
+			if val == choice {
+				return val, nil
+			}
+		}
+		return val, fmt.Errorf("interface enum update invalid choice: available: %v: choice: %v", choices, val)
+	}
+}
+
+type fromStringFunc[T any] func(string) (T, error)
+
+func fromStringEnum[T comparable](fromString fromStringFunc[T], choices ...T) fromStringFunc[T] {
+	return func(s string) (T, error) {
+		val, err := fromString(s)
+		if err != nil {
+			return val, err
+		}
+		for _, choice := range choices {
+			if val == choice {
+				return val, nil
+			}
+		}
+		return val, fmt.Errorf("string enum update invalid choice: available: %v: choice: %v", choices, val)
+	}
+}
+
+type scalarValue[
+	T any,
+	FI fromIFaceFunc[T],
+	FS fromStringFunc[T],
+] struct {
+	val         T
+	description string
+	fromIFace   FI
+	fromString  FS
+}
+
+func newScalarValue[
+	T any,
+	FI fromIFaceFunc[T],
+	FS fromStringFunc[T],
+](
+	val T,
+	description string,
+	fromIFace FI,
+	fromString FS,
+) scalarValue[T, FI, FS] {
+	return scalarValue[T, FI, FS]{
+		val:         val,
+		description: description,
+		fromIFace:   fromIFace,
+		fromString:  fromString,
+	}
+}
+
+func (v *scalarValue[_, _, _]) Description() string {
+	return v.description
+}
+
+func (v *scalarValue[_, _, _]) Get() interface{} {
+	return v.val
+}
+
+func (v *scalarValue[_, _, _]) ReplaceFromInterface(iFace interface{}) error {
+	val, err := v.fromIFace(iFace)
+	if err != nil {
+		return err
+	}
+	v.val = val
+	return nil
+}
+
+func (v *scalarValue[_, _, _]) String() string {
+	return fmt.Sprint(v.val)
+}
+
+func (scalarValue[_, _, _]) StringSlice() []string {
+	return nil
+}
+
+func (scalarValue[_, _, _]) TypeInfo() TypeInfo {
+	return TypeInfoScalar
+}
+
+func (v *scalarValue[_, _, _]) Update(s string) error {
+	val, err := v.fromString(s)
+	if err != nil {
+		return err
+	}
+	v.val = val
+	return nil
+}
+
+func (v *scalarValue[_, _, _]) UpdateFromInterface(iFace interface{}) error {
+	return v.ReplaceFromInterface(iFace)
+}
+
+//  -- SliceValue
+
+// It doesn't really make sense to use the Value type as the type param because then I get a list of values, when I want a list of the type the value contains. Also, if I use the Value interface, I'll need to initialize it before I can call any of it's methods I think. Using the the TRU
+// type params means that I can just use the constructor
+
+type sliceValue[
+	T any,
+	FI fromIFaceFunc[T],
+	FS fromStringFunc[T],
+] struct {
+	vals        []T
+	description string
+	fromIFace   FI
+	fromString  FS
+}
+
+func newSliceValue[
+	T any,
+	FI fromIFaceFunc[T],
+	FS fromStringFunc[T],
+](
+	vals []T,
+	description string,
+	fromIFace FI,
+	fromString FS,
+) sliceValue[T, FI, FS] {
+	return sliceValue[T, FI, FS]{
+		vals:        vals,
+		description: description,
+		fromIFace:   fromIFace,
+		fromString:  fromString,
+	}
+}
+
+func (v *sliceValue[_, _, _]) Description() string {
+	return v.description
+}
+
+func (v *sliceValue[_, _, _]) Get() interface{} {
+	return v.vals
+}
+
+func (v *sliceValue[T, _, _]) ReplaceFromInterface(iFace interface{}) error {
+	under, ok := iFace.([]interface{})
+	if !ok {
+		return ErrIncompatibleInterface
+	}
+
+	new := []T{}
+
+	// NOTE: in the previous impllementation, this method was able to use v.UpdateFromInterface  because it literally replaced all of the type's data, which was fine because the type was an alias for []T
+	// For this one, we should use the type parameter's fromIFace method because we're only wanting to work on the contained []T slice
+
+	for _, e := range under {
+		underE, err := v.fromIFace(e)
+		if err != nil {
+			// TODO: this won't communicate to the caller *which* element is the wrong type
+			return err
+		}
+		new = append(new, underE)
+	}
+	v.vals = new
+	return nil
+}
+
+func (v *sliceValue[_, _, _]) String() string {
+	return fmt.Sprint(v.vals)
+}
+
+func (v *sliceValue[_, _, _]) StringSlice() []string {
+	ret := make([]string, 0, len(v.vals))
+	for _, e := range v.vals {
+		ret = append(ret, fmt.Sprint(e))
+	}
+	return ret
+}
+
+func (sliceValue[_, _, _]) TypeInfo() TypeInfo {
+	return TypeInfoSlice
+}
+
+func (v *sliceValue[_, _, _]) Update(s string) error {
+	val, err := v.fromString(s)
+	if err != nil {
+		return err
+	}
+	v.vals = append(v.vals, val)
+	return nil
+}
+
+func (v *sliceValue[_, _, _]) UpdateFromInterface(iFace interface{}) error {
+	under, err := v.fromIFace(iFace)
+	if err != nil {
+		return ErrIncompatibleInterface
+	}
+
+	v.vals = append(v.vals, under)
+	return nil
+}
