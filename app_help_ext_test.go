@@ -112,6 +112,7 @@ func TestAppHelp(t *testing.T) {
 		{
 			name: "allcommandsSection",
 			app: warg.New(
+				"grabbit",
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
@@ -133,6 +134,7 @@ func TestAppHelp(t *testing.T) {
 		{
 			name: "detailedCommand",
 			app: warg.New(
+				"newAppName",
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
@@ -152,6 +154,7 @@ func TestAppHelp(t *testing.T) {
 		{
 			name: "detailedSection",
 			app: warg.New(
+				"newAppName",
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
@@ -173,6 +176,7 @@ func TestAppHelp(t *testing.T) {
 		{
 			name: "outlineCommand",
 			app: warg.New(
+				"grabbit",
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
@@ -192,6 +196,7 @@ func TestAppHelp(t *testing.T) {
 		{
 			name: "outlineSection",
 			app: warg.New(
+				"grabbit",
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{

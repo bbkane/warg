@@ -32,6 +32,7 @@ func exampleOverrideHelpFlagCustomSectionHelp(file *os.File, _ *section.SectionT
 
 func ExampleOverrideHelpFlag() {
 	app := warg.New(
+		"newAppName",
 		section.New(
 			"work with a fictional blog platform",
 			section.Command(

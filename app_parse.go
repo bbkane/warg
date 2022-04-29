@@ -19,9 +19,8 @@ type flagStr struct {
 }
 
 type gatherArgsResult struct {
-	// Appname holds os.Args[0]
-	AppName string
-	// Path holds the path to the current command/section
+
+	// Path holds the path to the current command/section. Does not include the app name
 	Path []string
 	// FlagStrs is a slice of flags and values passed from the CLI. It can't be a map because flags can have aliases and we need to preserve order
 	FlagStrs []flagStr
@@ -45,7 +44,6 @@ func containsString(haystack []string, needle string) bool {
 // See warg-gatherArgs-state-machine.png at the root of the repo for a diagram.
 func gatherArgs(osArgs []string, helpFlagNames []string) (*gatherArgsResult, error) {
 	res := &gatherArgsResult{}
-	res.AppName = osArgs[0]
 
 	startSt := "startSt"
 	helpFlagPassedSt := "helpFlagPassedSt"
@@ -303,9 +301,6 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	if err != nil {
 		return nil, err
 	}
-	if app.name != "" {
-		gar.AppName = app.name
-	}
 
 	ftar, err := fitToApp(app.rootSection, gar.Path)
 	if err != nil {
@@ -389,7 +384,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	// OK! Let's make the ParseResult for each case and gtfo
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
-		helpInfo := help.HelpInfo{AppName: gar.AppName, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}
+		helpInfo := help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}
 		// We know the helpFlag has a default so this is safe
 		helpType := ftar.AllowedFlags[flag.Name(app.helpFlagName)].Value.Get().(string)
 		for _, e := range app.helpMappings {
@@ -405,7 +400,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		return nil, fmt.Errorf("some problem with section help: info: %v", helpInfo)
 	} else if ftar.Section == nil && ftar.Command != nil {
 		if gar.HelpPassed {
-			helpInfo := help.HelpInfo{AppName: gar.AppName, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}
+			helpInfo := help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}
 			// We know the helpFlag has a default so this is safe
 			helpType := ftar.AllowedFlags[flag.Name(app.helpFlagName)].Value.Get().(string)
 			for _, e := range app.helpMappings {

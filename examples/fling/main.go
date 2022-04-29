@@ -45,6 +45,7 @@ func app() *warg.App {
 	}
 
 	app := warg.New(
+		"fling",
 		section.New(
 			"Link and unlink directory heirarchies ",
 			section.Command(

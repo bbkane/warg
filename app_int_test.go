@@ -21,7 +21,6 @@ func TestGatherArgs2(t *testing.T) {
 			args:          []string{t.Name()},
 			helpFlagNames: []string{"-h"},
 			expectedResult: &gatherArgsResult{
-				AppName:    t.Name(),
 				Path:       nil,
 				FlagStrs:   nil,
 				HelpPassed: false,
@@ -40,7 +39,6 @@ func TestGatherArgs2(t *testing.T) {
 			args:          []string{t.Name(), "-h"},
 			helpFlagNames: []string{"--help", "-h"},
 			expectedResult: &gatherArgsResult{
-				AppName:    t.Name(),
 				Path:       nil,
 				FlagStrs:   nil,
 				HelpPassed: true,
@@ -52,8 +50,7 @@ func TestGatherArgs2(t *testing.T) {
 			args:          []string{t.Name(), "-h", "val"},
 			helpFlagNames: []string{"--help", "-h"},
 			expectedResult: &gatherArgsResult{
-				AppName: t.Name(),
-				Path:    nil,
+				Path: nil,
 				FlagStrs: []flagStr{
 					{NameOrAlias: "-h", Value: "val", Consumed: false}},
 				HelpPassed: true,

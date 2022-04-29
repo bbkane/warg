@@ -110,18 +110,10 @@ func SkipValidation() AppOpt {
 	}
 }
 
-// Name sets the app name. If not passed,
-// the first value in the list passed to Parse will be used.
-// Usually, the value passed to Parse is os.Args, so os.Args[0] ends up as the name
-func Name(name string) AppOpt {
-	return func(a *App) {
-		a.name = name
-	}
-}
-
 // New builds a new App!
-func New(rootSection section.SectionT, opts ...AppOpt) App {
+func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 	app := App{
+		name:        name,
 		rootSection: rootSection,
 	}
 	for _, opt := range opts {
@@ -246,7 +238,7 @@ func validateFlags(
 func (app *App) Validate() error {
 	// NOTE: we need to be able to validate before we parse, and we may not know the app name
 	// till after prsing so set the root path to "root"
-	rootPath := []section.Name{"root"}
+	rootPath := []section.Name{section.Name(app.name)}
 	it := app.rootSection.BreadthFirst(rootPath)
 
 	for it.HasNext() {

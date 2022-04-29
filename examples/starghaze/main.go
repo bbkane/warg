@@ -171,6 +171,7 @@ func app() *warg.App {
 	)
 
 	app := warg.New(
+		"starghaze",
 		section.New(
 			"Save GitHub Starred Repos",
 			section.Command(

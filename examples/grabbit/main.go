@@ -78,6 +78,7 @@ func app() *warg.App {
 	)
 
 	app := warg.New(
+		"grabbit",
 		section.New(
 			"Get top images from subreddits",
 			section.ExistingCommand(
