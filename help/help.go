@@ -60,7 +60,7 @@ func leftPad(s string, pad string, plength int) string {
 // SetColor looks for a passed --color flag with an underlying string value. If
 // it exists and is set to "true", or if it exists, is set to "auto",
 // and the passed file is a TTY, an enabled Color is returned.
-func ConditionallyEnableColor(pf flag.PassedFlags, file *os.File) (gocolor.Color, error) {
+func ConditionallyEnableColor(pf command.PassedFlags, file *os.File) (gocolor.Color, error) {
 	// default to trying to use color
 	useColor := "auto"
 	// respect a --color string

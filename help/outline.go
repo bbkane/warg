@@ -61,11 +61,11 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, inde
 }
 
 func OutlineSectionHelp(file *os.File, _ *section.SectionT, hi HelpInfo) command.Action {
-	return func(pf flag.PassedFlags) error {
+	return func(pf command.Context) error {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(pf, file)
+		col, err := ConditionallyEnableColor(pf.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}

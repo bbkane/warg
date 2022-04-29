@@ -6,17 +6,16 @@ import (
 	"os"
 
 	"go.bbkane.com/warg/command"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
 )
 
 func AllCommandsSectionHelp(file *os.File, cur *section.SectionT, helpInfo HelpInfo) command.Action {
-	return func(pf flag.PassedFlags) error {
+	return func(pf command.Context) error {
 
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(pf, file)
+		col, err := ConditionallyEnableColor(pf.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}

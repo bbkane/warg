@@ -284,8 +284,8 @@ func resolveFlag(
 type ParseResult struct {
 	// Path to the command invoked. Does not include executable name (os.Args[0])
 	Path []string
-	// PassedFlags holds the set flags!
-	PassedFlags flag.PassedFlags
+	// Context holds the parsed information
+	Context command.Context
 	// Action holds the passed command's action to execute.
 	Action command.Action
 }
@@ -374,7 +374,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		}
 	}
 
-	pfs := make(flag.PassedFlags)
+	pfs := make(command.PassedFlags)
 	for name, fl := range ftar.AllowedFlags {
 		if fl.SetBy != "" {
 			pfs[string(name)] = fl.Value.Get()
@@ -390,9 +390,11 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		for _, e := range app.helpMappings {
 			if e.Name == helpType {
 				pr := ParseResult{
-					Path:        gar.Path,
-					PassedFlags: pfs,
-					Action:      e.SectionHelp(app.HelpFile, ftar.Section, helpInfo),
+					Path: gar.Path,
+					Context: command.Context{
+						Flags: pfs,
+					},
+					Action: e.SectionHelp(app.HelpFile, ftar.Section, helpInfo),
 				}
 				return &pr, nil
 			}
@@ -406,9 +408,11 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 			for _, e := range app.helpMappings {
 				if e.Name == helpType {
 					pr := ParseResult{
-						Path:        gar.Path,
-						PassedFlags: pfs,
-						Action:      e.CommandHelp(app.HelpFile, ftar.Command, helpInfo),
+						Path: gar.Path,
+						Context: command.Context{
+							Flags: pfs,
+						},
+						Action: e.CommandHelp(app.HelpFile, ftar.Command, helpInfo),
 					}
 					return &pr, nil
 				}
@@ -417,9 +421,11 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		} else {
 
 			pr := ParseResult{
-				Path:        gar.Path,
-				PassedFlags: pfs,
-				Action:      ftar.Action,
+				Path: gar.Path,
+				Context: command.Context{
+					Flags: pfs,
+				},
+				Action: ftar.Action,
 			}
 			return &pr, nil
 		}

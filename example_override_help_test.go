@@ -11,20 +11,20 @@ import (
 	"go.bbkane.com/warg/section"
 )
 
-func exampleOverrideHelpFlaglogin(pf flag.PassedFlags) error {
+func exampleOverrideHelpFlaglogin(_ command.Context) error {
 	fmt.Println("Logging in")
 	return nil
 }
 
 func exampleOverrideHelpFlagCustomCommandHelp(file *os.File, _ *command.Command, _ help.HelpInfo) command.Action {
-	return func(_ flag.PassedFlags) error {
+	return func(_ command.Context) error {
 		fmt.Fprintln(file, "Custom command help")
 		return nil
 	}
 }
 
 func exampleOverrideHelpFlagCustomSectionHelp(file *os.File, _ *section.SectionT, _ help.HelpInfo) command.Action {
-	return func(_ flag.PassedFlags) error {
+	return func(_ command.Context) error {
 		fmt.Fprintln(file, "Custom section help")
 		return nil
 	}

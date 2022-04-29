@@ -151,7 +151,7 @@ func (app *App) MustRun(osArgs []string, osLookupEnv LookupFunc) {
 		// https://unix.stackexchange.com/a/254747/185953
 		os.Exit(64)
 	}
-	err = pr.Action(pr.PassedFlags)
+	err = pr.Action(pr.Context)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

@@ -14,8 +14,8 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
-func exampleConfigFlagTextAdd(pf flag.PassedFlags) error {
-	addends := pf["--addend"].([]int)
+func exampleConfigFlagTextAdd(ctx command.Context) error {
+	addends := ctx.Flags["--addend"].([]int)
 	sum := 0
 	for _, a := range addends {
 		sum += a

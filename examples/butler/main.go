@@ -37,9 +37,9 @@ func buildApp() warg.App {
 	return app
 }
 
-func present(pf flag.PassedFlags) error {
+func present(ctx command.Context) error {
 	// this is a required flag, so we know it exists
-	name := pf["--name"].(string)
+	name := ctx.Flags["--name"].(string)
 	fmt.Printf("May I present to you %s.\n", name)
 	return nil
 }

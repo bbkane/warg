@@ -46,9 +46,6 @@ func (fm FlagMap) AddFlags(flagMap FlagMap) {
 // FlagOpt customizes a Flag on creation
 type FlagOpt func(*Flag)
 
-// PassedFlags holds a map of flag names to flag Values and is passed to a command's Action
-type PassedFlags map[string]interface{} // This can just stay a string for the convenience of the user.
-
 type Flag struct {
 	// Alias is an alternative name for a flag, usually shorter :)
 	Alias Name

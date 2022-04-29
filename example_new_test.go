@@ -11,12 +11,12 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
-func login(pf flag.PassedFlags) error {
-	url := pf["--url"].(string)
+func login(ctx command.Context) error {
+	url := ctx.Flags["--url"].(string)
 
 	// timeout doesn't have a default value,
 	// so we can't rely on it being passed.
-	timeout, exists := pf["--timeout"]
+	timeout, exists := ctx.Flags["--timeout"]
 	if exists {
 		timeout := timeout.(int)
 		fmt.Printf("Logging into %s with timeout %d\n", url, timeout)

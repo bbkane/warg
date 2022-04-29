@@ -223,7 +223,8 @@ func TestAppHelp(t *testing.T) {
 			pr, parseErr := tt.app.Parse(tt.args, tt.lookup)
 			assert.Nil(t, parseErr)
 
-			actionErr := pr.Action(pr.PassedFlags)
+			// TODO: command.DoNothing returns an error. Shouldn't this be not nil?
+			actionErr := pr.Action(pr.Context)
 			assert.Nil(t, actionErr)
 
 			closeErr := tt.app.HelpFile.Close()

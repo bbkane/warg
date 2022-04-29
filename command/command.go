@@ -8,8 +8,16 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
+// PassedFlags holds a map of flag names to flag Values
+type PassedFlags map[string]interface{} // This can just stay a string for the convenience of the user.
+
+// Context holds everything a command needs. Right now that's just passed flags
+type Context struct {
+	Flags PassedFlags
+}
+
 // An Action is run as the result of a command
-type Action func(flag.PassedFlags) error
+type Action func(Context) error
 
 type HelpShort string
 
@@ -53,7 +61,7 @@ type Command struct {
 
 // DoNothing is a command action that simply returns nil
 // Useful for prototyping
-func DoNothing(_ flag.PassedFlags) error {
+func DoNothing(_ Context) error {
 	return errors.New("TODO: replace this command.DoNothing call")
 }
 

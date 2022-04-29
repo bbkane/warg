@@ -40,7 +40,7 @@ func TestApp_Parse(t *testing.T) {
 		args                     []string
 		lookup                   warg.LookupFunc
 		expectedPassedPath       []string
-		expectedPassedFlagValues flag.PassedFlags
+		expectedPassedFlagValues command.PassedFlags
 		expectedErr              bool
 	}{
 		{
@@ -76,7 +76,7 @@ func TestApp_Parse(t *testing.T) {
 			args:                     []string{"app", "cat1", "com1", "--com1f1", "1"},
 			lookup:                   warg.LookupMap(nil),
 			expectedPassedPath:       []string{"cat1", "com1"},
-			expectedPassedFlagValues: flag.PassedFlags{"--com1f1": int(1), "--help": "default"},
+			expectedPassedFlagValues: command.PassedFlags{"--com1f1": int(1), "--help": "default"},
 			expectedErr:              false,
 		},
 		{
@@ -123,7 +123,7 @@ func TestApp_Parse(t *testing.T) {
 			args:                     []string{"test", "com"},
 			lookup:                   warg.LookupMap(nil),
 			expectedPassedPath:       []string{"com"},
-			expectedPassedFlagValues: flag.PassedFlags{"--flag": "hi", "--help": "default"},
+			expectedPassedFlagValues: command.PassedFlags{"--flag": "hi", "--help": "default"},
 			expectedErr:              false,
 		},
 		{
@@ -191,7 +191,7 @@ func TestApp_Parse(t *testing.T) {
 			args:               []string{"test", "print", "--config", "passedconfigval"},
 			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"print"},
-			expectedPassedFlagValues: flag.PassedFlags{
+			expectedPassedFlagValues: command.PassedFlags{
 				"--key":    "mapkeyval",
 				"--config": "passedconfigval",
 				"--help":   "default",
@@ -221,7 +221,7 @@ func TestApp_Parse(t *testing.T) {
 			args:               []string{"test", "com"},
 			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: flag.PassedFlags{
+			expectedPassedFlagValues: command.PassedFlags{
 				"--sflag": "sflagval",
 				"--help":  "default",
 			},
@@ -256,7 +256,7 @@ func TestApp_Parse(t *testing.T) {
 			args:               []string{"app", "com"},
 			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: flag.PassedFlags{
+			expectedPassedFlagValues: command.PassedFlags{
 				"--config": testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json"),
 				"--val":    "hi",
 				"--help":   "default",
@@ -288,7 +288,7 @@ func TestApp_Parse(t *testing.T) {
 			args:               []string{"test", "print"},
 			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"print"},
-			expectedPassedFlagValues: flag.PassedFlags{
+			expectedPassedFlagValues: command.PassedFlags{
 				"--subreddits": []string{"earthporn", "wallpapers"},
 				"--config":     testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
 				"--help":       "default",
@@ -323,7 +323,7 @@ func TestApp_Parse(t *testing.T) {
 				},
 			),
 			expectedPassedPath: []string{"test"},
-			expectedPassedFlagValues: flag.PassedFlags{
+			expectedPassedFlagValues: command.PassedFlags{
 				"--flag": "there",
 				"--help": "default",
 			},
@@ -354,7 +354,7 @@ func TestApp_Parse(t *testing.T) {
 				nil,
 			),
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: flag.PassedFlags{},
+			expectedPassedFlagValues: command.PassedFlags{},
 			expectedErr:              true,
 		},
 		{
@@ -380,7 +380,7 @@ func TestApp_Parse(t *testing.T) {
 			args:                     []string{t.Name(), "test", "-f", "val"},
 			lookup:                   warg.LookupMap(nil),
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: flag.PassedFlags{"--flag": "val", "--help": "default"},
+			expectedPassedFlagValues: command.PassedFlags{"--flag": "val", "--help": "default"},
 			expectedErr:              false,
 		},
 		{
@@ -406,7 +406,7 @@ func TestApp_Parse(t *testing.T) {
 			args:                     []string{t.Name(), "test", "-f", "1", "--flag", "2", "-f", "3", "--flag", "4"},
 			lookup:                   warg.LookupMap(nil),
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: flag.PassedFlags{"--flag": []string{"1", "2", "3", "4"}, "--help": "default"},
+			expectedPassedFlagValues: command.PassedFlags{"--flag": []string{"1", "2", "3", "4"}, "--help": "default"},
 			expectedErr:              false,
 		},
 		{
@@ -455,7 +455,7 @@ func TestApp_Parse(t *testing.T) {
 			args:                     []string{t.Name(), "test", "--flag1", "val1"},
 			lookup:                   warg.LookupMap(nil),
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: flag.PassedFlags{"--flag1": "val1", "--help": "default"},
+			expectedPassedFlagValues: command.PassedFlags{"--flag1": "val1", "--help": "default"},
 			expectedErr:              false,
 		},
 		{
@@ -484,7 +484,7 @@ func TestApp_Parse(t *testing.T) {
 			args:                     []string{t.Name(), "test", "--flag1", "val1"},
 			lookup:                   warg.LookupMap(nil),
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: flag.PassedFlags{"--flag1": "val1", "--help": "default"},
+			expectedPassedFlagValues: command.PassedFlags{"--flag1": "val1", "--help": "default"},
 			expectedErr:              false,
 		},
 		{
@@ -516,7 +516,7 @@ func TestApp_Parse(t *testing.T) {
 			args:               []string{"app", "com"},
 			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: flag.PassedFlags{
+			expectedPassedFlagValues: command.PassedFlags{
 				"--config": testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json"),
 				"--val":    []string{"from", "config"},
 				"--help":   "default",
@@ -552,7 +552,7 @@ func TestApp_Parse(t *testing.T) {
 			args:               []string{"app", "com"},
 			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: flag.PassedFlags{
+			expectedPassedFlagValues: command.PassedFlags{
 				"--config": testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml"),
 				"--val":    []string{"from", "config"},
 				"--help":   "default",
@@ -575,8 +575,9 @@ func TestApp_Parse(t *testing.T) {
 				assert.Nil(t, actualErr)
 			}
 
+			// TODO: I wish I'd made this compare a parse result with a parse result instead of field by field
 			assert.Equal(t, tt.expectedPassedPath, actualPR.Path)
-			assert.Equal(t, tt.expectedPassedFlagValues, actualPR.PassedFlags)
+			assert.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
 		})
 	}
 }

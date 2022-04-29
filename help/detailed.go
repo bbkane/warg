@@ -126,11 +126,11 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 }
 
 func DetailedCommandHelp(file *os.File, cur *command.Command, helpInfo HelpInfo) command.Action {
-	return func(pf flag.PassedFlags) error {
+	return func(pf command.Context) error {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(pf, file)
+		col, err := ConditionallyEnableColor(pf.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
@@ -179,12 +179,12 @@ func DetailedCommandHelp(file *os.File, cur *command.Command, helpInfo HelpInfo)
 }
 
 func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ HelpInfo) command.Action {
-	return func(pf flag.PassedFlags) error {
+	return func(pf command.Context) error {
 
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(pf, file)
+		col, err := ConditionallyEnableColor(pf.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
