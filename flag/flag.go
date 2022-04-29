@@ -84,7 +84,7 @@ type Flag struct {
 	TypeDescription string
 
 	// TypeInfo is set when parsing. Describes the "shape" of the type
-	TypeInfo value.TypeInfo
+	TypeInfo value.TypeContainer
 
 	// Value might be set when parsing. The interface returned by updating a flag
 	Value value.Value
@@ -124,7 +124,7 @@ func Default(values ...string) FlagOpt {
 		if err != nil {
 			log.Panicf("cannot create empty flag value when checking default: %v", flag)
 		}
-		if empty.TypeInfo() == value.TypeInfoScalar && len(values) != 1 {
+		if empty.TypeInfo() == value.TypeContainerScalar && len(values) != 1 {
 			log.Panicf("a scalar flag should only have one default value: We don't know the name of the type, but here's the Help: %#v", flag.HelpShort)
 		}
 		flag.DefaultValues = values

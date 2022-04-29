@@ -41,7 +41,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 
 	// TODO: should I print these one by one like I do value?
 	if len(f.DefaultValues) > 0 {
-		if f.TypeInfo == value.TypeInfoScalar {
+		if f.TypeInfo == value.TypeContainerScalar {
 			fmt.Fprintf(
 				w,
 				"    %s : %s\n",
@@ -82,7 +82,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 	}
 
 	if f.SetBy != "" {
-		if f.TypeInfo == value.TypeInfoSlice {
+		if f.TypeInfo == value.TypeContainerSlice {
 
 			sliceLen := len(fmt.Sprint(len(f.Value.StringSlice())))
 

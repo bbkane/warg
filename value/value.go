@@ -5,13 +5,13 @@ import (
 	"fmt"
 )
 
-type TypeInfo int64
+type TypeContainer int64
 
 // These constants describe the container type of a Value.
 const (
-	TypeInfoScalar TypeInfo = iota + 1
-	TypeInfoSlice
-	TypeInfoMap
+	TypeContainerScalar TypeContainer = iota + 1
+	TypeContainerSlice
+	TypeContainerMap
 )
 
 // Value is a "generic" type to store different types into flags
@@ -43,7 +43,7 @@ type Value interface {
 	StringSlice() []string
 
 	// TypeInfo specifies whether what "overall" type of value this is - scalar, slice, etc.
-	TypeInfo() TypeInfo
+	TypeInfo() TypeContainer
 
 	// Update appends to container type Values from a string (useful for CLI flags, env vars, default values)
 	// and replaces scalar Values
@@ -154,8 +154,8 @@ func (scalarValue[_, _, _]) StringSlice() []string {
 	return nil
 }
 
-func (scalarValue[_, _, _]) TypeInfo() TypeInfo {
-	return TypeInfoScalar
+func (scalarValue[_, _, _]) TypeInfo() TypeContainer {
+	return TypeContainerScalar
 }
 
 func (v *scalarValue[_, _, _]) Update(s string) error {
@@ -248,8 +248,8 @@ func (v *sliceValue[_, _, _]) StringSlice() []string {
 	return ret
 }
 
-func (sliceValue[_, _, _]) TypeInfo() TypeInfo {
-	return TypeInfoSlice
+func (sliceValue[_, _, _]) TypeInfo() TypeContainer {
+	return TypeContainerSlice
 }
 
 func (v *sliceValue[_, _, _]) Update(s string) error {

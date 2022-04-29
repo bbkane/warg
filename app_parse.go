@@ -198,7 +198,7 @@ func resolveFlag(
 		}
 
 		if fl.SetBy == "" && len(strValues) > 0 {
-			if val.TypeInfo() == value.TypeInfoScalar && len(strValues) > 1 {
+			if val.TypeInfo() == value.TypeContainerScalar && len(strValues) > 1 {
 				return fmt.Errorf("flag error: %v: flag passed multiple times, it's value (type %v), can only be updated once", name, fl.TypeDescription)
 			}
 
