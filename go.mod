@@ -6,6 +6,7 @@ require (
 	github.com/alecthomas/assert v1.0.0
 	github.com/mattn/go-isatty v0.0.14
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/xhit/go-str2duration/v2 v2.0.0
 	go.bbkane.com/gocolor v0.0.4
 	gopkg.in/yaml.v2 v2.4.0
 )

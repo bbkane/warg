@@ -52,7 +52,7 @@ func app() *warg.App {
 			"--subreddit-timeframe",
 			"Take the top subreddits from this timeframe",
 			// TODO: this should be a StringEnumSlice once that's implemented
-			value.StringSlice,
+			value.StringEnumSlice("day", "week", "month", "year", "all"),
 			flag.Alias("-st"),
 			flag.Default("week", "week"),
 			flag.ConfigPath("subreddits[].timeframe"),

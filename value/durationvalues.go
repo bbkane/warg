@@ -1,6 +1,10 @@
 package value
 
-import "time"
+import (
+	"time"
+
+	str2duration "github.com/xhit/go-str2duration/v2"
+)
 
 func durationFromIFace(iFace interface{}) (time.Duration, error) {
 	under, ok := iFace.(string)
@@ -11,14 +15,14 @@ func durationFromIFace(iFace interface{}) (time.Duration, error) {
 }
 
 func durationFromString(s string) (time.Duration, error) {
-	decoded, err := time.ParseDuration(s)
+	decoded, err := str2duration.ParseDuration(s)
 	if err != nil {
 		return 0, err
 	}
 	return decoded, nil
 }
 
-// Duration is updateable from a string parsed with https://pkg.go.dev/time#ParseDuration
+// Duration is updateable from a string parsed with https://pkg.go.dev/github.com/xhit/go-str2duration/v2#ParseDuration . Examples: "30s" (30 seconds), "3d" (3 days)
 func Duration() (Value, error) {
 	s := newScalarValue(
 		0,
