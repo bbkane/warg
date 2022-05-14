@@ -1,6 +1,6 @@
 # warg
 
-Build heirarchical CLI applications with warg!
+Build hierarchical CLI applications with warg!
 
 - warg uses [funcopt](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis) style declarative APIs to keep CLIs readable (nested commands can be indented!) and terse. warg does not require code generation.
 - warg is extremely interested in getting information into your app. Ensure a flag can be set from an environmental variable, configuration file, or default value by adding a single line to the flag declaration (configuration files also take some app-level config).
@@ -80,7 +80,7 @@ taking a break from developing on warg to develop some CLIs with warg.
 
 ## Sections, Commands, and Flags
 
-warg is designed to create heirarchical CLI applications similar to [azure-cli](https://github.com/Azure/azure-cli) (just to be clear, azure-cli is not built with warg, but it was my inspiration for warg). These apps use sections to group subcommands, and pass information via flags, not positional arguments. A few examples:
+warg is designed to create hierarchical CLI applications similar to [azure-cli](https://github.com/Azure/azure-cli) (just to be clear, azure-cli is not built with warg, but it was my inspiration for warg). These apps use sections to group subcommands, and pass information via flags, not positional arguments. A few examples:
 
 ### azure-cli
 
@@ -91,7 +91,7 @@ az keyvault certificate show --name <name> --vault-name <vault-name>
 If we try to dissect the parts of this command, we see that it:
 
 - Starts with the app name (`az`).
-- Narrows down intent with a section (`keyvault`). Sections are usually nouns and function similarly to a directory heirarchy on a computer - used to group related sections and commands so they're easy to find and use together.
+- Narrows down intent with a section (`keyvault`). Sections are usually nouns and function similarly to a directory hierarchy on a computer - used to group related sections and commands so they're easy to find and use together.
 - Narrows down intent further with another section (`certificate`).
 - Ends with a command (`show`). Commands are usually verbs and specify a single action to take within that section.
 - Passes information to the command with flags (`--name`, `--vault-name`).
