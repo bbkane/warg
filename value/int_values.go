@@ -11,8 +11,9 @@ func intFromIFace(iFace interface{}) (int, error) {
 		return under, nil
 	case float64:
 		return int(under), nil
+	default:
+		return 0, ErrIncompatibleInterface
 	}
-	return 0, ErrIncompatibleInterface
 }
 
 func intFromString(s string) (int, error) {
