@@ -249,7 +249,7 @@ func TestAppHelp(t *testing.T) {
 			}
 
 			expectedBytes, expectedReadErr := ioutil.ReadFile(goldenFilePath)
-			assert.Nil(t, expectedReadErr)
+			assert.Nil(t, expectedReadErr, "actualBytes: \n%s", string(actualHelpBytes))
 
 			if !bytes.Equal(expectedBytes, actualHelpBytes) {
 				t.Fatalf(

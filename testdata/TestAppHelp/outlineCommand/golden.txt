@@ -1,7 +1,5 @@
 # grab those images!
 grabbit
-  # path to editor
-  --editor
   # Print help information
   --help , -h
   # another command

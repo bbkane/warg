@@ -108,12 +108,20 @@ type fitToAppResult struct {
 
 // fitToApp takes the command entered by a user and uses it to "walk" down the apps command tree to build what the command was and what the available flags are.
 func fitToApp(rootSection section.SectionT, path []string) (*fitToAppResult, error) {
+
+	// AllowedFlags grows, as we traverse the tree; copy rootSection.Flags.
+	// We need a pristine rootsection.Flags for --help printing
+	allowedFlags := make(flag.FlagMap)
+	for k, v := range rootSection.Flags {
+		allowedFlags[k] = v
+	}
+
 	// validate passed command and get available flags
 	ftar := fitToAppResult{
 		Section:            &rootSection,
 		Command:            nil, // we start with a section, not a command
 		Action:             nil,
-		AllowedFlags:       rootSection.Flags,
+		AllowedFlags:       allowedFlags,
 		AllowedFlagAliases: make(flagNameToAlias),
 	}
 	// Add any root flag aliases to AllowedFlagAliases
@@ -283,7 +291,7 @@ func resolveFlag(
 // ParseResult holds the result of parsing the command line.
 type ParseResult struct {
 	// Path to the command invoked. Does not include executable name (os.Args[0])
-	Path []string
+	Path []string // TODO: consider moving this inside the command.Context
 	// Context holds the parsed information
 	Context command.Context
 	// Action holds the passed command's action to execute.
@@ -384,7 +392,12 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	// OK! Let's make the ParseResult for each case and gtfo
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
-		helpInfo := help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}
+		helpInfo := help.HelpInfo{
+			AppName:        app.name,
+			Path:           gar.Path,
+			AvailableFlags: ftar.AllowedFlags,
+			RootSection:    app.rootSection,
+		}
 		// We know the helpFlag has a default so this is safe
 		helpType := ftar.AllowedFlags[flag.Name(app.helpFlagName)].Value.Get().(string)
 		for _, e := range app.helpMappings {
@@ -402,7 +415,12 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		return nil, fmt.Errorf("some problem with section help: info: %v", helpInfo)
 	} else if ftar.Section == nil && ftar.Command != nil {
 		if gar.HelpPassed {
-			helpInfo := help.HelpInfo{AppName: app.name, Path: gar.Path, AvailableFlags: ftar.AllowedFlags, RootSection: app.rootSection}
+			helpInfo := help.HelpInfo{
+				AppName:        app.name,
+				Path:           gar.Path,
+				AvailableFlags: ftar.AllowedFlags,
+				RootSection:    app.rootSection,
+			}
 			// We know the helpFlag has a default so this is safe
 			helpType := ftar.AllowedFlags[flag.Name(app.helpFlagName)].Value.Get().(string)
 			for _, e := range app.helpMappings {
