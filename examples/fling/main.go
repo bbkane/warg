@@ -72,6 +72,7 @@ func app() *warg.App {
 				flag.Alias("-c"),
 				flag.Default("auto"),
 			),
+			section.Footer("Homepage: https://github.com/bbkane/fling"),
 		),
 		warg.SkipValidation(),
 	)

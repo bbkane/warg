@@ -9,3 +9,4 @@ var gSheetsOpen = command.DoNothing
 var gSheetsUpload = command.DoNothing
 var githubStarsDownload = command.DoNothing
 var printVersion = command.DoNothing
+var search = command.DoNothing

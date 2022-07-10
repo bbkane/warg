@@ -170,6 +170,35 @@ func app() *warg.App {
 		),
 	)
 
+	searchCmd := command.New(
+
+		"Full text search SQLite database",
+		search,
+		command.Flag(
+			"--limit",
+			"Max number of results",
+			value.Int,
+			flag.Default("50"),
+			flag.Required(),
+		),
+		command.Flag(
+			"--sqlite-dsn",
+			"Sqlite DSN. Usually the file name.",
+			value.String,
+			flag.Default("starghaze.db"),
+			flag.Required(),
+		),
+		command.Flag(
+			"--term",
+			"Search for this term",
+			value.String,
+			flag.Alias("-t"),
+			flag.Required(),
+		),
+
+		// TODO: how many results? limit by date added?
+	)
+
 	app := warg.New(
 		"starghaze",
 		section.New(
@@ -187,10 +216,15 @@ func app() *warg.App {
 				"format",
 				formatCmd,
 			),
+			section.ExistingCommand(
+				"search",
+				searchCmd,
+			),
 			section.ExistingSection(
 				"gsheets",
 				gsheetsSection,
 			),
+			section.Footer("Homepage: https://github.com/bbkane/starghaze"),
 		),
 		warg.SkipValidation(),
 	)
