@@ -2,11 +2,14 @@
 package warg
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"runtime/debug"
 	"strings"
 
+	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
@@ -110,6 +113,29 @@ func SkipValidation() AppOpt {
 	}
 }
 
+// AddVersionCommand adds a "version" command to the root section.
+// Pass an empty string to use .Main.Version from `debug.ReadBuildInfo`,
+// which returns "(devel)" when using `go run`
+func AddVersionCommand(version string) AppOpt {
+	return func(a *App) {
+		action := func(ctx command.Context) error {
+			if version != "" {
+				fmt.Println(version)
+				return nil
+			}
+			// If installed via `go install`, we'll be able to read runtime version info
+			info, ok := debug.ReadBuildInfo()
+			if !ok {
+				return errors.New("unable to read build info")
+			}
+			// when run with `go run`, this will return "(devel)"
+			fmt.Println(info.Main.Version)
+			return nil
+		}
+		section.Command("version", "Print version", action)(&a.rootSection)
+	}
+}
+
 // New builds a new App!
 func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 	app := App{
@@ -171,9 +197,9 @@ func LookupMap(m map[string]string) LookupFunc {
 
 type flagNameSet map[flag.Name]struct{}
 
-// AddFlags adds a flag's name and alias to the set. Returns an error
+// addFlags adds a flag's name and alias to the set. Returns an error
 // if the name OR alias already exists
-func (fs flagNameSet) AddFlags(fm flag.FlagMap) error {
+func (fs flagNameSet) addFlags(fm flag.FlagMap) error {
 	for flagName := range fm {
 		_, exists := fs[flagName]
 		if exists {
@@ -201,17 +227,17 @@ func validateFlags(
 	nameSet := make(flagNameSet)
 	var err error
 
-	err = nameSet.AddFlags(inheritedFlags)
+	err = nameSet.addFlags(inheritedFlags)
 	if err != nil {
 		return err
 	}
 
-	err = nameSet.AddFlags(secFlags)
+	err = nameSet.addFlags(secFlags)
 	if err != nil {
 		return err
 	}
 
-	err = nameSet.AddFlags(comFlags)
+	err = nameSet.addFlags(comFlags)
 	if err != nil {
 		return err
 	}

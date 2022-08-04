@@ -49,11 +49,6 @@ func app() *warg.App {
 		section.New(
 			"Link and unlink directory heirarchies ",
 			section.Command(
-				"version",
-				"Print version",
-				printVersion,
-			),
-			section.Command(
 				"link",
 				"Create links",
 				link,
@@ -74,6 +69,7 @@ func app() *warg.App {
 			),
 			section.Footer("Homepage: https://github.com/bbkane/fling"),
 		),
+		warg.AddVersionCommand(version),
 		warg.SkipValidation(),
 	)
 	return &app

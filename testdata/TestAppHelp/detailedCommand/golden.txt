@@ -17,6 +17,9 @@ Inherited Section Flags
     default : detailed
     currentvalue (set by appdefault) : detailed
 
+
+Footer:
+
 Examples:
 
 	# Use defaults

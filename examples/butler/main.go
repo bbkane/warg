@@ -30,6 +30,7 @@ func buildApp() warg.App {
 				),
 			),
 		),
+		warg.AddVersionCommand(""),
 		// Run the validation in a test instead of every
 		// time the app is created.
 		warg.SkipValidation(),

@@ -203,11 +203,6 @@ func app() *warg.App {
 		"starghaze",
 		section.New(
 			"Save GitHub Starred Repos",
-			section.Command(
-				"version",
-				"Print version",
-				printVersion,
-			),
 			section.ExistingCommand(
 				"download",
 				downloadCmd,
@@ -226,6 +221,7 @@ func app() *warg.App {
 			),
 			section.Footer("Homepage: https://github.com/bbkane/starghaze"),
 		),
+		warg.AddVersionCommand(version),
 		warg.SkipValidation(),
 	)
 	return &app

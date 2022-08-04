@@ -87,11 +87,6 @@ Homepage: https://github.com/bbkane/grabbit
 				grabCmd,
 			),
 			section.Footer(appFooter),
-			section.Command(
-				"version",
-				"Print version",
-				printVersion,
-			),
 			section.Flag(
 				"--color",
 				"Use colorized output",
@@ -156,6 +151,7 @@ Homepage: https://github.com/bbkane/grabbit
 			flag.Alias("-c"),
 			flag.Default("~/.config/grabbit.yaml"),
 		),
+		warg.AddVersionCommand(version),
 		warg.SkipValidation(),
 	)
 	return &app
