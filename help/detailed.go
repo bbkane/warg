@@ -171,6 +171,9 @@ func DetailedCommandHelp(file *os.File, cur *command.Command, helpInfo HelpInfo)
 			}
 		}
 		if cur.Footer != "" {
+			fmt.Fprintln(f)
+			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Footer")+":")
+			fmt.Fprintln(f)
 			fmt.Fprintf(f, "%s\n", cur.Footer)
 		}
 		return nil
