@@ -1,4 +1,4 @@
-package help
+package allcommands
 
 import (
 	"bufio"
@@ -6,16 +6,17 @@ import (
 	"os"
 
 	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/section"
 )
 
-func AllCommandsSectionHelp(file *os.File, cur *section.SectionT, helpInfo HelpInfo) command.Action {
+func AllCommandsSectionHelp(file *os.File, cur *section.SectionT, helpInfo common.HelpInfo) command.Action {
 	return func(pf command.Context) error {
 
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(pf.Flags, file)
+		col, err := common.ConditionallyEnableColor(pf.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
@@ -29,7 +30,7 @@ func AllCommandsSectionHelp(file *os.File, cur *section.SectionT, helpInfo HelpI
 
 		fmt.Fprintln(f)
 
-		fmt.Fprintln(f, fmtHeader(&col, "All Commands")+" (use <cmd> -h to see flag details):")
+		fmt.Fprintln(f, common.FmtHeader(&col, "All Commands")+" (use <cmd> -h to see flag details):")
 		fmt.Fprintln(f)
 
 		path := []section.Name{section.Name(helpInfo.AppName)}
@@ -50,16 +51,16 @@ func AllCommandsSectionHelp(file *os.File, cur *section.SectionT, helpInfo HelpI
 				fmt.Fprintf(f, "  ")
 
 				for _, p := range flatSec.Path {
-					fmt.Fprintf(f, fmtCommandName(&col, command.Name(p))+" ")
+					fmt.Fprintf(f, common.FmtCommandName(&col, command.Name(p))+" ")
 				}
-				fmt.Fprintln(f, fmtCommandName(&col, name))
+				fmt.Fprintln(f, common.FmtCommandName(&col, name))
 
 				fmt.Fprintln(f)
 			}
 
 		}
 		if cur.Footer != "" {
-			fmt.Fprintln(f, fmtHeader(&col, "Footer")+":")
+			fmt.Fprintln(f, common.FmtHeader(&col, "Footer")+":")
 			fmt.Fprintln(f)
 			fmt.Fprintf(f, "%s\n", cur.Footer)
 		}

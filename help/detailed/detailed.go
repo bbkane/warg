@@ -1,4 +1,4 @@
-package help
+package detailed
 
 import (
 	"bufio"
@@ -11,6 +11,7 @@ import (
 	"go.bbkane.com/gocolor"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 )
@@ -20,15 +21,15 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 		fmt.Fprintf(
 			w,
 			"  %s , %s : %s\n",
-			fmtFlagName(color, name),
-			fmtFlagAlias(color, f.Alias),
+			common.FmtFlagName(color, name),
+			common.FmtFlagAlias(color, f.Alias),
 			f.HelpShort,
 		)
 	} else {
 		fmt.Fprintf(
 			w,
 			"  %s : %s\n",
-			fmtFlagName(color, name),
+			common.FmtFlagName(color, name),
 			f.HelpShort,
 		)
 	}
@@ -106,7 +107,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 					"      %s %s\n",
 					color.Add(
 						color.Bold,
-						leftPad(indexStr, "0", padding)+")",
+						common.LeftPad(indexStr, "0", padding)+")",
 					),
 					e,
 				)
@@ -125,12 +126,12 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 	fmt.Fprintln(w)
 }
 
-func DetailedCommandHelp(file *os.File, cur *command.Command, helpInfo HelpInfo) command.Action {
+func DetailedCommandHelp(file *os.File, cur *command.Command, helpInfo common.HelpInfo) command.Action {
 	return func(pf command.Context) error {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(pf.Flags, file)
+		col, err := common.ConditionallyEnableColor(pf.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
@@ -181,13 +182,13 @@ func DetailedCommandHelp(file *os.File, cur *command.Command, helpInfo HelpInfo)
 	}
 }
 
-func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ HelpInfo) command.Action {
+func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ common.HelpInfo) command.Action {
 	return func(pf command.Context) error {
 
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(pf.Flags, file)
+		col, err := common.ConditionallyEnableColor(pf.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
@@ -210,7 +211,7 @@ func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ HelpInfo) comma
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					fmtSectionName(&col, k),
+					common.FmtSectionName(&col, k),
 					cur.Sections[k].HelpShort,
 				)
 			}
@@ -227,7 +228,7 @@ func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ HelpInfo) comma
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					fmtCommandName(&col, k),
+					common.FmtCommandName(&col, k),
 					cur.Commands[command.Name(k)].HelpShort,
 				)
 			}

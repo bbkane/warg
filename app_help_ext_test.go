@@ -13,6 +13,8 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
+	"go.bbkane.com/warg/help/allcommands"
+	"go.bbkane.com/warg/help/detailed"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 )
@@ -116,7 +118,7 @@ func TestAppHelp(t *testing.T) {
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
-						{Name: "allcommands", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.AllCommandsSectionHelp},
+						{Name: "allcommands", CommandHelp: detailed.DetailedCommandHelp, SectionHelp: allcommands.AllCommandsSectionHelp},
 					},
 					tmpFile(t),
 					"--help",
@@ -138,7 +140,7 @@ func TestAppHelp(t *testing.T) {
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
-						{Name: "detailed", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
+						{Name: "detailed", CommandHelp: detailed.DetailedCommandHelp, SectionHelp: detailed.DetailedSectionHelp},
 					},
 					tmpFile(t),
 					"--help",
@@ -158,7 +160,7 @@ func TestAppHelp(t *testing.T) {
 				grabbitSection(),
 				warg.OverrideHelpFlag(
 					[]help.HelpFlagMapping{
-						{Name: "detailed", CommandHelp: help.DetailedCommandHelp, SectionHelp: help.DetailedSectionHelp},
+						{Name: "detailed", CommandHelp: detailed.DetailedCommandHelp, SectionHelp: detailed.DetailedSectionHelp},
 					},
 					tmpFile(t),
 					"--help",

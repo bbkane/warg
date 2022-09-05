@@ -8,6 +8,8 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
+	"go.bbkane.com/warg/help/common"
+	"go.bbkane.com/warg/help/detailed"
 	"go.bbkane.com/warg/section"
 )
 
@@ -16,14 +18,14 @@ func exampleOverrideHelpFlaglogin(_ command.Context) error {
 	return nil
 }
 
-func exampleOverrideHelpFlagCustomCommandHelp(file *os.File, _ *command.Command, _ help.HelpInfo) command.Action {
+func exampleOverrideHelpFlagCustomCommandHelp(file *os.File, _ *command.Command, _ common.HelpInfo) command.Action {
 	return func(_ command.Context) error {
 		fmt.Fprintln(file, "Custom command help")
 		return nil
 	}
 }
 
-func exampleOverrideHelpFlagCustomSectionHelp(file *os.File, _ *section.SectionT, _ help.HelpInfo) command.Action {
+func exampleOverrideHelpFlagCustomSectionHelp(file *os.File, _ *section.SectionT, _ common.HelpInfo) command.Action {
 	return func(_ command.Context) error {
 		fmt.Fprintln(file, "Custom section help")
 		return nil
@@ -45,8 +47,8 @@ func ExampleOverrideHelpFlag() {
 			[]help.HelpFlagMapping{
 				{
 					Name:        "default",
-					CommandHelp: help.DetailedCommandHelp,
-					SectionHelp: help.DetailedSectionHelp,
+					CommandHelp: detailed.DetailedCommandHelp,
+					SectionHelp: detailed.DetailedSectionHelp,
 				},
 				{
 					Name:        "custom",

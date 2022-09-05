@@ -7,7 +7,7 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/flag"
-	"go.bbkane.com/warg/help"
+	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 )
@@ -392,7 +392,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	// OK! Let's make the ParseResult for each case and gtfo
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
-		helpInfo := help.HelpInfo{
+		helpInfo := common.HelpInfo{
 			AppName:        app.name,
 			Path:           gar.Path,
 			AvailableFlags: ftar.AllowedFlags,
@@ -415,7 +415,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		return nil, fmt.Errorf("some problem with section help: info: %v", helpInfo)
 	} else if ftar.Section == nil && ftar.Command != nil {
 		if gar.HelpPassed {
-			helpInfo := help.HelpInfo{
+			helpInfo := common.HelpInfo{
 				AppName:        app.name,
 				Path:           gar.Path,
 				AvailableFlags: ftar.AllowedFlags,
