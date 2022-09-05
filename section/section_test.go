@@ -3,7 +3,7 @@ package section_test
 import (
 	"testing"
 
-	"github.com/alecthomas/assert"
+	"github.com/stretchr/testify/require"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
 )
@@ -169,7 +169,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			if tt.expectedPanic {
-				assert.Panics(
+				require.Panics(
 					t,
 					func() {
 						it := tt.sec.BreadthFirst([]section.Name{tt.rootName})
@@ -186,7 +186,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			for it.HasNext() {
 				actual = append(actual, it.Next())
 			}
-			assert.Equal(t, tt.expected, actual)
+			require.Equal(t, tt.expected, actual)
 		})
 	}
 }

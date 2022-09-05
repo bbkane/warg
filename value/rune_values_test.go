@@ -3,7 +3,7 @@ package value
 import (
 	"testing"
 
-	"github.com/alecthomas/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRuneFromIFace(t *testing.T) {
@@ -25,12 +25,12 @@ func TestRuneFromIFace(t *testing.T) {
 			actualRune, actualErr := runeFromIFace(tt.iFace)
 
 			if tt.expectedErr {
-				assert.NotNil(t, actualErr)
+				require.NotNil(t, actualErr)
 			} else {
-				assert.Nil(t, actualErr)
+				require.Nil(t, actualErr)
 			}
 
-			assert.Equal(t, tt.expectedRune, actualRune)
+			require.Equal(t, tt.expectedRune, actualRune)
 		})
 	}
 

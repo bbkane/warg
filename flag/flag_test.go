@@ -3,7 +3,7 @@ package flag_test
 import (
 	"testing"
 
-	"github.com/alecthomas/assert"
+	"github.com/stretchr/testify/require"
 	"go.bbkane.com/warg/flag"
 )
 
@@ -14,7 +14,7 @@ func TestFlagMap_SortedNames(t *testing.T) {
 		"d": flag.Flag{},
 		"b": flag.Flag{},
 	}
-	assert.Equal(
+	require.Equal(
 		t,
 		[]flag.Name{
 			flag.Name("a"),

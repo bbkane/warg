@@ -15,7 +15,7 @@ import (
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 
-	"github.com/alecthomas/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // NOTE: this is is a bit of a hack to mock out a configreader
@@ -564,20 +564,20 @@ func TestApp_Parse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			err := tt.app.Validate()
-			assert.Nil(t, err)
+			require.Nil(t, err)
 
 			actualPR, actualErr := tt.app.Parse(tt.args, tt.lookup)
 
 			if tt.expectedErr {
-				assert.NotNil(t, actualErr)
+				require.NotNil(t, actualErr)
 				return
 			} else {
-				assert.Nil(t, actualErr)
+				require.Nil(t, actualErr)
 			}
 
 			// TODO: I wish I'd made this compare a parse result with a parse result instead of field by field
-			assert.Equal(t, tt.expectedPassedPath, actualPR.Path)
-			assert.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
+			require.Equal(t, tt.expectedPassedPath, actualPR.Path)
+			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
 		})
 	}
 }

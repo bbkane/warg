@@ -3,7 +3,7 @@ package tokenize_test
 import (
 	"testing"
 
-	"github.com/alecthomas/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.bbkane.com/warg/config/tokenize"
 )
@@ -54,6 +54,6 @@ func TestTokenize(t *testing.T) {
 			t.Errorf("tokenize error = %v, expectedErr = %v", gotErr, tt.expectedErr)
 			return
 		}
-		assert.Equal(t, tt.expectedTokens, gotTokens)
+		require.Equal(t, tt.expectedTokens, gotTokens)
 	}
 }

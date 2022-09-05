@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/alecthomas/assert"
+	"github.com/stretchr/testify/require"
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
@@ -218,38 +218,38 @@ func TestAppHelp(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			err := tt.app.Validate()
-			assert.Nil(t, err)
+			require.Nil(t, err)
 
 			pr, parseErr := tt.app.Parse(tt.args, tt.lookup)
-			assert.Nil(t, parseErr)
+			require.Nil(t, parseErr)
 
 			// TODO: command.DoNothing returns an error. Shouldn't this be not nil?
 			actionErr := pr.Action(pr.Context)
-			assert.Nil(t, actionErr)
+			require.Nil(t, actionErr)
 
 			closeErr := tt.app.HelpFile.Close()
-			assert.Nil(t, closeErr)
+			require.Nil(t, closeErr)
 
 			actualHelpBytes, readErr := ioutil.ReadFile(tt.app.HelpFile.Name())
-			assert.Nil(t, readErr)
+			require.Nil(t, readErr)
 
 			goldenDir := filepath.Join("testdata", t.Name())
 			goldenFilePath := filepath.Join(goldenDir, "golden.txt")
 			goldenFilePath, err = filepath.Abs(goldenFilePath)
-			assert.Nil(t, err)
+			require.Nil(t, err)
 
 			if *update {
 				mkdirErr := os.MkdirAll(goldenDir, 0700)
-				assert.Nil(t, mkdirErr)
+				require.Nil(t, mkdirErr)
 
 				writeErr := ioutil.WriteFile(goldenFilePath, actualHelpBytes, 0600)
-				assert.Nil(t, writeErr)
+				require.Nil(t, writeErr)
 
 				t.Logf("Wrote: %v\n", goldenFilePath)
 			}
 
 			expectedBytes, expectedReadErr := ioutil.ReadFile(goldenFilePath)
-			assert.Nil(t, expectedReadErr, "actualBytes: \n%s", string(actualHelpBytes))
+			require.Nil(t, expectedReadErr, "actualBytes: \n%s", string(actualHelpBytes))
 
 			if !bytes.Equal(expectedBytes, actualHelpBytes) {
 				t.Fatalf(

@@ -3,7 +3,7 @@ package jsonreader_test
 import (
 	"testing"
 
-	"github.com/alecthomas/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/config/jsonreader"
@@ -73,20 +73,20 @@ func TestSearch(t *testing.T) {
 			cr, err := jsonreader.New(tt.filePath)
 
 			if tt.expectedCreationErr {
-				assert.NotNil(t, err)
+				require.NotNil(t, err)
 			} else {
-				assert.Nil(t, err)
+				require.Nil(t, err)
 			}
 
 			res, err := cr.Search(tt.searchPath)
 
 			if tt.expectedSearchErr {
-				assert.NotNil(t, err)
+				require.NotNil(t, err)
 			} else {
-				assert.Nil(t, err)
+				require.Nil(t, err)
 			}
 
-			assert.Equal(t, tt.expectedSearchResult, res)
+			require.Equal(t, tt.expectedSearchResult, res)
 		})
 	}
 }
