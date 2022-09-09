@@ -13,6 +13,7 @@ import (
 const flagHelpSep = " : "
 const flagIndent = "  "
 const flagAliasNameSep = ", "
+const flagNameValueSep = " = "
 
 // padding returns the spaces to pad a name to fit a given length
 func padding(n flag.Name, length int) string {
@@ -28,12 +29,16 @@ func padding(n flag.Name, length int) string {
 func maxFlagColWidth(fm flag.FlagMap) int {
 	m := 0
 	for name, fl := range fm {
-		lenNameAliasOptionalSep := len(name)
+		dynamicLen := len(name)
 		if fl.Alias != "" {
-			lenNameAliasOptionalSep = lenNameAliasOptionalSep + len(fl.Alias) + len(flagAliasNameSep)
+			dynamicLen = dynamicLen + len(fl.Alias) + len(flagAliasNameSep)
 		}
-		if lenNameAliasOptionalSep > m {
-			m = lenNameAliasOptionalSep
+		if fl.SetBy != "" {
+			// TODO: account for compound type values!
+			dynamicLen = dynamicLen + len(flagNameValueSep) + len(fl.Value.String())
+		}
+		if dynamicLen > m {
+			m = dynamicLen
 		}
 	}
 	return m
@@ -66,8 +71,17 @@ func NoWrapCommandHelp(file *os.File, cur *command.Command, hi common.HelpInfo) 
 				)
 				paddingWidth = paddingWidth - len(fl.Alias) - len(flagAliasNameSep)
 			}
-			printlnNoSpace(
+			printNoSpace(
 				string(flagName),
+			)
+			if fl.SetBy != "" {
+				printNoSpace(
+					flagNameValueSep,
+					fl.Value.String(),
+				)
+				paddingWidth = paddingWidth - len(flagNameValueSep) - len(fl.Value.String())
+			}
+			printlnNoSpace(
 				padding(flagName, paddingWidth),
 				flagHelpSep,
 				string(fl.HelpShort),
