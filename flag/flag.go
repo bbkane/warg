@@ -59,7 +59,8 @@ type Flag struct {
 	// EmptyConstructor tells flag how to make a value
 	EmptyValueConstructor value.EmptyConstructor
 
-	// HelpShort is a message for the user on how to use this flag
+	// HelpShort is a message for the user on how to use this flag.
+	// Unlike Commands and Sections, Flags have no HelpLong.
 	HelpShort HelpShort
 
 	// Required means the user MUST fill this flag
