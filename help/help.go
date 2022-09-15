@@ -5,7 +5,6 @@ import (
 
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/help/allcommands"
-	"go.bbkane.com/warg/help/columns"
 	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/help/detailed"
 	"go.bbkane.com/warg/section"
@@ -45,10 +44,11 @@ func BuiltinHelpFlagMappings() []HelpFlagMapping {
 			CommandHelp: detailed.DetailedCommandHelp,
 			SectionHelp: allcommands.AllCommandsSectionHelp,
 		},
-
-		{Name: "nowrap",
-			CommandHelp: columns.NoWrapCommandHelp,
-			SectionHelp: allcommands.AllCommandsSectionHelp,
-		},
+		// // 2022-09-14: This is unfinished (need to do two-column stuff) and decide what that looks like
+		// // for different terminal sizes. Also see ~/Git-GH/wark_reflow
+		// {Name: "nowrap",
+		// 	CommandHelp: columns.NoWrapCommandHelp,
+		// 	SectionHelp: allcommands.AllCommandsSectionHelp,
+		// },
 	}
 }
