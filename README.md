@@ -140,3 +140,12 @@ All warg apps must have at least one nested command.  It is not possible to desi
 - zsh completion with https://www.dolthub.com/blog/2021-11-15-zsh-completions-with-subcommands/
 - go through TODOs in code
 - --help ideas: man, json, web, form, term, lsp, bash-completion, zsh-completion, compact
+
+# TODO - value2
+
+- finish containers
+- update tests
+- finish values
+- update calling code
+- update docs
+- rm value
