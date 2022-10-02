@@ -9,13 +9,13 @@ type scalarValue[T comparable] struct {
 }
 
 func newScalarValue[T comparable](
-	hardcoded innerTypeInfo[T],
+	inner innerTypeInfo[T],
 	opts ...commonFieldsOpt[T],
 ) scalarValue[T] {
 	sv := scalarValue[T]{
 		common: commonFields[T]{},
-		inner:  hardcoded,
-		val:    hardcoded.empty(),
+		inner:  inner,
+		val:    inner.empty(),
 	}
 	for _, opt := range opts {
 		opt(&sv.common)
@@ -38,7 +38,7 @@ func (v *scalarValue[_]) Choices() []string {
 }
 
 func (v *scalarValue[_]) Description() string {
-	return v.inner.description // TODO: will need to change this...
+	return v.inner.description
 }
 
 func (v *scalarValue[_]) Get() interface{} {

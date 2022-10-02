@@ -15,6 +15,10 @@ func Choices[T comparable](choices ...T) commonFieldsOpt[T] {
 }
 
 func (cf *commonFields[T]) WithinChoices(val T) bool {
+	// User didn't constrain choices
+	if len(cf.choices) == 0 {
+		return true
+	}
 	for _, choice := range cf.choices {
 		if val == choice {
 			return true

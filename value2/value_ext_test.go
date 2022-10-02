@@ -18,7 +18,7 @@ func TestIntValue(t *testing.T) {
 	require.Equal(t, v.Get().(int), 2)
 }
 
-func TestIntEnum(t *testing.T) {
+func TestIntChoices(t *testing.T) {
 	v, err := value.Scalar(
 		value.Int(),
 		value.Choices(1, 2),
@@ -31,4 +31,31 @@ func TestIntEnum(t *testing.T) {
 
 	err = v.Update("-1")
 	require.NotNil(t, err)
+}
+
+func TestIntSliceValue(t *testing.T) {
+	var v value.Value
+
+	v, err := value.Slice(
+		value.Int(),
+	)()
+	require.Nil(t, err)
+
+	err = v.Update("1")
+	require.Nil(t, err)
+	require.Equal(
+		t,
+		[]int{1},
+		v.Get().([]int),
+	)
+
+	err = v.ReplaceFromInterface(
+		[]interface{}{1, 2},
+	)
+	require.Nil(t, err)
+	require.Equal(
+		t,
+		[]int{1, 2},
+		v.Get().([]int),
+	)
 }
