@@ -5,14 +5,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 	value "go.bbkane.com/warg/value2"
-	"go.bbkane.com/warg/value2/contained"
 	"go.bbkane.com/warg/value2/scalar"
 	"go.bbkane.com/warg/value2/slice"
 )
 
 func TestIntScalar(t *testing.T) {
-	v, err := scalar.New(
-		contained.Int(),
+	v, err := scalar.Int(
 		scalar.Choices(1, 2),
 		scalar.Default(2),
 	)()
@@ -33,8 +31,7 @@ func TestIntScalar(t *testing.T) {
 func TestIntSlice(t *testing.T) {
 	var v value.Value
 
-	v, err := slice.New(
-		contained.Int(),
+	v, err := slice.Int(
 		slice.Choices(1, 2),
 		slice.Default([]int{1, 1, 1}),
 	)()
