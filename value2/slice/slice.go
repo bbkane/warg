@@ -4,21 +4,21 @@ import (
 	"fmt"
 
 	value "go.bbkane.com/warg/value2"
-	"go.bbkane.com/warg/value2/types"
+	"go.bbkane.com/warg/value2/contained"
 )
 
 type sliceValue[T comparable] struct {
 	choices     []T
 	defaultVals []T
 	hasDefault  bool
-	inner       types.ContainedTypeInfo[T]
+	inner       contained.ContainedTypeInfo[T]
 	vals        []T
 }
 
 type SliceOpt[T comparable] func(*sliceValue[T])
 
 func newSliceValue[T comparable](
-	inner types.ContainedTypeInfo[T],
+	inner contained.ContainedTypeInfo[T],
 	opts ...SliceOpt[T],
 ) sliceValue[T] {
 	sv := sliceValue[T]{
@@ -32,7 +32,7 @@ func newSliceValue[T comparable](
 	return sv
 }
 
-func New[T comparable](hc types.ContainedTypeInfo[T], opts ...SliceOpt[T]) value.EmptyConstructor {
+func New[T comparable](hc contained.ContainedTypeInfo[T], opts ...SliceOpt[T]) value.EmptyConstructor {
 	return func() (value.Value, error) {
 		s := newSliceValue(
 			hc,
@@ -94,7 +94,7 @@ func (v *sliceValue[_]) HasDefault() bool {
 func (v *sliceValue[T]) ReplaceFromInterface(iFace interface{}) error {
 	under, ok := iFace.([]interface{})
 	if !ok {
-		return types.ErrIncompatibleInterface
+		return contained.ErrIncompatibleInterface
 	}
 
 	new := []T{}

@@ -4,20 +4,20 @@ import (
 	"fmt"
 
 	value "go.bbkane.com/warg/value2"
-	"go.bbkane.com/warg/value2/types"
+	"go.bbkane.com/warg/value2/contained"
 )
 
 type scalarValue[T comparable] struct {
 	choices    []T
 	defaultVal *T
-	inner      types.ContainedTypeInfo[T]
+	inner      contained.ContainedTypeInfo[T]
 	val        T
 }
 
 type ScalarOpt[T comparable] func(*scalarValue[T])
 
 func newScalarValue[T comparable](
-	inner types.ContainedTypeInfo[T],
+	inner contained.ContainedTypeInfo[T],
 	opts ...ScalarOpt[T],
 ) scalarValue[T] {
 	sv := scalarValue[T]{
@@ -31,7 +31,7 @@ func newScalarValue[T comparable](
 	return sv
 }
 
-func New[T comparable](hc types.ContainedTypeInfo[T], opts ...ScalarOpt[T]) value.EmptyConstructor {
+func New[T comparable](hc contained.ContainedTypeInfo[T], opts ...ScalarOpt[T]) value.EmptyConstructor {
 	return func() (value.Value, error) {
 		s := newScalarValue(
 			hc,
