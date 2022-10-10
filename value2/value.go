@@ -42,6 +42,7 @@ type Value interface {
 	StringSlice() []string
 
 	// TypeInfo specifies whether what "overall" type of value this is - scalar, slice, etc.
+	// TODO: rename TypeContainer
 	TypeInfo() TypeContainer
 
 	// Update appends to container type Values from a string (useful for CLI flags, env vars, default values)
@@ -61,5 +62,4 @@ type Value interface {
 // Useful to create new values as well as initialize them
 type EmptyConstructor func() (Value, error)
 
-var ErrIncompatibleInterface = errors.New("could not decode interface into Value")
 var ErrInvalidChoice = errors.New("invalid choice for value")

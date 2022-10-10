@@ -1,4 +1,4 @@
-package value
+package types
 
 import (
 	"testing"
@@ -23,7 +23,7 @@ func TestRuneFromIFace(t *testing.T) {
 	runeInner := Rune()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actualRune, actualErr := runeInner.fromIFace(tt.iFace)
+			actualRune, actualErr := runeInner.FromIFace(tt.iFace)
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)

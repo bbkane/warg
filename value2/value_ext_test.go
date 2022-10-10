@@ -5,11 +5,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 	value "go.bbkane.com/warg/value2"
+	"go.bbkane.com/warg/value2/scalar"
+	"go.bbkane.com/warg/value2/slice"
+	"go.bbkane.com/warg/value2/types"
 )
 
 func TestIntValue(t *testing.T) {
 	var v value.Value
-	v, err := value.Scalar(value.Int())()
+	v, err := scalar.New(types.Int())()
 	require.Nil(t, err)
 	require.Equal(t, v.Get().(int), 0)
 
@@ -19,9 +22,9 @@ func TestIntValue(t *testing.T) {
 }
 
 func TestIntChoices(t *testing.T) {
-	v, err := value.Scalar(
-		value.Int(),
-		value.Choices(1, 2),
+	v, err := scalar.New(
+		types.Int(),
+		scalar.Choices(1, 2),
 	)()
 	require.Nil(t, err)
 
@@ -31,13 +34,15 @@ func TestIntChoices(t *testing.T) {
 
 	err = v.Update("-1")
 	require.NotNil(t, err)
+	require.Equal(t, v.Get().(int), 1)
 }
 
 func TestIntSliceValue(t *testing.T) {
 	var v value.Value
 
-	v, err := value.Slice(
-		value.Int(),
+	v, err := slice.New(
+		types.Int(),
+		slice.Choices(1, 2),
 	)()
 	require.Nil(t, err)
 
@@ -47,6 +52,14 @@ func TestIntSliceValue(t *testing.T) {
 		t,
 		[]int{1},
 		v.Get().([]int),
+	)
+
+	err = v.Update("-1")
+	require.NotNil(t, err)
+	require.Equal(
+		t,
+		v.Get().([]int),
+		[]int{1},
 	)
 
 	err = v.ReplaceFromInterface(

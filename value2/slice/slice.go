@@ -1,30 +1,37 @@
-package value
+package slice
 
-import "fmt"
+import (
+	"fmt"
+
+	value "go.bbkane.com/warg/value2"
+	"go.bbkane.com/warg/value2/types"
+)
 
 type sliceValue[T comparable] struct {
-	common commonFields[T]
-	inner  innerTypeInfo[T]
-	vals   []T
+	choices []T
+	inner   types.ContainedTypeInfo[T]
+	vals    []T
 }
 
+type SliceOpt[T comparable] func(*sliceValue[T])
+
 func newSliceValue[T comparable](
-	inner innerTypeInfo[T],
-	opts ...commonFieldsOpt[T],
+	inner types.ContainedTypeInfo[T],
+	opts ...SliceOpt[T],
 ) sliceValue[T] {
 	sv := sliceValue[T]{
-		common: commonFields[T]{},
-		inner:  inner,
-		vals:   nil,
+		choices: []T{},
+		inner:   inner,
+		vals:    nil,
 	}
 	for _, opt := range opts {
-		opt(&sv.common)
+		opt(&sv)
 	}
 	return sv
 }
 
-func Slice[T comparable](hc innerTypeInfo[T], opts ...commonFieldsOpt[T]) EmptyConstructor {
-	return func() (Value, error) {
+func New[T comparable](hc types.ContainedTypeInfo[T], opts ...SliceOpt[T]) value.EmptyConstructor {
+	return func() (value.Value, error) {
 		s := newSliceValue(
 			hc,
 			opts...,
@@ -33,12 +40,22 @@ func Slice[T comparable](hc innerTypeInfo[T], opts ...commonFieldsOpt[T]) EmptyC
 	}
 }
 
+func Choices[T comparable](choices ...T) SliceOpt[T] {
+	return func(cf *sliceValue[T]) {
+		cf.choices = choices
+	}
+}
+
 func (v *sliceValue[_]) Choices() []string {
-	return v.common.Choices()
+	ret := []string{}
+	for _, e := range v.choices {
+		ret = append(ret, fmt.Sprint(e))
+	}
+	return ret
 }
 
 func (v *sliceValue[_]) Description() string {
-	return v.inner.description
+	return v.inner.Description
 }
 
 func (v *sliceValue[_]) Get() interface{} {
@@ -48,12 +65,12 @@ func (v *sliceValue[_]) Get() interface{} {
 func (v *sliceValue[T]) ReplaceFromInterface(iFace interface{}) error {
 	under, ok := iFace.([]interface{})
 	if !ok {
-		return ErrIncompatibleInterface
+		return types.ErrIncompatibleInterface
 	}
 
 	new := []T{}
 	for _, e := range under {
-		underE, err := v.inner.fromIFace(e)
+		underE, err := v.inner.FromIFace(e)
 		if err != nil {
 			// TODO: this won't communicate to the caller *which* element is the wrong type
 			return err
@@ -76,20 +93,33 @@ func (v *sliceValue[_]) StringSlice() []string {
 	return ret
 }
 
-func (sliceValue[_]) TypeInfo() TypeContainer {
-	return TypeContainerSlice
+func (sliceValue[_]) TypeInfo() value.TypeContainer {
+	return value.TypeContainerSlice
+}
+
+func withinChoices[T comparable](val T, choices []T) bool {
+	// User didn't constrain choices
+	if len(choices) == 0 {
+		return true
+	}
+	for _, choice := range choices {
+		if val == choice {
+			return true
+		}
+	}
+	return false
 }
 
 func (v *sliceValue[T]) update(val T) error {
-	if !v.common.WithinChoices(val) {
-		return ErrInvalidChoice
+	if !withinChoices(val, v.choices) {
+		return value.ErrInvalidChoice
 	}
 	v.vals = append(v.vals, val)
 	return nil
 }
 
 func (v *sliceValue[_]) Update(s string) error {
-	val, err := v.inner.fromString(s)
+	val, err := v.inner.FromString(s)
 	if err != nil {
 		return err
 	}
@@ -97,7 +127,7 @@ func (v *sliceValue[_]) Update(s string) error {
 }
 
 func (v *sliceValue[_]) UpdateFromInterface(iFace interface{}) error {
-	val, err := v.inner.fromIFace(iFace)
+	val, err := v.inner.FromIFace(iFace)
 	if err != nil {
 		return err
 	}

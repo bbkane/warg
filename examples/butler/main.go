@@ -17,12 +17,12 @@ func buildApp() warg.App {
 		section.New(
 			section.HelpShort("A virtual assistant"),
 			section.Command(
-				command.Name("present"),
-				command.HelpShort("Formally present a guest (guests are never introduced, always presented)."),
+				"present",
+				"Formally present a guest (guests are never introduced, always presented).",
 				present,
 				command.Flag(
-					flag.Name("--name"),
-					flag.HelpShort("Guest to address."),
+					"--name",
+					"Guest to address.",
 					value.String,
 					flag.Alias("-n"),
 					flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),

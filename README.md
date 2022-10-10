@@ -143,7 +143,7 @@ All warg apps must have at least one nested command.  It is not possible to desi
 
 # TODO - value2
 
-- Add Default
+- Add Default - how do I set a default for both a scalar and a list here?
 - rm flag Enum, Default
 - update calling code
 - update docs

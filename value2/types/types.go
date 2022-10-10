@@ -1,4 +1,4 @@
-package value
+package types
 
 import (
 	"errors"
@@ -10,26 +10,28 @@ import (
 	"github.com/xhit/go-str2duration/v2"
 )
 
-type innerTypeInfo[T comparable] struct {
-	description string
-	fromIFace   func(iFace interface{}) (T, error)
-	fromString  func(string) (T, error)
-	// Initalized to the empty value, but used for updating stuff in the container type
-	empty func() T
+var ErrIncompatibleInterface = errors.New("could not decode interface into Value")
+
+type ContainedTypeInfo[T comparable] struct {
+	Description string
+	FromIFace   func(iFace interface{}) (T, error)
+	FromString  func(string) (T, error)
+	// Initalized to the Empty value, but used for updating stuff in the container type
+	Empty func() T
 }
 
-func Bool() innerTypeInfo[bool] {
-	return innerTypeInfo[bool]{
-		description: "bool",
-		empty:       func() bool { return false },
-		fromIFace: func(iFace interface{}) (bool, error) {
+func Bool() ContainedTypeInfo[bool] {
+	return ContainedTypeInfo[bool]{
+		Description: "bool",
+		Empty:       func() bool { return false },
+		FromIFace: func(iFace interface{}) (bool, error) {
 			under, ok := iFace.(bool)
 			if !ok {
 				return false, ErrIncompatibleInterface
 			}
 			return under, nil
 		},
-		fromString: func(s string) (bool, error) {
+		FromString: func(s string) (bool, error) {
 			switch s {
 			case "true":
 				return true, nil
@@ -50,28 +52,28 @@ func durationFromString(s string) (time.Duration, error) {
 	return decoded, nil
 }
 
-func Duration() innerTypeInfo[time.Duration] {
-	return innerTypeInfo[time.Duration]{
-		description: "duration",
-		empty: func() time.Duration {
+func Duration() ContainedTypeInfo[time.Duration] {
+	return ContainedTypeInfo[time.Duration]{
+		Description: "duration",
+		Empty: func() time.Duration {
 			var t time.Duration = 0
 			return t
 		},
-		fromIFace: func(iFace interface{}) (time.Duration, error) {
+		FromIFace: func(iFace interface{}) (time.Duration, error) {
 			under, ok := iFace.(string)
 			if !ok {
 				return 0, ErrIncompatibleInterface
 			}
 			return durationFromString(under)
 		},
-		fromString: durationFromString,
+		FromString: durationFromString,
 	}
 }
 
-func Int() innerTypeInfo[int] {
-	return innerTypeInfo[int]{
-		description: "int",
-		fromIFace: func(iFace interface{}) (int, error) {
+func Int() ContainedTypeInfo[int] {
+	return ContainedTypeInfo[int]{
+		Description: "int",
+		FromIFace: func(iFace interface{}) (int, error) {
 			switch under := iFace.(type) {
 			case int:
 				return under, nil
@@ -81,14 +83,14 @@ func Int() innerTypeInfo[int] {
 				return 0, ErrIncompatibleInterface
 			}
 		},
-		fromString: func(s string) (int, error) {
+		FromString: func(s string) (int, error) {
 			i, err := strconv.ParseInt(s, 0, strconv.IntSize)
 			if err != nil {
 				return 0, err
 			}
 			return int(i), nil
 		},
-		empty: func() int { return 0 },
+		Empty: func() int { return 0 },
 	}
 }
 
@@ -100,18 +102,18 @@ func pathFromString(s string) (string, error) {
 	return expanded, nil
 }
 
-func Path() innerTypeInfo[string] {
-	return innerTypeInfo[string]{
-		description: "path",
-		empty:       func() string { return "" },
-		fromIFace: func(iFace interface{}) (string, error) {
+func Path() ContainedTypeInfo[string] {
+	return ContainedTypeInfo[string]{
+		Description: "path",
+		Empty:       func() string { return "" },
+		FromIFace: func(iFace interface{}) (string, error) {
 			under, ok := iFace.(string)
 			if !ok {
 				return "", ErrIncompatibleInterface
 			}
 			return pathFromString(under)
 		},
-		fromString: pathFromString,
+		FromString: pathFromString,
 	}
 }
 
@@ -130,11 +132,11 @@ func runeFromString(s string) (rune, error) {
 	}
 }
 
-func Rune() innerTypeInfo[rune] {
-	return innerTypeInfo[rune]{
-		description: "rune",
-		empty:       func() rune { return emptyRune },
-		fromIFace: func(iFace interface{}) (rune, error) {
+func Rune() ContainedTypeInfo[rune] {
+	return ContainedTypeInfo[rune]{
+		Description: "rune",
+		Empty:       func() rune { return emptyRune },
+		FromIFace: func(iFace interface{}) (rune, error) {
 			switch under := iFace.(type) {
 			case rune:
 				return under, nil
@@ -144,22 +146,22 @@ func Rune() innerTypeInfo[rune] {
 				return emptyRune, ErrIncompatibleInterface
 			}
 		},
-		fromString: runeFromString,
+		FromString: runeFromString,
 	}
 }
 
-func String() innerTypeInfo[string] {
-	return innerTypeInfo[string]{
-		description: "string",
-		empty:       func() string { return "" },
-		fromIFace: func(iFace interface{}) (string, error) {
+func String() ContainedTypeInfo[string] {
+	return ContainedTypeInfo[string]{
+		Description: "string",
+		Empty:       func() string { return "" },
+		FromIFace: func(iFace interface{}) (string, error) {
 			under, ok := iFace.(string)
 			if !ok {
 				return "", ErrIncompatibleInterface
 			}
 			return under, nil
 		},
-		fromString: func(s string) (string, error) {
+		FromString: func(s string) (string, error) {
 			return s, nil
 		},
 	}
