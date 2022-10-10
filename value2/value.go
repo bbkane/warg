@@ -19,12 +19,21 @@ const (
 // scalar types (Int, String, ...) and container types (IntSlice, StringMap, ...).
 type Value interface {
 
+	// DefaultString returns the default underlying value (represented as a string)
+	DefaultString() string
+
+	// DefaultStringSlice returns the default underlying value for slice values and nil for others
+	DefaultStringSlice() []string
+
 	// Description of the type. useful for help messages. Should not be used as an ID.
 	Description() string
 
 	// Get returns the underlying value. It's meant to be type asserted against
 	// Example: myInt := v.(int)
 	Get() interface{}
+
+	// HasDefault returns true if this value has a default
+	HasDefault() bool
 
 	// Len returns 0 for scalar Values and len(underlyingValue) for container Values.
 	// TODO: I think this will be useful when/if I start enforcing flag grouping (like grabbits subreddit params).
@@ -48,6 +57,9 @@ type Value interface {
 	// Update appends to container type Values from a string (useful for CLI flags, env vars, default values)
 	// and replaces scalar Values
 	Update(string) error
+
+	// UpdateFromDefault updates the Value from a pre-set default, if one exists. use HasDefault to check whether a default exists
+	UpdateFromDefault()
 
 	// UpdateFromInterface updates a container type Value from an interface (useful for configs)
 	// and replaces scalar values (for scalar values, UpdateFromInterface is the same as ReplaceFromInterface).

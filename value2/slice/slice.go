@@ -8,9 +8,11 @@ import (
 )
 
 type sliceValue[T comparable] struct {
-	choices []T
-	inner   types.ContainedTypeInfo[T]
-	vals    []T
+	choices     []T
+	defaultVals []T
+	hasDefault  bool
+	inner       types.ContainedTypeInfo[T]
+	vals        []T
 }
 
 type SliceOpt[T comparable] func(*sliceValue[T])
@@ -46,9 +48,32 @@ func Choices[T comparable](choices ...T) SliceOpt[T] {
 	}
 }
 
+func Default[T comparable](def []T) SliceOpt[T] {
+	return func(cf *sliceValue[T]) {
+		cf.defaultVals = def
+		cf.hasDefault = true
+	}
+}
+
 func (v *sliceValue[_]) Choices() []string {
 	ret := []string{}
 	for _, e := range v.choices {
+		ret = append(ret, fmt.Sprint(e))
+	}
+	return ret
+}
+
+func (v *sliceValue[_]) DefaultString() string {
+	if !v.hasDefault {
+		return ""
+	}
+	return fmt.Sprint(v.defaultVals)
+}
+
+func (v *sliceValue[_]) DefaultStringSlice() []string {
+	// TODO: no copy paste
+	ret := make([]string, 0, len(v.defaultVals))
+	for _, e := range v.defaultVals {
 		ret = append(ret, fmt.Sprint(e))
 	}
 	return ret
@@ -60,6 +85,10 @@ func (v *sliceValue[_]) Description() string {
 
 func (v *sliceValue[_]) Get() interface{} {
 	return v.vals
+}
+
+func (v *sliceValue[_]) HasDefault() bool {
+	return v.hasDefault
 }
 
 func (v *sliceValue[T]) ReplaceFromInterface(iFace interface{}) error {
@@ -124,6 +153,12 @@ func (v *sliceValue[_]) Update(s string) error {
 		return err
 	}
 	return v.update(val)
+}
+
+func (v *sliceValue[_]) UpdateFromDefault() {
+	if v.hasDefault {
+		v.vals = v.defaultVals
+	}
 }
 
 func (v *sliceValue[_]) UpdateFromInterface(iFace interface{}) error {

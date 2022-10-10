@@ -8,9 +8,10 @@ import (
 )
 
 type scalarValue[T comparable] struct {
-	choices []T
-	inner   types.ContainedTypeInfo[T]
-	val     T
+	choices    []T
+	defaultVal *T
+	inner      types.ContainedTypeInfo[T]
+	val        T
 }
 
 type ScalarOpt[T comparable] func(*scalarValue[T])
@@ -46,6 +47,12 @@ func Choices[T comparable](choices ...T) ScalarOpt[T] {
 	}
 }
 
+func Default[T comparable](def T) ScalarOpt[T] {
+	return func(cf *scalarValue[T]) {
+		cf.defaultVal = &def
+	}
+}
+
 func (v *scalarValue[_]) Choices() []string {
 	ret := []string{}
 	for _, e := range v.choices {
@@ -54,12 +61,27 @@ func (v *scalarValue[_]) Choices() []string {
 	return ret
 }
 
+func (v *scalarValue[_]) DefaultString() string {
+	if v.defaultVal == nil {
+		return ""
+	}
+	return fmt.Sprint(&v.defaultVal)
+}
+
+func (v *scalarValue[_]) DefaultStringSlice() []string {
+	return nil
+}
+
 func (v *scalarValue[_]) Description() string {
 	return v.inner.Description
 }
 
 func (v *scalarValue[_]) Get() interface{} {
 	return v.val
+}
+
+func (v *scalarValue[_]) HasDefault() bool {
+	return v.defaultVal != nil
 }
 
 func (v *scalarValue[_]) ReplaceFromInterface(iFace interface{}) error {
@@ -106,6 +128,12 @@ func (v *scalarValue[_]) Update(s string) error {
 	}
 	v.val = val
 	return nil
+}
+
+func (v *scalarValue[_]) UpdateFromDefault() {
+	if v.defaultVal != nil {
+		v.val = *v.defaultVal
+	}
 }
 
 func (v *scalarValue[_]) UpdateFromInterface(iFace interface{}) error {
