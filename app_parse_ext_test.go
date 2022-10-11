@@ -13,7 +13,8 @@ import (
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
-	"go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/scalar"
+	"go.bbkane.com/warg/value/slice"
 
 	"github.com/stretchr/testify/require"
 )
@@ -52,7 +53,7 @@ func TestApp_Parse(t *testing.T) {
 					section.Flag(
 						flag.Name("--af1"),
 						"flag help",
-						value.Int,
+						scalar.Int(),
 					),
 					section.Section(
 						"cat1",
@@ -64,7 +65,9 @@ func TestApp_Parse(t *testing.T) {
 							command.Flag(
 								"--com1f1",
 								"flag help",
-								value.Int,
+								scalar.Int(
+									scalar.Default(10),
+								),
 								flag.Default("10"),
 							),
 						),
@@ -88,7 +91,7 @@ func TestApp_Parse(t *testing.T) {
 					section.Flag(
 						"--af1",
 						"flag help",
-						value.Int,
+						scalar.Int(),
 					),
 					section.Command("com", "command for validation", command.DoNothing),
 				),
@@ -113,7 +116,9 @@ func TestApp_Parse(t *testing.T) {
 						command.Flag(
 							"--flag",
 							"flag help",
-							value.String,
+							scalar.String(
+								scalar.Default("hi"),
+							),
 							flag.Default("hi"),
 						),
 					),
@@ -139,7 +144,9 @@ func TestApp_Parse(t *testing.T) {
 						command.Flag(
 							"--flag",
 							"flag help",
-							value.String,
+							scalar.String(
+								scalar.Default("hi"),
+							),
 							flag.Default("hi"),
 						),
 					),
@@ -161,7 +168,9 @@ func TestApp_Parse(t *testing.T) {
 					section.Flag(
 						"--key",
 						"a key",
-						value.String,
+						scalar.String(
+							scalar.Default("defaultkeyval"),
+						),
 						flag.ConfigPath("key"),
 						flag.Default("defaultkeyval"),
 					),
@@ -207,7 +216,9 @@ func TestApp_Parse(t *testing.T) {
 					section.Flag(
 						"--sflag",
 						"help for --sflag",
-						value.String,
+						scalar.String(
+							scalar.Default("sflagval"),
+						),
 						flag.Default("sflagval"),
 					),
 					section.Command(
@@ -235,7 +246,7 @@ func TestApp_Parse(t *testing.T) {
 					section.Flag(
 						"--val",
 						"flag help",
-						value.String,
+						scalar.String(),
 						flag.ConfigPath("params.val"),
 					),
 					section.Command(
@@ -272,7 +283,7 @@ func TestApp_Parse(t *testing.T) {
 					section.Flag(
 						"--subreddits",
 						"the subreddits",
-						value.StringSlice,
+						slice.String(),
 						flag.ConfigPath("subreddits[].name"),
 					),
 					section.Command("print", "print key value", command.DoNothing),
@@ -304,7 +315,7 @@ func TestApp_Parse(t *testing.T) {
 					section.Flag(
 						"--flag",
 						"help for --flag",
-						value.String,
+						scalar.String(),
 						flag.EnvVars("notthere", "there", "alsothere"),
 					),
 					section.Command(
@@ -338,7 +349,7 @@ func TestApp_Parse(t *testing.T) {
 					section.Flag(
 						"--flag",
 						"help for --flag",
-						value.String,
+						scalar.String(),
 						flag.Required(),
 					),
 					section.Command(
@@ -366,7 +377,7 @@ func TestApp_Parse(t *testing.T) {
 					section.Flag(
 						"--flag",
 						"help for --flag",
-						value.String,
+						scalar.String(),
 						flag.Alias("-f"),
 					),
 					section.Command(
@@ -396,7 +407,7 @@ func TestApp_Parse(t *testing.T) {
 						command.Flag(
 							"--flag",
 							"help for --flag",
-							value.StringSlice,
+							slice.String(),
 							flag.Alias("-f"),
 						),
 					),
@@ -433,8 +444,8 @@ func TestApp_Parse(t *testing.T) {
 			name: "addSectionFlags",
 			app: func() warg.App {
 				fm := flag.FlagMap{
-					"--flag1": flag.New("--flag1 value", value.String),
-					"--flag2": flag.New("--flag1 value", value.String),
+					"--flag1": flag.New("--flag1 value", scalar.String()),
+					"--flag2": flag.New("--flag1 value", scalar.String()),
 				}
 				app := warg.New(
 					"newAppName",
@@ -462,8 +473,8 @@ func TestApp_Parse(t *testing.T) {
 			name: "addCommandFlags",
 			app: func() warg.App {
 				fm := flag.FlagMap{
-					"--flag1": flag.New("--flag1 value", value.String),
-					"--flag2": flag.New("--flag1 value", value.String),
+					"--flag1": flag.New("--flag1 value", scalar.String()),
+					"--flag2": flag.New("--flag1 value", scalar.String()),
 				}
 				app := warg.New(
 					"newAppName",
@@ -495,7 +506,7 @@ func TestApp_Parse(t *testing.T) {
 					section.Flag(
 						"--val",
 						"flag help",
-						value.StringSlice,
+						slice.String(),
 						flag.ConfigPath("val"),
 					),
 					section.Command(
@@ -531,7 +542,7 @@ func TestApp_Parse(t *testing.T) {
 					section.Flag(
 						"--val",
 						"flag help",
-						value.StringSlice,
+						slice.String(),
 						flag.ConfigPath("val"),
 					),
 					section.Command(

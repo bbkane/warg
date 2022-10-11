@@ -2,12 +2,13 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
-	"go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/scalar"
 )
 
 func app() *warg.App {
@@ -18,57 +19,71 @@ func app() *warg.App {
 		command.Flag(
 			"--include-readmes",
 			"Search for README.md.",
-			value.Bool,
+			scalar.Bool(
+				scalar.Default(false),
+			),
 			flag.Default("false"),
 		),
 		command.Flag(
 			"--max-languages",
 			"Max number of languages to query on a repo",
-			value.Int,
+			scalar.Int(
+				scalar.Default(20),
+			),
 			flag.Default("20"),
 		),
 		command.Flag(
 			"--max-repo-topics",
 			"Max number of topics to query on a repo",
-			value.Int,
+			scalar.Int(
+				scalar.Default(20),
+			),
 			flag.Default("20"),
 		),
 		command.Flag(
 			"--after-cursor",
 			"PageInfo EndCursor to start from",
-			value.String,
+			scalar.String(),
 		),
 		command.Flag(
 			"--max-pages",
 			"Max number of pages to fetch",
-			value.Int,
+			scalar.Int(
+				scalar.Default(1),
+			),
 			flag.Default("1"),
 			flag.Required(),
 		),
 		command.Flag(
 			"--output",
 			"Output filepath. Must not exist",
-			value.Path,
+			scalar.Path(
+				scalar.Default("starghaze_download.jsonl"),
+			),
 			flag.Default("starghaze_download.jsonl"),
 		),
 		command.Flag(
 			"--page-size",
 			"Number of starred repos in page",
-			value.Int,
+			scalar.Int(
+				scalar.Default(100),
+			),
 			flag.Default("100"),
 			flag.Required(),
 		),
 		command.Flag(
 			"--timeout",
 			"Timeout for a run. Use https://pkg.go.dev/time#Duration to build it",
-			value.Duration,
+			scalar.Duration(
+				scalar.Default(time.Minute*10),
+			),
 			flag.Default("10m"),
 			flag.Required(),
 		),
 		command.Flag(
 			"--token",
 			"Github PAT",
-			value.String,
+			scalar.String(),
 			flag.EnvVars("STARGHAZE_GITHUB_TOKEN", "GITHUB_TOKEN"),
 			flag.Required(),
 		),
@@ -80,52 +95,65 @@ func app() *warg.App {
 		command.Flag(
 			"--format",
 			"Output format",
-			value.StringEnum("csv", "jsonl", "sqlite", "zinc"),
+			scalar.String(
+				scalar.Choices("csv", "jsonl", "sqlite", "zinc"),
+				scalar.Default("csv"),
+			),
 			flag.Default("csv"),
 			flag.Required(),
 		),
 		command.Flag(
 			"--date-format",
 			"Datetime output format. See https://github.com/lestrrat-go/strftime for details. If not passed, the GitHub default is RFC 3339. Consider using '%b %d, %Y' for csv format",
-			value.String,
+			scalar.String(),
 		),
 		command.Flag(
 			"--include-readmes",
 			"Search for README.md.",
-			value.Bool,
+			scalar.Bool(
+				scalar.Default(false),
+			),
 			flag.Default("false"),
 			flag.Required(),
 		),
 		command.Flag(
 			"--sqlite-dsn",
 			"Sqlite DSN. Usually the file name. Only used for --format sqlite",
-			value.String,
+			scalar.String(
+				scalar.Default("starghaze.db"),
+			),
 			flag.Default("starghaze.db"),
 		),
 		command.Flag(
 			"--zinc-index-name",
 			"Only used for --format zinc.",
-			value.String,
+			scalar.String(
+				scalar.Default("starghaze"),
+			),
 			flag.Default("starghaze"),
 		),
 		command.Flag(
 			"--input",
 			"Input file",
-			value.String,
+			scalar.Path(
+				scalar.Default("starghaze_download.jsonl"),
+			),
 			flag.Required(),
 			flag.Default("starghaze_download.jsonl"),
 		),
 		command.Flag(
 			"--max-line-size",
 			"Max line size in the file in MB",
-			value.Int,
+			scalar.Int(
+				scalar.Default(10),
+			),
 			flag.Default("10"),
 			flag.Required(),
 		),
 		command.Flag(
 			"--output",
 			"output file. Prints to stdout if not passed",
-			value.Path,
+			scalar.Path(),
 		),
 	)
 
@@ -143,13 +171,15 @@ func app() *warg.App {
 			command.Flag(
 				"--csv-path",
 				"CSV file to upload",
-				value.Path,
+				scalar.Path(),
 				flag.Required(),
 			),
 			command.Flag(
 				"--timeout",
 				"Timeout for a run. Use https://pkg.go.dev/time#Duration to build it",
-				value.Duration,
+				scalar.Duration(
+					scalar.Default(time.Minute*10),
+				),
 				flag.Default("10m"),
 				flag.Required(),
 			),
@@ -157,14 +187,14 @@ func app() *warg.App {
 		section.Flag(
 			"--sheet-id",
 			"ID For the particulare sheet. Viewable from `gid` URL param",
-			value.Int,
+			scalar.Int(),
 			flag.EnvVars("STARGHAZE_SHEET_ID"),
 			flag.Required(),
 		),
 		section.Flag(
 			"--spreadsheet-id",
 			"ID for the whole spreadsheet. Viewable from URL",
-			value.String,
+			scalar.String(),
 			flag.EnvVars("STARGHAZE_SPREADSHEET_ID"),
 			flag.Required(),
 		),
@@ -177,21 +207,25 @@ func app() *warg.App {
 		command.Flag(
 			"--limit",
 			"Max number of results",
-			value.Int,
+			scalar.Int(
+				scalar.Default(50),
+			),
 			flag.Default("50"),
 			flag.Required(),
 		),
 		command.Flag(
 			"--sqlite-dsn",
 			"Sqlite DSN. Usually the file name.",
-			value.String,
+			scalar.String(
+				scalar.Default("starghaze.db"),
+			),
 			flag.Default("starghaze.db"),
 			flag.Required(),
 		),
 		command.Flag(
 			"--term",
 			"Search for this term",
-			value.String,
+			scalar.String(),
 			flag.Alias("-t"),
 			flag.Required(),
 		),

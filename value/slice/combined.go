@@ -3,8 +3,8 @@ package slice
 import (
 	"time"
 
-	value "go.bbkane.com/warg/value2"
-	"go.bbkane.com/warg/value2/contained"
+	value "go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/contained"
 )
 
 func Bool(opts ...SliceOpt[bool]) value.EmptyConstructor {

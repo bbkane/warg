@@ -8,7 +8,7 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
-	"go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/scalar"
 )
 
 func TestApp_Validate(t *testing.T) {
@@ -82,7 +82,7 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New(
 				"newAppName",
 				section.New("",
-					section.Flag("-f", "", value.Bool,
+					section.Flag("-f", "", scalar.Bool(),
 						flag.Alias("f"),
 					),
 					section.Command("c", "", nil),
@@ -97,9 +97,9 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New(
 				"newAppName",
 				section.New("",
-					section.Flag("-f", "", value.Bool),
+					section.Flag("-f", "", scalar.Bool()),
 					section.Command("c", "", command.DoNothing,
-						command.Flag("--other", "", value.Bool, flag.Alias("-f")),
+						command.Flag("--other", "", scalar.Bool(), flag.Alias("-f")),
 					),
 				),
 				warg.SkipValidation(),

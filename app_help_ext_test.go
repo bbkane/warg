@@ -16,7 +16,7 @@ import (
 	"go.bbkane.com/warg/help/allcommands"
 	"go.bbkane.com/warg/help/detailed"
 	"go.bbkane.com/warg/section"
-	"go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/scalar"
 )
 
 var update = stdlibflag.Bool("update", false, "update golden files")
@@ -72,7 +72,9 @@ func grabbitSection() section.SectionT {
 				command.Flag(
 					"--editor",
 					"path to editor",
-					value.String,
+					scalar.String(
+						scalar.Default("vi"),
+					),
 					flag.Default("vi"),
 					flag.ConfigPath("editor"),
 					flag.EnvVars("EDITOR"),

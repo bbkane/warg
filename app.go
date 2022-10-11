@@ -14,7 +14,7 @@ import (
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
 	"go.bbkane.com/warg/section"
-	"go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/scalar"
 )
 
 // AppOpt let's you customize the app. Most AppOpts panic if incorrectly called
@@ -71,7 +71,9 @@ func OverrideHelpFlag(
 
 		helpFlag := flag.New(
 			flagHelp,
-			value.StringEnum(helpValues...),
+			scalar.String(
+				scalar.Choices(helpValues...),
+			),
 			flagOpts...,
 		)
 
@@ -100,7 +102,8 @@ func ConfigFlag(
 	return func(app *App) {
 		app.configFlagName = configFlagName
 		app.newConfigReader = newConfigReader
-		configFlag := flag.New(helpShort, value.Path, flagOpts...)
+		// TODO: need to have value opts here
+		configFlag := flag.New(helpShort, scalar.Path(), flagOpts...)
 		app.configFlag = &configFlag
 	}
 }

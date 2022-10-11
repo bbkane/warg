@@ -2,13 +2,15 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
-	"go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/scalar"
+	"go.bbkane.com/warg/value/slice"
 )
 
 func app() *warg.App {
@@ -35,7 +37,9 @@ Homepage: https://github.com/bbkane/grabbit
 		command.Flag(
 			"--subreddit-name",
 			"Subreddit to grab",
-			value.StringSlice,
+			slice.String(
+				slice.Default([]string{"earthporn", "wallpapers"}),
+			),
 			flag.Alias("-sn"),
 			flag.Default("earthporn", "wallpapers"),
 			flag.ConfigPath("subreddits[].name"),
@@ -44,7 +48,9 @@ Homepage: https://github.com/bbkane/grabbit
 		command.Flag(
 			"--subreddit-destination",
 			"Where to store the subreddit",
-			value.PathSlice,
+			slice.Path(
+				slice.Default([]string{".", "."}),
+			),
 			flag.Alias("-sd"),
 			flag.Default(".", "."),
 			flag.ConfigPath("subreddits[].destination"),
@@ -53,7 +59,10 @@ Homepage: https://github.com/bbkane/grabbit
 		command.Flag(
 			"--subreddit-timeframe",
 			"Take the top subreddits from this timeframe",
-			value.StringEnumSlice("day", "week", "month", "year", "all"),
+			slice.String(
+				slice.Choices("day", "week", "month", "year", "all"),
+				slice.Default([]string{"week", "week"}),
+			),
 			flag.Alias("-st"),
 			flag.Default("week", "week"),
 			flag.ConfigPath("subreddits[].timeframe"),
@@ -62,7 +71,9 @@ Homepage: https://github.com/bbkane/grabbit
 		command.Flag(
 			"--subreddit-limit",
 			"Max number of links to try to download",
-			value.IntSlice,
+			slice.Int(
+				slice.Default([]int{2, 3}),
+			),
 			flag.Alias("-sl"),
 			flag.Default("2", "3"),
 			flag.ConfigPath("subreddits[].limit"),
@@ -71,7 +82,9 @@ Homepage: https://github.com/bbkane/grabbit
 		command.Flag(
 			"--timeout",
 			"Timeout for a single download",
-			value.Duration,
+			scalar.Duration(
+				scalar.Default(time.Second*30),
+			),
 			flag.Alias("-t"),
 			flag.Default("30s"),
 			flag.Required(),
@@ -90,13 +103,18 @@ Homepage: https://github.com/bbkane/grabbit
 			section.Flag(
 				"--color",
 				"Use colorized output",
-				value.StringEnum("true", "false", "auto"),
+				scalar.String(
+					scalar.Choices("true", "false", "auto"),
+					scalar.Default("auto"),
+				),
 				flag.Default("auto"),
 			),
 			section.Flag(
 				"--log-filename",
 				"Log filename",
-				value.Path,
+				scalar.Path(
+					scalar.Default("~/.config/grabbit.jsonl"),
+				),
 				flag.Default("~/.config/grabbit.jsonl"),
 				flag.ConfigPath("lumberjacklogger.filename"),
 				flag.Required(),
@@ -104,7 +122,9 @@ Homepage: https://github.com/bbkane/grabbit
 			section.Flag(
 				"--log-maxage",
 				"Max age before log rotation in days",
-				value.Int,
+				scalar.Int(
+					scalar.Default(30),
+				),
 				flag.Default("30"),
 				flag.ConfigPath("lumberjacklogger.maxage"),
 				flag.Required(),
@@ -112,7 +132,9 @@ Homepage: https://github.com/bbkane/grabbit
 			section.Flag(
 				"--log-maxbackups",
 				"Num backups for the log",
-				value.Int,
+				scalar.Int(
+					scalar.Default(0),
+				),
 				flag.Default("0"),
 				flag.ConfigPath("lumberjacklogger.maxbackups"),
 				flag.Required(),
@@ -120,7 +142,9 @@ Homepage: https://github.com/bbkane/grabbit
 			section.Flag(
 				"--log-maxsize",
 				"Max size of log in megabytes",
-				value.Int,
+				scalar.Int(
+					scalar.Default(5),
+				),
 				flag.Default("5"),
 				flag.ConfigPath("lumberjacklogger.maxsize"),
 				flag.Required(),
@@ -135,7 +159,9 @@ Homepage: https://github.com/bbkane/grabbit
 					command.Flag(
 						"--editor",
 						"Path to editor",
-						value.String,
+						scalar.String(
+							scalar.Default("vi"),
+						),
 						flag.Alias("-e"),
 						flag.Default("vi"),
 						flag.EnvVars("EDITOR"),

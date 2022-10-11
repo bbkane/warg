@@ -8,7 +8,7 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
-	"go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/scalar"
 )
 
 func login(ctx command.Context) error {
@@ -40,12 +40,14 @@ func ExampleNew() {
 			section.Flag(
 				"--timeout",
 				"Optional timeout. Defaults to no timeout",
-				value.Int,
+				scalar.Int(),
 			),
 			section.Flag(
 				"--url",
 				"URL of the blog",
-				value.String,
+				scalar.String(
+					scalar.Default("https://www.myblog.com"),
+				),
 				flag.Default("https://www.myblog.com"),
 				flag.EnvVars("BLOG_URL"),
 			),

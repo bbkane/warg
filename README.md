@@ -143,7 +143,6 @@ All warg apps must have at least one nested command.  It is not possible to desi
 
 # TODO - value2
 
-- rm flag Enum, Default
-- update calling code
+- rm flag options
+- update flag calling code
 - update docs
-- rm value package

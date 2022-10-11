@@ -3,8 +3,8 @@ package slice
 import (
 	"fmt"
 
-	value "go.bbkane.com/warg/value2"
-	"go.bbkane.com/warg/value2/contained"
+	value "go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/contained"
 )
 
 type sliceValue[T comparable] struct {

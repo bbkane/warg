@@ -2,7 +2,6 @@ package value
 
 import (
 	"errors"
-	"fmt"
 )
 
 type TypeContainer int64
@@ -20,12 +19,21 @@ const (
 // scalar types (Int, String, ...) and container types (IntSlice, StringMap, ...).
 type Value interface {
 
+	// DefaultString returns the default underlying value (represented as a string)
+	DefaultString() string
+
+	// DefaultStringSlice returns the default underlying value for slice values and nil for others
+	DefaultStringSlice() []string
+
 	// Description of the type. useful for help messages. Should not be used as an ID.
 	Description() string
 
 	// Get returns the underlying value. It's meant to be type asserted against
 	// Example: myInt := v.(int)
 	Get() interface{}
+
+	// HasDefault returns true if this value has a default
+	HasDefault() bool
 
 	// Len returns 0 for scalar Values and len(underlyingValue) for container Values.
 	// TODO: I think this will be useful when/if I start enforcing flag grouping (like grabbits subreddit params).
@@ -43,11 +51,15 @@ type Value interface {
 	StringSlice() []string
 
 	// TypeInfo specifies whether what "overall" type of value this is - scalar, slice, etc.
+	// TODO: rename TypeContainer
 	TypeInfo() TypeContainer
 
 	// Update appends to container type Values from a string (useful for CLI flags, env vars, default values)
 	// and replaces scalar Values
 	Update(string) error
+
+	// UpdateFromDefault updates the Value from a pre-set default, if one exists. use HasDefault to check whether a default exists
+	UpdateFromDefault()
 
 	// UpdateFromInterface updates a container type Value from an interface (useful for configs)
 	// and replaces scalar values (for scalar values, UpdateFromInterface is the same as ReplaceFromInterface).
@@ -62,40 +74,4 @@ type Value interface {
 // Useful to create new values as well as initialize them
 type EmptyConstructor func() (Value, error)
 
-var ErrIncompatibleInterface = errors.New("could not decode interface into Value")
-
-// -- ScalarValue
-
-type fromIFaceFunc[T any] func(interface{}) (T, error)
-
-func fromIFaceEnum[T comparable](fromIFace fromIFaceFunc[T], choices ...T) fromIFaceFunc[T] {
-	return func(iFace interface{}) (T, error) {
-		val, err := fromIFace(iFace)
-		if err != nil {
-			return val, err
-		}
-		for _, choice := range choices {
-			if val == choice {
-				return val, nil
-			}
-		}
-		return val, fmt.Errorf("interface enum update invalid choice: available: %v: choice: %v", choices, val)
-	}
-}
-
-type fromStringFunc[T any] func(string) (T, error)
-
-func fromStringEnum[T comparable](fromString fromStringFunc[T], choices ...T) fromStringFunc[T] {
-	return func(s string) (T, error) {
-		val, err := fromString(s)
-		if err != nil {
-			return val, err
-		}
-		for _, choice := range choices {
-			if val == choice {
-				return val, nil
-			}
-		}
-		return val, fmt.Errorf("string enum update invalid choice: available: %v: choice: %v", choices, val)
-	}
-}
+var ErrInvalidChoice = errors.New("invalid choice for value")

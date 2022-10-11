@@ -11,7 +11,7 @@ import (
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
-	"go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/slice"
 )
 
 func exampleConfigFlagTextAdd(ctx command.Context) error {
@@ -36,7 +36,7 @@ func ExampleConfigFlag() {
 				command.Flag(
 					flag.Name("--addend"),
 					"Integer to add. Floats will be truncated. Flag is repeatible",
-					value.IntSlice,
+					slice.Int(),
 					flag.ConfigPath("add.addends"),
 					flag.Required(),
 				),

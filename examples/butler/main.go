@@ -8,7 +8,7 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
-	value "go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/scalar"
 )
 
 func buildApp() warg.App {
@@ -23,7 +23,7 @@ func buildApp() warg.App {
 				command.Flag(
 					"--name",
 					"Guest to address.",
-					value.String,
+					scalar.String(),
 					flag.Alias("-n"),
 					flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),
 					flag.Required(),

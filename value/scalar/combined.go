@@ -3,8 +3,8 @@ package scalar
 import (
 	"time"
 
-	value "go.bbkane.com/warg/value2"
-	"go.bbkane.com/warg/value2/contained"
+	value "go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/contained"
 )
 
 func Bool(opts ...ScalarOpt[bool]) value.EmptyConstructor {
