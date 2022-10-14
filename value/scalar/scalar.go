@@ -125,7 +125,7 @@ func (v *scalarValue[_]) Update(s string) error {
 		return err
 	}
 	if !withinChoices(val, v.choices) {
-		return value.ErrInvalidChoice
+		return value.ErrInvalidChoiceFunc(v.choices)
 	}
 	v.val = val
 	return nil

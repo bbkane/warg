@@ -13,7 +13,8 @@ Command Flags
 Inherited Section Flags
 
   --help , -h : Print help information
-    type : string enum with choices [detailed]
+    type : string
+    choices : [detailed]
     default : detailed
     currentvalue (set by appdefault) : detailed
 

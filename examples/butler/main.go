@@ -23,7 +23,7 @@ func buildApp() warg.App {
 				command.Flag(
 					"--name",
 					"Guest to address.",
-					scalar.String(),
+					scalar.String(scalar.Choices("bob")),
 					flag.Alias("-n"),
 					flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),
 					flag.Required(),

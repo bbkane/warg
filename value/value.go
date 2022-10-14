@@ -2,6 +2,7 @@ package value
 
 import (
 	"errors"
+	"fmt"
 )
 
 type TypeContainer int64
@@ -18,6 +19,9 @@ const (
 // There are two underlying "type" families designed to fit in Value:
 // scalar types (Int, String, ...) and container types (IntSlice, StringMap, ...).
 type Value interface {
+
+	// Choices for this value to contain (represented as strings)
+	Choices() []string
 
 	// DefaultString returns the default underlying value (represented as a string)
 	DefaultString() string
@@ -74,4 +78,6 @@ type Value interface {
 // Useful to create new values as well as initialize them
 type EmptyConstructor func() (Value, error)
 
-var ErrInvalidChoice = errors.New("invalid choice for value")
+func ErrInvalidChoiceFunc[T comparable](choices []T) error {
+	return errors.New("invalid choice for value: choices: " + fmt.Sprint(choices))
+}

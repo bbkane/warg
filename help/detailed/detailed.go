@@ -40,6 +40,14 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 		f.Value.Description(),
 	)
 
+	if len(f.Value.Choices()) > 0 {
+		fmt.Fprintf(w,
+			"    %s : %s\n",
+			color.Add(color.Bold, "choices"),
+			f.Value.Choices(),
+		)
+	}
+
 	// TODO: should I print these one by one like I do value?
 	if f.Value.HasDefault() {
 		if f.Value.TypeInfo() == value.TypeContainerScalar {

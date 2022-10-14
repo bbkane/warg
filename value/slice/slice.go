@@ -141,7 +141,7 @@ func withinChoices[T comparable](val T, choices []T) bool {
 
 func (v *sliceValue[T]) update(val T) error {
 	if !withinChoices(val, v.choices) {
-		return value.ErrInvalidChoice
+		return value.ErrInvalidChoiceFunc(v.choices)
 	}
 	v.vals = append(v.vals, val)
 	return nil
