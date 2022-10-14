@@ -148,3 +148,4 @@ All warg apps must have at least one nested command.  It is not possible to desi
   - app options
   - help
 - update docs
+- what's with how time.duration is printing (grabbit grab -h)

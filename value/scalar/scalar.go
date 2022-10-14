@@ -65,7 +65,8 @@ func (v *scalarValue[_]) DefaultString() string {
 	if v.defaultVal == nil {
 		return ""
 	}
-	return fmt.Sprint(&v.defaultVal)
+	// because we're representing the default as a ptr, we need to deref it to get a value
+	return fmt.Sprint(*v.defaultVal)
 }
 
 func (v *scalarValue[_]) DefaultStringSlice() []string {

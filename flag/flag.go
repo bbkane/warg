@@ -73,18 +73,7 @@ type Flag struct {
 	// SetBy might be set when parsing. Possible values: appdefault, config, passedflag
 	SetBy string
 
-	// TypeDescription is set when parsing. Describes the type: int, string, ...
-	TypeDescription string
-
-	// TypeInfo is set when parsing. Describes the "shape" of the type
-	TypeInfo value.TypeContainer
-
-	// TODO: document these
-	HasDefault         bool
-	DefaultString      string
-	DefaultStringSlice []string
-
-	// Value might be set when parsing. The interface returned by updating a flag
+	// Value is set when parsing. Use SetBy != "" to determine whether a value was actually passed  instead of being empty
 	Value value.Value
 }
 

@@ -37,17 +37,17 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 		w,
 		"    %s : %s\n",
 		color.Add(color.Bold, "type"),
-		f.TypeDescription,
+		f.Value.Description(),
 	)
 
 	// TODO: should I print these one by one like I do value?
-	if f.HasDefault {
-		if f.TypeInfo == value.TypeContainerScalar {
+	if f.Value.HasDefault() {
+		if f.Value.TypeInfo() == value.TypeContainerScalar {
 			fmt.Fprintf(
 				w,
 				"    %s : %s\n",
 				color.Add(color.Bold, "default"),
-				f.DefaultString,
+				f.Value.DefaultString(),
 			)
 			// TODO: check TypeInfo explicitly and panic on the final else
 		} else {
@@ -56,7 +56,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 				w,
 				"    %s : %s\n",
 				color.Add(color.Bold, "default"),
-				f.DefaultStringSlice,
+				f.Value.DefaultStringSlice(),
 			)
 		}
 	}
@@ -85,7 +85,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 	}
 
 	if f.SetBy != "" {
-		if f.TypeInfo == value.TypeContainerSlice {
+		if f.Value.TypeInfo() == value.TypeContainerSlice {
 
 			sliceLen := len(fmt.Sprint(len(f.Value.StringSlice())))
 

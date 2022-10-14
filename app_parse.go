@@ -187,11 +187,6 @@ func resolveFlag(
 		return fmt.Errorf("flag error: %v: %w", name, err)
 	}
 	fl.Value = val
-	fl.TypeDescription = val.Description()
-	fl.TypeInfo = val.TypeInfo()
-	fl.HasDefault = val.HasDefault()
-	fl.DefaultString = val.DefaultString()
-	fl.DefaultStringSlice = val.DefaultStringSlice()
 
 	// try to update from command line and consume from flagStrs
 	// need to check flag.SetBy even in the first case because we could be resolving
@@ -208,7 +203,7 @@ func resolveFlag(
 
 		if fl.SetBy == "" && len(strValues) > 0 {
 			if val.TypeInfo() == value.TypeContainerScalar && len(strValues) > 1 {
-				return fmt.Errorf("flag error: %v: flag passed multiple times, it's value (type %v), can only be updated once", name, fl.TypeDescription)
+				return fmt.Errorf("flag error: %v: flag passed multiple times, it's value (type %v), can only be updated once", name, fl.Value.Description())
 			}
 
 			for _, v := range strValues {
