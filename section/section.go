@@ -82,7 +82,6 @@ func ExistingSection(name Name, value SectionT) SectionOpt {
 
 // ExistingCommand adds an existing Command underneath this Section. Panics if a Command with the same name already exists
 func ExistingCommand(name command.Name, value command.Command) SectionOpt {
-	// TODO: add check that this doesn't start with "-"
 	return func(app *SectionT) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value

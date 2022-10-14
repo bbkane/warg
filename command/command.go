@@ -62,7 +62,7 @@ type Command struct {
 // DoNothing is a command action that simply returns nil
 // Useful for prototyping
 func DoNothing(_ Context) error {
-	return errors.New("TODO: replace this command.DoNothing call")
+	return errors.New("NOTE: replace this command.DoNothing call")
 }
 
 // New builds a Command

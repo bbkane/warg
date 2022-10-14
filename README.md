@@ -141,11 +141,3 @@ All warg apps must have at least one nested command.  It is not possible to desi
 - go through TODOs in code
 - --help ideas: man, json, web, form, term, lsp, bash-completion, zsh-completion, compact
 
-# TODO - value2
-
-- rm flag options
-- update flag calling code
-  - app options
-  - help
-- update docs
-- what's with how time.duration is printing (grabbit grab -h)

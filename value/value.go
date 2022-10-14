@@ -39,11 +39,6 @@ type Value interface {
 	// HasDefault returns true if this value has a default
 	HasDefault() bool
 
-	// Len returns 0 for scalar Values and len(underlyingValue) for container Values.
-	// TODO: I think this will be useful when/if I start enforcing flag grouping (like grabbits subreddit params).
-	// Those should all have the same length and the same source. I don't think I *need* it now, so leaving it out.
-	// Len() int
-
 	// ReplaceFromInterface replaces a value with one found in an interface.
 	// Useful to update a Value from a config.
 	ReplaceFromInterface(interface{}) error
@@ -54,9 +49,8 @@ type Value interface {
 	// StringSlice returns a []string ready to be printed for slice values and nil for others
 	StringSlice() []string
 
-	// TypeInfo specifies whether what "overall" type of value this is - scalar, slice, etc.
-	// TODO: rename TypeContainer
-	TypeInfo() TypeContainer
+	// TypeContainer specifies whether what "overall" type of value this is - scalar, slice, etc.
+	TypeContainer() TypeContainer
 
 	// Update appends to container type Values from a string (useful for CLI flags, env vars, default values)
 	// and replaces scalar Values

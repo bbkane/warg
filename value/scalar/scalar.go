@@ -102,7 +102,7 @@ func (v *scalarValue[_]) StringSlice() []string {
 	return nil
 }
 
-func (scalarValue[_]) TypeInfo() value.TypeContainer {
+func (scalarValue[_]) TypeContainer() value.TypeContainer {
 	return value.TypeContainerScalar
 }
 

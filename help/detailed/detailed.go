@@ -48,17 +48,16 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 		)
 	}
 
-	// TODO: should I print these one by one like I do value?
 	if f.Value.HasDefault() {
-		if f.Value.TypeInfo() == value.TypeContainerScalar {
+		if f.Value.TypeContainer() == value.TypeContainerScalar {
 			fmt.Fprintf(
 				w,
 				"    %s : %s\n",
 				color.Add(color.Bold, "default"),
 				f.Value.DefaultString(),
 			)
-			// TODO: check TypeInfo explicitly and panic on the final else
-		} else {
+
+		} else if f.Value.TypeContainer() == value.TypeContainerSlice {
 			// TODO: make the string slice sprint nicer
 			fmt.Fprintf(
 				w,
@@ -66,6 +65,8 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 				color.Add(color.Bold, "default"),
 				f.Value.DefaultStringSlice(),
 			)
+		} else {
+			panic("Unexpected Typecontainer: " + fmt.Sprint(f.Value.TypeContainer()))
 		}
 	}
 	if f.ConfigPath != "" {
@@ -93,7 +94,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 	}
 
 	if f.SetBy != "" {
-		if f.Value.TypeInfo() == value.TypeContainerSlice {
+		if f.Value.TypeContainer() == value.TypeContainerSlice {
 
 			sliceLen := len(fmt.Sprint(len(f.Value.StringSlice())))
 

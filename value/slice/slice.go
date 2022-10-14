@@ -122,7 +122,7 @@ func (v *sliceValue[_]) StringSlice() []string {
 	return ret
 }
 
-func (sliceValue[_]) TypeInfo() value.TypeContainer {
+func (sliceValue[_]) TypeContainer() value.TypeContainer {
 	return value.TypeContainerSlice
 }
 

@@ -226,7 +226,6 @@ func TestAppHelp(t *testing.T) {
 			pr, parseErr := tt.app.Parse(tt.args, tt.lookup)
 			require.Nil(t, parseErr)
 
-			// TODO: command.DoNothing returns an error. Shouldn't this be not nil?
 			actionErr := pr.Action(pr.Context)
 			require.Nil(t, actionErr)
 
