@@ -41,7 +41,6 @@ Homepage: https://github.com/bbkane/grabbit
 				slice.Default([]string{"earthporn", "wallpapers"}),
 			),
 			flag.Alias("-sn"),
-			flag.Default("earthporn", "wallpapers"),
 			flag.ConfigPath("subreddits[].name"),
 			flag.Required(),
 		),
@@ -52,7 +51,6 @@ Homepage: https://github.com/bbkane/grabbit
 				slice.Default([]string{".", "."}),
 			),
 			flag.Alias("-sd"),
-			flag.Default(".", "."),
 			flag.ConfigPath("subreddits[].destination"),
 			flag.Required(),
 		),
@@ -64,7 +62,6 @@ Homepage: https://github.com/bbkane/grabbit
 				slice.Default([]string{"week", "week"}),
 			),
 			flag.Alias("-st"),
-			flag.Default("week", "week"),
 			flag.ConfigPath("subreddits[].timeframe"),
 			flag.Required(),
 		),
@@ -75,7 +72,6 @@ Homepage: https://github.com/bbkane/grabbit
 				slice.Default([]int{2, 3}),
 			),
 			flag.Alias("-sl"),
-			flag.Default("2", "3"),
 			flag.ConfigPath("subreddits[].limit"),
 			flag.Required(),
 		),
@@ -86,7 +82,6 @@ Homepage: https://github.com/bbkane/grabbit
 				scalar.Default(time.Second*30),
 			),
 			flag.Alias("-t"),
-			flag.Default("30s"),
 			flag.Required(),
 		),
 	)
@@ -107,7 +102,6 @@ Homepage: https://github.com/bbkane/grabbit
 					scalar.Choices("true", "false", "auto"),
 					scalar.Default("auto"),
 				),
-				flag.Default("auto"),
 			),
 			section.Flag(
 				"--log-filename",
@@ -115,17 +109,15 @@ Homepage: https://github.com/bbkane/grabbit
 				scalar.Path(
 					scalar.Default("~/.config/grabbit.jsonl"),
 				),
-				flag.Default("~/.config/grabbit.jsonl"),
 				flag.ConfigPath("lumberjacklogger.filename"),
 				flag.Required(),
 			),
 			section.Flag(
 				"--log-maxage",
-				"Max age before log rotation in days",
+				"Max age before log rotation in days", // TODO: change to duration flag
 				scalar.Int(
 					scalar.Default(30),
 				),
-				flag.Default("30"),
 				flag.ConfigPath("lumberjacklogger.maxage"),
 				flag.Required(),
 			),
@@ -135,17 +127,15 @@ Homepage: https://github.com/bbkane/grabbit
 				scalar.Int(
 					scalar.Default(0),
 				),
-				flag.Default("0"),
 				flag.ConfigPath("lumberjacklogger.maxbackups"),
 				flag.Required(),
 			),
 			section.Flag(
-				"--log-maxsize",
+				"--log-maxsize", // TODO: make bytesize package similar to time?
 				"Max size of log in megabytes",
 				scalar.Int(
 					scalar.Default(5),
 				),
-				flag.Default("5"),
 				flag.ConfigPath("lumberjacklogger.maxsize"),
 				flag.Required(),
 			),
@@ -163,7 +153,6 @@ Homepage: https://github.com/bbkane/grabbit
 							scalar.Default("vi"),
 						),
 						flag.Alias("-e"),
-						flag.Default("vi"),
 						flag.EnvVars("EDITOR"),
 						flag.Required(),
 					),
@@ -172,10 +161,12 @@ Homepage: https://github.com/bbkane/grabbit
 		),
 		warg.ConfigFlag(
 			"--config",
+			[]scalar.ScalarOpt[string]{
+				scalar.Default("~/.config/grabbit.yaml"),
+			},
 			yamlreader.New,
 			"Config filepath",
 			flag.Alias("-c"),
-			flag.Default("~/.config/grabbit.yaml"),
 		),
 		warg.AddVersionCommand(version),
 		warg.SkipValidation(),

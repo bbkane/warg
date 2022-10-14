@@ -189,6 +189,9 @@ func resolveFlag(
 	fl.Value = val
 	fl.TypeDescription = val.Description()
 	fl.TypeInfo = val.TypeInfo()
+	fl.HasDefault = val.HasDefault()
+	fl.DefaultString = val.DefaultString()
+	fl.DefaultStringSlice = val.DefaultStringSlice()
 
 	// try to update from command line and consume from flagStrs
 	// need to check flag.SetBy even in the first case because we could be resolving
@@ -274,13 +277,8 @@ func resolveFlag(
 
 	// update from default
 	{
-		if fl.SetBy == "" && len(fl.DefaultValues) > 0 {
-			for _, v := range fl.DefaultValues {
-				err = fl.Value.Update(v)
-				if err != nil {
-					return fmt.Errorf("internal error updating flag %v from appdefault %v: %w", name, val, err)
-				}
-			}
+		if fl.SetBy == "" && fl.Value.HasDefault() {
+			fl.Value.UpdateFromDefault()
 			fl.SetBy = "appdefault"
 		}
 	}

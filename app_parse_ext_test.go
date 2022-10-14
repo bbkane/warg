@@ -68,7 +68,6 @@ func TestApp_Parse(t *testing.T) {
 								scalar.Int(
 									scalar.Default(10),
 								),
-								flag.Default("10"),
 							),
 						),
 					),
@@ -119,7 +118,6 @@ func TestApp_Parse(t *testing.T) {
 							scalar.String(
 								scalar.Default("hi"),
 							),
-							flag.Default("hi"),
 						),
 					),
 				),
@@ -147,7 +145,6 @@ func TestApp_Parse(t *testing.T) {
 							scalar.String(
 								scalar.Default("hi"),
 							),
-							flag.Default("hi"),
 						),
 					),
 				),
@@ -172,12 +169,12 @@ func TestApp_Parse(t *testing.T) {
 							scalar.Default("defaultkeyval"),
 						),
 						flag.ConfigPath("key"),
-						flag.Default("defaultkeyval"),
 					),
 					section.Command("print", "print key value", command.DoNothing),
 				),
 				warg.ConfigFlag(
 					"--config",
+					[]scalar.ScalarOpt[string]{scalar.Default("defaultconfigval")},
 					func(_ string) (config.Reader, error) {
 						var cr ConfigReaderFunc = func(path string) (config.SearchResult, error) {
 							if path == "key" {
@@ -193,7 +190,6 @@ func TestApp_Parse(t *testing.T) {
 						return cr, nil
 					},
 					"config flag",
-					flag.Default("defaultconfigval"),
 				),
 				warg.SkipValidation(),
 			),
@@ -219,7 +215,6 @@ func TestApp_Parse(t *testing.T) {
 						scalar.String(
 							scalar.Default("sflagval"),
 						),
-						flag.Default("sflagval"),
 					),
 					section.Command(
 						"com",
@@ -257,9 +252,13 @@ func TestApp_Parse(t *testing.T) {
 				),
 				warg.ConfigFlag(
 					"--config",
+					[]scalar.ScalarOpt[string]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json"),
+						),
+					},
 					jsonreader.New,
 					"path to config",
-					flag.Default(testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json")),
 				),
 				warg.SkipValidation(),
 			),
@@ -290,9 +289,13 @@ func TestApp_Parse(t *testing.T) {
 				),
 				warg.ConfigFlag(
 					"--config",
+					[]scalar.ScalarOpt[string]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
+						),
+					},
 					jsonreader.New,
 					"config flag",
-					flag.Default(testDataFilePath(t.Name(), "configSlice", "config_slice.json")),
 				),
 				warg.SkipValidation(),
 			),
@@ -517,9 +520,13 @@ func TestApp_Parse(t *testing.T) {
 				),
 				warg.ConfigFlag(
 					"--config",
+					[]scalar.ScalarOpt[string]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json"),
+						),
+					},
 					jsonreader.New,
 					"path to config",
-					flag.Default(testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json")),
 				),
 				warg.SkipValidation(),
 			),
@@ -553,9 +560,13 @@ func TestApp_Parse(t *testing.T) {
 				),
 				warg.ConfigFlag(
 					"--config",
+					[]scalar.ScalarOpt[string]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml"),
+						),
+					},
 					yamlreader.New,
 					"path to config",
-					flag.Default(testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml")),
 				),
 				warg.SkipValidation(),
 			),

@@ -22,7 +22,6 @@ func app() *warg.App {
 			scalar.Bool(
 				scalar.Default(false),
 			),
-			flag.Default("false"),
 		),
 		command.Flag(
 			"--max-languages",
@@ -30,7 +29,6 @@ func app() *warg.App {
 			scalar.Int(
 				scalar.Default(20),
 			),
-			flag.Default("20"),
 		),
 		command.Flag(
 			"--max-repo-topics",
@@ -38,7 +36,6 @@ func app() *warg.App {
 			scalar.Int(
 				scalar.Default(20),
 			),
-			flag.Default("20"),
 		),
 		command.Flag(
 			"--after-cursor",
@@ -51,7 +48,6 @@ func app() *warg.App {
 			scalar.Int(
 				scalar.Default(1),
 			),
-			flag.Default("1"),
 			flag.Required(),
 		),
 		command.Flag(
@@ -60,7 +56,6 @@ func app() *warg.App {
 			scalar.Path(
 				scalar.Default("starghaze_download.jsonl"),
 			),
-			flag.Default("starghaze_download.jsonl"),
 		),
 		command.Flag(
 			"--page-size",
@@ -68,7 +63,6 @@ func app() *warg.App {
 			scalar.Int(
 				scalar.Default(100),
 			),
-			flag.Default("100"),
 			flag.Required(),
 		),
 		command.Flag(
@@ -77,7 +71,6 @@ func app() *warg.App {
 			scalar.Duration(
 				scalar.Default(time.Minute*10),
 			),
-			flag.Default("10m"),
 			flag.Required(),
 		),
 		command.Flag(
@@ -99,7 +92,6 @@ func app() *warg.App {
 				scalar.Choices("csv", "jsonl", "sqlite", "zinc"),
 				scalar.Default("csv"),
 			),
-			flag.Default("csv"),
 			flag.Required(),
 		),
 		command.Flag(
@@ -113,7 +105,6 @@ func app() *warg.App {
 			scalar.Bool(
 				scalar.Default(false),
 			),
-			flag.Default("false"),
 			flag.Required(),
 		),
 		command.Flag(
@@ -122,7 +113,6 @@ func app() *warg.App {
 			scalar.String(
 				scalar.Default("starghaze.db"),
 			),
-			flag.Default("starghaze.db"),
 		),
 		command.Flag(
 			"--zinc-index-name",
@@ -130,7 +120,6 @@ func app() *warg.App {
 			scalar.String(
 				scalar.Default("starghaze"),
 			),
-			flag.Default("starghaze"),
 		),
 		command.Flag(
 			"--input",
@@ -139,7 +128,6 @@ func app() *warg.App {
 				scalar.Default("starghaze_download.jsonl"),
 			),
 			flag.Required(),
-			flag.Default("starghaze_download.jsonl"),
 		),
 		command.Flag(
 			"--max-line-size",
@@ -147,7 +135,6 @@ func app() *warg.App {
 			scalar.Int(
 				scalar.Default(10),
 			),
-			flag.Default("10"),
 			flag.Required(),
 		),
 		command.Flag(
@@ -180,7 +167,6 @@ func app() *warg.App {
 				scalar.Duration(
 					scalar.Default(time.Minute*10),
 				),
-				flag.Default("10m"),
 				flag.Required(),
 			),
 		),
@@ -210,7 +196,6 @@ func app() *warg.App {
 			scalar.Int(
 				scalar.Default(50),
 			),
-			flag.Default("50"),
 			flag.Required(),
 		),
 		command.Flag(
@@ -219,7 +204,6 @@ func app() *warg.App {
 			scalar.String(
 				scalar.Default("starghaze.db"),
 			),
-			flag.Default("starghaze.db"),
 			flag.Required(),
 		),
 		command.Flag(

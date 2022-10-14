@@ -48,7 +48,6 @@ func ExampleNew() {
 				scalar.String(
 					scalar.Default("https://www.myblog.com"),
 				),
-				flag.Default("https://www.myblog.com"),
 				flag.EnvVars("BLOG_URL"),
 			),
 			section.Section(

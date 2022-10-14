@@ -50,6 +50,7 @@ type App struct {
 // OverrideHelpFlag customizes your --help. If you write a custom --help function, you'll want to add it to your app here!
 func OverrideHelpFlag(
 	mappings []help.HelpFlagMapping,
+	defaultChoice string,
 	helpFile *os.File,
 	flagName flag.Name,
 	flagHelp flag.HelpShort,
@@ -64,22 +65,28 @@ func OverrideHelpFlag(
 		if _, alreadyThere := a.rootSection.Flags[flagName]; alreadyThere {
 			log.Panicf("flag already exists: %#v\n", flagName)
 		}
+
+		defaultFound := false
 		helpValues := make([]string, len(mappings))
 		for i := range mappings {
 			helpValues[i] = mappings[i].Name
+			if helpValues[i] == defaultChoice {
+				defaultFound = true
+			}
+		}
+
+		if !defaultFound {
+			panic(fmt.Sprintf("default (%#v) not found in helpValues (%#v)", defaultChoice, helpValues))
 		}
 
 		helpFlag := flag.New(
 			flagHelp,
 			scalar.String(
 				scalar.Choices(helpValues...),
+				scalar.Default(defaultChoice),
 			),
 			flagOpts...,
 		)
-
-		if len(helpFlag.DefaultValues) == 0 {
-			log.Panic("--help flag must have a default. use flag.Default(...) to set one")
-		}
 
 		a.rootSection.Flags[flagName] = helpFlag
 		// This is used in parsing, so no need to strongly type it
@@ -95,6 +102,8 @@ func OverrideHelpFlag(
 func ConfigFlag(
 	// TODO: put the new stuff at the front to be consistent with OverrideHelpFlag
 	configFlagName flag.Name,
+	// TODO: can I make this nicer?
+	scalarOpts []scalar.ScalarOpt[string],
 	newConfigReader config.NewReader,
 	helpShort flag.HelpShort,
 	flagOpts ...flag.FlagOpt,
@@ -103,7 +112,7 @@ func ConfigFlag(
 		app.configFlagName = configFlagName
 		app.newConfigReader = newConfigReader
 		// TODO: need to have value opts here
-		configFlag := flag.New(helpShort, scalar.Path(), flagOpts...)
+		configFlag := flag.New(helpShort, scalar.Path(scalarOpts...), flagOpts...)
 		app.configFlag = &configFlag
 	}
 }
@@ -152,11 +161,11 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 	if app.helpFlagName == "" {
 		OverrideHelpFlag(
 			help.BuiltinHelpFlagMappings(),
+			"default",
 			os.Stdout,
 			"--help",
 			"Print help",
 			flag.Alias("-h"),
-			flag.Default("default"),
 		)(&app)
 	}
 

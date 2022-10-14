@@ -56,12 +56,12 @@ func ExampleOverrideHelpFlag() {
 					SectionHelp: exampleOverrideHelpFlagCustomSectionHelp,
 				},
 			},
+			"default",
 			os.Stdout,
 			"--help",
 			"Print help",
 			flag.Alias("-h"),
 			// the flag default should match a name in the HelpFlagMapping
-			flag.Default("default"),
 		),
 	)
 

@@ -145,4 +145,6 @@ All warg apps must have at least one nested command.  It is not possible to desi
 
 - rm flag options
 - update flag calling code
+  - app options
+  - help
 - update docs

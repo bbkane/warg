@@ -53,10 +53,6 @@ type Flag struct {
 	// ConfigPath is the path from the config to the value the flag updates
 	ConfigPath string
 
-	// DefaultValues will be shoved into Value if the app builder specifies it.
-	// For scalar values, the last DefaultValues wins
-	DefaultValues []string
-
 	// Envvars holds a list of environment variables to update this flag. Only the first one that exists will be used.
 	EnvVars []string
 
@@ -82,6 +78,11 @@ type Flag struct {
 
 	// TypeInfo is set when parsing. Describes the "shape" of the type
 	TypeInfo value.TypeContainer
+
+	// TODO: document these
+	HasDefault         bool
+	DefaultString      string
+	DefaultStringSlice []string
 
 	// Value might be set when parsing. The interface returned by updating a flag
 	Value value.Value
@@ -110,21 +111,6 @@ func Alias(alias Name) FlagOpt {
 func ConfigPath(path string) FlagOpt {
 	return func(flag *Flag) {
 		flag.ConfigPath = path
-	}
-}
-
-// Default adds default values to a flag. The flag will be updated with each of the values when Resolve is called.
-// Panics when multiple values are passed and the flags is scalar
-func Default(values ...string) FlagOpt {
-	return func(flag *Flag) {
-		empty, err := flag.EmptyValueConstructor()
-		if err != nil {
-			log.Panicf("cannot create empty flag value when checking default: %v", flag)
-		}
-		if empty.TypeInfo() == value.TypeContainerScalar && len(values) != 1 {
-			log.Panicf("a scalar flag should only have one default value: We don't know the name of the type, but here's the Help: %#v", flag.HelpShort)
-		}
-		flag.DefaultValues = values
 	}
 }
 

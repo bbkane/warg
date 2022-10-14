@@ -20,7 +20,6 @@ func app() *warg.App {
 				scalar.Choices("true", "false", "dry-run"),
 				scalar.Default("true"),
 			),
-			flag.Default("true"),
 			flag.Required(),
 		),
 		"--dotfiles": flag.New(
@@ -28,7 +27,6 @@ func app() *warg.App {
 			scalar.Bool(
 				scalar.Default(true),
 			),
-			flag.Default("true"),
 			flag.Required(),
 		),
 		"--ignore": flag.New(
@@ -42,7 +40,6 @@ func app() *warg.App {
 				scalar.Default("~"),
 			),
 			flag.Alias("-l"),
-			flag.Default("~"),
 			flag.Required(),
 		),
 		"--src-dir": flag.New(
@@ -77,7 +74,6 @@ func app() *warg.App {
 					scalar.Default("auto"),
 				),
 				flag.Alias("-c"),
-				flag.Default("auto"),
 			),
 			section.Footer("Homepage: https://github.com/bbkane/fling"),
 		),

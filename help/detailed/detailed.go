@@ -41,20 +41,22 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 	)
 
 	// TODO: should I print these one by one like I do value?
-	if len(f.DefaultValues) > 0 {
+	if f.HasDefault {
 		if f.TypeInfo == value.TypeContainerScalar {
 			fmt.Fprintf(
 				w,
 				"    %s : %s\n",
 				color.Add(color.Bold, "default"),
-				f.DefaultValues[0],
+				f.DefaultString,
 			)
+			// TODO: check TypeInfo explicitly and panic on the final else
 		} else {
+			// TODO: make the string slice sprint nicer
 			fmt.Fprintf(
 				w,
 				"    %s : %s\n",
 				color.Add(color.Bold, "default"),
-				f.DefaultValues,
+				f.DefaultStringSlice,
 			)
 		}
 	}

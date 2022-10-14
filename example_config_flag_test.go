@@ -11,6 +11,7 @@ import (
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
+	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
 )
 
@@ -44,10 +45,12 @@ func ExampleConfigFlag() {
 		),
 		warg.ConfigFlag(
 			"--config",
+			[]scalar.ScalarOpt[string]{
+				scalar.Default("~/.config/calc.yaml"),
+			},
 			yamlreader.New,
 			"path to YAML config file",
 			flag.Alias("-c"),
-			flag.Default("~/.config/calc.yaml"),
 		),
 	)
 
