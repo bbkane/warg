@@ -1,0 +1,33 @@
+# https://github.com/marketplace/actions/run-golangci-lint#how-to-usename: golangci-lint
+name: Go lint
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+    branches:
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      
+      # https://github.com/marketplace/actions/setup-go-environment
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v3
+        with:
+          go-version: '>=1.18.0'
+
+      # https://github.com/marketplace/actions/checkout`
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      # https://github.com/marketplace/actions/run-golangci-lint#how-to-use
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
