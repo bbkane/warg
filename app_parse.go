@@ -88,7 +88,7 @@ func gatherArgs(osArgs []string, helpFlagNames []string) (*gatherArgsResult, err
 	}
 	// check the only non-terminal state
 	if state == flagPassedSt {
-		return nil, fmt.Errorf("flag passed without value( %#v) . All flags must have one value passed. Flags can be repeated to accumulate values. Example: --level 9000", currentFlagName)
+		return nil, fmt.Errorf("flag passed without value( %#v) . All flags must have one value passed. Repeat flags to accumulate values. Example: --level 9000", currentFlagName)
 	}
 	return res, nil
 }

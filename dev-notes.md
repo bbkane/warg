@@ -16,9 +16,13 @@ golangci-lint run
 
 ```json
 {
-  "go.lintTool":"golangci-lint",
-  "go.lintFlags": [
-    "--fast"
-  ]
+    "go.lintTool": "golangci-lint",
+    // This is recommended to not freeze the editor,
+    // but it isn't catching stuff!
+    // "go.lintFlags": [
+    //     "--fast"
+    // ],
 }
 ```
+
+Note that with the `lintTool` set to `golangci-lint`, the `Go` VS Code extension will `go install` golangci-lint, despite the fact that this is [explicitly recommended against](https://golangci-lint.run/usage/install/#install-from-source). ¯\_(ツ)_/¯

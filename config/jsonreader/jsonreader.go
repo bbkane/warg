@@ -3,7 +3,7 @@ package jsonreader
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/config/tokenize"
@@ -16,7 +16,7 @@ type jsonConfigReader struct {
 func New(filePath string) (config.Reader, error) {
 	cr := &jsonConfigReader{}
 
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
 	if err != nil {
 		// file not existing is ok
 		// TODO: explicitly check for file not found instead of any error

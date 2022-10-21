@@ -3,7 +3,7 @@ package warg_test
 import (
 	"bytes"
 	stdlibflag "flag"
-	"io/ioutil"
+
 	"os"
 	"path/filepath"
 	"testing"
@@ -96,7 +96,7 @@ func grabbitSection() section.SectionT {
 }
 
 func tmpFile(t *testing.T) *os.File {
-	actualHelpTmpFile, err := ioutil.TempFile(os.TempDir(), "warg-test-")
+	actualHelpTmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
 	if err != nil {
 		t.Fatalf("Error creating tmpfile: %v", err)
 	}
@@ -232,7 +232,7 @@ func TestAppHelp(t *testing.T) {
 			closeErr := tt.app.HelpFile.Close()
 			require.Nil(t, closeErr)
 
-			actualHelpBytes, readErr := ioutil.ReadFile(tt.app.HelpFile.Name())
+			actualHelpBytes, readErr := os.ReadFile(tt.app.HelpFile.Name())
 			require.Nil(t, readErr)
 
 			goldenDir := filepath.Join("testdata", t.Name())
@@ -244,13 +244,13 @@ func TestAppHelp(t *testing.T) {
 				mkdirErr := os.MkdirAll(goldenDir, 0700)
 				require.Nil(t, mkdirErr)
 
-				writeErr := ioutil.WriteFile(goldenFilePath, actualHelpBytes, 0600)
+				writeErr := os.WriteFile(goldenFilePath, actualHelpBytes, 0600)
 				require.Nil(t, writeErr)
 
 				t.Logf("Wrote: %v\n", goldenFilePath)
 			}
 
-			expectedBytes, expectedReadErr := ioutil.ReadFile(goldenFilePath)
+			expectedBytes, expectedReadErr := os.ReadFile(goldenFilePath)
 			require.Nil(t, expectedReadErr, "actualBytes: \n%s", string(actualHelpBytes))
 
 			if !bytes.Equal(expectedBytes, actualHelpBytes) {

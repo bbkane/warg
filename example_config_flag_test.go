@@ -2,7 +2,6 @@ package warg_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -54,7 +53,7 @@ func ExampleConfigFlag() {
 		),
 	)
 
-	err := ioutil.WriteFile(
+	err := os.WriteFile(
 		"testdata/ExampleConfigFlag/calc.yaml",
 		[]byte(
 			`

@@ -2,7 +2,7 @@ package yamlreader
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/config/tokenize"
@@ -19,7 +19,7 @@ type yamlConfigReader struct {
 func New(filePath string) (config.Reader, error) {
 	cr := &yamlConfigReader{}
 
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
 	if err != nil {
 		// the file not existing is ok
 		return cr, nil
