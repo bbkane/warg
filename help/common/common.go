@@ -1,7 +1,10 @@
 package common
 
 import (
+	"fmt"
+	"io"
 	"os"
+	"strings"
 
 	"github.com/mattn/go-isatty"
 	"go.bbkane.com/gocolor"
@@ -34,6 +37,15 @@ func LeftPad(s string, pad string, plength int) string {
 	return s
 }
 
+// Padding returns the a spaced string to pad a name so len((name + Padding(name, length)) == len(length))
+func Padding(n flag.Name, length int) string {
+	lenFlagName := len(n)
+	if lenFlagName > length {
+		panic("lenFlagName > length")
+	}
+	return strings.Repeat(" ", length-lenFlagName)
+}
+
 // ConditionallyEnableColor looks for a passed --color flag with an underlying string value. If
 // it exists and is set to "true", or if it exists, is set to "auto",
 // and the passed file is a TTY, an enabled Color is returned.
@@ -50,6 +62,19 @@ func ConditionallyEnableColor(pf command.PassedFlags, file *os.File) (gocolor.Co
 	startEnabled := useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd()))
 	return gocolor.Prepare(startEnabled)
 
+}
+
+// FprintNoSpace is just like fmt.Fprint, but doesn't separate args with spaces
+func FprintNoSpace(w io.Writer, s ...any) {
+	for _, si := range s {
+		fmt.Fprint(w, si)
+	}
+}
+
+// FprintlnNoSpace is just like fmt.Fprintln, but doesn't separate args with spaces
+func FprintlnNoSpace(w io.Writer, s ...any) {
+	FprintNoSpace(w, s...)
+	fmt.Fprintln(w)
 }
 
 func FmtHeader(col *gocolor.Color, header string) string {

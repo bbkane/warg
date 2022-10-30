@@ -7,6 +7,7 @@ import (
 	"go.bbkane.com/warg/help/allcommands"
 	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/help/detailed"
+	"go.bbkane.com/warg/help/nowrap"
 	"go.bbkane.com/warg/section"
 )
 
@@ -29,26 +30,30 @@ func BuiltinHelpFlagMappings() []HelpFlagMapping {
 			CommandHelp: detailed.DetailedCommandHelp,
 			SectionHelp: allcommands.AllCommandsSectionHelp,
 		},
-		{Name: "detailed",
+		{
+			Name:        "detailed",
 			CommandHelp: detailed.DetailedCommandHelp,
 			SectionHelp: detailed.DetailedSectionHelp,
 		},
 
-		{Name: "outline",
+		{
+			Name:        "outline",
 			CommandHelp: OutlineCommandHelp,
 			SectionHelp: OutlineSectionHelp,
 		},
 
 		// allcommands list child commands, so it doesn't really make sense for a command
-		{Name: "allcommands",
+		{
+			Name:        "allcommands",
 			CommandHelp: detailed.DetailedCommandHelp,
 			SectionHelp: allcommands.AllCommandsSectionHelp,
 		},
 		// // 2022-09-14: This is unfinished (need to do two-column stuff) and decide what that looks like
 		// // for different terminal sizes. Also see ~/Git-GH/wark_reflow
-		// {Name: "nowrap",
-		// 	CommandHelp: columns.NoWrapCommandHelp,
-		// 	SectionHelp: allcommands.AllCommandsSectionHelp,
-		// },
+		{
+			Name:        "nowrap",
+			CommandHelp: nowrap.NoWrapCommandHelp,
+			SectionHelp: allcommands.AllCommandsSectionHelp,
+		},
 	}
 }
