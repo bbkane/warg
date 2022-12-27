@@ -1,4 +1,4 @@
-package nowrap
+package twoline
 
 import (
 	"bufio"
@@ -13,67 +13,35 @@ import (
 	"go.bbkane.com/warg/help/common"
 )
 
-const flagHelpSep = " : "
-const flagIndent = "  "
-const flagAliasNameSep = ", "
-const flagNameValueSep = " = "
-
-// maxFlagColWidth calculates the max width of everything in the flag column.
-// NOTE: flagIndent is just considered its own column
-func maxFlagColWidth(fm flag.FlagMap) int {
-	m := 0
-	for name, fl := range fm {
-		dynamicLen := len(name)
-		if fl.Alias != "" {
-			dynamicLen = dynamicLen + len(fl.Alias) + len(flagAliasNameSep)
-		}
-		if fl.SetBy != "" {
-			// TODO: account for compound type values!
-			dynamicLen = dynamicLen + len(flagNameValueSep) + len(fl.Value.String())
-		}
-		if dynamicLen > m {
-			m = dynamicLen
-		}
-	}
-	return m
-}
-
-func printFlag(f io.Writer, color *gocolor.Color, flagName flag.Name, fl *flag.Flag, maxFlagColWidth_ int) {
-	common.FprintNoSpace(f, flagIndent)
-	paddingWidth := maxFlagColWidth_
-	// if the flag has an alias, print it and reduce padding
+func printFlag(f io.Writer, color *gocolor.Color, flagName flag.Name, fl *flag.Flag) {
+	common.FprintNoSpace(f, "  ")
 	if string(fl.Alias) != "" {
 		common.FprintNoSpace(
 			f,
-			string(fl.Alias),
-			flagAliasNameSep,
+			common.FmtFlagAlias(color, fl.Alias),
+			", ",
 		)
-		paddingWidth = paddingWidth - len(fl.Alias) - len(flagAliasNameSep)
 	}
 	common.FprintNoSpace(
 		f,
-		string(flagName),
+		common.FmtFlagName(color, flagName),
 	)
 	if fl.SetBy != "" {
 		common.FprintNoSpace(
 			f,
-			flagNameValueSep,
+			" = ",
 			fl.Value.String(),
 		)
-		paddingWidth = paddingWidth - len(flagNameValueSep) - len(fl.Value.String())
 	}
+	common.FprintlnNoSpace(f)
 	common.FprintlnNoSpace(
 		f,
-		common.Padding(flagName, paddingWidth),
-		flagHelpSep,
-		string(fl.HelpShort),
-		" (",
-		fl.Value.Description(),
-		")",
+		"    : ",
+		fl.HelpShort,
 	)
 }
 
-func NoWrapCommandHelp(file *os.File, cur *command.Command, hi common.HelpInfo) command.Action {
+func TwoLineCommandHelp(file *os.File, cur *command.Command, hi common.HelpInfo) command.Action {
 	return func(ctx command.Context) error {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
@@ -95,14 +63,12 @@ func NoWrapCommandHelp(file *os.File, cur *command.Command, hi common.HelpInfo) 
 		var commandFlagHelp bytes.Buffer
 		var sectionFlagHelp bytes.Buffer
 
-		maxFlagColWidth_ := maxFlagColWidth(hi.AvailableFlags)
-		// fmt.Println(flagIndent + strings.Repeat("_", maxFlagColWidth_))
 		for _, flagName := range hi.AvailableFlags.SortedNames() {
 			fl := hi.AvailableFlags[flagName]
 			if fl.IsCommandFlag {
-				printFlag(&commandFlagHelp, &col, flagName, &fl, maxFlagColWidth_)
+				printFlag(&commandFlagHelp, &col, flagName, &fl)
 			} else {
-				printFlag(&sectionFlagHelp, &col, flagName, &fl, maxFlagColWidth_)
+				printFlag(&sectionFlagHelp, &col, flagName, &fl)
 			}
 		}
 

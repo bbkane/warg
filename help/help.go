@@ -8,6 +8,7 @@ import (
 	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/help/detailed"
 	"go.bbkane.com/warg/help/nowrap"
+	"go.bbkane.com/warg/help/twoline"
 	"go.bbkane.com/warg/section"
 )
 
@@ -53,6 +54,11 @@ func BuiltinHelpFlagMappings() []HelpFlagMapping {
 		{
 			Name:        "nowrap",
 			CommandHelp: nowrap.NoWrapCommandHelp,
+			SectionHelp: allcommands.AllCommandsSectionHelp,
+		},
+		{
+			Name:        "twoline",
+			CommandHelp: twoline.TwoLineCommandHelp,
 			SectionHelp: allcommands.AllCommandsSectionHelp,
 		},
 	}
