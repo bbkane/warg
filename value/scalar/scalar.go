@@ -119,13 +119,13 @@ func withinChoices[T comparable](val T, choices []T) bool {
 	return false
 }
 
-func (v *scalarValue[_]) Update(s string) error {
+func (v *scalarValue[T]) Update(s string) error {
 	val, err := v.inner.FromString(s)
 	if err != nil {
 		return err
 	}
 	if !withinChoices(val, v.choices) {
-		return value.ErrInvalidChoiceFunc(v.choices)
+		return value.ErrInvalidChoice[T]{Choices: v.choices}
 	}
 	v.val = val
 	return nil
