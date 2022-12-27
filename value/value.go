@@ -1,7 +1,6 @@
 package value
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -72,6 +71,10 @@ type Value interface {
 // Useful to create new values as well as initialize them
 type EmptyConstructor func() (Value, error)
 
-func ErrInvalidChoiceFunc[T comparable](choices []T) error {
-	return errors.New("invalid choice for value: choices: " + fmt.Sprint(choices))
+type ErrInvalidChoice[T comparable] struct {
+	Choices []T
+}
+
+func (e ErrInvalidChoice[T]) Error() string {
+	return "invalid choice for value: choices: " + fmt.Sprint(e.Choices)
 }
