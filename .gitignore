@@ -1,3 +1,4 @@
 tmp*
 .DS_Store
 tags
+__debug_bin

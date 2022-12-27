@@ -581,6 +581,36 @@ func TestApp_Parse(t *testing.T) {
 			},
 			expectedErr: false,
 		},
+		// Note: Will need to update this if https://github.com/bbkane/warg/issues/36 gets implemented
+		{
+			name: "invalidFlagsErrorEvenForHelp",
+			app: warg.New(
+				"invalidFlagsErrorEvenForHelp",
+				section.New(
+					section.HelpShort("A virtual assistant"),
+					section.Command(
+						"present",
+						"Formally present a guest (guests are never introduced, always presented).",
+						command.DoNothing,
+						command.Flag(
+							"--name",
+							"Guest to address.",
+							scalar.String(scalar.Choices("bob")),
+							flag.Alias("-n"),
+							flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),
+							flag.Required(),
+						),
+					),
+				),
+				warg.SkipValidation(),
+			),
+
+			args:                     []string{"app", "present", "-h"},
+			lookup:                   warg.LookupMap(map[string]string{"USER": "bbkane"}),
+			expectedPassedPath:       []string{"present"},
+			expectedPassedFlagValues: command.PassedFlags{"--help": "default"},
+			expectedErr:              true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
