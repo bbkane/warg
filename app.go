@@ -99,6 +99,7 @@ func OverrideHelpFlag(
 }
 
 // Use ConfigFlag in conjunction with flag.ConfigPath to allow users to override flag defaults with values from a config.
+// This flag will be parsed and any resulting config will be read before other flag value sources.
 func ConfigFlag(
 	// TODO: put the new stuff at the front to be consistent with OverrideHelpFlag
 	configFlagName flag.Name,

@@ -23,7 +23,7 @@ func buildApp() warg.App {
 				command.Flag(
 					"--name",
 					"Guest to address.",
-					scalar.String(scalar.Choices("bob")),
+					scalar.String(),
 					flag.Alias("-n"),
 					flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),
 					flag.Required(),
@@ -31,8 +31,6 @@ func buildApp() warg.App {
 			),
 		),
 		warg.AddVersionCommand(""),
-		// Run the validation in a test instead of every
-		// time the app is created.
 		warg.SkipValidation(),
 	)
 	return app
