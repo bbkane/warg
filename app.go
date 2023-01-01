@@ -126,7 +126,7 @@ func SkipValidation() AppOpt {
 	}
 }
 
-// AddVersionCommand adds a "version" command to the root section.
+// AddVersionCommand adds a "version" command to the root section that prints the version passed.
 // Pass an empty string to use .Main.Version from `debug.ReadBuildInfo`,
 // which returns "(devel)" when using `go run`
 func AddVersionCommand(version string) AppOpt {
@@ -146,6 +146,20 @@ func AddVersionCommand(version string) AppOpt {
 			return nil
 		}
 		section.Command("version", "Print version", action)(&a.rootSection)
+	}
+}
+
+// AddColorFlag adds a "--color" flag to the root section. By convention, this flag will be respected by the different help commands
+func AddColorFlag() AppOpt {
+	return func(a *App) {
+		section.Flag(
+			"--color",
+			"Use ANSI colors",
+			scalar.String(
+				scalar.Choices("true", "false", "auto"),
+				scalar.Default("auto"),
+			),
+		)(&a.rootSection)
 	}
 }
 

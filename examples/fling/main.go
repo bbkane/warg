@@ -66,17 +66,9 @@ func app() *warg.App {
 				unlink,
 				command.ExistingFlags(linkUnlinkFlags),
 			),
-			section.Flag(
-				"--color",
-				"Control color (including for --help)",
-				scalar.String(
-					scalar.Choices("true", "false", "auto"),
-					scalar.Default("auto"),
-				),
-				flag.Alias("-c"),
-			),
 			section.Footer("Homepage: https://github.com/bbkane/fling"),
 		),
+		warg.AddColorFlag(),
 		warg.AddVersionCommand(version),
 		warg.SkipValidation(),
 	)

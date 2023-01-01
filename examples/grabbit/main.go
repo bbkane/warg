@@ -96,14 +96,6 @@ Homepage: https://github.com/bbkane/grabbit
 			),
 			section.Footer(appFooter),
 			section.Flag(
-				"--color",
-				"Use colorized output",
-				scalar.String(
-					scalar.Choices("true", "false", "auto"),
-					scalar.Default("auto"),
-				),
-			),
-			section.Flag(
 				"--log-filename",
 				"Log filename",
 				scalar.Path(
@@ -168,6 +160,7 @@ Homepage: https://github.com/bbkane/grabbit
 			"Config filepath",
 			flag.Alias("-c"),
 		),
+		warg.AddColorFlag(),
 		warg.AddVersionCommand(version),
 		warg.SkipValidation(),
 	)

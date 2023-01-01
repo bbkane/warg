@@ -31,6 +31,7 @@ func buildApp() warg.App {
 			),
 		),
 		warg.AddVersionCommand(""),
+		warg.AddColorFlag(),
 		warg.SkipValidation(),
 	)
 	return app

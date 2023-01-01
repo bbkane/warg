@@ -14,9 +14,9 @@ import (
 	"go.bbkane.com/warg/value/slice"
 )
 
-// ExampleFlagValueOptions shows a couple combinations of flag/value options.
+// ExampleApp_Parse_flag_value_options shows a couple combinations of flag/value options.
 // It's also possible to use '--help detailed' to see the current value of a flag and what set it.
-func ExampleFlagValueOptions() {
+func ExampleApp_Parse_flag_value_options() {
 
 	action := func(ctx command.Context) error {
 		// flag marked as Required(), so no need to check for existance

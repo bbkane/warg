@@ -89,7 +89,7 @@ warg is designed to create hierarchical CLI applications similar to [azure-cli](
 ### azure-cli
 
 ```
-az keyvault certificate show --name <name> --vault-name <vault-name>
+az keyvault certificate create --name <name> --vault-name <vault-name> --tag <key1=value1> --tag <key2=value2>
 ```
 
 If we try to dissect the parts of this command, we see that it:
@@ -97,9 +97,9 @@ If we try to dissect the parts of this command, we see that it:
 - Starts with the app name (`az`).
 - Narrows down intent with a **section** (`keyvault`). Sections are usually nouns and function similarly to a directory hierarchy on a computer - used to group related sections and commands so they're easy to find and use together.
 - Narrows down intent further with another **section** (`certificate`).
-- Ends with a **command** (`show`). Commands are usually verbs and specify a single action to take within that section.
+- Ends with a **command** (`create`). Commands are usually verbs and specify a single action to take within that section.
 - Passes information to the command with **flags** (`--name`, `--vault-name`).
-- Each flag is passed exactly one **value** (`<name>` and `<vault-name>` are placeholders for user-specified values)
+- Each flag is passed exactly one **value** (`<name>`, `<vault-name>`, and `<key=value` are placeholders for user-specified values). A flag can be typed multiple times to build aggregate data structures like slices or maps.
 
 This structure is both readable and scalable. `az` makes hundreds of commands browsable with this strategy!
 
@@ -130,8 +130,6 @@ Specify type-independent options to populate values with [`FlagOpt`](https://pkg
 
 See an [example](./example_flag_value_options_test.go).
 
-
-
 ## Specially Handled Flags
 
 ### `--config`
@@ -140,21 +138,11 @@ Because warg has the capability to read values from a config file into the app, 
 
 ### `--help` and  `--color`
 
-TODO
+As a special case, the`--help/-h` flag may be passed without a value. If so, the default help action will be taken. See [`OverrideHelpFlag`](https://pkg.go.dev/github.com/bbkane/warg#OverrideHelpFlag) and its example for how to change the default help action. By convention, the built-in help commands look for a flag called `--color`  to control whether `--help` prints to the terminal in color. Use `AddColorFlag` to easily add this flag to apps and  [`ConditionallyEnableColor`](https://pkg.go.dev/github.com/bbkane/warg/help#ConditionallyEnableColor) to easily look for this flag in custom help.
 
 ## Unsupported CLI Patterns
 
 One of warg's tradeoffs is that it insists on only using sections, commands,  flags, and values. This means it is not possible (by design) to build some styles of CLI apps. warg does not support positional arguments. Instead, use a required flag: `git clone <url>` would be `git clone --url <url>`.
 
 All warg apps must have at least one nested command.  It is not possible to design a warg app such that calling `<appname> --flag <value>` does useful work. Instead, `<appname> <command> --flag <value>` must be used.
-
-# TODO
-
-- Move these to issues
-- should I auto add a color flag, what about a version subcommand. I literally want these in all my apps
-- Add a sentinal value (UNSET?) to be used with optional flags that unsets the flag? sets the flag to the default value? So I can use fling without passing -i 'README.*' all the time :)
-- use https://stackoverflow.com/a/16946478/2958070 for better number handling?
-- zsh completion with https://www.dolthub.com/blog/2021-11-15-zsh-completions-with-subcommands/
-- go through TODOs in code
-- --help ideas: man, json, web, form, term, lsp, bash-completion, zsh-completion, compact
 

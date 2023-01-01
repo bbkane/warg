@@ -239,6 +239,7 @@ func app() *warg.App {
 			),
 			section.Footer("Homepage: https://github.com/bbkane/starghaze"),
 		),
+		warg.AddColorFlag(),
 		warg.AddVersionCommand(version),
 		warg.SkipValidation(),
 	)
