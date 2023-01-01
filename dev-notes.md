@@ -1,3 +1,11 @@
+# Install pre-commit hook
+
+This currently runs golangci-lint and go test.
+
+```bash
+./git_hooks_pre-commit.sh link
+```
+
 # [golangci-lint](https://golangci-lint.run/)
 
 ## MacOS [Install](https://golangci-lint.run/usage/install/#macos)
@@ -17,11 +25,6 @@ golangci-lint run
 ```json
 {
     "go.lintTool": "golangci-lint",
-    // This is recommended to not freeze the editor,
-    // but it isn't catching stuff!
-    // "go.lintFlags": [
-    //     "--fast"
-    // ],
 }
 ```
 

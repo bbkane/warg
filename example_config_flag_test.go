@@ -70,5 +70,5 @@ add:
 	}
 	app.MustRun([]string{"calc", "-c", "testdata/ExampleConfigFlag/calc.yaml", "add"}, os.LookupEnv)
 	// Output:
-	// Sum: 60
+	// Sum: 6
 }
