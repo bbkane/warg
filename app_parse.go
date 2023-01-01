@@ -41,7 +41,7 @@ func containsString(haystack []string, needle string) bool {
 // gatherArgs separates os.Args into a command path, a list of flags and their values from the CLI.
 // It also takes note of whether --help was passed. To minimize ambiguitiy between a path element and an optional
 // argument to --help, --help must be either not be passed, be the last string passed, or have exactly one value after it.
-// See warg-gatherArgs-state-machine.png at the root of the repo for a diagram.
+// See img/warg-gatherArgs-state-machine.png at the root of the repo for a diagram.
 func gatherArgs(osArgs []string, helpFlagNames []string) (*gatherArgsResult, error) {
 	res := &gatherArgsResult{}
 
