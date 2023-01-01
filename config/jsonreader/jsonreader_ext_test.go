@@ -1,6 +1,7 @@
 package jsonreader_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -48,7 +49,7 @@ func TestSearch(t *testing.T) {
 			searchPath:          "key1.key2",
 			expectedCreationErr: false,
 			expectedSearchResult: config.SearchResult{
-				IFace:        float64(1),
+				IFace:        json.Number("1"),
 				Exists:       true,
 				IsAggregated: false,
 			},

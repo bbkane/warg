@@ -274,6 +274,55 @@ func TestApp_Parse(t *testing.T) {
 			expectedErr: false,
 		},
 		{
+			// JSON needs some help to support number decoding
+			name: "numJSONConfig",
+			app: warg.New(
+				"newAppName",
+				section.New("help for test",
+					// TODO: looks like I don't have a float value type yet...
+					// section.Flag(
+					// 	"--floatval",
+					// 	"flag help",
+					// 	scalar.Float(),
+					// 	flag.ConfigPath("params.floatval"),
+					// ),
+					section.Flag(
+						"--intval",
+						"flag help",
+						scalar.Int(),
+						flag.ConfigPath("params.intval"),
+					),
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+					),
+				),
+				warg.ConfigFlag(
+					"--config",
+					[]scalar.ScalarOpt[string]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "numJSONConfig", "config.json"),
+						),
+					},
+					jsonreader.New,
+					"path to config",
+				),
+				warg.SkipValidation(),
+			),
+
+			args:               []string{"app", "com"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"com"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--config": testDataFilePath(t.Name(), "numJSONConfig", "config.json"),
+				// "--floatval": 1.5,
+				"--intval": 1,
+				"--help":   "default",
+			},
+			expectedErr: false,
+		},
+		{
 			name: "configSlice",
 			app: warg.New(
 				"newAppName",

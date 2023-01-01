@@ -1,6 +1,7 @@
 package jsonreader
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -23,7 +24,11 @@ func New(filePath string) (config.Reader, error) {
 		return cr, nil
 	}
 
-	err = json.Unmarshal(content, &cr.data)
+	// https://stackoverflow.com/a/16946478/2958070
+	d := json.NewDecoder(bytes.NewBuffer(content))
+	d.UseNumber()
+	err = d.Decode(&cr.data)
+
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package contained
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -70,6 +71,14 @@ func Duration() ContainedTypeInfo[time.Duration] {
 	}
 }
 
+func intFromString(s string) (int, error) {
+	i, err := strconv.ParseInt(s, 0, strconv.IntSize)
+	if err != nil {
+		return 0, err
+	}
+	return int(i), nil
+}
+
 func Int() ContainedTypeInfo[int] {
 	return ContainedTypeInfo[int]{
 		Description: "int",
@@ -77,20 +86,14 @@ func Int() ContainedTypeInfo[int] {
 			switch under := iFace.(type) {
 			case int:
 				return under, nil
-			case float64:
-				return int(under), nil
+			case json.Number:
+				return intFromString(string(under))
 			default:
 				return 0, ErrIncompatibleInterface
 			}
 		},
-		FromString: func(s string) (int, error) {
-			i, err := strconv.ParseInt(s, 0, strconv.IntSize)
-			if err != nil {
-				return 0, err
-			}
-			return int(i), nil
-		},
-		Empty: func() int { return 0 },
+		FromString: intFromString,
+		Empty:      func() int { return 0 },
 	}
 }
 

@@ -35,7 +35,7 @@ func ExampleConfigFlag() {
 				exampleConfigFlagTextAdd,
 				command.Flag(
 					flag.Name("--addend"),
-					"Integer to add. Floats will be truncated. Flag is repeatible",
+					"Integer to add. Flag is repeatible",
 					slice.Int(),
 					flag.ConfigPath("add.addends"),
 					flag.Required(),
