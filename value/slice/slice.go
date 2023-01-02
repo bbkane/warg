@@ -97,16 +97,16 @@ func (v *sliceValue[T]) ReplaceFromInterface(iFace interface{}) error {
 		return contained.ErrIncompatibleInterface
 	}
 
-	new := []T{}
+	newVals := []T{}
 	for _, e := range under {
 		underE, err := v.inner.FromIFace(e)
 		if err != nil {
 			// TODO: this won't communicate to the caller *which* element is the wrong type
 			return err
 		}
-		new = append(new, underE)
+		newVals = append(newVals, underE)
 	}
-	v.vals = new
+	v.vals = newVals
 	return nil
 }
 

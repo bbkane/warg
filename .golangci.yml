@@ -11,5 +11,11 @@ linters:
     - unused
     # stuff I'm adding
     - exhaustive
+    # TODO: this throws several errors. Probably need to rework API for this
+    # - exhaustruct
+    - gochecknoglobals
+    - gochecknoinits
     - gofmt
+    - nonamedreturns
+    - predeclared
   fast: false

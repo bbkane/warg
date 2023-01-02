@@ -19,6 +19,7 @@ import (
 	"go.bbkane.com/warg/value/scalar"
 )
 
+//nolint:gochecknoglobals  // https://github.com/leighmcculloch/gochecknoglobals/issues/11#issuecomment-1368578131
 var update = stdlibflag.Bool("update", false, "update golden files")
 
 // A grabbitSection is a simple section to test help
