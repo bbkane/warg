@@ -4,6 +4,23 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+make_print_color() {
+    color_name="$1"
+    color_code="$2"
+    color_reset="$(tput sgr0)"
+    if [ -t 1 ] ; then
+        eval "print_${color_name}() { printf \"${color_code}%s${color_reset}\\n\" \"\$1\"; }"
+    else  # Don't print colors on pipes
+        eval "print_${color_name}() { printf \"%s\\n\" \"\$1\"; }"
+    fi
+}
+
+# https://unix.stackexchange.com/a/269085/185953
+make_print_color "red" "$(tput setaf 1)"
+make_print_color "green" "$(tput setaf 2)"
+make_print_color "yellow" "$(tput setaf 3)"
+make_print_color "blue" "$(tput setaf 4)"
+
 # https://www.shellcheck.net/wiki/SC2155
 # https://stackoverflow.com/a/957978/2958070
 repo_root="$(git rev-parse --show-toplevel)"
@@ -27,6 +44,14 @@ elif [ "$1" == "unlink" ]; then
 fi
 set -u
 
-golangci-lint run
+print_blue "# Running: pre-commit"
 
-go test ./...
+print_blue "## Running: golangci-lint"
+golangci-lint run || { print_red "Failed!"; exit 1; }
+print_green "## Succeeded: golangci-lint"
+
+print_blue "## Running: go test"
+go test ./... > /dev/null || { print_red "Failed!"; exit 1; }
+print_green "## Succeeded: go test"
+
+print_green "# Succeeded: pre-commit"
