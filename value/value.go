@@ -28,7 +28,7 @@ type Value interface {
 	// DefaultStringSlice returns the default underlying value for slice values and nil for others
 	DefaultStringSlice() []string
 
-	// Description of the type. useful for help messages. Should not be used as an ID.
+	// Description of the type. Useful for help messages. Not guaranteed to be unique. Should not be used as an ID.
 	Description() string
 
 	// Get returns the underlying value. It's meant to be type asserted against

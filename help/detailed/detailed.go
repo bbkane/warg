@@ -172,12 +172,12 @@ func DetailedCommandHelp(file *os.File, cur *command.Command, helpInfo common.He
 			}
 
 			if commandFlagHelp.Len() > 0 {
-				fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Command Flags"))
+				fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Command Flags")+":")
 				fmt.Fprintln(f)
 				_, _ = commandFlagHelp.WriteTo(f)
 			}
 			if sectionFlagHelp.Len() > 0 {
-				fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Inherited Section Flags"))
+				fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Inherited Section Flags")+":")
 				fmt.Fprintln(f)
 				_, _ = sectionFlagHelp.WriteTo(f)
 			}

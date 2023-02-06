@@ -1,22 +1,12 @@
-package scalar_test
+package slice_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	"go.bbkane.com/warg/value/contained"
-	"go.bbkane.com/warg/value/scalar"
+	"go.bbkane.com/warg/value/slice"
 )
-
-func TestDurationString(t *testing.T) {
-	constructor := scalar.Duration(scalar.Default(3 * time.Minute))
-	v, err := constructor()
-	require.Nil(t, err)
-
-	vStr := v.DefaultString()
-	require.Equal(t, "3m0s", vStr)
-}
 
 func TestDefaultAndChoices(t *testing.T) {
 	typeInfo := contained.Int()
@@ -25,12 +15,12 @@ func TestDefaultAndChoices(t *testing.T) {
 		return 7, nil
 	}
 
-	constructor := scalar.New(typeInfo, scalar.Default(3), scalar.Choices(1, 2))
+	constructor := slice.New(typeInfo, slice.Default([]int{3}), slice.Choices(1, 2))
 	v, err := constructor()
 	require.Nil(t, err)
 
-	actualDefaultStr := v.DefaultString()
-	require.Equal(t, "7", actualDefaultStr)
+	actualDefaultStr := v.DefaultStringSlice()
+	require.Equal(t, []string{"7"}, actualDefaultStr)
 	actualChoices := v.Choices()
 	require.Equal(t, []string{"7", "7"}, actualChoices)
 }

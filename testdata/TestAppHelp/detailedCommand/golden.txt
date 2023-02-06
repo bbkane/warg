@@ -1,6 +1,6 @@
 Edit the config. A default config will be created if it doesn't exist
 
-Command Flags
+Command Flags:
 
   --editor : path to editor
     type : string
@@ -10,7 +10,7 @@ Command Flags
     required : true
     currentvalue (set by envvar) : emacs
 
-Inherited Section Flags
+Inherited Section Flags:
 
   --help , -h : Print help information
     type : string

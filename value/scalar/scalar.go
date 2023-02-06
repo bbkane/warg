@@ -21,9 +21,10 @@ func newScalarValue[T comparable](
 	opts ...ScalarOpt[T],
 ) scalarValue[T] {
 	sv := scalarValue[T]{
-		choices: []T{},
-		inner:   inner,
-		val:     inner.Empty(),
+		choices:    []T{},
+		defaultVal: nil,
+		inner:      inner,
+		val:        inner.Empty(),
 	}
 	for _, opt := range opts {
 		opt(&sv)
@@ -42,14 +43,26 @@ func New[T comparable](hc contained.ContainedTypeInfo[T], opts ...ScalarOpt[T]) 
 }
 
 func Choices[T comparable](choices ...T) ScalarOpt[T] {
-	return func(cf *scalarValue[T]) {
-		cf.choices = choices
+	return func(v *scalarValue[T]) {
+		for _, ch := range choices {
+			newChoice, err := v.inner.FromInstance(ch)
+			if err != nil {
+				panic("error constructing default value: " + fmt.Sprint(ch) + " : " + err.Error())
+			}
+			v.choices = append(v.choices, newChoice)
+		}
 	}
 }
 
 func Default[T comparable](def T) ScalarOpt[T] {
-	return func(cf *scalarValue[T]) {
-		cf.defaultVal = &def
+	return func(v *scalarValue[T]) {
+		newDef, err := v.inner.FromInstance(def)
+		// I think it's ok to panic here. This is from author code,
+		// not user values
+		if err != nil {
+			panic("error constructing default value: " + fmt.Sprint(def) + " : " + err.Error())
+		}
+		v.defaultVal = &newDef
 	}
 }
 

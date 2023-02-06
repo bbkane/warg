@@ -13,10 +13,24 @@ import (
 
 var ErrIncompatibleInterface = errors.New("could not decode interface into Value")
 
+// identity simply returns the thing passed and nil
+func identity[T comparable](t T) (T, error) {
+	return t, nil
+}
+
 type ContainedTypeInfo[T comparable] struct {
 	Description string
-	FromIFace   func(iFace interface{}) (T, error)
-	FromString  func(string) (T, error)
+
+	FromIFace func(iFace interface{}) (T, error)
+
+	// FromInstance updates a T from an instance of itself.
+	// This is particularly usefule for paths - when the user sets a scalar.Default of `~`,
+	// we want to expand that into /path/to/home the same way we would
+	// when updating from a string in the CLI
+	FromInstance func(T) (T, error)
+
+	FromString func(string) (T, error)
+
 	// Initalized to the Empty value, but used for updating stuff in the container type
 	Empty func() T
 }
@@ -32,6 +46,7 @@ func Bool() ContainedTypeInfo[bool] {
 			}
 			return under, nil
 		},
+		FromInstance: identity[bool],
 		FromString: func(s string) (bool, error) {
 			switch s {
 			case "true":
@@ -67,7 +82,8 @@ func Duration() ContainedTypeInfo[time.Duration] {
 			}
 			return durationFromString(under)
 		},
-		FromString: durationFromString,
+		FromInstance: identity[time.Duration],
+		FromString:   durationFromString,
 	}
 }
 
@@ -92,8 +108,9 @@ func Int() ContainedTypeInfo[int] {
 				return 0, ErrIncompatibleInterface
 			}
 		},
-		FromString: intFromString,
-		Empty:      func() int { return 0 },
+		FromInstance: identity[int],
+		FromString:   intFromString,
+		Empty:        func() int { return 0 },
 	}
 }
 
@@ -116,7 +133,8 @@ func Path() ContainedTypeInfo[string] {
 			}
 			return pathFromString(under)
 		},
-		FromString: pathFromString,
+		FromInstance: pathFromString,
+		FromString:   pathFromString,
 	}
 }
 
@@ -149,7 +167,8 @@ func Rune() ContainedTypeInfo[rune] {
 				return emptyRune, ErrIncompatibleInterface
 			}
 		},
-		FromString: runeFromString,
+		FromInstance: identity[rune],
+		FromString:   runeFromString,
 	}
 }
 
@@ -164,6 +183,7 @@ func String() ContainedTypeInfo[string] {
 			}
 			return under, nil
 		},
+		FromInstance: identity[string],
 		FromString: func(s string) (string, error) {
 			return s, nil
 		},
