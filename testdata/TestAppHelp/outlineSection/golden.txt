@@ -1,6 +1,6 @@
 # grab those images!
 grabbit
-  # Print help information
+  # Print help
   --help , -h
   # another command
   command2

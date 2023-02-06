@@ -12,11 +12,11 @@ Command Flags:
 
 Inherited Section Flags:
 
-  --help , -h : Print help information
+  --help , -h : Print help
     type : string
-    choices : [detailed]
-    default : detailed
-    currentvalue (set by appdefault) : detailed
+    choices : [default detailed outline allcommands]
+    default : default
+    currentvalue (set by appdefault) : default
 
 
 Footer:

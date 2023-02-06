@@ -12,9 +12,6 @@ import (
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
-	"go.bbkane.com/warg/help"
-	"go.bbkane.com/warg/help/allcommands"
-	"go.bbkane.com/warg/help/detailed"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 )
@@ -96,14 +93,6 @@ func grabbitSection() section.SectionT {
 	return sec
 }
 
-func tmpFile(t *testing.T) *os.File {
-	actualHelpTmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
-	if err != nil {
-		t.Fatalf("Error creating tmpfile: %v", err)
-	}
-	return actualHelpTmpFile
-}
-
 func TestAppHelp(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -118,16 +107,6 @@ func TestAppHelp(t *testing.T) {
 			app: warg.New(
 				"grabbit",
 				grabbitSection(),
-				warg.OverrideHelpFlag(
-					[]help.HelpFlagMapping{
-						{Name: "allcommands", CommandHelp: detailed.DetailedCommandHelp, SectionHelp: allcommands.AllCommandsSectionHelp},
-					},
-					"allcommands",
-					tmpFile(t),
-					"--help",
-					"Print help information",
-					flag.Alias("-h"),
-				),
 				warg.SkipValidation(),
 			),
 			args:   []string{"grabbit", "config", "--help"},
@@ -140,16 +119,6 @@ func TestAppHelp(t *testing.T) {
 			app: warg.New(
 				"newAppName",
 				grabbitSection(),
-				warg.OverrideHelpFlag(
-					[]help.HelpFlagMapping{
-						{Name: "detailed", CommandHelp: detailed.DetailedCommandHelp, SectionHelp: detailed.DetailedSectionHelp},
-					},
-					"detailed",
-					tmpFile(t),
-					"--help",
-					"Print help information",
-					flag.Alias("-h"),
-				),
 				warg.SkipValidation(),
 			),
 			args:   []string{"grabbit", "config", "edit", "--help"},
@@ -160,19 +129,9 @@ func TestAppHelp(t *testing.T) {
 			app: warg.New(
 				"newAppName",
 				grabbitSection(),
-				warg.OverrideHelpFlag(
-					[]help.HelpFlagMapping{
-						{Name: "detailed", CommandHelp: detailed.DetailedCommandHelp, SectionHelp: detailed.DetailedSectionHelp},
-					},
-					"detailed",
-					tmpFile(t),
-					"--help",
-					"Print help information",
-					flag.Alias("-h"),
-				),
 				warg.SkipValidation(),
 			),
-			args:   []string{"grabbit", "--help"},
+			args:   []string{"grabbit", "--help", "detailed"},
 			lookup: warg.LookupMap(nil),
 		},
 
@@ -182,19 +141,9 @@ func TestAppHelp(t *testing.T) {
 			app: warg.New(
 				"grabbit",
 				grabbitSection(),
-				warg.OverrideHelpFlag(
-					[]help.HelpFlagMapping{
-						{Name: "outline", CommandHelp: help.OutlineCommandHelp, SectionHelp: help.OutlineSectionHelp},
-					},
-					"outline",
-					tmpFile(t),
-					"--help",
-					"Print help information",
-					flag.Alias("-h"),
-				),
 				warg.SkipValidation(),
 			),
-			args:   []string{"grabbit", "config", "edit", "--help"},
+			args:   []string{"grabbit", "config", "edit", "--help", "outline"},
 			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
@@ -202,26 +151,20 @@ func TestAppHelp(t *testing.T) {
 			app: warg.New(
 				"grabbit",
 				grabbitSection(),
-				warg.OverrideHelpFlag(
-					[]help.HelpFlagMapping{
-						{Name: "outline", CommandHelp: help.OutlineCommandHelp, SectionHelp: help.OutlineSectionHelp},
-					},
-					"outline",
-					tmpFile(t),
-					"--help",
-					"Print help information",
-					flag.Alias("-h"),
-				),
 				warg.SkipValidation(),
 			),
-			args:   []string{"grabbit", "--help"},
+			args:   []string{"grabbit", "--help", "outline"},
 			lookup: warg.LookupMap(nil),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			err := tt.app.Validate()
+			tmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
+			require.Nil(t, err)
+			tt.app.HelpFile = tmpFile
+
+			err = tt.app.Validate()
 			require.Nil(t, err)
 
 			pr, parseErr := tt.app.Parse(tt.args, tt.lookup)
