@@ -236,12 +236,15 @@ func resolveFlag(
 					}
 					fl.SetBy = "config"
 				} else {
+					if fl.Value.TypeContainer() == value.TypeContainerScalar {
+						return fmt.Errorf("could not update scalar value with aggregated value from config: name: %v, configPath: %v", name, fl.ConfigPath)
+					}
 					under, ok := fpr.IFace.([]interface{})
 					if !ok {
 						return fmt.Errorf("expected []interface{}, got: %#v", under)
 					}
 					for _, e := range under {
-						err = fl.Value.UpdateFromInterface(e)
+						err = fl.Value.AppendFromInterface(e)
 						if err != nil {
 							return fmt.Errorf("could not update container type value: err: %w", err)
 						}
@@ -273,7 +276,7 @@ func resolveFlag(
 	// update from default
 	{
 		if fl.SetBy == "" && fl.Value.HasDefault() {
-			fl.Value.UpdateFromDefault()
+			fl.Value.ReplaceFromDefault()
 			fl.SetBy = "appdefault"
 		}
 	}

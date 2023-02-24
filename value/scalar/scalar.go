@@ -144,12 +144,12 @@ func (v *scalarValue[T]) Update(s string) error {
 	return nil
 }
 
-func (v *scalarValue[_]) UpdateFromDefault() {
+func (v *scalarValue[_]) ReplaceFromDefault() {
 	if v.defaultVal != nil {
 		v.val = *v.defaultVal
 	}
 }
 
-func (v *scalarValue[_]) UpdateFromInterface(iFace interface{}) error {
+func (v *scalarValue[_]) AppendFromInterface(iFace interface{}) error {
 	return v.ReplaceFromInterface(iFace)
 }

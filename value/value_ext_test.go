@@ -24,7 +24,7 @@ func TestIntScalar(t *testing.T) {
 	require.NotNil(t, err)
 	require.Equal(t, v.Get().(int), 1)
 
-	v.UpdateFromDefault()
+	v.ReplaceFromDefault()
 	require.Equal(t, v.Get().(int), 2)
 }
 
@@ -63,7 +63,7 @@ func TestIntSlice(t *testing.T) {
 		v.Get().([]int),
 	)
 
-	v.UpdateFromDefault()
+	v.ReplaceFromDefault()
 	require.Equal(
 		t,
 		[]int{1, 1, 1},

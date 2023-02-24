@@ -169,13 +169,13 @@ func (v *sliceValue[_]) Update(s string) error {
 	return v.update(val)
 }
 
-func (v *sliceValue[_]) UpdateFromDefault() {
+func (v *sliceValue[_]) ReplaceFromDefault() {
 	if v.hasDefault {
 		v.vals = v.defaultVals
 	}
 }
 
-func (v *sliceValue[_]) UpdateFromInterface(iFace interface{}) error {
+func (v *sliceValue[_]) AppendFromInterface(iFace interface{}) error {
 	val, err := v.inner.FromIFace(iFace)
 	if err != nil {
 		return err

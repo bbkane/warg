@@ -55,16 +55,16 @@ type Value interface {
 	// and replaces scalar Values
 	Update(string) error
 
-	// UpdateFromDefault updates the Value from a pre-set default, if one exists. use HasDefault to check whether a default exists
-	UpdateFromDefault()
+	// ReplaceFromDefault updates the Value from a pre-set default, if one exists. use HasDefault to check whether a default exists
+	ReplaceFromDefault()
 
-	// UpdateFromInterface updates a container type Value from an interface (useful for configs)
-	// and replaces scalar values (for scalar values, UpdateFromInterface is the same as ReplaceFromInterface).
-	// Note that UpdateFromInterface must be called with the "contained" type for container type Values
-	// For example, the StringSlice.UpdateFromInterface
+	// AppendFromInterface updates a container type Value from an interface (useful for configs)
+	// and replaces scalar values (for scalar values, AppendFromInterface is the same as ReplaceFromInterface).
+	// Note that AppendFromInterface must be called with the "contained" type for container type Values
+	// For example, the StringSlice.AppendFromInterface
 	// must be called with a string, not a []string
 	// It returns ErrIncompatibleInterface if the interface can't be decoded
-	UpdateFromInterface(interface{}) error
+	AppendFromInterface(interface{}) error
 }
 
 // EmptyConstructur just builds a new value.
