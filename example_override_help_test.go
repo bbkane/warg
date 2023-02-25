@@ -18,15 +18,17 @@ func exampleOverrideHelpFlaglogin(_ command.Context) error {
 	return nil
 }
 
-func exampleOverrideHelpFlagCustomCommandHelp(file *os.File, _ *command.Command, _ common.HelpInfo) command.Action {
-	return func(_ command.Context) error {
+func exampleOverrideHelpFlagCustomCommandHelp(_ *command.Command, _ common.HelpInfo) command.Action {
+	return func(ctx command.Context) error {
+		file := ctx.Stdout
 		fmt.Fprintln(file, "Custom command help")
 		return nil
 	}
 }
 
-func exampleOverrideHelpFlagCustomSectionHelp(file *os.File, _ *section.SectionT, _ common.HelpInfo) command.Action {
-	return func(_ command.Context) error {
+func exampleOverrideHelpFlagCustomSectionHelp(_ *section.SectionT, _ common.HelpInfo) command.Action {
+	return func(ctx command.Context) error {
+		file := ctx.Stdout
 		fmt.Fprintln(file, "Custom section help")
 		return nil
 	}
@@ -57,7 +59,6 @@ func ExampleOverrideHelpFlag() {
 				},
 			},
 			"default",
-			os.Stdout,
 			"--help",
 			"Print help",
 			flag.Alias("-h"),

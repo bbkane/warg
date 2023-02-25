@@ -138,8 +138,9 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 	fmt.Fprintln(w)
 }
 
-func DetailedCommandHelp(file *os.File, cur *command.Command, helpInfo common.HelpInfo) command.Action {
+func DetailedCommandHelp(cur *command.Command, helpInfo common.HelpInfo) command.Action {
 	return func(pf command.Context) error {
+		file := pf.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
@@ -194,8 +195,9 @@ func DetailedCommandHelp(file *os.File, cur *command.Command, helpInfo common.He
 	}
 }
 
-func DetailedSectionHelp(file *os.File, cur *section.SectionT, _ common.HelpInfo) command.Action {
+func DetailedSectionHelp(cur *section.SectionT, _ common.HelpInfo) command.Action {
 	return func(pf command.Context) error {
+		file := pf.Stdout
 
 		f := bufio.NewWriter(file)
 		defer f.Flush()

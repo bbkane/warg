@@ -2,6 +2,7 @@ package command
 
 import (
 	"errors"
+	"os"
 	"sort"
 
 	"go.bbkane.com/warg/flag"
@@ -11,9 +12,11 @@ import (
 // PassedFlags holds a map of flag names to flag Values
 type PassedFlags map[string]interface{} // This can just stay a string for the convenience of the user.
 
-// Context holds everything a command needs. Right now that's just passed flags
+// Context holds everything a command needs.
 type Context struct {
-	Flags PassedFlags
+	Flags  PassedFlags
+	Stderr *os.File
+	Stdout *os.File
 }
 
 // An Action is run as the result of a command

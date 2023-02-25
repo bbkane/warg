@@ -35,11 +35,17 @@ type App struct {
 	helpFlagAlias flag.Name
 	helpMappings  []help.HelpFlagMapping
 
-	// HelpFile contains the file set in OverrideHelpFlag.
-	// HelpFile is part of the public API to allow for easier testing.
-	// HelpFile is never closed by warg, so if setting it to something other than stderr/stdout,
-	// please remember to close HelpFile after using ParseResult.Action (which writes to HelpFile).
-	HelpFile *os.File
+	// Stdout will be passed to command.Context for user commands to print to.
+	// This file is never closed by warg, so if setting to something other than stderr/stdout,
+	// remember to close the file after running the command.
+	// Useful for saving output for tests. Set to os.Stdout if not passed
+	Stdout *os.File
+
+	// Stderr will be passed to command.Context for user commands to print to.
+	// This file is never closed by warg, so if setting to something other than stderr/stdout,
+	// remember to close the file after running the command.
+	// Useful for saving output for tests. Set to os.Stdout if not passed
+	Stderr *os.File
 
 	// rootSection holds the good stuff!
 	rootSection section.SectionT
@@ -51,7 +57,6 @@ type App struct {
 func OverrideHelpFlag(
 	mappings []help.HelpFlagMapping,
 	defaultChoice string,
-	helpFile *os.File,
 	flagName flag.Name,
 	flagHelp flag.HelpShort,
 	flagOpts ...flag.FlagOpt,
@@ -93,7 +98,6 @@ func OverrideHelpFlag(
 		a.helpFlagName = flagName
 		a.helpFlagAlias = helpFlag.Alias
 		a.helpMappings = mappings
-		a.HelpFile = helpFile
 
 	}
 }
@@ -163,6 +167,18 @@ func AddColorFlag() AppOpt {
 	}
 }
 
+func OverrideStdout(f *os.File) AppOpt {
+	return func(a *App) {
+		a.Stdout = f
+	}
+}
+
+func OverrideStderr(f *os.File) AppOpt {
+	return func(a *App) {
+		a.Stderr = f
+	}
+}
+
 // New builds a new App!
 func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 	app := App{
@@ -177,11 +193,17 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 		OverrideHelpFlag(
 			help.BuiltinHelpFlagMappings(),
 			"default",
-			os.Stdout,
 			"--help",
 			"Print help",
 			flag.Alias("-h"),
 		)(&app)
+	}
+
+	if app.Stderr == nil {
+		OverrideStderr(os.Stderr)(&app)
+	}
+	if app.Stdout == nil {
+		OverrideStdout(os.Stdout)(&app)
 	}
 
 	if !app.skipValidation {

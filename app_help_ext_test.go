@@ -1,23 +1,17 @@
 package warg_test
 
-import (
-	"bytes"
-	stdlibflag "flag"
+// Run WARG_TEST_UPDATE_GOLDEN=1 go test ./... to update golden files
 
+import (
 	"os"
-	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 )
-
-//nolint:gochecknoglobals  // https://github.com/leighmcculloch/gochecknoglobals/issues/11#issuecomment-1368578131
-var update = stdlibflag.Bool("update", false, "update golden files")
 
 // A grabbitSection is a simple section to test help
 func grabbitSection() section.SectionT {
@@ -94,6 +88,7 @@ func grabbitSection() section.SectionT {
 }
 
 func TestAppHelp(t *testing.T) {
+	updateGolden := os.Getenv("WARG_TEST_UPDATE_GOLDEN") != ""
 	tests := []struct {
 		name   string
 		app    warg.App
@@ -160,52 +155,7 @@ func TestAppHelp(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
-			tmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
-			require.Nil(t, err)
-			tt.app.HelpFile = tmpFile
-
-			err = tt.app.Validate()
-			require.Nil(t, err)
-
-			pr, parseErr := tt.app.Parse(tt.args, tt.lookup)
-			require.Nil(t, parseErr)
-
-			actionErr := pr.Action(pr.Context)
-			require.Nil(t, actionErr)
-
-			closeErr := tt.app.HelpFile.Close()
-			require.Nil(t, closeErr)
-
-			actualHelpBytes, readErr := os.ReadFile(tt.app.HelpFile.Name())
-			require.Nil(t, readErr)
-
-			goldenDir := filepath.Join("testdata", t.Name())
-			goldenFilePath := filepath.Join(goldenDir, "golden.txt")
-			goldenFilePath, err = filepath.Abs(goldenFilePath)
-			require.Nil(t, err)
-
-			if *update {
-				mkdirErr := os.MkdirAll(goldenDir, 0700)
-				require.Nil(t, mkdirErr)
-
-				writeErr := os.WriteFile(goldenFilePath, actualHelpBytes, 0600)
-				require.Nil(t, writeErr)
-
-				t.Logf("Wrote: %v\n", goldenFilePath)
-			}
-
-			expectedBytes, expectedReadErr := os.ReadFile(goldenFilePath)
-			require.Nil(t, expectedReadErr, "actualBytes: \n%s", string(actualHelpBytes))
-
-			if !bytes.Equal(expectedBytes, actualHelpBytes) {
-				t.Fatalf(
-					"expected != actual. See diff:\n  vimdiff %s %s\n",
-					goldenFilePath,
-					tt.app.HelpFile.Name(),
-				)
-			}
-
+			warg.GoldenTest(t, tt.app, tt.args, tt.lookup, updateGolden)
 		})
 	}
 }

@@ -61,8 +61,9 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, inde
 
 }
 
-func OutlineSectionHelp(file *os.File, _ *section.SectionT, hi common.HelpInfo) command.Action {
+func OutlineSectionHelp(_ *section.SectionT, hi common.HelpInfo) command.Action {
 	return func(pf command.Context) error {
+		file := pf.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
@@ -80,6 +81,6 @@ func OutlineSectionHelp(file *os.File, _ *section.SectionT, hi common.HelpInfo) 
 	}
 }
 
-func OutlineCommandHelp(file *os.File, cur *command.Command, helpInfo common.HelpInfo) command.Action {
-	return OutlineSectionHelp(file, nil, helpInfo)
+func OutlineCommandHelp(cur *command.Command, helpInfo common.HelpInfo) command.Action {
+	return OutlineSectionHelp(nil, helpInfo)
 }

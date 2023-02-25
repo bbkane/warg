@@ -52,6 +52,7 @@ func gatherArgs(osArgs []string, helpFlagNames []string) (*gatherArgsResult, err
 
 	state := startSt
 	var currentFlagName string
+	// Skip the name of the executable passed.
 	for _, arg := range osArgs[1:] {
 		// fmt.Printf("state: %v, arg: %v\n", state, arg)
 
@@ -407,9 +408,11 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 				pr := ParseResult{
 					Path: gar.Path,
 					Context: command.Context{
-						Flags: pfs,
+						Flags:  pfs,
+						Stderr: app.Stderr,
+						Stdout: app.Stdout,
 					},
-					Action: e.SectionHelp(app.HelpFile, ftar.Section, helpInfo),
+					Action: e.SectionHelp(ftar.Section, helpInfo),
 				}
 				return &pr, nil
 			}
@@ -430,9 +433,11 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 					pr := ParseResult{
 						Path: gar.Path,
 						Context: command.Context{
-							Flags: pfs,
+							Flags:  pfs,
+							Stderr: app.Stderr,
+							Stdout: app.Stdout,
 						},
-						Action: e.CommandHelp(app.HelpFile, ftar.Command, helpInfo),
+						Action: e.CommandHelp(ftar.Command, helpInfo),
 					}
 					return &pr, nil
 				}
@@ -443,7 +448,9 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 			pr := ParseResult{
 				Path: gar.Path,
 				Context: command.Context{
-					Flags: pfs,
+					Flags:  pfs,
+					Stderr: app.Stderr,
+					Stdout: app.Stdout,
 				},
 				Action: ftar.Action,
 			}

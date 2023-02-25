@@ -10,8 +10,9 @@ import (
 	"go.bbkane.com/warg/section"
 )
 
-func AllCommandsSectionHelp(file *os.File, cur *section.SectionT, helpInfo common.HelpInfo) command.Action {
+func AllCommandsSectionHelp(cur *section.SectionT, helpInfo common.HelpInfo) command.Action {
 	return func(pf command.Context) error {
+		file := pf.Stdout
 
 		f := bufio.NewWriter(file)
 		defer f.Flush()

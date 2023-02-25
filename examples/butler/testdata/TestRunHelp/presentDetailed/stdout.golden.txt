@@ -1,0 +1,23 @@
+Formally present a guest (guests are never introduced, always presented).
+
+Command Flags:
+
+  --name , -n : Guest to address.
+    type : string
+    envvars : [BUTLER_PRESENT_NAME USER]
+    required : true
+
+Inherited Section Flags:
+
+  --color : Use ANSI colors
+    type : string
+    choices : [true false auto]
+    default : auto
+    currentvalue (set by appdefault) : auto
+
+  --help , -h : Print help
+    type : string
+    choices : [default detailed outline allcommands]
+    default : default
+    currentvalue (set by passedflag) : detailed
+

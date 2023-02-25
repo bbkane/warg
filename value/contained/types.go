@@ -184,8 +184,6 @@ func String() ContainedTypeInfo[string] {
 			return under, nil
 		},
 		FromInstance: identity[string],
-		FromString: func(s string) (string, error) {
-			return s, nil
-		},
+		FromString:   identity[string],
 	}
 }
