@@ -29,6 +29,12 @@ func TestRunHelp(t *testing.T) {
 			args:   []string{"butler", "present", "--help", "detailed"},
 			lookup: warg.LookupMap(nil),
 		},
+		{
+			name:   "presentBob",
+			app:    buildApp(),
+			args:   []string{"butler", "present", "--name", "bob"},
+			lookup: warg.LookupMap(nil),
+		},
 	}
 
 	for _, tt := range tests {

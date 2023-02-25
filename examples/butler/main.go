@@ -40,7 +40,7 @@ func buildApp() warg.App {
 func present(ctx command.Context) error {
 	// this is a required flag, so we know it exists
 	name := ctx.Flags["--name"].(string)
-	fmt.Printf("May I present to you %s.\n", name)
+	fmt.Fprintf(ctx.Stdout, "May I present to you %s.\n", name)
 	return nil
 }
 
