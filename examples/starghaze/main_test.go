@@ -24,15 +24,15 @@ func TestRunHelp(t *testing.T) {
 		lookup warg.LookupFunc
 	}{
 		{
-			name:   "presentDetailed",
+			name:   "starghazeDownloadHelpDetailed",
 			app:    app(),
-			args:   []string{"butler", "present", "--help", "detailed"},
+			args:   []string{"starghaze", "download", "--help", "detailed"},
 			lookup: warg.LookupMap(nil),
 		},
 		{
-			name:   "presentBob",
+			name:   "starghazeFormatHelpDetailed",
 			app:    app(),
-			args:   []string{"butler", "present", "--name", "bob"},
+			args:   []string{"starghaze", "format", "--help", "detailed"},
 			lookup: warg.LookupMap(nil),
 		},
 	}

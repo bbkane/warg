@@ -1,0 +1,126 @@
+Grab images. Optionally use `config edit` first to create a config
+
+Command Flags:
+
+  --subreddit-destination , -sd : Where to store the subreddit
+    type : path
+    default : [. .]
+    configpath : subreddits[].destination
+    required : true
+    currentvalue (set by config) :
+      00) /Users/bbkane/Pictures/grabbit
+      01) /Users/bbkane/Pictures/grabbit
+      02) /Users/bbkane/Pictures/grabbit
+      03) /Users/bbkane/Pictures/grabbit
+      04) /Users/bbkane/Pictures/grabbit
+      05) /Users/bbkane/Pictures/grabbit
+      06) /Users/bbkane/Pictures/grabbit
+      07) /Users/bbkane/Pictures/grabbit
+      08) /Users/bbkane/Pictures/grabbit
+      09) /Users/bbkane/Pictures/grabbit
+
+  --subreddit-limit , -sl : Max number of links to try to download
+    type : int
+    default : [2 3]
+    configpath : subreddits[].limit
+    required : true
+    currentvalue (set by config) :
+      00) 2
+      01) 1
+      02) 4
+      03) 10
+      04) 1
+      05) 3
+      06) 3
+      07) 2
+      08) 1
+      09) 2
+
+  --subreddit-name , -sn : Subreddit to grab
+    type : string
+    default : [earthporn wallpapers]
+    configpath : subreddits[].name
+    required : true
+    currentvalue (set by config) :
+      00) architectureporn
+      01) churchporn
+      02) cityporn
+      03) earthporn
+      04) futureporn
+      05) imaginarycastles
+      06) imaginaryinteriors
+      07) villageporn
+      08) roomporn
+      09) wallpapers
+
+  --subreddit-timeframe , -st : Take the top subreddits from this timeframe
+    type : string
+    choices : [day week month year all]
+    default : [week week]
+    configpath : subreddits[].timeframe
+    required : true
+    currentvalue (set by config) :
+      00) week
+      01) week
+      02) week
+      03) week
+      04) week
+      05) week
+      06) week
+      07) week
+      08) week
+      09) week
+
+  --timeout , -t : Timeout for a single download
+    type : duration
+    default : 30s
+    required : true
+    currentvalue (set by appdefault) : 30s
+
+Inherited Section Flags:
+
+  --color : Use ANSI colors
+    type : string
+    choices : [true false auto]
+    default : auto
+    currentvalue (set by appdefault) : auto
+
+  --config , -c : Config filepath
+    type : path
+    default : /Users/bbkane/.config/grabbit.yaml
+    currentvalue (set by appdefault) : /Users/bbkane/.config/grabbit.yaml
+
+  --help , -h : Print help
+    type : string
+    choices : [default detailed outline allcommands]
+    default : default
+    currentvalue (set by passedflag) : detailed
+
+  --log-filename : Log filename
+    type : path
+    default : /Users/bbkane/.config/grabbit.jsonl
+    configpath : lumberjacklogger.filename
+    required : true
+    currentvalue (set by config) : /Users/bbkane/.config/grabbit.jsonl
+
+  --log-maxage : Max age before log rotation in days
+    type : int
+    default : 30
+    configpath : lumberjacklogger.maxage
+    required : true
+    currentvalue (set by config) : 30
+
+  --log-maxbackups : Num backups for the log
+    type : int
+    default : 0
+    configpath : lumberjacklogger.maxbackups
+    required : true
+    currentvalue (set by config) : 0
+
+  --log-maxsize : Max size of log in megabytes
+    type : int
+    default : 5
+    configpath : lumberjacklogger.maxsize
+    required : true
+    currentvalue (set by config) : 5
+

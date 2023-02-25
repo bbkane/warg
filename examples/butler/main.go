@@ -11,7 +11,7 @@ import (
 	"go.bbkane.com/warg/value/scalar"
 )
 
-func buildApp() warg.App {
+func app() *warg.App {
 	app := warg.New(
 		"butler",
 		section.New(
@@ -34,7 +34,7 @@ func buildApp() warg.App {
 		warg.AddColorFlag(),
 		warg.SkipValidation(),
 	)
-	return app
+	return &app
 }
 
 func present(ctx command.Context) error {
@@ -45,6 +45,6 @@ func present(ctx command.Context) error {
 }
 
 func main() {
-	app := buildApp()
+	app := app()
 	app.MustRun(os.Args, os.LookupEnv)
 }
