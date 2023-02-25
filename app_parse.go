@@ -202,8 +202,11 @@ func resolveFlag(
 		}
 
 		if fl.SetBy == "" && len(strValues) > 0 {
-			if val.TypeContainer() == value.TypeContainerScalar && len(strValues) > 1 {
+
+			_, isScalar := val.(value.ScalarValue)
+			if isScalar && len(strValues) > 1 {
 				return fmt.Errorf("flag error: %v: flag passed multiple times, it's value (type %v), can only be updated once", name, fl.Value.Description())
+
 			}
 
 			for _, v := range strValues {
@@ -236,20 +239,23 @@ func resolveFlag(
 					}
 					fl.SetBy = "config"
 				} else {
-					if fl.Value.TypeContainer() == value.TypeContainerScalar {
+					v, ok := fl.Value.(value.SliceValue)
+					if !ok {
 						return fmt.Errorf("could not update scalar value with aggregated value from config: name: %v, configPath: %v", name, fl.ConfigPath)
+
 					}
 					under, ok := fpr.IFace.([]interface{})
 					if !ok {
 						return fmt.Errorf("expected []interface{}, got: %#v", under)
 					}
 					for _, e := range under {
-						err = fl.Value.AppendFromInterface(e)
+						err = v.AppendFromInterface(e)
 						if err != nil {
 							return fmt.Errorf("could not update container type value: err: %w", err)
 						}
 					}
 					fl.SetBy = "config"
+					fl.Value = v
 				}
 			}
 		}

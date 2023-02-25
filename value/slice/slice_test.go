@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/contained"
 	"go.bbkane.com/warg/value/slice"
 )
@@ -18,8 +19,9 @@ func TestDefaultAndChoices(t *testing.T) {
 	constructor := slice.New(typeInfo, slice.Default([]int{3}), slice.Choices(1, 2))
 	v, err := constructor()
 	require.Nil(t, err)
+	sliceVal := v.(value.SliceValue)
 
-	actualDefaultStr := v.DefaultStringSlice()
+	actualDefaultStr := sliceVal.DefaultStringSlice()
 	require.Equal(t, []string{"7"}, actualDefaultStr)
 	actualChoices := v.Choices()
 	require.Equal(t, []string{"7", "7"}, actualChoices)

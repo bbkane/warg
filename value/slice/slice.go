@@ -77,13 +77,6 @@ func (v *sliceValue[_]) Choices() []string {
 	return ret
 }
 
-func (v *sliceValue[_]) DefaultString() string {
-	if !v.hasDefault {
-		return ""
-	}
-	return fmt.Sprint(v.defaultVals)
-}
-
 func (v *sliceValue[_]) DefaultStringSlice() []string {
 	// TODO: no copy paste
 	ret := make([]string, 0, len(v.defaultVals))
@@ -124,20 +117,12 @@ func (v *sliceValue[T]) ReplaceFromInterface(iFace interface{}) error {
 	return nil
 }
 
-func (v *sliceValue[_]) String() string {
-	return fmt.Sprint(v.vals)
-}
-
 func (v *sliceValue[_]) StringSlice() []string {
 	ret := make([]string, 0, len(v.vals))
 	for _, e := range v.vals {
 		ret = append(ret, fmt.Sprint(e))
 	}
 	return ret
-}
-
-func (sliceValue[_]) TypeContainer() value.TypeContainer {
-	return value.TypeContainerSlice
 }
 
 func withinChoices[T comparable](val T, choices []T) bool {
