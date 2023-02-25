@@ -74,6 +74,8 @@ func New(helpShort HelpShort, action Action, opts ...CommandOpt) Command {
 		HelpShort: helpShort,
 		Action:    action,
 		Flags:     make(flag.FlagMap),
+		Footer:    "",
+		HelpLong:  "",
 	}
 	for _, opt := range opts {
 		opt(&command)

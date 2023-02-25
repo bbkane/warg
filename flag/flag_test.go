@@ -8,11 +8,22 @@ import (
 )
 
 func TestFlagMap_SortedNames(t *testing.T) {
+	emptyFlag := flag.Flag{
+		Alias:                 "",
+		ConfigPath:            "",
+		EnvVars:               nil,
+		EmptyValueConstructor: nil,
+		HelpShort:             "",
+		Required:              false,
+		IsCommandFlag:         false,
+		SetBy:                 "",
+		Value:                 nil,
+	}
 	fm := flag.FlagMap{
-		"c": flag.Flag{},
-		"a": flag.Flag{},
-		"d": flag.Flag{},
-		"b": flag.Flag{},
+		"c": emptyFlag,
+		"a": emptyFlag,
+		"d": emptyFlag,
+		"b": emptyFlag,
 	}
 	require.Equal(
 		t,

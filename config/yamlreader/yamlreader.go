@@ -17,7 +17,9 @@ type yamlConfigReader struct {
 }
 
 func New(filePath string) (config.Reader, error) {
-	cr := &yamlConfigReader{}
+	cr := &yamlConfigReader{
+		data: nil,
+	}
 
 	content, err := os.ReadFile(filePath)
 	if err != nil {
@@ -112,7 +114,11 @@ func (cr *yamlConfigReader) Search(path string) (config.SearchResult, error) {
 			next, exists := currentMap[token.Text]
 			current = next
 			if !exists {
-				return config.SearchResult{}, nil
+				return config.SearchResult{
+					IFace:        nil,
+					Exists:       false,
+					IsAggregated: false,
+				}, nil
 			}
 		}
 	}

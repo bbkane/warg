@@ -43,7 +43,11 @@ func containsString(haystack []string, needle string) bool {
 // argument to --help, --help must be either not be passed, be the last string passed, or have exactly one value after it.
 // See img/warg-gatherArgs-state-machine.png at the root of the repo for a diagram.
 func gatherArgs(osArgs []string, helpFlagNames []string) (*gatherArgsResult, error) {
-	res := &gatherArgsResult{}
+	res := &gatherArgsResult{
+		Path:       nil,
+		FlagStrs:   nil,
+		HelpPassed: false,
+	}
 
 	startSt := "startSt"
 	helpFlagPassedSt := "helpFlagPassedSt"

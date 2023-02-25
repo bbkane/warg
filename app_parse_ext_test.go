@@ -184,7 +184,11 @@ func TestApp_Parse(t *testing.T) {
 									IsAggregated: false,
 								}, nil
 							}
-							return config.SearchResult{}, nil
+							return config.SearchResult{
+								IFace:        nil,
+								Exists:       false,
+								IsAggregated: false,
+							}, nil
 						}
 
 						return cr, nil

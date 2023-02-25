@@ -182,8 +182,17 @@ func OverrideStderr(f *os.File) AppOpt {
 // New builds a new App!
 func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 	app := App{
-		name:        name,
-		rootSection: rootSection,
+		name:            name,
+		rootSection:     rootSection,
+		configFlagName:  "",
+		newConfigReader: nil,
+		configFlag:      nil,
+		helpFlagName:    "",
+		helpFlagAlias:   "",
+		helpMappings:    nil,
+		skipValidation:  false,
+		Stdout:          nil,
+		Stderr:          nil,
 	}
 	for _, opt := range opts {
 		opt(&app)
