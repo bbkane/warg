@@ -82,10 +82,6 @@ func (v *scalarValue[_]) DefaultString() string {
 	return fmt.Sprint(*v.defaultVal)
 }
 
-func (v *scalarValue[_]) DefaultStringSlice() []string {
-	return nil
-}
-
 func (v *scalarValue[_]) Description() string {
 	return v.inner.Description
 }
@@ -109,14 +105,6 @@ func (v *scalarValue[_]) ReplaceFromInterface(iFace interface{}) error {
 
 func (v *scalarValue[_]) String() string {
 	return fmt.Sprint(v.val)
-}
-
-func (v *scalarValue[_]) StringSlice() []string {
-	return nil
-}
-
-func (scalarValue[_]) TypeContainer() value.TypeContainer {
-	return value.TypeContainerScalar
 }
 
 func withinChoices[T comparable](val T, choices []T) bool {
@@ -144,12 +132,8 @@ func (v *scalarValue[T]) Update(s string) error {
 	return nil
 }
 
-func (v *scalarValue[_]) UpdateFromDefault() {
+func (v *scalarValue[_]) ReplaceFromDefault() {
 	if v.defaultVal != nil {
 		v.val = *v.defaultVal
 	}
-}
-
-func (v *scalarValue[_]) UpdateFromInterface(iFace interface{}) error {
-	return v.ReplaceFromInterface(iFace)
 }

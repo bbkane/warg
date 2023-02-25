@@ -49,24 +49,23 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 	}
 
 	if f.Value.HasDefault() {
-		if f.Value.TypeContainer() == value.TypeContainerScalar {
+		switch v := f.Value.(type) {
+		case value.ScalarValue:
 			fmt.Fprintf(
 				w,
 				"    %s : %s\n",
 				color.Add(color.Bold, "default"),
-				f.Value.DefaultString(),
+				v.DefaultString(),
 			)
-
-		} else if f.Value.TypeContainer() == value.TypeContainerSlice {
-			// TODO: make the string slice sprint nicer
+		case value.SliceValue:
 			fmt.Fprintf(
 				w,
 				"    %s : %s\n",
 				color.Add(color.Bold, "default"),
-				f.Value.DefaultStringSlice(),
+				v.DefaultStringSlice(),
 			)
-		} else {
-			panic("Unexpected Typecontainer: " + fmt.Sprint(f.Value.TypeContainer()))
+		default:
+			panic(fmt.Sprintf("Unexpected type: %#v", f.Value))
 		}
 	}
 	if f.ConfigPath != "" {
@@ -94,9 +93,9 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 	}
 
 	if f.SetBy != "" {
-		if f.Value.TypeContainer() == value.TypeContainerSlice {
-
-			sliceLen := len(fmt.Sprint(len(f.Value.StringSlice())))
+		switch v := f.Value.(type) {
+		case value.SliceValue:
+			sliceLen := len(fmt.Sprint(len(v.StringSlice())))
 
 			// Find the max padding for a specified length
 			// 0 - 9 : 0  # no padding needed
@@ -110,7 +109,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 				color.Add(color.Bold, f.SetBy),
 			)
 
-			for i, e := range f.Value.StringSlice() {
+			for i, e := range v.StringSlice() {
 				indexStr := fmt.Sprint(i)
 				padding := maxPadding - len(indexStr)
 				fmt.Fprintf(
@@ -123,14 +122,16 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 					e,
 				)
 			}
-		} else {
+		case value.ScalarValue:
 			fmt.Fprintf(
 				w,
 				"    %s (set by %s) : %s\n",
 				color.Add(color.Bold, "currentvalue"),
 				color.Add(color.Bold, f.SetBy),
-				f.Value,
+				v.String(),
 			)
+		default:
+			panic(fmt.Sprintf("unexpected value: %#v", f))
 		}
 	}
 
