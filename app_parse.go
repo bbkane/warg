@@ -231,7 +231,7 @@ func resolveFlag(
 			if err != nil {
 				return err
 			}
-			if fpr.Exists {
+			if fpr != nil {
 				if !fpr.IsAggregated {
 					err := fl.Value.ReplaceFromInterface(fpr.IFace)
 					if err != nil {

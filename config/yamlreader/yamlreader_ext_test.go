@@ -15,7 +15,7 @@ func TestSearch(t *testing.T) {
 		filePath             string
 		searchPath           string
 		expectedCreationErr  bool
-		expectedSearchResult config.SearchResult
+		expectedSearchResult *config.SearchResult
 		expectedSearchErr    bool
 	}{
 		{
@@ -23,33 +23,27 @@ func TestSearch(t *testing.T) {
 			filePath:            "testdata/TestSearch.yaml",
 			searchPath:          "key",
 			expectedCreationErr: false,
-			expectedSearchResult: config.SearchResult{
+			expectedSearchResult: &config.SearchResult{
 				IFace:        "value",
-				Exists:       true,
 				IsAggregated: false,
 			},
 			expectedSearchErr: false,
 		},
 		{
-			name:                "nil_map",
-			filePath:            "non-existant",
-			searchPath:          "non-existant",
-			expectedCreationErr: false, // It's ok to not have a config file
-			expectedSearchResult: config.SearchResult{
-				IFace:        nil,
-				Exists:       false,
-				IsAggregated: false,
-			},
-			expectedSearchErr: false,
+			name:                 "nil_map",
+			filePath:             "non-existant",
+			searchPath:           "non-existant",
+			expectedCreationErr:  false, // It's ok to not have a config file
+			expectedSearchResult: nil,
+			expectedSearchErr:    false,
 		},
 		{
 			name:                "two_keys",
 			filePath:            "testdata/TestSearch.yaml",
 			searchPath:          "key1.key2",
 			expectedCreationErr: false,
-			expectedSearchResult: config.SearchResult{
+			expectedSearchResult: &config.SearchResult{
 				IFace:        1,
-				Exists:       true,
 				IsAggregated: false,
 			},
 			expectedSearchErr: false,
@@ -59,9 +53,8 @@ func TestSearch(t *testing.T) {
 			filePath:            "testdata/TestSearch.yaml",
 			searchPath:          "subreddits[].name",
 			expectedCreationErr: false,
-			expectedSearchResult: config.SearchResult{
+			expectedSearchResult: &config.SearchResult{
 				IFace:        []interface{}([]interface{}{"earthporn", "wallpapers"}),
-				Exists:       true,
 				IsAggregated: true,
 			},
 			expectedSearchErr: false,
