@@ -3,6 +3,7 @@ linters:
   enable:
     # defaults
     - errcheck
+    - goimports
     - gosimple
     - govet
     - ineffassign
@@ -11,8 +12,7 @@ linters:
     - unused
     # stuff I'm adding
     - exhaustive
-    # TODO: this throws several errors. Probably need to rework API for this
-    # - exhaustruct
+    - exhaustruct
     - gochecknoglobals
     - gochecknoinits
     - gofmt

@@ -82,6 +82,13 @@ func New(helpShort HelpShort, empty value.EmptyConstructor, opts ...FlagOpt) Fla
 	flag := Flag{
 		HelpShort:             helpShort,
 		EmptyValueConstructor: empty,
+		Alias:                 "",
+		ConfigPath:            "",
+		EnvVars:               nil,
+		Required:              false,
+		IsCommandFlag:         false,
+		SetBy:                 "",
+		Value:                 nil,
 	}
 	for _, opt := range opts {
 		opt(&flag)

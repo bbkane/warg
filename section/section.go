@@ -62,6 +62,8 @@ func New(helpShort HelpShort, opts ...SectionOpt) SectionT {
 		Flags:     make(flag.FlagMap),
 		Sections:  make(SectionMap),
 		Commands:  make(command.CommandMap),
+		HelpLong:  "",
+		Footer:    "",
 	}
 	for _, opt := range opts {
 		opt(&section)

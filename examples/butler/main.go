@@ -11,7 +11,7 @@ import (
 	"go.bbkane.com/warg/value/scalar"
 )
 
-func buildApp() warg.App {
+func app() *warg.App {
 	app := warg.New(
 		"butler",
 		section.New(
@@ -34,17 +34,17 @@ func buildApp() warg.App {
 		warg.AddColorFlag(),
 		warg.SkipValidation(),
 	)
-	return app
+	return &app
 }
 
 func present(ctx command.Context) error {
 	// this is a required flag, so we know it exists
 	name := ctx.Flags["--name"].(string)
-	fmt.Printf("May I present to you %s.\n", name)
+	fmt.Fprintf(ctx.Stdout, "May I present to you %s.\n", name)
 	return nil
 }
 
 func main() {
-	app := buildApp()
+	app := app()
 	app.MustRun(os.Args, os.LookupEnv)
 }

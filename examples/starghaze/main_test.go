@@ -16,6 +16,7 @@ func TestApp_Validate(t *testing.T) {
 }
 
 func TestRunHelp(t *testing.T) {
+	t.Skip("Machine dependent for now - see https://github.com/bbkane/warg/issues/51")
 	updateGolden := os.Getenv("WARG_TEST_UPDATE_GOLDEN") != ""
 	tests := []struct {
 		name   string
@@ -24,15 +25,15 @@ func TestRunHelp(t *testing.T) {
 		lookup warg.LookupFunc
 	}{
 		{
-			name:   "presentDetailed",
+			name:   "starghazeDownloadHelpDetailed",
 			app:    app(),
-			args:   []string{"butler", "present", "--help", "detailed"},
+			args:   []string{"starghaze", "download", "--help", "detailed"},
 			lookup: warg.LookupMap(nil),
 		},
 		{
-			name:   "presentBob",
+			name:   "starghazeFormatHelpDetailed",
 			app:    app(),
-			args:   []string{"butler", "present", "--name", "bob"},
+			args:   []string{"starghaze", "format", "--help", "detailed"},
 			lookup: warg.LookupMap(nil),
 		},
 	}

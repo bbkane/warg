@@ -17,7 +17,9 @@ type yamlConfigReader struct {
 }
 
 func New(filePath string) (config.Reader, error) {
-	cr := &yamlConfigReader{}
+	cr := &yamlConfigReader{
+		data: nil,
+	}
 
 	content, err := os.ReadFile(filePath)
 	if err != nil {
@@ -34,11 +36,11 @@ func New(filePath string) (config.Reader, error) {
 
 }
 
-func (cr *yamlConfigReader) Search(path string) (config.SearchResult, error) {
+func (cr *yamlConfigReader) Search(path string) (*config.SearchResult, error) {
 	data := cr.data
 	tokens, err := tokenize.Tokenize(path)
 	if err != nil {
-		return config.SearchResult{}, err
+		return nil, err
 	}
 
 	lenTokens := len(tokens)
@@ -49,14 +51,14 @@ func (cr *yamlConfigReader) Search(path string) (config.SearchResult, error) {
 			// cast it to a slice, then get all keys from it!
 			sliceOfDicts, ok := current.([]interface{})
 			if !ok {
-				return config.SearchResult{}, fmt.Errorf(
+				return nil, fmt.Errorf(
 					"expecting []interface{}: \n  actual type %T\n  actual value: %#v\n   path: %v\n  token: %v",
 					current, current, path, token,
 				)
 			}
 			finalToken := tokens[lenTokens-1]
 			if finalToken.Type != tokenize.TokenTypeKey {
-				return config.SearchResult{}, fmt.Errorf(
+				return nil, fmt.Errorf(
 					"expected TokenTypeKey for last element: path: %v: token: %v",
 					path,
 					token,
@@ -66,26 +68,26 @@ func (cr *yamlConfigReader) Search(path string) (config.SearchResult, error) {
 			for _, e := range sliceOfDicts {
 				cm, ok := e.(configMap)
 				if !ok {
-					return config.SearchResult{}, fmt.Errorf(
+					return nil, fmt.Errorf(
 						"expecting ConfigMap: \n  actual type %T\n  actual value: %#v\n  path: %v\n  token: %v",
 						current, current, path, token,
 					)
 				}
 				val, exists := cm[finalToken.Text]
 				if !exists {
-					return config.SearchResult{}, fmt.Errorf(
+					return nil, fmt.Errorf(
 						"for the slice operator, ALL elements must contain the key: path: %v: key: %v",
 						path, finalToken.Text,
 					)
 				}
 				ret = append(ret, val)
 			}
-			return config.SearchResult{IFace: ret, Exists: true, IsAggregated: true}, nil
+			return &config.SearchResult{IFace: ret, IsAggregated: true}, nil
 		} else {
 			// outside the special case, we should be able to just index into this thing, and loop again
 			// or, if it's the last one, return
 			if token.Type != tokenize.TokenTypeKey {
-				return config.SearchResult{}, fmt.Errorf(
+				return nil, fmt.Errorf(
 					"expected TokenTypeKey for last element: path: %v: token: %v",
 					path,
 					token,
@@ -102,7 +104,7 @@ func (cr *yamlConfigReader) Search(path string) (config.SearchResult, error) {
 			// but see ~/warg_configreader.md - I'm going to create a new package to do that
 
 			if !ok {
-				return config.SearchResult{}, fmt.Errorf(
+				return nil, fmt.Errorf(
 					"expecting ConfigMap: \n  actual type %T\n  actual value: %#v\n  path: %v\n  token: %v",
 					current, current, path, token,
 				)
@@ -112,9 +114,9 @@ func (cr *yamlConfigReader) Search(path string) (config.SearchResult, error) {
 			next, exists := currentMap[token.Text]
 			current = next
 			if !exists {
-				return config.SearchResult{}, nil
+				return nil, nil
 			}
 		}
 	}
-	return config.SearchResult{IFace: current, Exists: true, IsAggregated: false}, nil
+	return &config.SearchResult{IFace: current, IsAggregated: false}, nil
 }
