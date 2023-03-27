@@ -11,14 +11,14 @@ type sliceValue[T comparable] struct {
 	choices     []T
 	defaultVals []T
 	hasDefault  bool
-	inner       contained.ContainedTypeInfo[T]
+	inner       contained.TypeInfo[T]
 	vals        []T
 }
 
 type SliceOpt[T comparable] func(*sliceValue[T])
 
 func newSliceValue[T comparable](
-	inner contained.ContainedTypeInfo[T],
+	inner contained.TypeInfo[T],
 	opts ...SliceOpt[T],
 ) sliceValue[T] {
 	sv := sliceValue[T]{
@@ -32,7 +32,7 @@ func newSliceValue[T comparable](
 	return sv
 }
 
-func New[T comparable](hc contained.ContainedTypeInfo[T], opts ...SliceOpt[T]) value.EmptyConstructor {
+func New[T comparable](hc contained.TypeInfo[T], opts ...SliceOpt[T]) value.EmptyConstructor {
 	return func() (value.Value, error) {
 		s := newSliceValue(
 			hc,

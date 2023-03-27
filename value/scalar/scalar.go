@@ -10,14 +10,14 @@ import (
 type scalarValue[T comparable] struct {
 	choices    []T
 	defaultVal *T
-	inner      contained.ContainedTypeInfo[T]
+	inner      contained.TypeInfo[T]
 	val        T
 }
 
 type ScalarOpt[T comparable] func(*scalarValue[T])
 
 func newScalarValue[T comparable](
-	inner contained.ContainedTypeInfo[T],
+	inner contained.TypeInfo[T],
 	opts ...ScalarOpt[T],
 ) scalarValue[T] {
 	sv := scalarValue[T]{
@@ -32,7 +32,7 @@ func newScalarValue[T comparable](
 	return sv
 }
 
-func New[T comparable](hc contained.ContainedTypeInfo[T], opts ...ScalarOpt[T]) value.EmptyConstructor {
+func New[T comparable](hc contained.TypeInfo[T], opts ...ScalarOpt[T]) value.EmptyConstructor {
 	return func() (value.Value, error) {
 		s := newScalarValue(
 			hc,

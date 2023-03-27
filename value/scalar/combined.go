@@ -1,11 +1,20 @@
 package scalar
 
 import (
+	"net/netip"
 	"time"
 
 	value "go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/contained"
 )
+
+func Addr(opts ...ScalarOpt[netip.Addr]) value.EmptyConstructor {
+	return New(contained.Addr(), opts...)
+}
+
+func AddrPort(opts ...ScalarOpt[netip.AddrPort]) value.EmptyConstructor {
+	return New(contained.AddrPort(), opts...)
+}
 
 func Bool(opts ...ScalarOpt[bool]) value.EmptyConstructor {
 	return New(contained.Bool(), opts...)

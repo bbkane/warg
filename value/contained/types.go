@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/netip"
 	"strconv"
 	"time"
 
@@ -18,7 +19,7 @@ func identity[T comparable](t T) (T, error) {
 	return t, nil
 }
 
-type ContainedTypeInfo[T comparable] struct {
+type TypeInfo[T comparable] struct {
 	Description string
 
 	FromIFace func(iFace interface{}) (T, error)
@@ -35,8 +36,60 @@ type ContainedTypeInfo[T comparable] struct {
 	Empty func() T
 }
 
-func Bool() ContainedTypeInfo[bool] {
-	return ContainedTypeInfo[bool]{
+func Addr() TypeInfo[netip.Addr] {
+	return TypeInfo[netip.Addr]{
+		Description: "IP address",
+		Empty: func() netip.Addr {
+			return netip.Addr{}
+		},
+		FromIFace: func(iFace interface{}) (netip.Addr, error) {
+			switch under := iFace.(type) {
+			case netip.Addr:
+				return under, nil
+			case []byte:
+				ip, ok := netip.AddrFromSlice(under)
+				if !ok {
+					return netip.Addr{}, fmt.Errorf("Could not convert %s to netip.Addr", string(under))
+				}
+				return ip, nil
+			case string:
+				return netip.ParseAddr(under)
+			default:
+				return netip.Addr{}, ErrIncompatibleInterface
+			}
+		},
+		FromInstance: func(a netip.Addr) (netip.Addr, error) {
+			return a, nil
+		},
+		FromString: netip.ParseAddr,
+	}
+}
+
+func AddrPort() TypeInfo[netip.AddrPort] {
+	return TypeInfo[netip.AddrPort]{
+		Description: "IP and Port number separated by a colon: ip:port ",
+		Empty: func() netip.AddrPort {
+			return netip.AddrPort{}
+		},
+		FromIFace: func(iFace interface{}) (netip.AddrPort, error) {
+			switch under := iFace.(type) {
+			case netip.AddrPort:
+				return under, nil
+			case string:
+				return netip.ParseAddrPort(under)
+			default:
+				return netip.AddrPort{}, ErrIncompatibleInterface
+			}
+		},
+		FromString: netip.ParseAddrPort,
+		FromInstance: func(ap netip.AddrPort) (netip.AddrPort, error) {
+			return ap, nil
+		},
+	}
+}
+
+func Bool() TypeInfo[bool] {
+	return TypeInfo[bool]{
 		Description: "bool",
 		Empty:       func() bool { return false },
 		FromIFace: func(iFace interface{}) (bool, error) {
@@ -68,8 +121,8 @@ func durationFromString(s string) (time.Duration, error) {
 	return decoded, nil
 }
 
-func Duration() ContainedTypeInfo[time.Duration] {
-	return ContainedTypeInfo[time.Duration]{
+func Duration() TypeInfo[time.Duration] {
+	return TypeInfo[time.Duration]{
 		Description: "duration",
 		Empty: func() time.Duration {
 			var t time.Duration = 0
@@ -95,8 +148,8 @@ func intFromString(s string) (int, error) {
 	return int(i), nil
 }
 
-func Int() ContainedTypeInfo[int] {
-	return ContainedTypeInfo[int]{
+func Int() TypeInfo[int] {
+	return TypeInfo[int]{
 		Description: "int",
 		FromIFace: func(iFace interface{}) (int, error) {
 			switch under := iFace.(type) {
@@ -122,8 +175,8 @@ func pathFromString(s string) (string, error) {
 	return expanded, nil
 }
 
-func Path() ContainedTypeInfo[string] {
-	return ContainedTypeInfo[string]{
+func Path() TypeInfo[string] {
+	return TypeInfo[string]{
 		Description: "path",
 		Empty:       func() string { return "" },
 		FromIFace: func(iFace interface{}) (string, error) {
@@ -153,8 +206,8 @@ func runeFromString(s string) (rune, error) {
 	}
 }
 
-func Rune() ContainedTypeInfo[rune] {
-	return ContainedTypeInfo[rune]{
+func Rune() TypeInfo[rune] {
+	return TypeInfo[rune]{
 		Description: "rune",
 		Empty:       func() rune { return emptyRune },
 		FromIFace: func(iFace interface{}) (rune, error) {
@@ -172,8 +225,8 @@ func Rune() ContainedTypeInfo[rune] {
 	}
 }
 
-func String() ContainedTypeInfo[string] {
-	return ContainedTypeInfo[string]{
+func String() TypeInfo[string] {
+	return TypeInfo[string]{
 		Description: "string",
 		Empty:       func() string { return "" },
 		FromIFace: func(iFace interface{}) (string, error) {
