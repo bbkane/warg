@@ -63,6 +63,16 @@ type SliceValue interface {
 	AppendFromInterface(interface{}) error
 }
 
+type DictValue interface {
+	Value
+
+	// DefaultStringMap returns the default underlying value for the map
+	DefaultStringMap() map[string]string
+
+	// StringMap returns what's in the map currently
+	StringMap() map[string]string
+}
+
 // EmptyConstructur just builds a new value.
 // Useful to create new values as well as initialize them
 type EmptyConstructor func() (Value, error)
