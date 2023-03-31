@@ -8,5 +8,5 @@ pre-commit:
   commands:
     golangci-lint:
       run: golangci-lint run
-    go-test:
-      run: go test ./...
+    gotestsum:
+      run: gotestsum ./...

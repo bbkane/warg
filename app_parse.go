@@ -215,6 +215,7 @@ func resolveFlag(
 			}
 
 			for _, v := range strValues {
+				// NOTE: this would be the perfect place to unset the value
 				err = fl.Value.Update(v)
 				if err != nil {
 					return fmt.Errorf("error updating flag %v from passed flag value %v: %w", name, v, err)
