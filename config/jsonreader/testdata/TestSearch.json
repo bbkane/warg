@@ -3,6 +3,9 @@
   "key1": {
     "key2": 1
   },
+  "map_val": {
+    "a": 1
+  },
   "subreddits": [
     {
       "name": "earthporn",

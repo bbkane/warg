@@ -13,6 +13,7 @@ import (
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
+	"go.bbkane.com/warg/value/dict"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
 
@@ -660,6 +661,73 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedPath:       []string{"present"},
 			expectedPassedFlagValues: command.PassedFlags{"--help": "default"},
 			expectedErr:              true,
+		},
+		{
+			name: "JSONConfigMap",
+			app: warg.New(
+				"newAppName",
+				section.New("help for test",
+					section.Flag(
+						"--val",
+						"flag help",
+						dict.Int(),
+						flag.ConfigPath("val"),
+					),
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+					),
+				),
+				warg.ConfigFlag(
+					"--config",
+					[]scalar.ScalarOpt[string]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "JSONConfigMap", "config.json"),
+						),
+					},
+					jsonreader.New,
+					"path to config",
+				),
+				warg.SkipValidation(),
+			),
+
+			args:               []string{"app", "com"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"com"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--config": testDataFilePath(t.Name(), "JSONConfigMap", "config.json"),
+				"--val":    map[string]int{"a": 1},
+				"--help":   "default",
+			},
+			expectedErr: false,
+		},
+		{
+			name: "dictUpdate",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Flag(
+						flag.Name("--flag"),
+						"flag help",
+						dict.Bool(),
+					),
+
+					section.Command(
+						"com1",
+						"help for com1",
+						command.DoNothing,
+					),
+				),
+				warg.SkipValidation(),
+			),
+
+			args:                     []string{"app", "com1", "--flag", "true=true", "--flag", "false=false"},
+			lookup:                   warg.LookupMap(nil),
+			expectedPassedPath:       []string{"com1"},
+			expectedPassedFlagValues: command.PassedFlags{"--flag": map[string]bool{"true": true, "false": false}, "--help": "default"},
+			expectedErr:              false,
 		},
 	}
 	for _, tt := range tests {

@@ -60,6 +60,17 @@ func TestSearch(t *testing.T) {
 			},
 			expectedSearchErr: false,
 		},
+		{
+			name:                "map_val",
+			filePath:            "testdata/TestSearch.json",
+			searchPath:          "map_val",
+			expectedCreationErr: false,
+			expectedSearchResult: &config.SearchResult{
+				IFace:        map[string]interface{}{"a": json.Number("1")},
+				IsAggregated: false,
+			},
+			expectedSearchErr: false,
+		},
 	}
 
 	for _, tt := range tests {
