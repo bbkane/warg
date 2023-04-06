@@ -2,6 +2,7 @@ package common
 
 import (
 	"os"
+	"sort"
 
 	"github.com/mattn/go-isatty"
 	"go.bbkane.com/gocolor"
@@ -70,4 +71,15 @@ func FmtFlagName(col *gocolor.Color, flagName flag.Name) string {
 
 func FmtFlagAlias(col *gocolor.Color, flagAlias flag.Name) string {
 	return col.Add(col.Bold+col.FgYellow, string(flagAlias))
+}
+
+// SortedKeys returns the keys of the map m in sorted order.
+// copied and modified from https://cs.opensource.google/go/x/exp/+/master:maps/maps.go;l=10;drc=79cabaa25d7518588d46eb676385c8dff49670c3
+func SortedKeys[M ~map[string]V, V any](m M) []string {
+	r := make([]string, 0, len(m))
+	for k := range m {
+		r = append(r, k)
+	}
+	sort.Strings(r)
+	return r
 }

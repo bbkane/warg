@@ -50,6 +50,21 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 
 	if f.Value.HasDefault() {
 		switch v := f.Value.(type) {
+		case value.DictValue:
+			fmt.Fprintf(
+				w,
+				"    %s\n",
+				color.Add(color.Bold, "default"),
+			)
+			def := v.DefaultStringMap()
+			for _, key := range common.SortedKeys(def) {
+				fmt.Fprintf(
+					w,
+					"      %s : %s\n",
+					color.Add(color.Bold, key),
+					def[key],
+				)
+			}
 		case value.ScalarValue:
 			fmt.Fprintf(
 				w,
@@ -102,6 +117,22 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 
 	if f.SetBy != "" {
 		switch v := f.Value.(type) {
+		case value.DictValue:
+			fmt.Fprintf(
+				w,
+				"    %s (set by %s):\n",
+				color.Add(color.Bold, "currentvalue"),
+				color.Add(color.Bold, f.SetBy),
+			)
+			m := v.StringMap()
+			for _, key := range common.SortedKeys(m) {
+				fmt.Fprintf(
+					w,
+					"      %s : %s\n",
+					color.Add(color.Bold, key),
+					m[key],
+				)
+			}
 		case value.SliceValue:
 			sliceLen := len(fmt.Sprint(len(v.StringSlice())))
 
