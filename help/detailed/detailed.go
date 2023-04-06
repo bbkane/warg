@@ -91,6 +91,14 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 			color.Add(color.Bold, "required"),
 		)
 	}
+	if f.UnsetSentinel != "" {
+		fmt.Fprintf(
+			w,
+			"    %s : %s\n",
+			color.Add(color.Bold, "unsetsentinel"),
+			f.UnsetSentinel,
+		)
+	}
 
 	if f.SetBy != "" {
 		switch v := f.Value.(type) {

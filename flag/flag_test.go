@@ -8,17 +8,8 @@ import (
 )
 
 func TestFlagMap_SortedNames(t *testing.T) {
-	emptyFlag := flag.Flag{
-		Alias:                 "",
-		ConfigPath:            "",
-		EnvVars:               nil,
-		EmptyValueConstructor: nil,
-		HelpShort:             "",
-		Required:              false,
-		IsCommandFlag:         false,
-		SetBy:                 "",
-		Value:                 nil,
-	}
+	emptyFlag := flag.New("", nil)
+
 	fm := flag.FlagMap{
 		"c": emptyFlag,
 		"a": emptyFlag,

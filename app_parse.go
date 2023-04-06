@@ -215,13 +215,26 @@ func resolveFlag(
 			}
 
 			for _, v := range strValues {
-				// NOTE: this would be the perfect place to unset the value
+
+				// Unset the value if we get UnsetSentinel
+				if v == fl.UnsetSentinel {
+					val, err := fl.EmptyValueConstructor()
+					if err != nil {
+						return fmt.Errorf("flag error: %v: %w", name, err)
+					}
+					fl.Value = val
+
+					// Set to "unsetSentinel" to avoid updating from config etc..
+					// This will be set back to "" at end of update
+					fl.SetBy = "unsetSentinel"
+					continue
+				}
 				err = fl.Value.Update(v)
 				if err != nil {
 					return fmt.Errorf("error updating flag %v from passed flag value %v: %w", name, v, err)
 				}
+				fl.SetBy = "passedflag"
 			}
-			fl.SetBy = "passedflag"
 		}
 	}
 
@@ -291,6 +304,11 @@ func resolveFlag(
 			fl.Value.ReplaceFromDefault()
 			fl.SetBy = "appdefault"
 		}
+	}
+
+	// Set to "" if unsetSentinel
+	if fl.SetBy == "unsetSentinel" {
+		fl.SetBy = ""
 	}
 
 	return nil

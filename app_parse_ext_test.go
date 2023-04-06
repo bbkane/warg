@@ -729,6 +729,89 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: command.PassedFlags{"--flag": map[string]bool{"true": true, "false": false}, "--help": "default"},
 			expectedErr:              false,
 		},
+		{
+			name: "unsetSentinelScalarSuccess",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Flag(
+						"--flag",
+						"help for --flag",
+						scalar.String(scalar.Default("default")),
+						flag.UnsetSentinel("UNSET"),
+					),
+					section.Command(
+						"test",
+						"help for test",
+						command.DoNothing,
+					),
+				),
+				warg.SkipValidation(),
+			),
+			args:               []string{t.Name(), "test", "--flag", "UNSET"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"test"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--help": "default",
+			},
+			expectedErr: false,
+		},
+		{
+			name: "unsetSentinelScalarError",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Flag(
+						"--flag",
+						"help for --flag",
+						scalar.String(scalar.Default("default")),
+						flag.UnsetSentinel("UNSET"),
+					),
+					section.Command(
+						"test",
+						"help for test",
+						command.DoNothing,
+					),
+				),
+				warg.SkipValidation(),
+			),
+			args:                     []string{t.Name(), "test", "--flag", "UNSET", "--flag", "justsayno"},
+			lookup:                   warg.LookupMap(nil),
+			expectedPassedPath:       []string{"test"},
+			expectedPassedFlagValues: nil,
+			expectedErr:              true,
+		},
+		{
+			name: "unsetSentinelSlice",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Flag(
+						"--flag",
+						"help for --flag",
+						slice.String(slice.Default([]string{"default"})),
+						flag.UnsetSentinel("UNSET"),
+					),
+					section.Command(
+						"test",
+						"help for test",
+						command.DoNothing,
+					),
+				),
+				warg.SkipValidation(),
+			),
+			args:               []string{t.Name(), "test", "--flag", "a", "--flag", "UNSET", "--flag", "b", "--flag", "c"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"test"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--help": "default",
+				"--flag": []string{"b", "c"},
+			},
+			expectedErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

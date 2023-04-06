@@ -31,8 +31,11 @@ func app() *warg.App {
 		),
 		"--ignore": flag.New(
 			"Ignore file/dir if the name (not the whole path) matches passed regex",
-			slice.String(),
+			slice.String(
+				slice.Default([]string{"README.*"}),
+			),
 			flag.Alias("-i"),
+			flag.UnsetSentinel("UNSET"),
 		),
 		"--link-dir": flag.New(
 			"Symlinks will be created in this directory pointing to files/directories in --src-dir",

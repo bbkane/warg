@@ -65,6 +65,9 @@ type Flag struct {
 	// Required means the user MUST fill this flag
 	Required bool
 
+	// When UnsetSentinal is passed as a flag value, Value is reset and SetBy is set to ""
+	UnsetSentinel string
+
 	// -- the following are set when parsing
 
 	// IsCommandFlag is set when parsing. Set to true if the flag was attached to a command (as opposed to being inherited from a section)
@@ -88,6 +91,7 @@ func New(helpShort HelpShort, empty value.EmptyConstructor, opts ...FlagOpt) Fla
 		Required:              false,
 		IsCommandFlag:         false,
 		SetBy:                 "",
+		UnsetSentinel:         "",
 		Value:                 nil,
 	}
 	for _, opt := range opts {
@@ -114,6 +118,23 @@ func ConfigPath(path string) FlagOpt {
 func EnvVars(name ...string) FlagOpt {
 	return func(f *Flag) {
 		f.EnvVars = name
+	}
+}
+
+// UnsetSentinel is a bit of an advanced feature meant to allow overriding a
+// default, config, or environmental value with a command line flag.
+// When UnsetSentinel is passed as a flag value, Value is reset and SetBy is set to "".
+// It it recommended to set `name` to "UNSET" for consistency among warg apps.
+// Scalar example:
+//
+//	app --flag UNSET  // undoes anything that sets --flag
+//
+// Slice example:
+//
+//	app --flag a --flag b --flag UNSET --flag c --flag d // ends up with []string{"c", "d"}
+func UnsetSentinel(name string) FlagOpt {
+	return func(f *Flag) {
+		f.UnsetSentinel = name
 	}
 }
 
