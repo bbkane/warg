@@ -1,3 +1,9 @@
+# v0.0.19
+
+## Fixes
+
+- Fix panic when using a `value.Dict` and calling `detailed.DetailedCommandHelp`
+
 # v0.0.18
 
 ## Features
