@@ -10,6 +10,9 @@ import (
 	"go.bbkane.com/warg/config/tokenize"
 )
 
+// This must be a type declaration or the tests fail
+type configMap = map[string]interface{}
+
 type jsonConfigReader struct {
 	data configMap
 }
@@ -36,9 +39,6 @@ func New(filePath string) (config.Reader, error) {
 	}
 	return cr, nil
 }
-
-// This must be a type declaration or the tests fail
-type configMap = map[string]interface{}
 
 func (cr *jsonConfigReader) Search(path string) (*config.SearchResult, error) {
 	data := cr.data

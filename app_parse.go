@@ -250,7 +250,7 @@ func resolveFlag(
 					err := fl.Value.ReplaceFromInterface(fpr.IFace)
 					if err != nil {
 						return fmt.Errorf(
-							"could not replace container type value: val: %#v , replacement: %#v, err: %w",
+							"could not replace container type value:\nval:\n%#v\nreplacement:\n%#v\nerr: %w",
 							fl.Value,
 							fpr.IFace,
 							err,
