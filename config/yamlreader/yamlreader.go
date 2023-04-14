@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// YAML can have keys of non-string types
 type configMap map[interface{}]interface{}
 
 type yamlConfigReader struct {
@@ -94,14 +95,7 @@ func (cr *yamlConfigReader) Search(path string) (*config.SearchResult, error) {
 				)
 			}
 
-			// JSON needs this
 			currentMap, ok := current.(configMap)
-
-			// YAML needs this
-			// currentMap, ok := current.(map[interface{}]interface{})
-
-			// Sticking with JSON now because it works and is sprinkled over the code :)
-			// but see ~/warg_configreader.md - I'm going to create a new package to do that
 
 			if !ok {
 				return nil, fmt.Errorf(
@@ -117,6 +111,18 @@ func (cr *yamlConfigReader) Search(path string) (*config.SearchResult, error) {
 				return nil, nil
 			}
 		}
+	}
+
+	if currentConfigMap, ok := current.(configMap); ok {
+		newMap := make(map[string]interface{})
+		for k, v := range currentConfigMap {
+			kStr, ok := k.(string)
+			if !ok {
+				return nil, fmt.Errorf("YAML map parse failure. Expected string, got %T: %v", k, k)
+			}
+			newMap[kStr] = v
+		}
+		current = newMap
 	}
 	return &config.SearchResult{IFace: current, IsAggregated: false}, nil
 }
