@@ -38,6 +38,7 @@ func TestTokenize(t *testing.T) {
 				{Text: "[]", Type: tokenize.TokenTypeSlice},
 				{Text: "slice_key", Type: tokenize.TokenTypeKey},
 			},
+			expectedErr: false,
 		},
 		// TODO: a slice in the middle of a key will break it. Test that once I care enough :)
 	}
