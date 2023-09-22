@@ -28,7 +28,7 @@ func New(filePath string) (config.Reader, error) {
 		return cr, nil
 	}
 
-	err = yaml.Unmarshal(content, &cr.data)
+	err = yaml.UnmarshalStrict(content, &cr.data)
 	if err != nil {
 		return nil, err
 	}
