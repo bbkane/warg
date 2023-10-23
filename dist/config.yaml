@@ -4,13 +4,6 @@ release:
     owner: bbkane
     name: warg
   name_template: '{{.Tag}}'
-scoop:
-  name: warg
-  commit_author:
-    name: goreleaserbot
-    email: bot@goreleaser.com
-  commit_msg_template: Scoop update for {{ .ProjectName }} version {{ .Tag }}
-  goamd64: v1
 builds:
   - id: warg
     goos:
@@ -40,7 +33,6 @@ builds:
     main: .
     binary: warg
     builder: go
-    skip: true
     gobinary: go
     command: build
     ldflags:
@@ -103,10 +95,14 @@ announce:
   linkedin:
     message_template: '{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
   telegram:
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
+    message_template: '{{ .ProjectName }} {{ mdv2escape .Tag }} is out! Check it out at {{ mdv2escape .ReleaseURL }}'
+    parse_mode: MarkdownV2
   webhook:
     message_template: '{ "message": "{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}"}'
     content_type: application/json; charset=utf-8
+  opencollective:
+    title_template: '{{ .Tag }}'
+    message_template: '{{ .ProjectName }} {{ .Tag }} is out!<br/>Check it out at <a href="{{ .ReleaseURL }}">{{ .ReleaseURL }}</a>'
 git:
   tag_sort: -version:refname
 github_urls:
