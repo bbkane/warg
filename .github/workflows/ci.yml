@@ -18,6 +18,8 @@ jobs:
         uses: golangci/golangci-lint-action@v3
       - name: go test
         run: go test -v ./...
+      - name: Debug print YAML
+        run: cat ./testdata/ExampleFlagValueOptions/config.yaml; printf '\n--- SEP ---\n'; cat ./testdata/ExampleConfigFlag/calc.yaml
       - name: Install yamllint
         run: pip install yamllint
       - name: Lint YAML files
