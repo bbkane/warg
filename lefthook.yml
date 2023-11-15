@@ -5,10 +5,10 @@
 
 pre-commit:
   commands:
+    go-test:
+      run: go test ./...
     golangci-lint:
       run: golangci-lint run
-    gotestsum:
-      run: gotestsum ./...
     yamllint:
       run: yamllint .
   parallel: true
