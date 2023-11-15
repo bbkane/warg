@@ -55,9 +55,7 @@ func ExampleConfigFlag() {
 
 	err := os.WriteFile(
 		"testdata/ExampleConfigFlag/calc.yaml",
-		[]byte(
-			`
-add:
+		[]byte(`add:
   addends:
     - 1
     - 2

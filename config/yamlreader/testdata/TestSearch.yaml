@@ -2,10 +2,10 @@
 key: value
 key1:
   key2: 1
-subreddits:
-  - name: earthporn
-    limit: 10
-  - name: wallpapers
-    limit: 5
 map_val:
   a: 1
+subreddits:
+  - limit: 10
+    name: earthporn
+  - limit: 5
+    name: wallpapers

@@ -1,15 +1,3 @@
-name: CI
-
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-  workflow_call:
-
-permissions:
-  contents: read
-
 jobs:
   setup:
     name: CI
@@ -18,18 +6,28 @@ jobs:
       # https://github.com/marketplace/actions/checkout`
       - name: Checkout Repo
         uses: actions/checkout@v3
-
       # https://github.com/marketplace/actions/setup-go-environment
       - name: Set up Go 1.x >= 1.18
         uses: actions/setup-go@v3
         with:
-          go-version-file: go.mod
           # requires go.sum file (i.e., external libraries)
           cache: true
-
+          go-version-file: go.mod
       # https://github.com/marketplace/actions/run-golangci-lint#how-to-use
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
-
       - name: go test
         run: go test -v ./...
+      - name: Install yamllint
+        run: pip install yamllint
+      - name: Lint YAML files
+        run: yamllint .
+name: CI
+on: # yamllint disable-line rule:truthy
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_call:
+permissions:
+  contents: read

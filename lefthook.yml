@@ -4,9 +4,11 @@
 #   https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
 
 pre-commit:
-  parallel: true
   commands:
+    go-test:
+      run: go test ./...
     golangci-lint:
       run: golangci-lint run
-    gotestsum:
-      run: gotestsum ./...
+    yamllint:
+      run: yamllint .
+  parallel: true

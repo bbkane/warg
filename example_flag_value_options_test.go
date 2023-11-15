@@ -77,13 +77,11 @@ func ExampleApp_Parse_flag_value_options() {
 
 	err := os.WriteFile(
 		"testdata/ExampleFlagValueOptions/config.yaml",
-		[]byte(
-			`
-args:
+		[]byte(`args:
   slice-flag:
-  - 1
-  - 2
-  - 3
+    - 1
+    - 2
+    - 3
 `),
 		0644,
 	)
