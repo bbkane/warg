@@ -51,6 +51,8 @@ type App struct {
 	rootSection section.SectionT
 
 	skipValidation bool
+
+	version string
 }
 
 // OverrideHelpFlag customizes your --help. If you write a custom --help function, you'll want to add it to your app here!
@@ -102,6 +104,13 @@ func OverrideHelpFlag(
 	}
 }
 
+// OverrideVersion lets you set a custom version string. The default is read from debug.BuildInfo
+func OverrideVersion(version string) AppOpt {
+	return func(a *App) {
+		a.version = version
+	}
+}
+
 // Use ConfigFlag in conjunction with flag.ConfigPath to allow users to override flag defaults with values from a config.
 // This flag will be parsed and any resulting config will be read before other flag value sources.
 func ConfigFlag(
@@ -128,6 +137,18 @@ func SkipValidation() AppOpt {
 	return func(a *App) {
 		a.skipValidation = true
 	}
+}
+
+func debugBuildInfoVersion() string {
+	// If installed via `go install`, we'll be able to read runtime version info
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		// This shouldn't happen with modern versions of Go
+		// unless someone strips the binary, and I don't support that
+		panic("unable to read build info")
+	}
+	// when run with `go run`, this will return "(devel)"
+	return info.Main.Version
 }
 
 // AddVersionCommand adds a "version" command to the root section that prints the version passed.
@@ -191,6 +212,7 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 		helpFlagAlias:   "",
 		helpMappings:    nil,
 		skipValidation:  false,
+		version:         "",
 		Stdout:          nil,
 		Stderr:          nil,
 	}
@@ -215,13 +237,19 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 		OverrideStdout(os.Stdout)(&app)
 	}
 
-	if !app.skipValidation {
-		err := app.Validate()
-		if err != nil {
-			panic(err)
-		}
+	if app.version == "" {
+		OverrideVersion(debugBuildInfoVersion())
 	}
 
+	// validate or not and return
+	if app.skipValidation {
+		return app
+	}
+
+	err := app.Validate()
+	if err != nil {
+		panic(err)
+	}
 	return app
 }
 

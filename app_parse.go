@@ -431,9 +431,10 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 				pr := ParseResult{
 					Path: gar.Path,
 					Context: command.Context{
-						Flags:  pfs,
-						Stderr: app.Stderr,
-						Stdout: app.Stdout,
+						Flags:   pfs,
+						Stderr:  app.Stderr,
+						Stdout:  app.Stdout,
+						Version: app.version,
 					},
 					Action: e.SectionHelp(ftar.Section, helpInfo),
 				}
@@ -456,9 +457,10 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 					pr := ParseResult{
 						Path: gar.Path,
 						Context: command.Context{
-							Flags:  pfs,
-							Stderr: app.Stderr,
-							Stdout: app.Stdout,
+							Flags:   pfs,
+							Stderr:  app.Stderr,
+							Stdout:  app.Stdout,
+							Version: app.version,
 						},
 						Action: e.CommandHelp(ftar.Command, helpInfo),
 					}
@@ -471,9 +473,10 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 			pr := ParseResult{
 				Path: gar.Path,
 				Context: command.Context{
-					Flags:  pfs,
-					Stderr: app.Stderr,
-					Stdout: app.Stdout,
+					Flags:   pfs,
+					Stderr:  app.Stderr,
+					Stdout:  app.Stdout,
+					Version: app.version,
 				},
 				Action: ftar.Action,
 			}

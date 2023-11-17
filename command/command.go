@@ -2,6 +2,7 @@ package command
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"sort"
 
@@ -17,6 +18,8 @@ type Context struct {
 	Flags  PassedFlags
 	Stderr *os.File
 	Stdout *os.File
+	// Version of this app
+	Version string
 }
 
 // An Action is run as the result of a command
@@ -62,10 +65,16 @@ type Command struct {
 	HelpLong string
 }
 
-// DoNothing is a command action that simply returns nil
+// DoNothing is a command action that simply returns an error.
 // Useful for prototyping
 func DoNothing(_ Context) error {
 	return errors.New("NOTE: replace this command.DoNothing call")
+}
+
+// PrintVersion prints the app's version
+func PrintVersion(ctx Context) error {
+	fmt.Fprintln(ctx.Stdout, ctx.Version)
+	return nil
 }
 
 // New builds a Command
