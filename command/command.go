@@ -2,7 +2,6 @@ package command
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"sort"
 
@@ -77,14 +76,6 @@ type Command struct {
 // Useful for prototyping
 func DoNothing(_ Context) error {
 	return errors.New("NOTE: replace this command.DoNothing call")
-}
-
-// PrintVersion prints the app's version. Use as follows
-//
-//	section.Command("version", "Print version", command.PrintVersion),
-func PrintVersion(ctx Context) error {
-	fmt.Fprintln(ctx.Stdout, ctx.Version)
-	return nil
 }
 
 // New builds a Command

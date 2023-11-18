@@ -69,7 +69,7 @@ func app() *warg.App {
 				unlink,
 				command.ExistingFlags(linkUnlinkFlags),
 			),
-			section.Command("version", "Print version", command.PrintVersion),
+			section.ExistingCommand("version", warg.VersionCommand()),
 			section.Footer("Homepage: https://github.com/bbkane/fling"),
 		),
 		warg.AddColorFlag(),

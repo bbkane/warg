@@ -838,7 +838,7 @@ func TestContextVersion(t *testing.T) {
 		"appName",
 		section.New(
 			"test",
-			section.Command("version", "Print version", command.PrintVersion),
+			section.Command("version", "Print version", command.DoNothing),
 		),
 		warg.OverrideVersion("customversion"),
 	)

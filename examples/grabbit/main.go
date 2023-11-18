@@ -90,7 +90,8 @@ Homepage: https://github.com/bbkane/grabbit
 		"grabbit",
 		section.New(
 			"Get top images from subreddits",
-			section.Command("version", "Print version", command.PrintVersion),
+			section.ExistingCommand("version", warg.VersionCommand()),
+
 			section.ExistingCommand(
 				"grab",
 				grabCmd,

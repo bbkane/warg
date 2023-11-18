@@ -221,7 +221,7 @@ func app() *warg.App {
 		"starghaze",
 		section.New(
 			"Save GitHub Starred Repos",
-			section.Command("version", "Print version", command.PrintVersion),
+			section.ExistingCommand("version", warg.VersionCommand()),
 			section.ExistingCommand(
 				"download",
 				downloadCmd,

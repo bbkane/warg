@@ -12,12 +12,11 @@ something and remain < 1.0.0 forever.
 ## Added
 
 - `command.Context`: `Version`, `AppName`, `Path` fields
-- `warg.OverrideVersion()` to set version on app creation.
+- `warg.VersionCommand()` to facilitate easy version commands. Use with: `section.ExistingCommand("version", warg.VersionCommand()),`
 
 ## Changed
 
-- rm `AddVersionCommand()` in favor of `command.PrintVersion()`. Migrate by adding a "version" command manually:
-  `section.Command("version", "Print version", command.PrintVersion)`
+- rm `AddVersionCommand()` in favor of `warg.VersionCommand()`
 
 ## v0.0.20
 

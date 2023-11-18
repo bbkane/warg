@@ -8,6 +8,7 @@ import (
 	"runtime/debug"
 	"strings"
 
+	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
@@ -173,6 +174,16 @@ func OverrideStderr(f *os.File) AppOpt {
 	return func(a *App) {
 		a.Stderr = f
 	}
+}
+
+func VersionCommand() command.Command {
+	return command.New(
+		"Print version",
+		func(ctx command.Context) error {
+			fmt.Fprintln(ctx.Stdout, ctx.Version)
+			return nil
+		},
+	)
 }
 
 // New builds a new App!

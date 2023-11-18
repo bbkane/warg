@@ -29,7 +29,7 @@ func app() *warg.App {
 					flag.Required(),
 				),
 			),
-			section.Command("version", "Print version", command.PrintVersion),
+			section.ExistingCommand("version", warg.VersionCommand()),
 		),
 		warg.AddColorFlag(),
 		warg.SkipValidation(),
