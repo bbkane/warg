@@ -13,10 +13,7 @@ import (
 
 // HelpInfo lists common information available to a help function
 type HelpInfo struct {
-	// AppName as defined by warg.New()
-	AppName string
-	// Path passed either to a command or a section
-	Path []string
+
 	// AvailableFlags for the current section or commmand, including inherted flags from parent sections.
 	// All flags are Resolved if possible (i.e., flag.SetBy != "")
 	AvailableFlags flag.FlagMap

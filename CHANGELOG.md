@@ -11,7 +11,7 @@ something and remain < 1.0.0 forever.
 
 ## Added
 
-- `command.Context.Version` field
+- `command.Context`: `Version`, `AppName`, `Path` fields
 - `warg.OverrideVersion()` to set version on app creation.
 
 ## Changed

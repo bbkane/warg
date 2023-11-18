@@ -11,13 +11,13 @@ import (
 )
 
 func AllCommandsSectionHelp(cur *section.SectionT, helpInfo common.HelpInfo) command.Action {
-	return func(pf command.Context) error {
-		file := pf.Stdout
+	return func(cmdCtx command.Context) error {
+		file := cmdCtx.Stdout
 
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := common.ConditionallyEnableColor(pf.Flags, file)
+		col, err := common.ConditionallyEnableColor(cmdCtx.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
@@ -34,8 +34,8 @@ func AllCommandsSectionHelp(cur *section.SectionT, helpInfo common.HelpInfo) com
 		fmt.Fprintln(f, common.FmtHeader(&col, "All Commands")+" (use <cmd> -h to see flag details):")
 		fmt.Fprintln(f)
 
-		path := []section.Name{section.Name(helpInfo.AppName)}
-		for _, e := range helpInfo.Path {
+		path := []section.Name{section.Name(cmdCtx.AppName)}
+		for _, e := range cmdCtx.Path {
 			path = append(path, section.Name(e))
 		}
 

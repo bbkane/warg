@@ -34,8 +34,6 @@ Full code for this example at [./examples/butler/main.go](./examples/butler/main
 	)
 ```
 
-
-
 ## Run Butler
 
 Color can be toggled on/off/auto with the `--color` flag:

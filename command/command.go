@@ -15,6 +15,9 @@ type PassedFlags map[string]interface{} // This can just stay a string for the c
 
 // Context holds everything a command needs.
 type Context struct {
+	AppName string
+	// Path passed either to a command or a section
+	Path   []string
 	Flags  PassedFlags
 	Stderr *os.File
 	Stdout *os.File
@@ -56,13 +59,18 @@ type CommandOpt func(*Command)
 // A Command should not be constructed directly. Use Command / New / ExistingCommand functions
 type Command struct {
 	Action Action
-	Flags  flag.FlagMap
-	// HelpShort is a required one-line description
-	HelpShort HelpShort
+
+	// Parsed Flags
+	Flags flag.FlagMap
+
 	// Footer is yet another optional longer description.
 	Footer string
+
 	// HelpLong is an optional longer description
 	HelpLong string
+
+	// HelpShort is a required one-line description
+	HelpShort HelpShort
 }
 
 // DoNothing is a command action that simply returns an error.

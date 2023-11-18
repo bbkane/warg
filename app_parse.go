@@ -419,8 +419,6 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
 		helpInfo := common.HelpInfo{
-			AppName:        app.name,
-			Path:           gar.Path,
 			AvailableFlags: ftar.AllowedFlags,
 			RootSection:    app.rootSection,
 		}
@@ -431,7 +429,9 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 				pr := ParseResult{
 					Path: gar.Path,
 					Context: command.Context{
+						AppName: app.name,
 						Flags:   pfs,
+						Path:    gar.Path,
 						Stderr:  app.Stderr,
 						Stdout:  app.Stdout,
 						Version: app.version,
@@ -445,8 +445,6 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	} else if ftar.Section == nil && ftar.Command != nil {
 		if gar.HelpPassed {
 			helpInfo := common.HelpInfo{
-				AppName:        app.name,
-				Path:           gar.Path,
 				AvailableFlags: ftar.AllowedFlags,
 				RootSection:    app.rootSection,
 			}
@@ -457,7 +455,9 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 					pr := ParseResult{
 						Path: gar.Path,
 						Context: command.Context{
+							AppName: app.name,
 							Flags:   pfs,
+							Path:    gar.Path,
 							Stderr:  app.Stderr,
 							Stdout:  app.Stdout,
 							Version: app.version,
@@ -473,7 +473,9 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 			pr := ParseResult{
 				Path: gar.Path,
 				Context: command.Context{
+					AppName: app.name,
 					Flags:   pfs,
+					Path:    gar.Path,
 					Stderr:  app.Stderr,
 					Stdout:  app.Stdout,
 					Version: app.version,
