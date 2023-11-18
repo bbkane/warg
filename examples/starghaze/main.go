@@ -234,13 +234,13 @@ func app() *warg.App {
 				"search",
 				searchCmd,
 			),
+			section.ExistingFlag("--color", warg.ColorFlag()),
 			section.ExistingSection(
 				"gsheets",
 				gsheetsSection,
 			),
 			section.Footer("Homepage: https://github.com/bbkane/starghaze"),
 		),
-		warg.AddColorFlag(),
 		warg.SkipValidation(),
 	)
 	return &app

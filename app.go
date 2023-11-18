@@ -150,18 +150,18 @@ func debugBuildInfoVersion() string {
 	return info.Main.Version
 }
 
-// AddColorFlag adds a "--color" flag to the root section. By convention, this flag will be respected by the different help commands
-func AddColorFlag() AppOpt {
-	return func(a *App) {
-		section.Flag(
-			"--color",
-			"Use ANSI colors",
-			scalar.String(
-				scalar.Choices("true", "false", "auto"),
-				scalar.Default("auto"),
-			),
-		)(&a.rootSection)
-	}
+// ColorFlag returns a flag indicating whether use user wants colored output.
+// By convention, if this flag is named "--color", it will be respected by the different help commands. Usage:
+//
+//	section.ExistingFlag("--color", warg.ColorFlag()),
+func ColorFlag() flag.Flag {
+	return flag.New(
+		"Use ANSI colors",
+		scalar.String(
+			scalar.Choices("true", "false", "auto"),
+			scalar.Default("auto"),
+		),
+	)
 }
 
 func OverrideStdout(f *os.File) AppOpt {

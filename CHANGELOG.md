@@ -11,12 +11,18 @@ something and remain < 1.0.0 forever.
 
 ## Added
 
-- `command.Context`: `Version`, `AppName`, `Path` fields
-- `warg.VersionCommand()` to facilitate easy version commands. Use with: `section.ExistingCommand("version", warg.VersionCommand()),`
+- `command.Context`: `Version`, `AppName`, `Path` fields. Justification: I want
+  to pass these fields to OpenTelemetry in `starghaze`
 
 ## Changed
 
-- rm `AddVersionCommand()` in favor of `warg.VersionCommand()`
+- rm `warg.AddVersionCommand()` in favor of `warg.VersionCommand()`. Use with
+  `section.ExistingCommand("version", warg.VersionCommand()),`. Justification:
+  more declarative - I'd like to define all commands inside the root section
+  instead of having another way to add a flag as a warg option.
+- rm `warg.AddColorFlag()` in favor of `warg.ColorFlag()`. Use with
+  `section.ExistingFlag("--color", warg.ColorFlag()),`. Same justification as
+  `warg.VersionCommand()`
 
 ## v0.0.20
 

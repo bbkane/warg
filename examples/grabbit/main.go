@@ -96,6 +96,7 @@ Homepage: https://github.com/bbkane/grabbit
 				"grab",
 				grabCmd,
 			),
+			section.ExistingFlag("--color", warg.ColorFlag()),
 			section.Footer(appFooter),
 			section.Flag(
 				"--log-filename",
@@ -162,7 +163,6 @@ Homepage: https://github.com/bbkane/grabbit
 			"Config filepath",
 			flag.Alias("-c"),
 		),
-		warg.AddColorFlag(),
 		warg.SkipValidation(),
 	)
 	return &app
