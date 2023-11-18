@@ -827,10 +827,27 @@ func TestApp_Parse(t *testing.T) {
 			} else {
 				require.Nil(t, actualErr)
 			}
-
-			// TODO: I wish I'd made this compare a parse result with a parse result instead of field by field
 			require.Equal(t, tt.expectedPassedPath, actualPR.Path)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
 		})
 	}
+}
+
+func TestContextVersion(t *testing.T) {
+	app := warg.New(
+		"appName",
+		section.New(
+			"test",
+			section.Command("version", "Print version", command.PrintVersion),
+		),
+		warg.OverrideVersion("customversion"),
+	)
+	err := app.Validate()
+	require.Nil(t, err)
+
+	actualPR, err := app.Parse([]string{"appName"}, warg.LookupMap(nil))
+	require.Nil(t, err)
+
+	expectedVersion := "customversion"
+	require.Equal(t, expectedVersion, actualPR.Context.Version)
 }

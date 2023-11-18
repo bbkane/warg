@@ -90,6 +90,7 @@ Homepage: https://github.com/bbkane/grabbit
 		"grabbit",
 		section.New(
 			"Get top images from subreddits",
+			section.Command("version", "Print version", command.PrintVersion),
 			section.ExistingCommand(
 				"grab",
 				grabCmd,
@@ -161,7 +162,6 @@ Homepage: https://github.com/bbkane/grabbit
 			flag.Alias("-c"),
 		),
 		warg.AddColorFlag(),
-		warg.AddVersionCommand(version),
 		warg.SkipValidation(),
 	)
 	return &app

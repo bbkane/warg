@@ -29,8 +29,8 @@ Full code for this example at [./examples/butler/main.go](./examples/butler/main
 					flag.Required(),
 				),
 			),
+			section.Command("version", "Print version", command.PrintVersion),
 		),
-		warg.AddVersionCommand(""),
 	)
 ```
 
