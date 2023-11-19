@@ -827,7 +827,7 @@ func TestApp_Parse(t *testing.T) {
 			} else {
 				require.Nil(t, actualErr)
 			}
-			require.Equal(t, tt.expectedPassedPath, actualPR.Path)
+			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
 		})
 	}

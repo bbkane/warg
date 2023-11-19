@@ -316,9 +316,6 @@ func resolveFlag(
 
 // ParseResult holds the result of parsing the command line.
 type ParseResult struct {
-	// Path to the command invoked. Does not include executable name (os.Args[0])
-	Path []string // TODO: consider moving this inside the command.Context
-	// Context holds the parsed information
 	Context command.Context
 	// Action holds the passed command's action to execute.
 	Action command.Action
@@ -427,7 +424,6 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		for _, e := range app.helpMappings {
 			if e.Name == helpType {
 				pr := ParseResult{
-					Path: gar.Path,
 					Context: command.Context{
 						AppName: app.name,
 						Flags:   pfs,
@@ -453,7 +449,6 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 			for _, e := range app.helpMappings {
 				if e.Name == helpType {
 					pr := ParseResult{
-						Path: gar.Path,
 						Context: command.Context{
 							AppName: app.name,
 							Flags:   pfs,
@@ -471,7 +466,6 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		} else {
 
 			pr := ParseResult{
-				Path: gar.Path,
 				Context: command.Context{
 					AppName: app.name,
 					Flags:   pfs,

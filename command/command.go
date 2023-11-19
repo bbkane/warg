@@ -15,7 +15,7 @@ type PassedFlags map[string]interface{} // This can just stay a string for the c
 // Context holds everything a command needs.
 type Context struct {
 	AppName string
-	// Path passed either to a command or a section
+	// Path passed either to a command or a section. Does not include executable name (os.Args[0])
 	Path   []string
 	Flags  PassedFlags
 	Stderr *os.File
