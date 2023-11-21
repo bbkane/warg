@@ -1,6 +1,7 @@
 package warg
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -321,8 +322,34 @@ type ParseResult struct {
 	Action command.Action
 }
 
+type ParseOptHolder struct {
+	Context context.Context
+}
+
+type ParseOpt func(*ParseOptHolder)
+
+func AddContext(ctx context.Context) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Context = ctx
+	}
+}
+
+func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
+	parseOptHolder := ParseOptHolder{
+		Context: nil,
+	}
+
+	for _, opt := range opts {
+		opt(&parseOptHolder)
+	}
+	return parseOptHolder
+}
+
 // Parse parses the args, but does not execute anything.
-func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, error) {
+func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc, opts ...ParseOpt) (*ParseResult, error) {
+
+	parseOptHolder := NewParseOptHolder(opts...)
+
 	helpFlagNames := []string{string(app.helpFlagName)}
 	if app.helpFlagAlias != "" {
 		helpFlagNames = append(helpFlagNames, string(app.helpFlagAlias))
@@ -426,6 +453,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 				pr := ParseResult{
 					Context: command.Context{
 						AppName: app.name,
+						Context: parseOptHolder.Context,
 						Flags:   pfs,
 						Path:    gar.Path,
 						Stderr:  app.Stderr,
@@ -451,6 +479,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 					pr := ParseResult{
 						Context: command.Context{
 							AppName: app.name,
+							Context: parseOptHolder.Context,
 							Flags:   pfs,
 							Path:    gar.Path,
 							Stderr:  app.Stderr,
@@ -468,6 +497,7 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 			pr := ParseResult{
 				Context: command.Context{
 					AppName: app.name,
+					Context: parseOptHolder.Context,
 					Flags:   pfs,
 					Path:    gar.Path,
 					Stderr:  app.Stderr,

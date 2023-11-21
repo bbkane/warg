@@ -1,3 +1,30 @@
+Move runtime dependencies to Parse/Run
+
+That means I can do less in buildApp and use the same buildApp easily in tests (override stdout there to a file) and in main (let the default stdout be /dev/stdout
+
+Something like this:
+
+```go
+pr : = app.Parse(
+    AddContext(myContext),
+    OverrideArgs(not os.Args),
+    OverrideStderr(myFileHandle),
+    OverrideStdout(myFileHandle),
+)
+```
+
+The context bit is so I can easily make mocks outside the app and smuggle them in with the context.
+
+Lets do:
+
+- add ParseOpt , ParseOptHolder - DONE
+- Add `AddContext` - DONE
+- Test AddContext - DONE
+- update changelog (at this point, I'll be more sure it'll work..)
+- Add `OverrideArgs`
+- Add `OverrideLookupFunc`
+- Add `OverrideStderr`, `OverrideStdout`
+
 # Changelog
 
 All notable changes to this project will be documented in this file. The format
@@ -13,9 +40,13 @@ something and remain < 1.0.0 forever.
 
 - `command.Context`: `Version`, `AppName`, `Path` fields. Justification: I want
   to pass these fields to OpenTelemetry in `starghaze`
+- `command.Context.Context` field: Justification: I want to smuggle mocks into
+  my `command.Action`s when testing. Before, this, I added an ugly "mock
+  selection" flag, and this is much cleaner.
 
 ## Changed
 
+- move `warg.ParseResult.Path` to `command.Context.Path`
 - rm `warg.AddVersionCommand()` in favor of `warg.VersionCommand()`. Use with
   `section.ExistingCommand("version", warg.VersionCommand()),`. Justification:
   more declarative - I'd like to define all commands inside the root section
@@ -23,6 +54,10 @@ something and remain < 1.0.0 forever.
 - rm `warg.AddColorFlag()` in favor of `warg.ColorFlag()`. Use with
   `section.ExistingFlag("--color", warg.ColorFlag()),`. Same justification as
   `warg.VersionCommand()`
+- update `Parse()` to use `ParseOpt`s instead of positional args:
+  `OverrideArgs`, `OverrideLookupFunc`. Justification: thse have obvious
+  defaults that only need overriding for tests, which also probably want to use
+  other `ParseOpt`s
 
 ## v0.0.20
 

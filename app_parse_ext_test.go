@@ -3,6 +3,7 @@ package warg_test
 // external tests - import warg like it's an external package
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 
@@ -850,4 +851,25 @@ func TestContextVersion(t *testing.T) {
 
 	expectedVersion := "customversion"
 	require.Equal(t, expectedVersion, actualPR.Context.Version)
+}
+
+func TestContextContext(t *testing.T) {
+	app := warg.New(
+		"appName",
+		section.New(
+			"test",
+			section.Command("version", "Print version", command.DoNothing),
+		),
+	)
+	err := app.Validate()
+	require.Nil(t, err)
+
+	type contextKey struct{}
+	expectedValue := "value"
+
+	ctx := context.WithValue(context.Background(), contextKey{}, expectedValue)
+	actualPR, err := app.Parse([]string{"appName"}, warg.LookupMap(nil), warg.AddContext(ctx))
+	require.Nil(t, err)
+
+	require.Equal(t, expectedValue, actualPR.Context.Context.Value(contextKey{}).(string))
 }
