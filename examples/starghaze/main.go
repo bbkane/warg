@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"time"
 
 	"go.bbkane.com/warg"
@@ -247,5 +246,5 @@ func app() *warg.App {
 }
 
 func main() {
-	app().MustRun(os.Args, os.LookupEnv)
+	app().MustRun()
 }

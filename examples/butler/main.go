@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
@@ -46,5 +45,5 @@ func present(ctx command.Context) error {
 
 func main() {
 	app := app()
-	app.MustRun(os.Args, os.LookupEnv)
+	app.MustRun()
 }

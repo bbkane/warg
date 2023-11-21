@@ -21,9 +21,12 @@ Lets do:
 - Add `AddContext` - DONE
 - Test AddContext - DONE
 - update changelog (at this point, I'll be more sure it'll work..)
-- Add `OverrideArgs`
-- Add `OverrideLookupFunc`
+- Add `OverrideArgs` - DONE
+- Add `OverrideLookupFunc` - DONE
 - Add `OverrideStderr`, `OverrideStdout`
+- Should `warg.OverrideLookupFunc` be called `warg.OverrideLookupEnv`?
+- Should I modify `warg.GoldenTest` to work more closely with `ParseOpts`? Probably not, at least until I overhaul config flag stuff
+
 
 # Changelog
 

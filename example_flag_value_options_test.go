@@ -88,7 +88,9 @@ func ExampleApp_Parse_flag_value_options() {
 	if err != nil {
 		log.Fatalf("write error: %e", err)
 	}
-	app.MustRun([]string{"calc", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "show", "--scalar-flag", "b"}, os.LookupEnv)
+	app.MustRun(
+		warg.OverrideArgs([]string{"calc", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "show", "--scalar-flag", "b"}),
+	)
 	// Output:
 	// --scalar-flag: "b"
 	// --slice-flag: []int{1, 2, 3}

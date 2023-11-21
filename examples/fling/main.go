@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
@@ -79,5 +77,5 @@ func app() *warg.App {
 }
 
 func main() {
-	app().MustRun(os.Args, os.LookupEnv)
+	app().MustRun()
 }

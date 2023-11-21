@@ -66,7 +66,9 @@ func ExampleConfigFlag() {
 	if err != nil {
 		log.Fatalf("write error: %e", err)
 	}
-	app.MustRun([]string{"calc", "-c", "testdata/ExampleConfigFlag/calc.yaml", "add"}, os.LookupEnv)
+	app.MustRun(
+		warg.OverrideArgs([]string{"calc", "-c", "testdata/ExampleConfigFlag/calc.yaml", "add"}),
+	)
 	// Output:
 	// Sum: 6
 }

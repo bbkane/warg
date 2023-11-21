@@ -2,7 +2,6 @@ package warg_test
 
 import (
 	"fmt"
-	"os"
 
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
@@ -66,7 +65,7 @@ func ExampleOverrideHelpFlag() {
 		),
 	)
 
-	app.MustRun([]string{"blog.exe", "-h", "custom"}, os.LookupEnv)
+	app.MustRun(warg.OverrideArgs([]string{"blog.exe", "-h", "custom"}))
 	// Output:
 	// Custom section help
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"time"
 
 	"go.bbkane.com/warg"
@@ -169,5 +168,5 @@ Homepage: https://github.com/bbkane/grabbit
 }
 
 func main() {
-	app().MustRun(os.Args, os.LookupEnv)
+	app().MustRun()
 }

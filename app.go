@@ -242,8 +242,8 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 // MustRun runs the app.
 // Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
 // Any errors on an Action will be printed to stderr and os.Exit(1) will be called.
-func (app *App) MustRun(osArgs []string, osLookupEnv LookupFunc) {
-	pr, err := app.Parse(osArgs, osLookupEnv)
+func (app *App) MustRun(opts ...ParseOpt) {
+	pr, err := app.Parse(opts...)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		// https://unix.stackexchange.com/a/254747/185953

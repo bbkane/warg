@@ -25,7 +25,7 @@ func GoldenTest(t *testing.T, app App, args []string, lookup LookupFunc, updateG
 	err = app.Validate()
 	require.Nil(t, err)
 
-	pr, parseErr := app.Parse(args, lookup)
+	pr, parseErr := app.Parse(OverrideArgs(args), OverrideLookupFunc(lookup))
 	require.Nil(t, parseErr)
 
 	actionErr := pr.Action(pr.Context)

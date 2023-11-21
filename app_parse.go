@@ -3,6 +3,7 @@ package warg
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"go.bbkane.com/warg/command"
@@ -323,7 +324,11 @@ type ParseResult struct {
 }
 
 type ParseOptHolder struct {
+	Args []string
+
 	Context context.Context
+
+	LookupFunc LookupFunc
 }
 
 type ParseOpt func(*ParseOptHolder)
@@ -334,21 +339,47 @@ func AddContext(ctx context.Context) ParseOpt {
 	}
 }
 
+func OverrideArgs(args []string) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Args = args
+	}
+}
+
+func OverrideLookupFunc(lookup LookupFunc) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.LookupFunc = lookup
+	}
+}
+
 func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
 	parseOptHolder := ParseOptHolder{
-		Context: nil,
+		Context:    nil,
+		Args:       nil,
+		LookupFunc: nil,
 	}
 
 	for _, opt := range opts {
 		opt(&parseOptHolder)
 	}
+
+	if parseOptHolder.Args == nil {
+		OverrideArgs(os.Args)(&parseOptHolder)
+	}
+
+	if parseOptHolder.LookupFunc == nil {
+		OverrideLookupFunc(os.LookupEnv)(&parseOptHolder)
+	}
+
 	return parseOptHolder
 }
 
 // Parse parses the args, but does not execute anything.
-func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc, opts ...ParseOpt) (*ParseResult, error) {
+func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 
 	parseOptHolder := NewParseOptHolder(opts...)
+
+	osArgs := parseOptHolder.Args
+	osLookupEnv := parseOptHolder.LookupFunc
 
 	helpFlagNames := []string{string(app.helpFlagName)}
 	if app.helpFlagAlias != "" {

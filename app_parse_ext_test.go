@@ -820,7 +820,7 @@ func TestApp_Parse(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := tt.app.Parse(tt.args, tt.lookup)
+			actualPR, actualErr := tt.app.Parse(warg.OverrideArgs(tt.args), warg.OverrideLookupFunc(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -846,7 +846,10 @@ func TestContextVersion(t *testing.T) {
 	err := app.Validate()
 	require.Nil(t, err)
 
-	actualPR, err := app.Parse([]string{"appName"}, warg.LookupMap(nil))
+	actualPR, err := app.Parse(
+		warg.OverrideArgs([]string{"appName"}),
+		warg.OverrideLookupFunc(warg.LookupMap(nil)),
+	)
 	require.Nil(t, err)
 
 	expectedVersion := "customversion"
@@ -868,7 +871,11 @@ func TestContextContext(t *testing.T) {
 	expectedValue := "value"
 
 	ctx := context.WithValue(context.Background(), contextKey{}, expectedValue)
-	actualPR, err := app.Parse([]string{"appName"}, warg.LookupMap(nil), warg.AddContext(ctx))
+	actualPR, err := app.Parse(
+		warg.OverrideArgs([]string{"appName"}),
+		warg.OverrideLookupFunc(warg.LookupMap(nil)),
+		warg.AddContext(ctx),
+	)
 	require.Nil(t, err)
 
 	require.Equal(t, expectedValue, actualPR.Context.Context.Value(contextKey{}).(string))
