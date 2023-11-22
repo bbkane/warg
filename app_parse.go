@@ -329,6 +329,18 @@ type ParseOptHolder struct {
 	Context context.Context
 
 	LookupFunc LookupFunc
+
+	// Stderr will be passed to command.Context for user commands to print to.
+	// This file is never closed by warg, so if setting to something other than stderr/stdout,
+	// remember to close the file after running the command.
+	// Useful for saving output for tests. Defaults to os.Stderr if not passed
+	Stderr *os.File
+
+	// Stdout will be passed to command.Context for user commands to print to.
+	// This file is never closed by warg, so if setting to something other than stderr/stdout,
+	// remember to close the file after running the command.
+	// Useful for saving output for tests. Defaults to os.Stdout if not passed
+	Stdout *os.File
 }
 
 type ParseOpt func(*ParseOptHolder)
@@ -351,11 +363,25 @@ func OverrideLookupFunc(lookup LookupFunc) ParseOpt {
 	}
 }
 
+func OverrideStderr(stderr *os.File) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Stderr = stderr
+	}
+}
+
+func OverrideStdout(stdout *os.File) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Stdout = stdout
+	}
+}
+
 func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
 	parseOptHolder := ParseOptHolder{
 		Context:    nil,
 		Args:       nil,
 		LookupFunc: nil,
+		Stderr:     nil,
+		Stdout:     nil,
 	}
 
 	for _, opt := range opts {
@@ -368,6 +394,14 @@ func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
 
 	if parseOptHolder.LookupFunc == nil {
 		OverrideLookupFunc(os.LookupEnv)(&parseOptHolder)
+	}
+
+	if parseOptHolder.Stderr == nil {
+		OverrideStderr(os.Stderr)(&parseOptHolder)
+	}
+
+	if parseOptHolder.Stdout == nil {
+		OverrideStdout(os.Stdout)(&parseOptHolder)
 	}
 
 	return parseOptHolder
@@ -487,8 +521,8 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 						Context: parseOptHolder.Context,
 						Flags:   pfs,
 						Path:    gar.Path,
-						Stderr:  app.Stderr,
-						Stdout:  app.Stdout,
+						Stderr:  parseOptHolder.Stderr,
+						Stdout:  parseOptHolder.Stdout,
 						Version: app.version,
 					},
 					Action: e.SectionHelp(ftar.Section, helpInfo),
@@ -513,8 +547,8 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 							Context: parseOptHolder.Context,
 							Flags:   pfs,
 							Path:    gar.Path,
-							Stderr:  app.Stderr,
-							Stdout:  app.Stdout,
+							Stderr:  parseOptHolder.Stderr,
+							Stdout:  parseOptHolder.Stdout,
 							Version: app.version,
 						},
 						Action: e.CommandHelp(ftar.Command, helpInfo),
@@ -531,8 +565,8 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 					Context: parseOptHolder.Context,
 					Flags:   pfs,
 					Path:    gar.Path,
-					Stderr:  app.Stderr,
-					Stdout:  app.Stdout,
+					Stderr:  parseOptHolder.Stderr,
+					Stdout:  parseOptHolder.Stdout,
 					Version: app.version,
 				},
 				Action: ftar.Action,

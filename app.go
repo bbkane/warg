@@ -34,18 +34,6 @@ type App struct {
 	helpFlagAlias flag.Name
 	helpMappings  []help.HelpFlagMapping
 
-	// Stdout will be passed to command.Context for user commands to print to.
-	// This file is never closed by warg, so if setting to something other than stderr/stdout,
-	// remember to close the file after running the command.
-	// Useful for saving output for tests. Set to os.Stdout if not passed
-	Stdout *os.File
-
-	// Stderr will be passed to command.Context for user commands to print to.
-	// This file is never closed by warg, so if setting to something other than stderr/stdout,
-	// remember to close the file after running the command.
-	// Useful for saving output for tests. Set to os.Stdout if not passed
-	Stderr *os.File
-
 	// rootSection holds the good stuff!
 	rootSection section.SectionT
 
@@ -164,18 +152,6 @@ func ColorFlag() flag.Flag {
 	)
 }
 
-func OverrideStdout(f *os.File) AppOpt {
-	return func(a *App) {
-		a.Stdout = f
-	}
-}
-
-func OverrideStderr(f *os.File) AppOpt {
-	return func(a *App) {
-		a.Stderr = f
-	}
-}
-
 func VersionCommand() command.Command {
 	return command.New(
 		"Print version",
@@ -199,8 +175,6 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 		helpMappings:    nil,
 		skipValidation:  false,
 		version:         "",
-		Stdout:          nil,
-		Stderr:          nil,
 	}
 	for _, opt := range opts {
 		opt(&app)
@@ -214,13 +188,6 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 			"Print help",
 			flag.Alias("-h"),
 		)(&app)
-	}
-
-	if app.Stderr == nil {
-		OverrideStderr(os.Stderr)(&app)
-	}
-	if app.Stdout == nil {
-		OverrideStdout(os.Stdout)(&app)
 	}
 
 	if app.version == "" {
