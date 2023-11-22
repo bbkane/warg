@@ -14,33 +14,36 @@ import (
 // t.Fatalf will be called. Pass updateGolden = true to update captured stdout and stderr files under the ./testdata dir (relative to test location)..
 // From the CLI, call with WARG_TEST_UPDATE_GOLDEN=1 go test ./...
 func GoldenTest(t *testing.T, app App, args []string, lookup LookupFunc, updateGolden bool) {
-	stdoutTmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
-	require.Nil(t, err)
-	app.Stdout = stdoutTmpFile
-
 	stderrTmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
 	require.Nil(t, err)
-	app.Stderr = stderrTmpFile
+
+	stdoutTmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
+	require.Nil(t, err)
 
 	err = app.Validate()
 	require.Nil(t, err)
 
-	pr, parseErr := app.Parse(args, lookup)
+	pr, parseErr := app.Parse(
+		OverrideArgs(args),
+		OverrideLookupFunc(lookup),
+		OverrideStderr(stderrTmpFile),
+		OverrideStdout(stdoutTmpFile),
+	)
 	require.Nil(t, parseErr)
 
 	actionErr := pr.Action(pr.Context)
 	require.Nil(t, actionErr)
 
-	stderrCloseErr := app.Stderr.Close()
+	stderrCloseErr := stderrTmpFile.Close()
 	require.Nil(t, stderrCloseErr)
 
-	stdoutCloseErr := app.Stdout.Close()
+	stdoutCloseErr := stdoutTmpFile.Close()
 	require.Nil(t, stdoutCloseErr)
 
-	actualStderrBytes, stderrReadErr := os.ReadFile(app.Stderr.Name())
+	actualStderrBytes, stderrReadErr := os.ReadFile(stderrTmpFile.Name())
 	require.Nil(t, stderrReadErr)
 
-	actualStdoutBytes, stoutReadErr := os.ReadFile(app.Stdout.Name())
+	actualStdoutBytes, stoutReadErr := os.ReadFile(stdoutTmpFile.Name())
 	require.Nil(t, stoutReadErr)
 
 	goldenDir := filepath.Join("testdata", t.Name())
@@ -73,7 +76,7 @@ func GoldenTest(t *testing.T, app App, args []string, lookup LookupFunc, updateG
 		t.Fatalf(
 			"expected != actual. See diff:\n  vimdiff %s %s\n",
 			stderrGoldenFilePath,
-			app.Stderr.Name(),
+			stderrTmpFile.Name(),
 		)
 	}
 
@@ -84,7 +87,7 @@ func GoldenTest(t *testing.T, app App, args []string, lookup LookupFunc, updateG
 		t.Fatalf(
 			"expected != actual. See diff:\n  vimdiff %s %s\n",
 			stdoutGoldenFilePath,
-			app.Stdout.Name(),
+			stdoutTmpFile.Name(),
 		)
 	}
 

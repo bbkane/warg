@@ -1,7 +1,9 @@
 package warg
 
 import (
+	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"go.bbkane.com/warg/command"
@@ -316,16 +318,103 @@ func resolveFlag(
 
 // ParseResult holds the result of parsing the command line.
 type ParseResult struct {
-	// Path to the command invoked. Does not include executable name (os.Args[0])
-	Path []string // TODO: consider moving this inside the command.Context
-	// Context holds the parsed information
 	Context command.Context
 	// Action holds the passed command's action to execute.
 	Action command.Action
 }
 
+type ParseOptHolder struct {
+	Args []string
+
+	Context context.Context
+
+	LookupFunc LookupFunc
+
+	// Stderr will be passed to command.Context for user commands to print to.
+	// This file is never closed by warg, so if setting to something other than stderr/stdout,
+	// remember to close the file after running the command.
+	// Useful for saving output for tests. Defaults to os.Stderr if not passed
+	Stderr *os.File
+
+	// Stdout will be passed to command.Context for user commands to print to.
+	// This file is never closed by warg, so if setting to something other than stderr/stdout,
+	// remember to close the file after running the command.
+	// Useful for saving output for tests. Defaults to os.Stdout if not passed
+	Stdout *os.File
+}
+
+type ParseOpt func(*ParseOptHolder)
+
+func AddContext(ctx context.Context) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Context = ctx
+	}
+}
+
+func OverrideArgs(args []string) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Args = args
+	}
+}
+
+func OverrideLookupFunc(lookup LookupFunc) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.LookupFunc = lookup
+	}
+}
+
+func OverrideStderr(stderr *os.File) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Stderr = stderr
+	}
+}
+
+func OverrideStdout(stdout *os.File) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Stdout = stdout
+	}
+}
+
+func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
+	parseOptHolder := ParseOptHolder{
+		Context:    nil,
+		Args:       nil,
+		LookupFunc: nil,
+		Stderr:     nil,
+		Stdout:     nil,
+	}
+
+	for _, opt := range opts {
+		opt(&parseOptHolder)
+	}
+
+	if parseOptHolder.Args == nil {
+		OverrideArgs(os.Args)(&parseOptHolder)
+	}
+
+	if parseOptHolder.LookupFunc == nil {
+		OverrideLookupFunc(os.LookupEnv)(&parseOptHolder)
+	}
+
+	if parseOptHolder.Stderr == nil {
+		OverrideStderr(os.Stderr)(&parseOptHolder)
+	}
+
+	if parseOptHolder.Stdout == nil {
+		OverrideStdout(os.Stdout)(&parseOptHolder)
+	}
+
+	return parseOptHolder
+}
+
 // Parse parses the args, but does not execute anything.
-func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, error) {
+func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
+
+	parseOptHolder := NewParseOptHolder(opts...)
+
+	osArgs := parseOptHolder.Args
+	osLookupEnv := parseOptHolder.LookupFunc
+
 	helpFlagNames := []string{string(app.helpFlagName)}
 	if app.helpFlagAlias != "" {
 		helpFlagNames = append(helpFlagNames, string(app.helpFlagAlias))
@@ -419,8 +508,6 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	if ftar.Section != nil && ftar.Command == nil {
 		// no legit actions, just print the help
 		helpInfo := common.HelpInfo{
-			AppName:        app.name,
-			Path:           gar.Path,
 			AvailableFlags: ftar.AllowedFlags,
 			RootSection:    app.rootSection,
 		}
@@ -429,11 +516,14 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		for _, e := range app.helpMappings {
 			if e.Name == helpType {
 				pr := ParseResult{
-					Path: gar.Path,
 					Context: command.Context{
-						Flags:  pfs,
-						Stderr: app.Stderr,
-						Stdout: app.Stdout,
+						AppName: app.name,
+						Context: parseOptHolder.Context,
+						Flags:   pfs,
+						Path:    gar.Path,
+						Stderr:  parseOptHolder.Stderr,
+						Stdout:  parseOptHolder.Stdout,
+						Version: app.version,
 					},
 					Action: e.SectionHelp(ftar.Section, helpInfo),
 				}
@@ -444,8 +534,6 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 	} else if ftar.Section == nil && ftar.Command != nil {
 		if gar.HelpPassed {
 			helpInfo := common.HelpInfo{
-				AppName:        app.name,
-				Path:           gar.Path,
 				AvailableFlags: ftar.AllowedFlags,
 				RootSection:    app.rootSection,
 			}
@@ -454,11 +542,14 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 			for _, e := range app.helpMappings {
 				if e.Name == helpType {
 					pr := ParseResult{
-						Path: gar.Path,
 						Context: command.Context{
-							Flags:  pfs,
-							Stderr: app.Stderr,
-							Stdout: app.Stdout,
+							AppName: app.name,
+							Context: parseOptHolder.Context,
+							Flags:   pfs,
+							Path:    gar.Path,
+							Stderr:  parseOptHolder.Stderr,
+							Stdout:  parseOptHolder.Stdout,
+							Version: app.version,
 						},
 						Action: e.CommandHelp(ftar.Command, helpInfo),
 					}
@@ -469,11 +560,14 @@ func (app *App) Parse(osArgs []string, osLookupEnv LookupFunc) (*ParseResult, er
 		} else {
 
 			pr := ParseResult{
-				Path: gar.Path,
 				Context: command.Context{
-					Flags:  pfs,
-					Stderr: app.Stderr,
-					Stdout: app.Stdout,
+					AppName: app.name,
+					Context: parseOptHolder.Context,
+					Flags:   pfs,
+					Path:    gar.Path,
+					Stderr:  parseOptHolder.Stderr,
+					Stdout:  parseOptHolder.Stdout,
+					Version: app.version,
 				},
 				Action: ftar.Action,
 			}

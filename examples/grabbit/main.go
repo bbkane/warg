@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"time"
 
 	"go.bbkane.com/warg"
@@ -90,10 +89,13 @@ Homepage: https://github.com/bbkane/grabbit
 		"grabbit",
 		section.New(
 			"Get top images from subreddits",
+			section.ExistingCommand("version", warg.VersionCommand()),
+
 			section.ExistingCommand(
 				"grab",
 				grabCmd,
 			),
+			section.ExistingFlag("--color", warg.ColorFlag()),
 			section.Footer(appFooter),
 			section.Flag(
 				"--log-filename",
@@ -160,13 +162,11 @@ Homepage: https://github.com/bbkane/grabbit
 			"Config filepath",
 			flag.Alias("-c"),
 		),
-		warg.AddColorFlag(),
-		warg.AddVersionCommand(version),
 		warg.SkipValidation(),
 	)
 	return &app
 }
 
 func main() {
-	app().MustRun(os.Args, os.LookupEnv)
+	app().MustRun()
 }

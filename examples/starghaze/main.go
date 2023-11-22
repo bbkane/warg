@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"time"
 
 	"go.bbkane.com/warg"
@@ -221,6 +220,7 @@ func app() *warg.App {
 		"starghaze",
 		section.New(
 			"Save GitHub Starred Repos",
+			section.ExistingCommand("version", warg.VersionCommand()),
 			section.ExistingCommand(
 				"download",
 				downloadCmd,
@@ -233,19 +233,18 @@ func app() *warg.App {
 				"search",
 				searchCmd,
 			),
+			section.ExistingFlag("--color", warg.ColorFlag()),
 			section.ExistingSection(
 				"gsheets",
 				gsheetsSection,
 			),
 			section.Footer("Homepage: https://github.com/bbkane/starghaze"),
 		),
-		warg.AddColorFlag(),
-		warg.AddVersionCommand(version),
 		warg.SkipValidation(),
 	)
 	return &app
 }
 
 func main() {
-	app().MustRun(os.Args, os.LookupEnv)
+	app().MustRun()
 }

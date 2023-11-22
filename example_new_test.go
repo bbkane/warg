@@ -72,7 +72,7 @@ func ExampleNew() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	app.MustRun([]string{"blog.exe", "login"}, os.LookupEnv)
+	app.MustRun(warg.OverrideArgs([]string{"blog.exe", "login"}))
 	// Output:
 	// Logging into https://envvar.com
 }

@@ -2,7 +2,6 @@
 package warg
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -35,22 +34,12 @@ type App struct {
 	helpFlagAlias flag.Name
 	helpMappings  []help.HelpFlagMapping
 
-	// Stdout will be passed to command.Context for user commands to print to.
-	// This file is never closed by warg, so if setting to something other than stderr/stdout,
-	// remember to close the file after running the command.
-	// Useful for saving output for tests. Set to os.Stdout if not passed
-	Stdout *os.File
-
-	// Stderr will be passed to command.Context for user commands to print to.
-	// This file is never closed by warg, so if setting to something other than stderr/stdout,
-	// remember to close the file after running the command.
-	// Useful for saving output for tests. Set to os.Stdout if not passed
-	Stderr *os.File
-
 	// rootSection holds the good stuff!
 	rootSection section.SectionT
 
 	skipValidation bool
+
+	version string
 }
 
 // OverrideHelpFlag customizes your --help. If you write a custom --help function, you'll want to add it to your app here!
@@ -102,6 +91,13 @@ func OverrideHelpFlag(
 	}
 }
 
+// OverrideVersion lets you set a custom version string. The default is read from debug.BuildInfo
+func OverrideVersion(version string) AppOpt {
+	return func(a *App) {
+		a.version = version
+	}
+}
+
 // Use ConfigFlag in conjunction with flag.ConfigPath to allow users to override flag defaults with values from a config.
 // This flag will be parsed and any resulting config will be read before other flag value sources.
 func ConfigFlag(
@@ -130,53 +126,40 @@ func SkipValidation() AppOpt {
 	}
 }
 
-// AddVersionCommand adds a "version" command to the root section that prints the version passed.
-// Pass an empty string to use .Main.Version from `debug.ReadBuildInfo`,
-// which returns "(devel)" when using `go run`
-func AddVersionCommand(version string) AppOpt {
-	return func(a *App) {
-		action := func(ctx command.Context) error {
-			if version != "" {
-				fmt.Println(version)
-				return nil
-			}
-			// If installed via `go install`, we'll be able to read runtime version info
-			info, ok := debug.ReadBuildInfo()
-			if !ok {
-				return errors.New("unable to read build info")
-			}
-			// when run with `go run`, this will return "(devel)"
-			fmt.Println(info.Main.Version)
+func debugBuildInfoVersion() string {
+	// If installed via `go install`, we'll be able to read runtime version info
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		// This shouldn't happen with modern versions of Go
+		// unless someone strips the binary, and I don't support that
+		panic("unable to read build info")
+	}
+	// when run with `go run`, this will return "(devel)"
+	return info.Main.Version
+}
+
+// ColorFlag returns a flag indicating whether use user wants colored output.
+// By convention, if this flag is named "--color", it will be respected by the different help commands. Usage:
+//
+//	section.ExistingFlag("--color", warg.ColorFlag()),
+func ColorFlag() flag.Flag {
+	return flag.New(
+		"Use ANSI colors",
+		scalar.String(
+			scalar.Choices("true", "false", "auto"),
+			scalar.Default("auto"),
+		),
+	)
+}
+
+func VersionCommand() command.Command {
+	return command.New(
+		"Print version",
+		func(ctx command.Context) error {
+			fmt.Fprintln(ctx.Stdout, ctx.Version)
 			return nil
-		}
-		section.Command("version", "Print version", action)(&a.rootSection)
-	}
-}
-
-// AddColorFlag adds a "--color" flag to the root section. By convention, this flag will be respected by the different help commands
-func AddColorFlag() AppOpt {
-	return func(a *App) {
-		section.Flag(
-			"--color",
-			"Use ANSI colors",
-			scalar.String(
-				scalar.Choices("true", "false", "auto"),
-				scalar.Default("auto"),
-			),
-		)(&a.rootSection)
-	}
-}
-
-func OverrideStdout(f *os.File) AppOpt {
-	return func(a *App) {
-		a.Stdout = f
-	}
-}
-
-func OverrideStderr(f *os.File) AppOpt {
-	return func(a *App) {
-		a.Stderr = f
-	}
+		},
+	)
 }
 
 // New builds a new App!
@@ -191,8 +174,7 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 		helpFlagAlias:   "",
 		helpMappings:    nil,
 		skipValidation:  false,
-		Stdout:          nil,
-		Stderr:          nil,
+		version:         "",
 	}
 	for _, opt := range opts {
 		opt(&app)
@@ -208,28 +190,27 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 		)(&app)
 	}
 
-	if app.Stderr == nil {
-		OverrideStderr(os.Stderr)(&app)
-	}
-	if app.Stdout == nil {
-		OverrideStdout(os.Stdout)(&app)
+	if app.version == "" {
+		OverrideVersion(debugBuildInfoVersion())(&app)
 	}
 
-	if !app.skipValidation {
-		err := app.Validate()
-		if err != nil {
-			panic(err)
-		}
+	// validate or not and return
+	if app.skipValidation {
+		return app
 	}
 
+	err := app.Validate()
+	if err != nil {
+		panic(err)
+	}
 	return app
 }
 
 // MustRun runs the app.
 // Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
 // Any errors on an Action will be printed to stderr and os.Exit(1) will be called.
-func (app *App) MustRun(osArgs []string, osLookupEnv LookupFunc) {
-	pr, err := app.Parse(osArgs, osLookupEnv)
+func (app *App) MustRun(opts ...ParseOpt) {
+	pr, err := app.Parse(opts...)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		// https://unix.stackexchange.com/a/254747/185953

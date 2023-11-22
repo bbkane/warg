@@ -3,6 +3,7 @@ package warg_test
 // external tests - import warg like it's an external package
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 
@@ -819,7 +820,7 @@ func TestApp_Parse(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := tt.app.Parse(tt.args, tt.lookup)
+			actualPR, actualErr := tt.app.Parse(warg.OverrideArgs(tt.args), warg.OverrideLookupFunc(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -827,10 +828,55 @@ func TestApp_Parse(t *testing.T) {
 			} else {
 				require.Nil(t, actualErr)
 			}
-
-			// TODO: I wish I'd made this compare a parse result with a parse result instead of field by field
-			require.Equal(t, tt.expectedPassedPath, actualPR.Path)
+			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
 		})
 	}
+}
+
+func TestContextVersion(t *testing.T) {
+	app := warg.New(
+		"appName",
+		section.New(
+			"test",
+			section.Command("version", "Print version", command.DoNothing),
+		),
+		warg.OverrideVersion("customversion"),
+	)
+	err := app.Validate()
+	require.Nil(t, err)
+
+	actualPR, err := app.Parse(
+		warg.OverrideArgs([]string{"appName"}),
+		warg.OverrideLookupFunc(warg.LookupMap(nil)),
+	)
+	require.Nil(t, err)
+
+	expectedVersion := "customversion"
+	require.Equal(t, expectedVersion, actualPR.Context.Version)
+}
+
+func TestContextContext(t *testing.T) {
+	app := warg.New(
+		"appName",
+		section.New(
+			"test",
+			section.Command("version", "Print version", command.DoNothing),
+		),
+	)
+	err := app.Validate()
+	require.Nil(t, err)
+
+	type contextKey struct{}
+	expectedValue := "value"
+
+	ctx := context.WithValue(context.Background(), contextKey{}, expectedValue)
+	actualPR, err := app.Parse(
+		warg.OverrideArgs([]string{"appName"}),
+		warg.OverrideLookupFunc(warg.LookupMap(nil)),
+		warg.AddContext(ctx),
+	)
+	require.Nil(t, err)
+
+	require.Equal(t, expectedValue, actualPR.Context.Context.Value(contextKey{}).(string))
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
@@ -29,9 +28,9 @@ func app() *warg.App {
 					flag.Required(),
 				),
 			),
+			section.ExistingCommand("version", warg.VersionCommand()),
+			section.ExistingFlag("--color", warg.ColorFlag()),
 		),
-		warg.AddVersionCommand(""),
-		warg.AddColorFlag(),
 		warg.SkipValidation(),
 	)
 	return &app
@@ -46,5 +45,5 @@ func present(ctx command.Context) error {
 
 func main() {
 	app := app()
-	app.MustRun(os.Args, os.LookupEnv)
+	app.MustRun()
 }

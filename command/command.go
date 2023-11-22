@@ -1,6 +1,7 @@
 package command
 
 import (
+	"context"
 	"errors"
 	"os"
 	"sort"
@@ -14,9 +15,19 @@ type PassedFlags map[string]interface{} // This can just stay a string for the c
 
 // Context holds everything a command needs.
 type Context struct {
-	Flags  PassedFlags
+	AppName string
+
+	// Context to smuggle user-defined state (i.e., not flags) into an Action. I use this for mocks when testing
+	Context context.Context
+	Flags   PassedFlags
+
+	// Path passed either to a command or a section. Does not include executable name (os.Args[0])
+	Path   []string
 	Stderr *os.File
 	Stdout *os.File
+
+	// Version of this app
+	Version string
 }
 
 // An Action is run as the result of a command
@@ -52,17 +63,23 @@ type CommandOpt func(*Command)
 // The name of a Command should probably be a verb - add , edit, run, ...
 // A Command should not be constructed directly. Use Command / New / ExistingCommand functions
 type Command struct {
+	// Action to run when command is invoked
 	Action Action
-	Flags  flag.FlagMap
-	// HelpShort is a required one-line description
-	HelpShort HelpShort
+
+	// Parsed Flags
+	Flags flag.FlagMap
+
 	// Footer is yet another optional longer description.
 	Footer string
+
 	// HelpLong is an optional longer description
 	HelpLong string
+
+	// HelpShort is a required one-line description
+	HelpShort HelpShort
 }
 
-// DoNothing is a command action that simply returns nil
+// DoNothing is a command action that simply returns an error.
 // Useful for prototyping
 func DoNothing(_ Context) error {
 	return errors.New("NOTE: replace this command.DoNothing call")
