@@ -1,4 +1,6 @@
 extends: default
+ignore:
+  - dist/
 rules:
   comments:
     ignore-shebangs: true
