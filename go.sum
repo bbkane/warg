@@ -19,8 +19,8 @@ github.com/stretchr/testify v1.8.0 h1:pSgiaMZlXftHpm5L7V1+rVB+AZJydKsMxsQBIJw4PK
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/xhit/go-str2duration/v2 v2.0.0 h1:uFtk6FWB375bP7ewQl+/1wBcn840GPhnySOdcz/okPE=
 github.com/xhit/go-str2duration/v2 v2.0.0/go.mod h1:ohY8p+0f07DiV6Em5LKB0s2YpLtXVyJfNt1+BlmyAsU=
-go.bbkane.com/gocolor v0.0.4 h1:UI4ejgjHdC6oupH8src8+FQgbbfcZ6C7BSPZzecBjzs=
-go.bbkane.com/gocolor v0.0.4/go.mod h1:7AEOm8kyPlpj9qr/SL9mEXSceh8xM2w+eBm4deMRNHk=
+go.bbkane.com/gocolor v0.0.5 h1:WrdijR+XIH9QXXYUYTPH7m8QGIp7wLdMFWKL+8bK38Q=
+go.bbkane.com/gocolor v0.0.5/go.mod h1:7AEOm8kyPlpj9qr/SL9mEXSceh8xM2w+eBm4deMRNHk=
 golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220829200755-d48e67d00261 h1:v6hYoSR9T5oet+pMXwUWkbiVqx/63mlHjefrHmxwfeY=
 golang.org/x/sys v0.0.0-20220829200755-d48e67d00261/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
