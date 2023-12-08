@@ -7,7 +7,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.8.0
 	github.com/xhit/go-str2duration/v2 v2.0.0
-	go.bbkane.com/gocolor v0.0.4
+	go.bbkane.com/gocolor v0.0.5
 	gopkg.in/yaml.v2 v2.4.0
 )
 
