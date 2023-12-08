@@ -3,7 +3,6 @@ linters:
   enable:
     # defaults
     - errcheck
-    - goimports
     - gosimple
     - govet
     - ineffassign
@@ -16,6 +15,7 @@ linters:
     - gochecknoglobals
     - gochecknoinits
     - gofmt
+    - goimports
     - nonamedreturns
     - predeclared
   fast: false
