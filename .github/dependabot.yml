@@ -1,0 +1,13 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+updates:
+  - directory: / # Location of package manifests
+    # temporary disable dependabot PR while I figure out how to test the server code: https://github.com/dependabot/dependabot-core/issues/7072#issuecomment-1516555997
+    open-pull-requests-limit: 5
+    package-ecosystem: gomod # See documentation for possible values
+    schedule:
+      interval: weekly
+version: 2
