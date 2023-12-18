@@ -155,7 +155,13 @@ func TestAppHelp(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			warg.GoldenTest(t, tt.app, tt.args, tt.lookup, updateGolden)
+			warg.GoldenTest(
+				t,
+				tt.app,
+				updateGolden,
+				warg.OverrideArgs(tt.args),
+				warg.OverrideLookupFunc(tt.lookup),
+			)
 		})
 	}
 }
