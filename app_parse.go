@@ -392,6 +392,10 @@ func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
 		OverrideArgs(os.Args)(&parseOptHolder)
 	}
 
+	if parseOptHolder.Context == nil {
+		AddContext(context.Background())(&parseOptHolder)
+	}
+
 	if parseOptHolder.LookupFunc == nil {
 		OverrideLookupFunc(os.LookupEnv)(&parseOptHolder)
 	}
