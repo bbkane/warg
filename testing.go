@@ -11,9 +11,10 @@ import (
 
 // GoldenTest runs the app and and captures stdout and stderr into files.
 // If those differ than previously captured stdout/stderr,
-// t.Fatalf will be called. Pass updateGolden = true to update captured stdout and stderr files under the ./testdata dir (relative to test location)..
-// From the CLI, call with WARG_TEST_UPDATE_GOLDEN=1 go test ./...
-func GoldenTest(t *testing.T, app App, args []string, lookup LookupFunc, updateGolden bool) {
+// t.Fatalf will be called. Pass updateGolden = true to update captured stdout and stderr files under the ./testdata dir (relative to test location)
+//
+// Passed `parseOpts` should not include OverrideStderr/OverrideStdout as GoldenTest overwrites those
+func GoldenTest(t *testing.T, app App, updateGolden bool, parseOpts ...ParseOpt) {
 	stderrTmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
 	require.Nil(t, err)
 
@@ -23,12 +24,12 @@ func GoldenTest(t *testing.T, app App, args []string, lookup LookupFunc, updateG
 	err = app.Validate()
 	require.Nil(t, err)
 
-	pr, parseErr := app.Parse(
-		OverrideArgs(args),
-		OverrideLookupFunc(lookup),
-		OverrideStderr(stderrTmpFile),
-		OverrideStdout(stdoutTmpFile),
-	)
+	parseOptHolder := NewParseOptHolder(parseOpts...)
+
+	OverrideStderr(stderrTmpFile)(&parseOptHolder)
+	OverrideStdout(stdoutTmpFile)(&parseOptHolder)
+
+	pr, parseErr := app.parseWithOptHolder(parseOptHolder)
 	require.Nil(t, parseErr)
 
 	actionErr := pr.Action(pr.Context)

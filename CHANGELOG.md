@@ -7,6 +7,12 @@ Some versioning notes: warg's primary purpose is to serve my (@bbkane) CLIs, so
 it's likely to have breaking changes whenever I discover a better way to do
 something and remain < 1.0.0 forever.
 
+## v0.0.22
+
+## Changed
+
+- make `warg.GoldenTest` accept `ParseOpt`s instead of a hardcoded list of options
+
 ## v0.0.21
 
 ## Added

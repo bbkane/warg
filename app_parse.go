@@ -392,6 +392,10 @@ func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
 		OverrideArgs(os.Args)(&parseOptHolder)
 	}
 
+	if parseOptHolder.Context == nil {
+		AddContext(context.Background())(&parseOptHolder)
+	}
+
 	if parseOptHolder.LookupFunc == nil {
 		OverrideLookupFunc(os.LookupEnv)(&parseOptHolder)
 	}
@@ -407,10 +411,7 @@ func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
 	return parseOptHolder
 }
 
-// Parse parses the args, but does not execute anything.
-func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
-
-	parseOptHolder := NewParseOptHolder(opts...)
+func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult, error) {
 
 	osArgs := parseOptHolder.Args
 	osLookupEnv := parseOptHolder.LookupFunc
@@ -576,4 +577,11 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 	} else {
 		return nil, fmt.Errorf("internal Error: invalid parse state: currentSection == %v, currentCommand == %v", ftar.Section, ftar.Command)
 	}
+}
+
+// Parse parses the args, but does not execute anything.
+func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
+
+	parseOptHolder := NewParseOptHolder(opts...)
+	return app.parseWithOptHolder(parseOptHolder)
 }
