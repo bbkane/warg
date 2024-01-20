@@ -218,7 +218,7 @@ func (app *App) MustRun(opts ...ParseOpt) {
 	}
 	err = pr.Action(pr.Context)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(pr.Context.Stderr, err)
 		os.Exit(1)
 	}
 }

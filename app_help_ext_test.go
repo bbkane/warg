@@ -158,7 +158,10 @@ func TestAppHelp(t *testing.T) {
 			warg.GoldenTest(
 				t,
 				tt.app,
-				updateGolden,
+				warg.GoldenTestOpts{
+					UpdateGolden:    updateGolden,
+					ExpectActionErr: false,
+				},
 				warg.OverrideArgs(tt.args),
 				warg.OverrideLookupFunc(tt.lookup),
 			)

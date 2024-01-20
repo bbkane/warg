@@ -43,7 +43,10 @@ func TestRunHelp(t *testing.T) {
 			warg.GoldenTest(
 				t,
 				*tt.app,
-				updateGolden,
+				warg.GoldenTestOpts{
+					UpdateGolden:    updateGolden,
+					ExpectActionErr: false,
+				},
 				warg.OverrideArgs(tt.args),
 				warg.OverrideLookupFunc(tt.lookup),
 			)

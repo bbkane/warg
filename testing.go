@@ -9,12 +9,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type GoldenTestOpts struct {
+	// UpdateGolden files for captured stderr/stdout
+	UpdateGolden bool
+
+	// Whether the action should return an error
+	ExpectActionErr bool
+}
+
 // GoldenTest runs the app and and captures stdout and stderr into files.
 // If those differ than previously captured stdout/stderr,
-// t.Fatalf will be called. Pass updateGolden = true to update captured stdout and stderr files under the ./testdata dir (relative to test location)
+// t.Fatalf will be called.
 //
 // Passed `parseOpts` should not include OverrideStderr/OverrideStdout as GoldenTest overwrites those
-func GoldenTest(t *testing.T, app App, updateGolden bool, parseOpts ...ParseOpt) {
+func GoldenTest(
+	t *testing.T,
+	app App,
+	opts GoldenTestOpts,
+	parseOpts ...ParseOpt) {
 	stderrTmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
 	require.Nil(t, err)
 
@@ -33,7 +45,11 @@ func GoldenTest(t *testing.T, app App, updateGolden bool, parseOpts ...ParseOpt)
 	require.Nil(t, parseErr)
 
 	actionErr := pr.Action(pr.Context)
-	require.Nil(t, actionErr)
+	if opts.ExpectActionErr {
+		require.Error(t, actionErr)
+	} else {
+		require.NoError(t, actionErr)
+	}
 
 	stderrCloseErr := stderrTmpFile.Close()
 	require.Nil(t, stderrCloseErr)
@@ -57,7 +73,7 @@ func GoldenTest(t *testing.T, app App, updateGolden bool, parseOpts ...ParseOpt)
 	stdoutGoldenFilePath, err = filepath.Abs(stdoutGoldenFilePath)
 	require.Nil(t, err)
 
-	if updateGolden {
+	if opts.UpdateGolden {
 		mkdirErr := os.MkdirAll(goldenDir, 0700)
 		require.Nil(t, mkdirErr)
 
