@@ -7,13 +7,19 @@ Some versioning notes: warg's primary purpose is to serve my (@bbkane) CLIs, so
 it's likely to have breaking changes whenever I discover a better way to do
 something and remain < 1.0.0 forever.
 
-## v0.0.22
+# v0.0.23 (Unreleased)
+
+## Changed
+
+- make `warg.GoldenTest` use `GoldenTestArgs` and then `ParseOpt`s
+
+# v0.0.22
 
 ## Changed
 
 - make `warg.GoldenTest` accept `ParseOpt`s instead of a hardcoded list of options
 
-## v0.0.21
+# v0.0.21
 
 ## Added
 
@@ -41,19 +47,19 @@ something and remain < 1.0.0 forever.
   instead of `AppOpt`s. Justification: This removes the need for these public
   fields in `App` and nicer for callers.
 
-## v0.0.20
+# v0.0.20
 
 ### Fixed
 
 - Fix YAML config parsing for `value.Dict`
 
-## v0.0.19
+# v0.0.19
 
 ### Fixed
 
 - Fix panic when using a `value.Dict` and calling `detailed.DetailedCommandHelp`
 
-## v0.0.18
+# v0.0.18
 
 ### Added
 

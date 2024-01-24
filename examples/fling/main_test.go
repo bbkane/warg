@@ -20,13 +20,11 @@ func TestRunHelp(t *testing.T) {
 	updateGolden := os.Getenv("WARG_TEST_UPDATE_GOLDEN") != ""
 	tests := []struct {
 		name   string
-		app    *warg.App
 		args   []string
 		lookup warg.LookupFunc
 	}{
 		{
 			name:   "linkDetailed",
-			app:    app(),
 			args:   []string{"fling", "link", "--help", "detailed"},
 			lookup: warg.LookupMap(nil),
 		},
@@ -36,8 +34,8 @@ func TestRunHelp(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			warg.GoldenTest(
 				t,
-				*tt.app,
-				warg.GoldenTestOpts{
+				warg.GoldenTestArgs{
+					App:             app(),
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},

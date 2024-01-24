@@ -157,8 +157,8 @@ func TestAppHelp(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			warg.GoldenTest(
 				t,
-				tt.app,
-				warg.GoldenTestOpts{
+				warg.GoldenTestArgs{
+					App:             &tt.app,
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},

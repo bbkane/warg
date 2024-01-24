@@ -9,7 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type GoldenTestOpts struct {
+type GoldenTestArgs struct {
+	App *App
+
 	// UpdateGolden files for captured stderr/stdout
 	UpdateGolden bool
 
@@ -24,8 +26,7 @@ type GoldenTestOpts struct {
 // Passed `parseOpts` should not include OverrideStderr/OverrideStdout as GoldenTest overwrites those
 func GoldenTest(
 	t *testing.T,
-	app App,
-	opts GoldenTestOpts,
+	args GoldenTestArgs,
 	parseOpts ...ParseOpt) {
 	stderrTmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
 	require.Nil(t, err)
@@ -33,7 +34,7 @@ func GoldenTest(
 	stdoutTmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
 	require.Nil(t, err)
 
-	err = app.Validate()
+	err = args.App.Validate()
 	require.Nil(t, err)
 
 	parseOptHolder := NewParseOptHolder(parseOpts...)
@@ -41,11 +42,11 @@ func GoldenTest(
 	OverrideStderr(stderrTmpFile)(&parseOptHolder)
 	OverrideStdout(stdoutTmpFile)(&parseOptHolder)
 
-	pr, parseErr := app.parseWithOptHolder(parseOptHolder)
+	pr, parseErr := args.App.parseWithOptHolder(parseOptHolder)
 	require.Nil(t, parseErr)
 
 	actionErr := pr.Action(pr.Context)
-	if opts.ExpectActionErr {
+	if args.ExpectActionErr {
 		require.Error(t, actionErr)
 	} else {
 		require.NoError(t, actionErr)
@@ -73,7 +74,7 @@ func GoldenTest(
 	stdoutGoldenFilePath, err = filepath.Abs(stdoutGoldenFilePath)
 	require.Nil(t, err)
 
-	if opts.UpdateGolden {
+	if args.UpdateGolden {
 		mkdirErr := os.MkdirAll(goldenDir, 0700)
 		require.Nil(t, mkdirErr)
 
