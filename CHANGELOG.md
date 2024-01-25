@@ -3,15 +3,14 @@
 All notable changes to this project will be documented in this file. The format
 is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-Some versioning notes: warg's primary purpose is to serve my (@bbkane) CLIs, so
-it's likely to have breaking changes whenever I discover a better way to do
-something and remain < 1.0.0 forever.
+Note that I update this changelog as I make changes, so the top version (right
+below this description) is likely unreleased.
 
-# v0.0.23 (Unreleased)
+# v0.0.23
 
 ## Changed
 
-- make `warg.GoldenTest` use `GoldenTestArgs` and then `ParseOpt`s
+- make `warg.GoldenTest` use `GoldenTestArgs` and `ParseOpt`s
 
 # v0.0.22
 
