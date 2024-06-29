@@ -10,4 +10,7 @@ rules:
   key-duplicates: disable
   key-ordering: enable
   line-length: disable
+  quoted-strings:
+    quote-type: single
+    required: only-when-needed
   trailing-spaces: disable
