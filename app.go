@@ -27,6 +27,8 @@ type App struct {
 	newConfigReader config.NewReader
 	configFlag      *flag.Flag
 
+	globalFlags flag.FlagMap
+
 	// New Help()
 	name         string
 	helpFlagName flag.Name
@@ -56,7 +58,7 @@ func OverrideHelpFlag(
 			log.Panicf("flagName should start with '-': %#v\n", flagName)
 		}
 
-		if _, alreadyThere := a.rootSection.Flags[flagName]; alreadyThere {
+		if _, alreadyThere := a.globalFlags[flagName]; alreadyThere {
 			log.Panicf("flag already exists: %#v\n", flagName)
 		}
 
@@ -82,7 +84,7 @@ func OverrideHelpFlag(
 			flagOpts...,
 		)
 
-		a.rootSection.Flags[flagName] = helpFlag
+		a.globalFlags[flagName] = helpFlag
 		// This is used in parsing, so no need to strongly type it
 		a.helpFlagName = flagName
 		a.helpFlagAlias = helpFlag.Alias
@@ -95,6 +97,27 @@ func OverrideHelpFlag(
 func OverrideVersion(version string) AppOpt {
 	return func(a *App) {
 		a.version = version
+	}
+}
+
+// ExistingGlobalFlag adds an existing flag to a Command. It panics if a flag with the same name exists
+func ExistingGlobalFlag(name flag.Name, value flag.Flag) AppOpt {
+	return func(com *App) {
+		com.globalFlags.AddFlag(name, value)
+	}
+}
+
+// ExistingGlobalFlags adds existing flags to a Command. It panics if a flag with the same name exists
+func ExistingGlobalFlags(flagMap flag.FlagMap) AppOpt {
+	return func(com *App) {
+		com.globalFlags.AddFlags(flagMap)
+	}
+}
+
+// GlobalFlag adds a flag to the app. It panics if a flag with the same name exists
+func GlobalFlag(name flag.Name, value flag.Flag) AppOpt {
+	return func(com *App) {
+		com.globalFlags.AddFlag(name, value)
 	}
 }
 
@@ -175,6 +198,7 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 		helpMappings:    nil,
 		skipValidation:  false,
 		version:         "",
+		globalFlags:     make(flag.FlagMap),
 	}
 	for _, opt := range opts {
 		opt(&app)
@@ -259,19 +283,13 @@ func (fs flagNameSet) addFlags(fm flag.FlagMap) error {
 }
 
 func validateFlags(
-	inheritedFlags flag.FlagMap,
-	secFlags flag.FlagMap,
+	globalFlags flag.FlagMap,
 	comFlags flag.FlagMap,
 ) error {
 	nameSet := make(flagNameSet)
 	var err error
 
-	err = nameSet.addFlags(inheritedFlags)
-	if err != nil {
-		return err
-	}
-
-	err = nameSet.addFlags(secFlags)
+	err = nameSet.addFlags(globalFlags)
 	if err != nil {
 		return err
 	}
@@ -320,9 +338,6 @@ func (app *App) Validate() error {
 			return fmt.Errorf("sections must have either child sections or child commands: %#v", secName)
 		}
 
-		// No need to check section flags here; all sections will end in a command
-		// and we can check there
-
 		for name, com := range flatSec.Sec.Commands {
 
 			// Commands must not start wtih "-"
@@ -330,7 +345,7 @@ func (app *App) Validate() error {
 				return fmt.Errorf("command names must not start with '-': %#v", name)
 			}
 
-			err := validateFlags(flatSec.InheritedFlags, flatSec.Sec.Flags, com.Flags)
+			err := validateFlags(app.globalFlags, com.Flags)
 			if err != nil {
 				return err
 			}

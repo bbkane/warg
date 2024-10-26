@@ -143,17 +143,34 @@ func app() *warg.App {
 		),
 	)
 
+	sheetFlags := flag.FlagMap{
+		"--sheet-id": flag.New(
+			"ID For the particulare sheet. Viewable from `gid` URL param",
+			scalar.Int(),
+			flag.EnvVars("STARGHAZE_SHEET_ID"),
+			flag.Required(),
+		),
+		"--spreadsheet-id": flag.New(
+			"ID for the whole spreadsheet. Viewable from URL",
+			scalar.String(),
+			flag.EnvVars("STARGHAZE_SPREADSHEET_ID"),
+			flag.Required(),
+		),
+	}
+
 	gsheetsSection := section.New(
 		"Google Sheets commands",
 		section.Command(
 			"open",
 			"Open spreadsheet in browser",
 			gSheetsOpen,
+			command.ExistingFlags(sheetFlags),
 		),
 		section.Command(
 			"upload",
 			"Upload CSV to Google Sheets. This will overwrite whatever is in the spreadsheet",
 			gSheetsUpload,
+			command.ExistingFlags(sheetFlags),
 			command.Flag(
 				"--csv-path",
 				"CSV file to upload",
@@ -168,20 +185,6 @@ func app() *warg.App {
 				),
 				flag.Required(),
 			),
-		),
-		section.Flag(
-			"--sheet-id",
-			"ID For the particulare sheet. Viewable from `gid` URL param",
-			scalar.Int(),
-			flag.EnvVars("STARGHAZE_SHEET_ID"),
-			flag.Required(),
-		),
-		section.Flag(
-			"--spreadsheet-id",
-			"ID for the whole spreadsheet. Viewable from URL",
-			scalar.String(),
-			flag.EnvVars("STARGHAZE_SPREADSHEET_ID"),
-			flag.Required(),
 		),
 	)
 
@@ -233,13 +236,13 @@ func app() *warg.App {
 				"search",
 				searchCmd,
 			),
-			section.ExistingFlag("--color", warg.ColorFlag()),
 			section.ExistingSection(
 				"gsheets",
 				gsheetsSection,
 			),
 			section.Footer("Homepage: https://github.com/bbkane/starghaze"),
 		),
+		warg.ExistingGlobalFlag("--color", warg.ColorFlag()),
 		warg.SkipValidation(),
 	)
 	return &app

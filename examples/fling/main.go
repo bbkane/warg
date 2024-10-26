@@ -69,8 +69,8 @@ func app() *warg.App {
 			),
 			section.ExistingCommand("version", warg.VersionCommand()),
 			section.Footer("Homepage: https://github.com/bbkane/fling"),
-			section.ExistingFlag("--color", warg.ColorFlag()),
 		),
+		warg.ExistingGlobalFlag("--color", warg.ColorFlag()),
 		warg.SkipValidation(),
 	)
 	return &app

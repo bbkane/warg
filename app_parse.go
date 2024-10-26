@@ -116,12 +116,7 @@ type fitToAppResult struct {
 // fitToApp takes the command entered by a user and uses it to "walk" down the apps command tree to build what the command was and what the available flags are.
 func fitToApp(rootSection section.SectionT, path []string) (*fitToAppResult, error) {
 
-	// AllowedFlags grows, as we traverse the tree; copy rootSection.Flags.
-	// We need a pristine rootsection.Flags for --help printing
 	allowedFlags := make(flag.FlagMap)
-	for k, v := range rootSection.Flags {
-		allowedFlags[k] = v
-	}
 
 	// validate passed command and get available flags
 	ftar := fitToAppResult{
@@ -161,13 +156,6 @@ func fitToApp(rootSection section.SectionT, path []string) (*fitToAppResult, err
 			ftar.Section = &section
 			childCommands = section.Commands
 			childSections = section.Sections
-			for flagName, fl := range section.Flags {
-				// TODO: check if key exists already
-				if fl.Alias != "" {
-					ftar.AllowedFlagAliases[flagName] = fl.Alias
-				}
-				ftar.AllowedFlags[flagName] = fl
-			}
 		} else {
 			retErr := fmt.Errorf("expected command or section, but got %#v, try --help", word)
 			return nil, retErr

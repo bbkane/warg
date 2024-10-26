@@ -52,11 +52,6 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName",
 				section.New(
 					"help for test",
-					section.Flag(
-						flag.Name("--af1"),
-						"flag help",
-						scalar.Int(),
-					),
 					section.Section(
 						"cat1",
 						"help for cat1",
@@ -89,11 +84,6 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName",
 				section.New(
 					"help for test",
-					section.Flag(
-						"--af1",
-						"flag help",
-						scalar.Int(),
-					),
 					section.Command("com", "command for validation", command.DoNothing),
 				),
 				warg.SkipValidation(),

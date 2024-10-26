@@ -26,11 +26,6 @@ func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName flag.Name, f 
 }
 
 func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, indent int) {
-	// section flags
-	for _, k := range sec.Flags.SortedNames() {
-		outlineFlagHelper(w, color, k, sec.Flags[flag.Name(k)], indent)
-	}
-
 	// commands and command flags
 	for _, comName := range sec.Commands.SortedNames() {
 		com := sec.Commands[command.Name(comName)]
