@@ -114,9 +114,13 @@ type fitToAppResult struct {
 }
 
 // fitToApp takes the command entered by a user and uses it to "walk" down the apps command tree to build what the command was and what the available flags are.
-func fitToApp(rootSection section.SectionT, path []string) (*fitToAppResult, error) {
+func fitToApp(rootSection section.SectionT, globalFlags flag.FlagMap, path []string) (*fitToAppResult, error) {
 
 	allowedFlags := make(flag.FlagMap)
+	// copy the global flags into allowedFlags
+	for name, fl := range globalFlags {
+		allowedFlags[name] = fl
+	}
 
 	// validate passed command and get available flags
 	ftar := fitToAppResult{
@@ -414,7 +418,7 @@ func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult,
 		return nil, err
 	}
 
-	ftar, err := fitToApp(app.rootSection, gar.Path)
+	ftar, err := fitToApp(app.rootSection, app.globalFlags, gar.Path)
 	if err != nil {
 		return nil, err
 	}

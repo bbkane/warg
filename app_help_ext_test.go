@@ -132,6 +132,7 @@ func TestAppHelp(t *testing.T) {
 
 		// outline
 		{
+			// TODO: make this print global flags!
 			name: "outlineCommand",
 			app: warg.New(
 				"grabbit",
@@ -142,6 +143,7 @@ func TestAppHelp(t *testing.T) {
 			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
+			// TODO: make this print global flags!
 			name: "outlineSection",
 			app: warg.New(
 				"grabbit",

@@ -154,15 +154,19 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName",
 				section.New(
 					"help for test",
-					section.Flag(
-						"--key",
-						"a key",
-						scalar.String(
-							scalar.Default("defaultkeyval"),
+					section.Command(
+						"print",
+						"print key value",
+						command.DoNothing,
+						command.Flag(
+							"--key",
+							"a key",
+							scalar.String(
+								scalar.Default("defaultkeyval"),
+							),
+							flag.ConfigPath("key"),
 						),
-						flag.ConfigPath("key"),
 					),
-					section.Command("print", "print key value", command.DoNothing),
 				),
 				warg.ConfigFlag(
 					"--config",
@@ -197,50 +201,20 @@ func TestApp_Parse(t *testing.T) {
 			expectedErr: false,
 		},
 		{
-			name: "sectionFlag",
-			app: warg.New(
-				"newAppName",
-				section.New(
-					"help for test",
-					section.Flag(
-						"--sflag",
-						"help for --sflag",
-						scalar.String(
-							scalar.Default("sflagval"),
-						),
-					),
-					section.Command(
-						"com",
-						"help for com",
-						command.DoNothing,
-					),
-				),
-				warg.SkipValidation(),
-			),
-			args:               []string{"test", "com"},
-			lookup:             warg.LookupMap(nil),
-			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: command.PassedFlags{
-				"--sflag": "sflagval",
-				"--help":  "default",
-			},
-			expectedErr: false,
-		},
-		{
 			name: "simpleJSONConfig",
 			app: warg.New(
 				"newAppName",
 				section.New("help for test",
-					section.Flag(
-						"--val",
-						"flag help",
-						scalar.String(),
-						flag.ConfigPath("params.val"),
-					),
 					section.Command(
 						"com",
 						"help for com",
 						command.DoNothing,
+						command.Flag(
+							"--val",
+							"flag help",
+							scalar.String(),
+							flag.ConfigPath("params.val"),
+						),
 					),
 				),
 				warg.ConfigFlag(
@@ -272,23 +246,16 @@ func TestApp_Parse(t *testing.T) {
 			app: warg.New(
 				"newAppName",
 				section.New("help for test",
-					// TODO: looks like I don't have a float value type yet...
-					// section.Flag(
-					// 	"--floatval",
-					// 	"flag help",
-					// 	scalar.Float(),
-					// 	flag.ConfigPath("params.floatval"),
-					// ),
-					section.Flag(
-						"--intval",
-						"flag help",
-						scalar.Int(),
-						flag.ConfigPath("params.intval"),
-					),
 					section.Command(
 						"com",
 						"help for com",
 						command.DoNothing,
+						command.Flag(
+							"--intval",
+							"flag help",
+							scalar.Int(),
+							flag.ConfigPath("params.intval"),
+						),
 					),
 				),
 				warg.ConfigFlag(
@@ -321,13 +288,17 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName",
 				section.New(
 					"help for test",
-					section.Flag(
-						"--subreddits",
-						"the subreddits",
-						slice.String(),
-						flag.ConfigPath("subreddits[].name"),
+					section.Command(
+						"print",
+						"print key value",
+						command.DoNothing,
+						command.Flag(
+							"--subreddits",
+							"the subreddits",
+							slice.String(),
+							flag.ConfigPath("subreddits[].name"),
+						),
 					),
-					section.Command("print", "print key value", command.DoNothing),
 				),
 				warg.ConfigFlag(
 					"--config",
@@ -357,16 +328,16 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName",
 				section.New(
 					"help for test",
-					section.Flag(
-						"--flag",
-						"help for --flag",
-						scalar.String(),
-						flag.EnvVars("notthere", "there", "alsothere"),
-					),
 					section.Command(
 						"test",
 						"blah",
 						command.DoNothing,
+						command.Flag(
+							"--flag",
+							"help for --flag",
+							scalar.String(),
+							flag.EnvVars("notthere", "there", "alsothere"),
+						),
 					),
 				),
 				warg.SkipValidation(),
@@ -391,16 +362,16 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName",
 				section.New(
 					"help for test",
-					section.Flag(
-						"--flag",
-						"help for --flag",
-						scalar.String(),
-						flag.Required(),
-					),
 					section.Command(
 						"test",
 						"blah",
 						command.DoNothing,
+						command.Flag(
+							"--flag",
+							"help for --flag",
+							scalar.String(),
+							flag.Required(),
+						),
 					),
 				),
 				warg.SkipValidation(),
@@ -419,16 +390,16 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName",
 				section.New(
 					"help for section",
-					section.Flag(
-						"--flag",
-						"help for --flag",
-						scalar.String(),
-						flag.Alias("-f"),
-					),
 					section.Command(
 						"test",
 						"help for test",
 						command.DoNothing,
+						command.Flag(
+							"--flag",
+							"help for --flag",
+							scalar.String(),
+							flag.Alias("-f"),
+						),
 					),
 				),
 				warg.SkipValidation(),
@@ -496,11 +467,11 @@ func TestApp_Parse(t *testing.T) {
 					"newAppName",
 					section.New(
 						"help for section",
-						section.ExistingFlags(fm),
 						section.Command(
 							"test",
 							"help for test",
 							command.DoNothing,
+							command.ExistingFlags(fm),
 						),
 					),
 					warg.SkipValidation(),
@@ -548,16 +519,16 @@ func TestApp_Parse(t *testing.T) {
 			app: warg.New(
 				"newAppName",
 				section.New("help for test",
-					section.Flag(
-						"--val",
-						"flag help",
-						slice.String(),
-						flag.ConfigPath("val"),
-					),
 					section.Command(
 						"com",
 						"help for com",
 						command.DoNothing,
+						command.Flag(
+							"--val",
+							"flag help",
+							slice.String(),
+							flag.ConfigPath("val"),
+						),
 					),
 				),
 				warg.ConfigFlag(
@@ -572,7 +543,6 @@ func TestApp_Parse(t *testing.T) {
 				),
 				warg.SkipValidation(),
 			),
-
 			args:               []string{"app", "com"},
 			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"com"},
@@ -588,16 +558,16 @@ func TestApp_Parse(t *testing.T) {
 			app: warg.New(
 				"newAppName",
 				section.New("help for test",
-					section.Flag(
-						"--val",
-						"flag help",
-						slice.String(),
-						flag.ConfigPath("val"),
-					),
 					section.Command(
 						"com",
 						"help for com",
 						command.DoNothing,
+						command.Flag(
+							"--val",
+							"flag help",
+							slice.String(),
+							flag.ConfigPath("val"),
+						),
 					),
 				),
 				warg.ConfigFlag(
@@ -657,17 +627,18 @@ func TestApp_Parse(t *testing.T) {
 			name: "JSONConfigMap",
 			app: warg.New(
 				"newAppName",
-				section.New("help for test",
-					section.Flag(
-						"--val",
-						"flag help",
-						dict.Int(),
-						flag.ConfigPath("val"),
-					),
+				section.New(
+					"help for test",
 					section.Command(
 						"com",
 						"help for com",
 						command.DoNothing,
+						command.Flag(
+							"--val",
+							"flag help",
+							dict.Int(),
+							flag.ConfigPath("val"),
+						),
 					),
 				),
 				warg.ConfigFlag(
@@ -699,16 +670,15 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName",
 				section.New(
 					"help for test",
-					section.Flag(
-						flag.Name("--flag"),
-						"flag help",
-						dict.Bool(),
-					),
-
 					section.Command(
 						"com1",
 						"help for com1",
 						command.DoNothing,
+						command.Flag(
+							flag.Name("--flag"),
+							"flag help",
+							dict.Bool(),
+						),
 					),
 				),
 				warg.SkipValidation(),
@@ -726,16 +696,16 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName",
 				section.New(
 					"help for test",
-					section.Flag(
-						"--flag",
-						"help for --flag",
-						scalar.String(scalar.Default("default")),
-						flag.UnsetSentinel("UNSET"),
-					),
 					section.Command(
 						"test",
 						"help for test",
 						command.DoNothing,
+						command.Flag(
+							"--flag",
+							"help for --flag",
+							scalar.String(scalar.Default("default")),
+							flag.UnsetSentinel("UNSET"),
+						),
 					),
 				),
 				warg.SkipValidation(),
@@ -754,16 +724,16 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName",
 				section.New(
 					"help for test",
-					section.Flag(
-						"--flag",
-						"help for --flag",
-						scalar.String(scalar.Default("default")),
-						flag.UnsetSentinel("UNSET"),
-					),
 					section.Command(
 						"test",
 						"help for test",
 						command.DoNothing,
+						command.Flag(
+							"--flag",
+							"help for --flag",
+							scalar.String(scalar.Default("default")),
+							flag.UnsetSentinel("UNSET"),
+						),
 					),
 				),
 				warg.SkipValidation(),
@@ -780,16 +750,16 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName",
 				section.New(
 					"help for test",
-					section.Flag(
-						"--flag",
-						"help for --flag",
-						slice.String(slice.Default([]string{"default"})),
-						flag.UnsetSentinel("UNSET"),
-					),
 					section.Command(
 						"test",
 						"help for test",
 						command.DoNothing,
+						command.Flag(
+							"--flag",
+							"help for --flag",
+							slice.String(slice.Default([]string{"default"})),
+							flag.UnsetSentinel("UNSET"),
+						),
 					),
 				),
 				warg.SkipValidation(),

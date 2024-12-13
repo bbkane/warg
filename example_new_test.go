@@ -28,6 +28,19 @@ func login(ctx command.Context) error {
 }
 
 func ExampleNew() {
+	commonFlags := flag.FlagMap{
+		"--timeout": flag.New(
+			"Optional timeout. Defaults to no timeout",
+			scalar.Int(),
+		),
+		"--url": flag.New(
+			"URL of the blog",
+			scalar.String(
+				scalar.Default("https://www.myblog.com"),
+			),
+			flag.EnvVars("BLOG_URL"),
+		),
+	}
 	app := warg.New(
 		"newAppName",
 		section.New(
@@ -36,19 +49,7 @@ func ExampleNew() {
 				"login",
 				"Login to the platform",
 				login,
-			),
-			section.Flag(
-				"--timeout",
-				"Optional timeout. Defaults to no timeout",
-				scalar.Int(),
-			),
-			section.Flag(
-				"--url",
-				"URL of the blog",
-				scalar.String(
-					scalar.Default("https://www.myblog.com"),
-				),
-				flag.EnvVars("BLOG_URL"),
+				command.ExistingFlags(commonFlags),
 			),
 			section.Section(
 				"comments",
@@ -60,6 +61,7 @@ func ExampleNew() {
 					// command to look,
 					// so use a provided stub action
 					command.DoNothing,
+					command.ExistingFlags(commonFlags),
 				),
 			),
 		),

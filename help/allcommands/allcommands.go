@@ -52,7 +52,7 @@ func AllCommandsSectionHelp(cur *section.SectionT, helpInfo common.HelpInfo) com
 				fmt.Fprintf(f, "  ")
 
 				for _, p := range flatSec.Path {
-					fmt.Fprintf(f, common.FmtCommandName(&col, command.Name(p))+" ")
+					fmt.Fprint(f, common.FmtCommandName(&col, command.Name(p))+" ")
 				}
 				fmt.Fprintln(f, common.FmtCommandName(&col, name))
 

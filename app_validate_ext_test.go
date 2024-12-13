@@ -70,8 +70,12 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New(
 				"newAppName",
 				section.New("",
-					section.Flag("f", "", nil),
-					section.Command("c", "", nil),
+					section.Command(
+						"c",
+						"",
+						command.DoNothing,
+						command.Flag("f", "", nil),
+					),
 				),
 				warg.SkipValidation(),
 			),
@@ -82,10 +86,13 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New(
 				"newAppName",
 				section.New("",
-					section.Flag("-f", "", scalar.Bool(),
-						flag.Alias("f"),
-					),
-					section.Command("c", "", nil),
+					section.Command(
+						"c",
+						"",
+						command.DoNothing,
+						command.Flag("-f", "", scalar.Bool(),
+							flag.Alias("f"),
+						)),
 				),
 				warg.SkipValidation(),
 			),
@@ -97,8 +104,8 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New(
 				"newAppName",
 				section.New("",
-					section.Flag("-f", "", scalar.Bool()),
 					section.Command("c", "", command.DoNothing,
+						command.Flag("-f", "", scalar.Bool()),
 						command.Flag("--other", "", scalar.Bool(), flag.Alias("-f")),
 					),
 				),

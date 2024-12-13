@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/section"
 )
 
@@ -30,8 +30,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			),
 			expected: []section.FlatSection{
 				{
-					InheritedFlags: make(flag.FlagMap),
-					Path:           []section.Name{"r"},
+					Path: []section.Name{"r"},
 					Sec: section.New(
 						"root section help",
 						section.Command("c1", "", nil),
@@ -41,8 +40,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				},
 				{
-					InheritedFlags: make(flag.FlagMap),
-					Path:           []section.Name{"r", "s1"},
+					Path: []section.Name{"r", "s1"},
 					Sec: section.New(
 						"", section.Command("c2", "", nil),
 					),
@@ -66,8 +64,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			),
 			expected: []section.FlatSection{
 				{
-					InheritedFlags: make(flag.FlagMap),
-					Path:           []section.Name{"r"},
+					Path: []section.Name{"r"},
 					Sec: section.New("",
 						section.Section("sc", "",
 							section.Command("c", "", nil),
@@ -81,22 +78,19 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				},
 				{
-					InheritedFlags: make(flag.FlagMap),
-					Path:           []section.Name{"r", "sa"},
+					Path: []section.Name{"r", "sa"},
 					Sec: section.New("",
 						section.Command("c", "", nil),
 					),
 				},
 				{
-					InheritedFlags: make(flag.FlagMap),
-					Path:           []section.Name{"r", "sb"},
+					Path: []section.Name{"r", "sb"},
 					Sec: section.New("",
 						section.Command("c", "", nil),
 					),
 				},
 				{
-					InheritedFlags: make(flag.FlagMap),
-					Path:           []section.Name{"r", "sc"},
+					Path: []section.Name{"r", "sc"},
 					Sec: section.New("",
 						section.Command("c", "", nil),
 					),
@@ -105,60 +99,68 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			expectedPanic: false,
 		},
 		{
-			name:     "duplicateFlagNames",
-			rootName: "r",
-			sec: section.New("root section help",
-				section.Flag("-f1", "", nil),
-				section.Section("s1", "",
-					section.Flag("-f1", "", nil),
-					section.Section("s2", ""),
-				),
-			),
-			expected:      nil,
-			expectedPanic: true,
-		},
-		{
 			name:     "dupFlagNamesSeparatePaths",
 			rootName: "r",
 			sec: section.New("",
 				section.Section("s1", "",
-					section.Command("c1", "", nil),
-					section.Flag("-f1", "", nil),
+					section.Command(
+						"c1",
+						"",
+						nil,
+						command.Flag("-f1", "", nil),
+					),
 				),
 				section.Section("s2", "",
-					section.Command("c1", "", nil),
-					section.Flag("-f1", "", nil),
+					section.Command(
+						"c1",
+						"",
+						nil,
+						command.Flag("-f1", "", nil),
+					),
 				),
 			),
 			expected: []section.FlatSection{
 				{
-					InheritedFlags: make(flag.FlagMap),
-					Path:           []section.Name{"r"},
+					Path: []section.Name{"r"},
 					Sec: section.New("",
 						section.Section("s1", "",
-							section.Command("c1", "", nil),
-							section.Flag("-f1", "", nil),
+							section.Command(
+								"c1",
+								"",
+								nil,
+								command.Flag("-f1", "", nil),
+							),
 						),
 						section.Section("s2", "",
-							section.Command("c1", "", nil),
-							section.Flag("-f1", "", nil),
+							section.Command(
+								"c1",
+								"",
+								nil,
+								command.Flag("-f1", "", nil),
+							),
 						),
 					),
 				},
 				{
-					InheritedFlags: make(flag.FlagMap),
-					Path:           []section.Name{"r", "s1"},
+					Path: []section.Name{"r", "s1"},
 					Sec: section.New("",
-						section.Command("c1", "", nil),
-						section.Flag("-f1", "", nil),
+						section.Command(
+							"c1",
+							"",
+							nil,
+							command.Flag("-f1", "", nil),
+						),
 					),
 				},
 				{
-					InheritedFlags: make(flag.FlagMap),
-					Path:           []section.Name{"r", "s2"},
+					Path: []section.Name{"r", "s2"},
 					Sec: section.New("",
-						section.Command("c1", "", nil),
-						section.Flag("-f1", "", nil),
+						section.Command(
+							"c1",
+							"",
+							nil,
+							command.Flag("-f1", "", nil),
+						),
 					),
 				},
 			},
