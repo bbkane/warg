@@ -775,6 +775,7 @@ func TestApp_Parse(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+
 		t.Run(tt.name, func(t *testing.T) {
 
 			err := tt.app.Validate()
@@ -794,6 +795,64 @@ func TestApp_Parse(t *testing.T) {
 	}
 }
 
+// This is the same as TestApp_Parse, but that's too long for a single test
+func TestApp_Parse_GlobalFlag(t *testing.T) {
+	tests := []struct {
+		name                     string
+		app                      warg.App
+		args                     []string
+		lookup                   warg.LookupFunc
+		expectedPassedPath       []string
+		expectedPassedFlagValues command.PassedFlags
+		expectedErr              bool
+	}{
+		{
+			name: "globalFlag",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+					),
+				),
+				warg.SkipValidation(),
+				warg.GlobalFlag(
+					"--global",
+					"global flag",
+					scalar.String(),
+				),
+			),
+
+			args:                     []string{"app", "com", "--global", "globalval"},
+			lookup:                   warg.LookupMap(nil),
+			expectedPassedPath:       []string{"com"},
+			expectedPassedFlagValues: command.PassedFlags{"--global": "globalval", "--help": "default"},
+			expectedErr:              false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			err := tt.app.Validate()
+			require.Nil(t, err)
+
+			actualPR, actualErr := tt.app.Parse(warg.OverrideArgs(tt.args), warg.OverrideLookupFunc(tt.lookup))
+
+			if tt.expectedErr {
+				require.NotNil(t, actualErr)
+				return
+			} else {
+				require.Nil(t, actualErr)
+			}
+			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
+			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
+		})
+	}
+}
 func TestContextVersion(t *testing.T) {
 	app := warg.New(
 		"appName",

@@ -13,6 +13,7 @@ import (
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
 	"go.bbkane.com/warg/section"
+	"go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/scalar"
 )
 
@@ -115,10 +116,9 @@ func ExistingGlobalFlags(flagMap flag.FlagMap) AppOpt {
 }
 
 // GlobalFlag adds a flag to the app. It panics if a flag with the same name exists
-func GlobalFlag(name flag.Name, value flag.Flag) AppOpt {
-	return func(com *App) {
-		com.globalFlags.AddFlag(name, value)
-	}
+func GlobalFlag(name flag.Name, helpShort flag.HelpShort, empty value.EmptyConstructor, opts ...flag.FlagOpt) AppOpt {
+	return ExistingGlobalFlag(name, flag.New(helpShort, empty, opts...))
+
 }
 
 // Use ConfigFlag in conjunction with flag.ConfigPath to allow users to override flag defaults with values from a config.
