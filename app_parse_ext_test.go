@@ -836,7 +836,7 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
+			// Test validation in TestApp_Validate
 			err := tt.app.Validate()
 			require.Nil(t, err)
 

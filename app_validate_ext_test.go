@@ -113,6 +113,32 @@ func TestApp_Validate(t *testing.T) {
 			),
 			expectedErr: true,
 		},
+		{
+			name: "globalFlagNameAliasConflict",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+						command.Flag(
+							"--global",
+							"global flag conflict",
+							scalar.String(),
+						),
+					),
+				),
+				warg.SkipValidation(),
+				warg.GlobalFlag(
+					"--global",
+					"global flag",
+					scalar.String(),
+				),
+			),
+			expectedErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
