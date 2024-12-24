@@ -39,8 +39,6 @@ type SectionOpt func(*SectionT)
 // Sections should not be created in place - New/ExistingSection/Section functions.
 // SectionT is the type name because we need the more user-visible `Section` as a function name.
 type SectionT struct {
-	// // Flags holds flags available to this Section and all subsections and Commands
-	// Flags flag.FlagMap
 	// Commands holds the Commands under this Section
 	Commands command.CommandMap
 	// Sections holds the Sections under this Section
@@ -57,11 +55,10 @@ type SectionT struct {
 func New(helpShort HelpShort, opts ...SectionOpt) SectionT {
 	section := SectionT{
 		HelpShort: helpShort,
-		// Flags:     make(flag.FlagMap),
-		Sections: make(SectionMap),
-		Commands: make(command.CommandMap),
-		HelpLong: "",
-		Footer:   "",
+		Sections:  make(SectionMap),
+		Commands:  make(command.CommandMap),
+		HelpLong:  "",
+		Footer:    "",
 	}
 	for _, opt := range opts {
 		opt(&section)
@@ -91,29 +88,10 @@ func ExistingCommand(name command.Name, value command.Command) SectionOpt {
 	}
 }
 
-// ExistingFlag adds an existing Flag to be made availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
-// func ExistingFlag(name flag.Name, value flag.Flag) SectionOpt {
-// 	return func(sec *SectionT) {
-// 		sec.Flags.AddFlag(name, value)
-
-// 	}
-// }
-
-// func ExistingFlags(flagMap flag.FlagMap) SectionOpt {
-// 	return func(sec *SectionT) {
-// 		sec.Flags.AddFlags(flagMap)
-// 	}
-// }
-
 // Section creates a Section and adds it underneath this Section. Panics if a Section with the same name already exists
 func Section(name Name, helpShort HelpShort, opts ...SectionOpt) SectionOpt {
 	return ExistingSection(name, New(helpShort, opts...))
 }
-
-// Flag creates a Flag and makes it availabe to subsections and subcommands. Panics if the flag name doesn't start with '-' or a flag with the same name exists already
-// func Flag(name flag.Name, helpShort flag.HelpShort, empty value.EmptyConstructor, opts ...flag.FlagOpt) SectionOpt {
-// 	return ExistingFlag(name, flag.New(helpShort, empty, opts...))
-// }
 
 // Command creates a Command and adds it underneath this Section. Panics if a Command with the same name already exists
 func Command(name command.Name, helpShort command.HelpShort, action command.Action, opts ...command.CommandOpt) SectionOpt {
@@ -169,11 +147,6 @@ type SectionIterator struct {
 func (s *SectionIterator) Next() FlatSection {
 	current := s.queue[0]
 	s.queue = s.queue[1:]
-
-	// // child.ParentPath = current.childParentPath = current.name
-	// childParentPath := make([]Name, len(current.ParentPath)+1)
-	// copy(childParentPath, current.ParentPath)
-	// childParentPath[len(childParentPath)-1] = current.Name
 
 	// Add child sections to queue
 	for _, childName := range current.Sec.Sections.SortedNames() {
