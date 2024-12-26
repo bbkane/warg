@@ -12,16 +12,13 @@ import (
 func TestDefaultAndChoices(t *testing.T) {
 	typeInfo := contained.Int()
 	typeInfo.Description = "Defaults to the perfect number 7"
-	typeInfo.FromInstance = func(i int) (int, error) {
-		return 7, nil
-	}
 
 	constructor := slice.New(typeInfo, slice.Default([]int{3}), slice.Choices(1, 2))
 	v := constructor()
 	sliceVal := v.(value.SliceValue)
 
 	actualDefaultStr := sliceVal.DefaultStringSlice()
-	require.Equal(t, []string{"7"}, actualDefaultStr)
+	require.Equal(t, []string{"3"}, actualDefaultStr)
 	actualChoices := v.Choices()
-	require.Equal(t, []string{"7", "7"}, actualChoices)
+	require.Equal(t, []string{"1", "2"}, actualChoices)
 }

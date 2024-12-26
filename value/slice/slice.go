@@ -35,27 +35,14 @@ func New[T comparable](hc contained.TypeInfo[T], opts ...SliceOpt[T]) value.Empt
 
 func Choices[T comparable](choices ...T) SliceOpt[T] {
 	return func(v *sliceValue[T]) {
-		for _, ch := range choices {
-			newChoice, err := v.inner.FromInstance(ch)
-			if err != nil {
-				panic("error constructing default value: " + fmt.Sprint(ch) + " : " + err.Error())
-			}
-			v.choices = append(v.choices, newChoice)
-		}
+		v.choices = choices
 	}
 
 }
 
 func Default[T comparable](def []T) SliceOpt[T] {
 	return func(cf *sliceValue[T]) {
-
-		for _, d := range def {
-			newD, err := cf.inner.FromInstance(d)
-			if err != nil {
-				panic("error constructing default value: " + fmt.Sprint(d) + " : " + err.Error())
-			}
-			cf.defaultVals = append(cf.defaultVals, newD)
-		}
+		cf.defaultVals = def
 		cf.hasDefault = true
 	}
 }

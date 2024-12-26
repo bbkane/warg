@@ -38,25 +38,13 @@ func New[T comparable](inner contained.TypeInfo[T], opts ...DictOpt[T]) value.Em
 
 func Choices[T comparable](choices ...T) DictOpt[T] {
 	return func(v *dictValue[T]) {
-		for _, ch := range choices {
-			newChoice, err := v.inner.FromInstance(ch)
-			if err != nil {
-				panic("error constructing default value: " + fmt.Sprint(ch) + " : " + err.Error())
-			}
-			v.choices = append(v.choices, newChoice)
-		}
+		v.choices = choices
 	}
 }
 
 func Default[T comparable](def map[string]T) DictOpt[T] {
 	return func(cf *dictValue[T]) {
-		for key, d := range def {
-			newD, err := cf.inner.FromInstance(d)
-			if err != nil {
-				panic("error constructing default value: " + fmt.Sprint(d) + " : " + err.Error())
-			}
-			cf.defaultVals[key] = newD
-		}
+		cf.defaultVals = def
 		cf.hasDefault = true
 	}
 }

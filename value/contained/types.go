@@ -24,12 +24,6 @@ type TypeInfo[T comparable] struct {
 
 	FromIFace func(iFace interface{}) (T, error)
 
-	// FromInstance updates a T from an instance of itself.
-	// This is particularly usefule for paths - when the user sets a scalar.Default of `~`,
-	// we want to expand that into /path/to/home the same way we would
-	// when updating from a string in the CLI
-	FromInstance func(T) (T, error)
-
 	FromString func(string) (T, error)
 
 	// Initalized to the Empty value, but used for updating stuff in the container type
@@ -58,9 +52,7 @@ func Addr() TypeInfo[netip.Addr] {
 				return netip.Addr{}, ErrIncompatibleInterface
 			}
 		},
-		FromInstance: func(a netip.Addr) (netip.Addr, error) {
-			return a, nil
-		},
+
 		FromString: netip.ParseAddr,
 	}
 }
@@ -82,9 +74,6 @@ func AddrPort() TypeInfo[netip.AddrPort] {
 			}
 		},
 		FromString: netip.ParseAddrPort,
-		FromInstance: func(ap netip.AddrPort) (netip.AddrPort, error) {
-			return ap, nil
-		},
 	}
 }
 
@@ -99,7 +88,6 @@ func Bool() TypeInfo[bool] {
 			}
 			return under, nil
 		},
-		FromInstance: identity[bool],
 		FromString: func(s string) (bool, error) {
 			switch s {
 			case "true":
@@ -135,8 +123,7 @@ func Duration() TypeInfo[time.Duration] {
 			}
 			return durationFromString(under)
 		},
-		FromInstance: identity[time.Duration],
-		FromString:   durationFromString,
+		FromString: durationFromString,
 	}
 }
 
@@ -161,9 +148,8 @@ func Int() TypeInfo[int] {
 				return 0, ErrIncompatibleInterface
 			}
 		},
-		FromInstance: identity[int],
-		FromString:   intFromString,
-		Empty:        func() int { return 0 },
+		FromString: intFromString,
+		Empty:      func() int { return 0 },
 	}
 }
 
@@ -186,8 +172,7 @@ func Path() TypeInfo[string] {
 			}
 			return pathFromString(under)
 		},
-		FromInstance: pathFromString,
-		FromString:   pathFromString,
+		FromString: pathFromString,
 	}
 }
 
@@ -220,8 +205,7 @@ func Rune() TypeInfo[rune] {
 				return emptyRune, ErrIncompatibleInterface
 			}
 		},
-		FromInstance: identity[rune],
-		FromString:   runeFromString,
+		FromString: runeFromString,
 	}
 }
 
@@ -236,7 +220,6 @@ func String() TypeInfo[string] {
 			}
 			return under, nil
 		},
-		FromInstance: identity[string],
-		FromString:   identity[string],
+		FromString: identity[string],
 	}
 }

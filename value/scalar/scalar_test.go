@@ -22,16 +22,13 @@ func TestDurationString(t *testing.T) {
 func TestDefaultAndChoices(t *testing.T) {
 	typeInfo := contained.Int()
 	typeInfo.Description = "Defaults to the perfect number 7"
-	typeInfo.FromInstance = func(i int) (int, error) {
-		return 7, nil
-	}
 
 	constructor := scalar.New(typeInfo, scalar.Default(3), scalar.Choices(1, 2))
 	v := constructor()
 	scalarValue := v.(value.ScalarValue)
 
 	actualDefaultStr := scalarValue.DefaultString()
-	require.Equal(t, "7", actualDefaultStr)
+	require.Equal(t, "3", actualDefaultStr)
 	actualChoices := v.Choices()
-	require.Equal(t, []string{"7", "7"}, actualChoices)
+	require.Equal(t, []string{"1", "2"}, actualChoices)
 }
