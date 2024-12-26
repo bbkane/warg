@@ -4,6 +4,7 @@ import (
 	"net/netip"
 	"time"
 
+	"go.bbkane.com/warg/path"
 	value "go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/contained"
 )
@@ -28,7 +29,7 @@ func Int(opts ...SliceOpt[int]) value.EmptyConstructor {
 	return New(contained.Int(), opts...)
 }
 
-func Path(opts ...SliceOpt[string]) value.EmptyConstructor {
+func Path(opts ...SliceOpt[path.Path]) value.EmptyConstructor {
 	return New(contained.Path(), opts...)
 }
 

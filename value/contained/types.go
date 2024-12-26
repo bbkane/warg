@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/xhit/go-str2duration/v2"
+	"go.bbkane.com/warg/path"
 )
 
 var ErrIncompatibleInterface = errors.New("could not decode interface into Value")
@@ -153,26 +153,18 @@ func Int() TypeInfo[int] {
 	}
 }
 
-func pathFromString(s string) (string, error) {
-	expanded, err := homedir.Expand(s)
-	if err != nil {
-		return "", err
-	}
-	return expanded, nil
-}
-
-func Path() TypeInfo[string] {
-	return TypeInfo[string]{
+func Path() TypeInfo[path.Path] {
+	return TypeInfo[path.Path]{
 		Description: "path",
-		Empty:       func() string { return "" },
-		FromIFace: func(iFace interface{}) (string, error) {
+		Empty:       func() path.Path { return path.New("") },
+		FromIFace: func(iFace interface{}) (path.Path, error) {
 			under, ok := iFace.(string)
 			if !ok {
-				return "", ErrIncompatibleInterface
+				return path.New(""), ErrIncompatibleInterface
 			}
-			return pathFromString(under)
+			return path.New(under), nil
 		},
-		FromString: pathFromString,
+		FromString: func(s string) (path.Path, error) { return path.New(s), nil },
 	}
 }
 
