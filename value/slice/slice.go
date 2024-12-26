@@ -18,7 +18,7 @@ type sliceValue[T comparable] struct {
 type SliceOpt[T comparable] func(*sliceValue[T])
 
 func New[T comparable](hc contained.TypeInfo[T], opts ...SliceOpt[T]) value.EmptyConstructor {
-	return func() (value.Value, error) {
+	return func() value.Value {
 		sv := sliceValue[T]{
 			choices:     []T{},
 			defaultVals: nil,
@@ -29,7 +29,7 @@ func New[T comparable](hc contained.TypeInfo[T], opts ...SliceOpt[T]) value.Empt
 		for _, opt := range opts {
 			opt(&sv)
 		}
-		return &sv, nil
+		return &sv
 	}
 }
 

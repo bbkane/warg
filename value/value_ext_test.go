@@ -4,19 +4,17 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	value "go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
 )
 
 func TestIntScalar(t *testing.T) {
-	v, err := scalar.Int(
+	v := scalar.Int(
 		scalar.Choices(1, 2),
 		scalar.Default(2),
 	)()
-	require.Nil(t, err)
 
-	err = v.Update("1")
+	err := v.Update("1")
 	require.Nil(t, err)
 	require.Equal(t, v.Get().(int), 1)
 
@@ -29,15 +27,13 @@ func TestIntScalar(t *testing.T) {
 }
 
 func TestIntSlice(t *testing.T) {
-	var v value.Value
 
-	v, err := slice.Int(
+	v := slice.Int(
 		slice.Choices(1, 2),
 		slice.Default([]int{1, 1, 1}),
 	)()
-	require.Nil(t, err)
 
-	err = v.Update("1")
+	err := v.Update("1")
 	require.Nil(t, err)
 	require.Equal(
 		t,

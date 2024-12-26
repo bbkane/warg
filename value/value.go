@@ -75,7 +75,7 @@ type DictValue interface {
 
 // EmptyConstructur just builds a new value.
 // Useful to create new values as well as initialize them
-type EmptyConstructor func() (Value, error)
+type EmptyConstructor func() Value
 
 type ErrInvalidChoice[T comparable] struct {
 	Choices []T

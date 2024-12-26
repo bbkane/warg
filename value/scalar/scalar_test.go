@@ -12,8 +12,7 @@ import (
 
 func TestDurationString(t *testing.T) {
 	constructor := scalar.Duration(scalar.Default(3 * time.Minute))
-	v, err := constructor()
-	require.Nil(t, err)
+	v := constructor()
 	scalarValue := v.(value.ScalarValue)
 
 	vStr := scalarValue.DefaultString()
@@ -28,8 +27,7 @@ func TestDefaultAndChoices(t *testing.T) {
 	}
 
 	constructor := scalar.New(typeInfo, scalar.Default(3), scalar.Choices(1, 2))
-	v, err := constructor()
-	require.Nil(t, err)
+	v := constructor()
 	scalarValue := v.(value.ScalarValue)
 
 	actualDefaultStr := scalarValue.DefaultString()

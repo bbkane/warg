@@ -33,12 +33,12 @@ func newScalarValue[T comparable](
 }
 
 func New[T comparable](hc contained.TypeInfo[T], opts ...ScalarOpt[T]) value.EmptyConstructor {
-	return func() (value.Value, error) {
+	return func() value.Value {
 		s := newScalarValue(
 			hc,
 			opts...,
 		)
-		return &s, nil
+		return &s
 	}
 }
 

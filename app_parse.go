@@ -181,10 +181,7 @@ func resolveFlag(
 	// TODO: can I delete from flagStrs in the caller? then I wouldn't need to pass
 	// flagStrs (just a potential strValues) into here and it's a more pure function
 
-	val, err := fl.EmptyValueConstructor()
-	if err != nil {
-		return fmt.Errorf("flag error: %v: %w", name, err)
-	}
+	val := fl.EmptyValueConstructor()
 	fl.Value = val
 
 	// try to update from command line and consume from flagStrs
@@ -212,10 +209,7 @@ func resolveFlag(
 
 				// Unset the value if we get UnsetSentinel
 				if v == fl.UnsetSentinel {
-					val, err := fl.EmptyValueConstructor()
-					if err != nil {
-						return fmt.Errorf("flag error: %v: %w", name, err)
-					}
+					val := fl.EmptyValueConstructor()
 					fl.Value = val
 
 					// Set to "unsetSentinel" to avoid updating from config etc..
@@ -223,7 +217,7 @@ func resolveFlag(
 					fl.SetBy = "unsetSentinel"
 					continue
 				}
-				err = fl.Value.Update(v)
+				err := fl.Value.Update(v)
 				if err != nil {
 					return fmt.Errorf("error updating flag %v from passed flag value %v: %w", name, v, err)
 				}
@@ -280,7 +274,7 @@ func resolveFlag(
 			for _, e := range fl.EnvVars {
 				val, exists := lookupEnv(e)
 				if exists {
-					err = fl.Value.Update(val)
+					err := fl.Value.Update(val)
 					if err != nil {
 						return fmt.Errorf("error updating flag %v from envvar %v: %w", name, val, err)
 					}

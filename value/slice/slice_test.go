@@ -17,8 +17,7 @@ func TestDefaultAndChoices(t *testing.T) {
 	}
 
 	constructor := slice.New(typeInfo, slice.Default([]int{3}), slice.Choices(1, 2))
-	v, err := constructor()
-	require.Nil(t, err)
+	v := constructor()
 	sliceVal := v.(value.SliceValue)
 
 	actualDefaultStr := sliceVal.DefaultStringSlice()

@@ -21,7 +21,7 @@ type DictOpt[T comparable] func(*dictValue[T])
 // TODO: TEST THIS, but lets try to get more sleep
 
 func New[T comparable](inner contained.TypeInfo[T], opts ...DictOpt[T]) value.EmptyConstructor {
-	return func() (value.Value, error) {
+	return func() value.Value {
 		dv := dictValue[T]{
 			choices:     []T{},
 			defaultVals: make(map[string]T),
@@ -32,7 +32,7 @@ func New[T comparable](inner contained.TypeInfo[T], opts ...DictOpt[T]) value.Em
 		for _, opt := range opts {
 			opt(&dv)
 		}
-		return &dv, nil
+		return &dv
 	}
 }
 
