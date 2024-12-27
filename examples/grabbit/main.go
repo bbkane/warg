@@ -7,6 +7,7 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
@@ -35,7 +36,7 @@ Homepage: https://github.com/bbkane/grabbit
 		"--log-filename": flag.New(
 			"Log filename",
 			scalar.Path(
-				scalar.Default("~/.config/grabbit.jsonl"),
+				scalar.Default(path.New("~/.config/grabbit.jsonl")),
 			),
 			flag.ConfigPath("lumberjacklogger.filename"),
 			flag.Required(),
@@ -89,7 +90,7 @@ Homepage: https://github.com/bbkane/grabbit
 					"--subreddit-destination",
 					"Where to store the subreddit",
 					slice.Path(
-						slice.Default([]string{".", "."}),
+						slice.Default([]path.Path{path.New("."), path.New(".")}),
 					),
 					flag.Alias("-sd"),
 					flag.ConfigPath("subreddits[].destination"),
@@ -152,8 +153,8 @@ Homepage: https://github.com/bbkane/grabbit
 		),
 		warg.ConfigFlag(
 			"--config",
-			[]scalar.ScalarOpt[string]{
-				scalar.Default("~/.config/grabbit.yaml"),
+			[]scalar.ScalarOpt[path.Path]{
+				scalar.Default(path.New("~/.config/grabbit.yaml")),
 			},
 			yamlreader.New,
 			"Config filepath",

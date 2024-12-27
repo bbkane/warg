@@ -10,7 +10,7 @@ below this description) is likely unreleased.
 
 ## Added
 
-- `path.Path` type that users should call `Expand`/`MustExpand` on.
+- `path.Path` type that users should call `Expand`/`MustExpand` on. See `Removed`
 
 ## Changed
 

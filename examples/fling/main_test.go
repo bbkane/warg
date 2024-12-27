@@ -16,7 +16,6 @@ func TestApp_Validate(t *testing.T) {
 }
 
 func TestRunHelp(t *testing.T) {
-	t.Skip("Machine dependent for now - see https://github.com/bbkane/warg/issues/51")
 	updateGolden := os.Getenv("WARG_TEST_UPDATE_GOLDEN") != ""
 	tests := []struct {
 		name   string

@@ -6,6 +6,7 @@ import (
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 )
@@ -53,7 +54,7 @@ func app() *warg.App {
 			"--output",
 			"Output filepath. Must not exist",
 			scalar.Path(
-				scalar.Default("starghaze_download.jsonl"),
+				scalar.Default(path.New("starghaze_download.jsonl")),
 			),
 		),
 		command.Flag(
@@ -124,7 +125,7 @@ func app() *warg.App {
 			"--input",
 			"Input file",
 			scalar.Path(
-				scalar.Default("starghaze_download.jsonl"),
+				scalar.Default(path.New("starghaze_download.jsonl")),
 			),
 			flag.Required(),
 		),

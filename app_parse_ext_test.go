@@ -13,6 +13,7 @@ import (
 	"go.bbkane.com/warg/config/jsonreader"
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/dict"
 	"go.bbkane.com/warg/value/scalar"
@@ -31,8 +32,8 @@ func (f ConfigReaderFunc) Search(path string) (*config.SearchResult, error) {
 }
 
 // testDataFilePath generates a path to a file needed for a test
-func testDataFilePath(testName string, subTestName string, fileName string) string {
-	return filepath.Join("testdata", testName, subTestName, fileName)
+func testDataFilePath(testName string, subTestName string, fileName string) path.Path {
+	return path.New(filepath.Join("testdata", testName, subTestName, fileName))
 }
 
 func TestApp_Parse(t *testing.T) {
@@ -148,180 +149,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: nil,
 			expectedErr:              true,
 		},
-		{
-			name: "configFlag",
-			app: warg.New(
-				"newAppName",
-				section.New(
-					"help for test",
-					section.Command(
-						"print",
-						"print key value",
-						command.DoNothing,
-						command.Flag(
-							"--key",
-							"a key",
-							scalar.String(
-								scalar.Default("defaultkeyval"),
-							),
-							flag.ConfigPath("key"),
-						),
-					),
-				),
-				warg.ConfigFlag(
-					"--config",
-					[]scalar.ScalarOpt[string]{scalar.Default("defaultconfigval")},
-					func(_ string) (config.Reader, error) {
-						var cr ConfigReaderFunc = func(path string) (*config.SearchResult, error) {
-							if path == "key" {
 
-								return &config.SearchResult{
-									IFace:        "mapkeyval",
-									IsAggregated: false,
-								}, nil
-							}
-
-							return nil, nil
-						}
-
-						return cr, nil
-					},
-					"config flag",
-				),
-				warg.SkipValidation(),
-			),
-			args:               []string{"test", "print", "--config", "passedconfigval"},
-			lookup:             warg.LookupMap(nil),
-			expectedPassedPath: []string{"print"},
-			expectedPassedFlagValues: command.PassedFlags{
-				"--key":    "mapkeyval",
-				"--config": "passedconfigval",
-				"--help":   "default",
-			},
-			expectedErr: false,
-		},
-		{
-			name: "simpleJSONConfig",
-			app: warg.New(
-				"newAppName",
-				section.New("help for test",
-					section.Command(
-						"com",
-						"help for com",
-						command.DoNothing,
-						command.Flag(
-							"--val",
-							"flag help",
-							scalar.String(),
-							flag.ConfigPath("params.val"),
-						),
-					),
-				),
-				warg.ConfigFlag(
-					"--config",
-					[]scalar.ScalarOpt[string]{
-						scalar.Default(
-							testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json"),
-						),
-					},
-					jsonreader.New,
-					"path to config",
-				),
-				warg.SkipValidation(),
-			),
-
-			args:               []string{"app", "com"},
-			lookup:             warg.LookupMap(nil),
-			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: command.PassedFlags{
-				"--config": testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json"),
-				"--val":    "hi",
-				"--help":   "default",
-			},
-			expectedErr: false,
-		},
-		{
-			// JSON needs some help to support number decoding
-			name: "numJSONConfig",
-			app: warg.New(
-				"newAppName",
-				section.New("help for test",
-					section.Command(
-						"com",
-						"help for com",
-						command.DoNothing,
-						command.Flag(
-							"--intval",
-							"flag help",
-							scalar.Int(),
-							flag.ConfigPath("params.intval"),
-						),
-					),
-				),
-				warg.ConfigFlag(
-					"--config",
-					[]scalar.ScalarOpt[string]{
-						scalar.Default(
-							testDataFilePath(t.Name(), "numJSONConfig", "config.json"),
-						),
-					},
-					jsonreader.New,
-					"path to config",
-				),
-				warg.SkipValidation(),
-			),
-
-			args:               []string{"app", "com"},
-			lookup:             warg.LookupMap(nil),
-			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: command.PassedFlags{
-				"--config": testDataFilePath(t.Name(), "numJSONConfig", "config.json"),
-				// "--floatval": 1.5,
-				"--intval": 1,
-				"--help":   "default",
-			},
-			expectedErr: false,
-		},
-		{
-			name: "configSlice",
-			app: warg.New(
-				"newAppName",
-				section.New(
-					"help for test",
-					section.Command(
-						"print",
-						"print key value",
-						command.DoNothing,
-						command.Flag(
-							"--subreddits",
-							"the subreddits",
-							slice.String(),
-							flag.ConfigPath("subreddits[].name"),
-						),
-					),
-				),
-				warg.ConfigFlag(
-					"--config",
-					[]scalar.ScalarOpt[string]{
-						scalar.Default(
-							testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
-						),
-					},
-					jsonreader.New,
-					"config flag",
-				),
-				warg.SkipValidation(),
-			),
-			args:               []string{"test", "print"},
-			lookup:             warg.LookupMap(nil),
-			expectedPassedPath: []string{"print"},
-			expectedPassedFlagValues: command.PassedFlags{
-				"--subreddits": []string{"earthporn", "wallpapers"},
-				"--config":     testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
-				"--help":       "default",
-			},
-			expectedErr: false,
-		},
 		{
 			name: "envvar",
 			app: warg.New(
@@ -514,85 +342,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: command.PassedFlags{"--flag1": "val1", "--help": "default"},
 			expectedErr:              false,
 		},
-		{
-			name: "JSONConfigStringSlice",
-			app: warg.New(
-				"newAppName",
-				section.New("help for test",
-					section.Command(
-						"com",
-						"help for com",
-						command.DoNothing,
-						command.Flag(
-							"--val",
-							"flag help",
-							slice.String(),
-							flag.ConfigPath("val"),
-						),
-					),
-				),
-				warg.ConfigFlag(
-					"--config",
-					[]scalar.ScalarOpt[string]{
-						scalar.Default(
-							testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json"),
-						),
-					},
-					jsonreader.New,
-					"path to config",
-				),
-				warg.SkipValidation(),
-			),
-			args:               []string{"app", "com"},
-			lookup:             warg.LookupMap(nil),
-			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: command.PassedFlags{
-				"--config": testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json"),
-				"--val":    []string{"from", "config"},
-				"--help":   "default",
-			},
-			expectedErr: false,
-		},
-		{
-			name: "YAMLConfigStringSlice",
-			app: warg.New(
-				"newAppName",
-				section.New("help for test",
-					section.Command(
-						"com",
-						"help for com",
-						command.DoNothing,
-						command.Flag(
-							"--val",
-							"flag help",
-							slice.String(),
-							flag.ConfigPath("val"),
-						),
-					),
-				),
-				warg.ConfigFlag(
-					"--config",
-					[]scalar.ScalarOpt[string]{
-						scalar.Default(
-							testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml"),
-						),
-					},
-					yamlreader.New,
-					"path to config",
-				),
-				warg.SkipValidation(),
-			),
 
-			args:               []string{"app", "com"},
-			lookup:             warg.LookupMap(nil),
-			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: command.PassedFlags{
-				"--config": testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml"),
-				"--val":    []string{"from", "config"},
-				"--help":   "default",
-			},
-			expectedErr: false,
-		},
 		// Note: Will need to update this if https://github.com/bbkane/warg/issues/36 gets implemented
 		{
 			name: "invalidFlagsErrorEvenForHelp",
@@ -623,47 +373,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: command.PassedFlags{"--help": "default"},
 			expectedErr:              true,
 		},
-		{
-			name: "JSONConfigMap",
-			app: warg.New(
-				"newAppName",
-				section.New(
-					"help for test",
-					section.Command(
-						"com",
-						"help for com",
-						command.DoNothing,
-						command.Flag(
-							"--val",
-							"flag help",
-							dict.Int(),
-							flag.ConfigPath("val"),
-						),
-					),
-				),
-				warg.ConfigFlag(
-					"--config",
-					[]scalar.ScalarOpt[string]{
-						scalar.Default(
-							testDataFilePath(t.Name(), "JSONConfigMap", "config.json"),
-						),
-					},
-					jsonreader.New,
-					"path to config",
-				),
-				warg.SkipValidation(),
-			),
 
-			args:               []string{"app", "com"},
-			lookup:             warg.LookupMap(nil),
-			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: command.PassedFlags{
-				"--config": testDataFilePath(t.Name(), "JSONConfigMap", "config.json"),
-				"--val":    map[string]int{"a": 1},
-				"--help":   "default",
-			},
-			expectedErr: false,
-		},
 		{
 			name: "dictUpdate",
 			app: warg.New(
@@ -770,6 +480,332 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: command.PassedFlags{
 				"--help": "default",
 				"--flag": []string{"b", "c"},
+			},
+			expectedErr: false,
+		},
+	}
+	for _, tt := range tests {
+
+		t.Run(tt.name, func(t *testing.T) {
+
+			err := tt.app.Validate()
+			require.Nil(t, err)
+
+			actualPR, actualErr := tt.app.Parse(warg.OverrideArgs(tt.args), warg.OverrideLookupFunc(tt.lookup))
+
+			if tt.expectedErr {
+				require.NotNil(t, actualErr)
+				return
+			} else {
+				require.Nil(t, actualErr)
+			}
+			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
+			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
+		})
+	}
+}
+
+func TestApp_Parse_config(t *testing.T) {
+	tests := []struct {
+		name                     string
+		app                      warg.App
+		args                     []string
+		lookup                   warg.LookupFunc
+		expectedPassedPath       []string
+		expectedPassedFlagValues command.PassedFlags
+		expectedErr              bool
+	}{
+		{
+			name: "configFlag",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"print",
+						"print key value",
+						command.DoNothing,
+						command.Flag(
+							"--key",
+							"a key",
+							scalar.String(
+								scalar.Default("defaultkeyval"),
+							),
+							flag.ConfigPath("key"),
+						),
+					),
+				),
+				warg.ConfigFlag(
+					"--config",
+					[]scalar.ScalarOpt[path.Path]{scalar.Default(path.New("defaultconfigval"))},
+					func(_ string) (config.Reader, error) {
+						var cr ConfigReaderFunc = func(path string) (*config.SearchResult, error) {
+							if path == "key" {
+
+								return &config.SearchResult{
+									IFace:        "mapkeyval",
+									IsAggregated: false,
+								}, nil
+							}
+
+							return nil, nil
+						}
+
+						return cr, nil
+					},
+					"config flag",
+				),
+				warg.SkipValidation(),
+			),
+			args:               []string{"test", "print", "--config", "passedconfigval"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"print"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--key":    "mapkeyval",
+				"--config": path.New("passedconfigval"),
+				"--help":   "default",
+			},
+			expectedErr: false,
+		},
+		{
+			name: "simpleJSONConfig",
+			app: warg.New(
+				"newAppName",
+				section.New("help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+						command.Flag(
+							"--val",
+							"flag help",
+							scalar.String(),
+							flag.ConfigPath("params.val"),
+						),
+					),
+				),
+				warg.ConfigFlag(
+					"--config",
+					[]scalar.ScalarOpt[path.Path]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json"),
+						),
+					},
+					jsonreader.New,
+					"path to config",
+				),
+				warg.SkipValidation(),
+			),
+
+			args:               []string{"app", "com"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"com"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--config": testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json"),
+				"--val":    "hi",
+				"--help":   "default",
+			},
+			expectedErr: false,
+		},
+		{
+			// JSON needs some help to support number decoding
+			name: "numJSONConfig",
+			app: warg.New(
+				"newAppName",
+				section.New("help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+						command.Flag(
+							"--intval",
+							"flag help",
+							scalar.Int(),
+							flag.ConfigPath("params.intval"),
+						),
+					),
+				),
+				warg.ConfigFlag(
+					"--config",
+					[]scalar.ScalarOpt[path.Path]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "numJSONConfig", "config.json"),
+						),
+					},
+					jsonreader.New,
+					"path to config",
+				),
+				warg.SkipValidation(),
+			),
+
+			args:               []string{"app", "com"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"com"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--config": testDataFilePath(t.Name(), "numJSONConfig", "config.json"),
+				// "--floatval": 1.5,
+				"--intval": 1,
+				"--help":   "default",
+			},
+			expectedErr: false,
+		},
+		{
+			name: "configSlice",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"print",
+						"print key value",
+						command.DoNothing,
+						command.Flag(
+							"--subreddits",
+							"the subreddits",
+							slice.String(),
+							flag.ConfigPath("subreddits[].name"),
+						),
+					),
+				),
+				warg.ConfigFlag(
+					"--config",
+					[]scalar.ScalarOpt[path.Path]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
+						),
+					},
+					jsonreader.New,
+					"config flag",
+				),
+				warg.SkipValidation(),
+			),
+			args:               []string{"test", "print"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"print"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--subreddits": []string{"earthporn", "wallpapers"},
+				"--config":     testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
+				"--help":       "default",
+			},
+			expectedErr: false,
+		},
+		{
+			name: "JSONConfigStringSlice",
+			app: warg.New(
+				"newAppName",
+				section.New("help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+						command.Flag(
+							"--val",
+							"flag help",
+							slice.String(),
+							flag.ConfigPath("val"),
+						),
+					),
+				),
+				warg.ConfigFlag(
+					"--config",
+					[]scalar.ScalarOpt[path.Path]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json"),
+						),
+					},
+					jsonreader.New,
+					"path to config",
+				),
+				warg.SkipValidation(),
+			),
+			args:               []string{"app", "com"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"com"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--config": testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json"),
+				"--val":    []string{"from", "config"},
+				"--help":   "default",
+			},
+			expectedErr: false,
+		},
+		{
+			name: "YAMLConfigStringSlice",
+			app: warg.New(
+				"newAppName",
+				section.New("help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+						command.Flag(
+							"--val",
+							"flag help",
+							slice.String(),
+							flag.ConfigPath("val"),
+						),
+					),
+				),
+				warg.ConfigFlag(
+					"--config",
+					[]scalar.ScalarOpt[path.Path]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml"),
+						),
+					},
+					yamlreader.New,
+					"path to config",
+				),
+				warg.SkipValidation(),
+			),
+
+			args:               []string{"app", "com"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"com"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--config": testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml"),
+				"--val":    []string{"from", "config"},
+				"--help":   "default",
+			},
+			expectedErr: false,
+		},
+		{
+			name: "JSONConfigMap",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+						command.Flag(
+							"--val",
+							"flag help",
+							dict.Int(),
+							flag.ConfigPath("val"),
+						),
+					),
+				),
+				warg.ConfigFlag(
+					"--config",
+					[]scalar.ScalarOpt[path.Path]{
+						scalar.Default(
+							testDataFilePath(t.Name(), "JSONConfigMap", "config.json"),
+						),
+					},
+					jsonreader.New,
+					"path to config",
+				),
+				warg.SkipValidation(),
+			),
+
+			args:               []string{"app", "com"},
+			lookup:             warg.LookupMap(nil),
+			expectedPassedPath: []string{"com"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--config": testDataFilePath(t.Name(), "JSONConfigMap", "config.json"),
+				"--val":    map[string]int{"a": 1},
+				"--help":   "default",
 			},
 			expectedErr: false,
 		},

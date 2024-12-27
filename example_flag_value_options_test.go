@@ -9,6 +9,7 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
@@ -66,8 +67,8 @@ func ExampleApp_Parse_flag_value_options() {
 		),
 		warg.ConfigFlag(
 			"--config",
-			[]scalar.ScalarOpt[string]{
-				scalar.Default("~/.config/flag-overrides.yaml"),
+			[]scalar.ScalarOpt[path.Path]{
+				scalar.Default(path.New("~/.config/flag-overrides.yaml")),
 			},
 			yamlreader.New,
 			"path to YAML config file",

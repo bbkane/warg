@@ -12,6 +12,7 @@ import (
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
+	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/scalar"
@@ -127,7 +128,7 @@ func ConfigFlag(
 	// TODO: put the new stuff at the front to be consistent with OverrideHelpFlag
 	configFlagName flag.Name,
 	// TODO: can I make this nicer?
-	scalarOpts []scalar.ScalarOpt[string],
+	scalarOpts []scalar.ScalarOpt[path.Path],
 	newConfigReader config.NewReader,
 	helpShort flag.HelpShort,
 	flagOpts ...flag.FlagOpt,

@@ -10,6 +10,7 @@ import (
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help/common"
+	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 )
@@ -441,9 +442,13 @@ func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult,
 		if err != nil {
 			return nil, err
 		}
-		// NOTE: this *should* always be a string
-		configPath := app.configFlag.Value.Get().(string)
-		configReader, err = app.newConfigReader(configPath)
+		// NOTE: this should *always* be a path.
+		configPath := app.configFlag.Value.Get().(path.Path)
+		configPathStr, err := configPath.Expand()
+		if err != nil {
+			return nil, fmt.Errorf("error expanding config path ( %s ) : %w", configPath, err)
+		}
+		configReader, err = app.newConfigReader(configPathStr)
 		if err != nil {
 			return nil, fmt.Errorf("error reading config path ( %s ) : %w", configPath, err)
 		}
