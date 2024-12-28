@@ -7,76 +7,55 @@ Command Flags:
     default : ~/.config/grabbit.jsonl
     configpath : lumberjacklogger.filename
     required : true
-    currentvalue (set by config) : ~/.config/grabbit.jsonl
+    currentvalue (set by appdefault) : ~/.config/grabbit.jsonl
 
   --log-maxage : Max age before log rotation in days
     type : int
     default : 30
     configpath : lumberjacklogger.maxage
     required : true
-    currentvalue (set by config) : 30
+    currentvalue (set by appdefault) : 30
 
   --log-maxbackups : Num backups for the log
     type : int
     default : 0
     configpath : lumberjacklogger.maxbackups
     required : true
-    currentvalue (set by config) : 0
+    currentvalue (set by appdefault) : 0
 
   --log-maxsize : Max size of log in megabytes
     type : int
     default : 5
     configpath : lumberjacklogger.maxsize
     required : true
-    currentvalue (set by config) : 5
+    currentvalue (set by appdefault) : 5
 
   --subreddit-destination , -sd : Where to store the subreddit
     type : path
     default : [. .]
     configpath : subreddits[].destination
     required : true
-    currentvalue (set by config) :
-      0) ~/Pictures/grabbit
-      1) ~/Pictures/grabbit
-      2) ~/Pictures/grabbit
-      3) ~/Pictures/grabbit
-      4) ~/Pictures/grabbit
-      5) ~/Pictures/grabbit
-      6) ~/Pictures/grabbit
-      7) ~/Pictures/grabbit
-      8) ~/Pictures/grabbit
+    currentvalue (set by appdefault) :
+      0) .
+      1) .
 
   --subreddit-limit , -sl : Max number of links to try to download
     type : int
     default : [2 3]
     configpath : subreddits[].limit
     required : true
-    currentvalue (set by config) :
+    currentvalue (set by appdefault) :
       0) 2
-      1) 1
-      2) 4
-      3) 10
-      4) 1
-      5) 3
-      6) 2
-      7) 1
-      8) 2
+      1) 3
 
   --subreddit-name , -sn : Subreddit to grab
     type : string
     default : [earthporn wallpapers]
     configpath : subreddits[].name
     required : true
-    currentvalue (set by config) :
-      0) architectureporn
-      1) churchporn
-      2) cityporn
-      3) earthporn
-      4) futureporn
-      5) imaginarycastles
-      6) villageporn
-      7) roomporn
-      8) wallpapers
+    currentvalue (set by appdefault) :
+      0) earthporn
+      1) wallpapers
 
   --subreddit-timeframe , -st : Take the top subreddits from this timeframe
     type : string
@@ -84,16 +63,9 @@ Command Flags:
     default : [week week]
     configpath : subreddits[].timeframe
     required : true
-    currentvalue (set by config) :
+    currentvalue (set by appdefault) :
       0) week
       1) week
-      2) week
-      3) week
-      4) week
-      5) week
-      6) week
-      7) week
-      8) week
 
   --timeout , -t : Timeout for a single download
     type : duration
@@ -106,7 +78,7 @@ Inherited Section Flags:
   --config , -c : Config filepath
     type : path
     default : ~/.config/grabbit.yaml
-    currentvalue (set by appdefault) : ~/.config/grabbit.yaml
+    currentvalue (set by passedflag) : NOTTHERE
 
   --help , -h : Print help
     type : string

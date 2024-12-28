@@ -24,7 +24,7 @@ func TestRunHelp(t *testing.T) {
 	}{
 		{
 			name:   "grabbitGrabHelpDetailed",
-			args:   []string{"grabbit", "grab", "--help", "detailed"},
+			args:   []string{"grabbit", "grab", "--config", "NOTTHERE", "--help", "detailed"},
 			lookup: warg.LookupMap(nil),
 		},
 	}
