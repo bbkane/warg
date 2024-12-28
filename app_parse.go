@@ -184,6 +184,7 @@ func resolveFlag(
 
 	val := fl.EmptyValueConstructor()
 	fl.Value = val
+	canUpdate := true
 
 	// try to update from command line and consume from flagStrs
 	// need to check flag.SetBy even in the first case because we could be resolving
@@ -215,9 +216,10 @@ func resolveFlag(
 
 					// Set to "unsetSentinel" to avoid updating from config etc..
 					// This will be set back to "" at end of update
-					fl.SetBy = "unsetSentinel"
+					canUpdate = false
 					continue
 				}
+				canUpdate = true
 				err := fl.Value.Update(v)
 				if err != nil {
 					return fmt.Errorf("error updating flag %v from passed flag value %v: %w", name, v, err)
@@ -229,7 +231,7 @@ func resolveFlag(
 
 	// update from config
 	{
-		if fl.SetBy == "" && configReader != nil {
+		if canUpdate && fl.SetBy == "" && configReader != nil {
 			fpr, err := configReader.Search(fl.ConfigPath)
 			if err != nil {
 				return err
@@ -271,7 +273,7 @@ func resolveFlag(
 
 	// update from envvars
 	{
-		if fl.SetBy == "" && len(fl.EnvVars) > 0 {
+		if canUpdate && fl.SetBy == "" && len(fl.EnvVars) > 0 {
 			for _, e := range fl.EnvVars {
 				val, exists := lookupEnv(e)
 				if exists {
@@ -289,15 +291,10 @@ func resolveFlag(
 
 	// update from default
 	{
-		if fl.SetBy == "" && fl.Value.HasDefault() {
+		if canUpdate && fl.SetBy == "" && fl.Value.HasDefault() {
 			fl.Value.ReplaceFromDefault()
 			fl.SetBy = "appdefault"
 		}
-	}
-
-	// Set to "" if unsetSentinel
-	if fl.SetBy == "unsetSentinel" {
-		fl.SetBy = ""
 	}
 
 	return nil

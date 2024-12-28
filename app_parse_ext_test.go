@@ -400,6 +400,38 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: command.PassedFlags{"--flag": map[string]bool{"true": true, "false": false}, "--help": "default"},
 			expectedErr:              false,
 		},
+	}
+	for _, tt := range tests {
+
+		t.Run(tt.name, func(t *testing.T) {
+
+			err := tt.app.Validate()
+			require.Nil(t, err)
+
+			actualPR, actualErr := tt.app.Parse(warg.OverrideArgs(tt.args), warg.OverrideLookupFunc(tt.lookup))
+
+			if tt.expectedErr {
+				require.NotNil(t, actualErr)
+				return
+			} else {
+				require.Nil(t, actualErr)
+			}
+			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
+			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
+		})
+	}
+}
+
+func TestApp_Parse_unsetSetinel(t *testing.T) {
+	tests := []struct {
+		name                     string
+		app                      warg.App
+		args                     []string
+		lookup                   warg.LookupFunc
+		expectedPassedPath       []string
+		expectedPassedFlagValues command.PassedFlags
+		expectedErr              bool
+	}{
 		{
 			name: "unsetSentinelScalarSuccess",
 			app: warg.New(
@@ -429,6 +461,7 @@ func TestApp_Parse(t *testing.T) {
 			expectedErr: false,
 		},
 		{
+			// A scalar flag can only be passed once - either to set it to something or to ensure it's unset with unsetSentinel. There's no point in allowing it to be passed multiples times since all desired outcomes can be accomplished with a single pass.
 			name: "unsetSentinelScalarError",
 			app: warg.New(
 				"newAppName",
