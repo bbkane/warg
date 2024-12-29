@@ -268,5 +268,8 @@ func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValue
 // - port gzc Parse -> Parse2
 // - make warg.Parse call Parse2 instead of doing the parsing
 // - make all the tests pass (unsetsentinel, etc...)
+// - test against CLI apps
+// - release version
 // - delete old parsing code
-// - update warg.Parse's signature and make tests pass!
+// - update warg.Parse's signature and tests
+// - actually add tab completion (need to stringify values so they can be suggested as flag values)
