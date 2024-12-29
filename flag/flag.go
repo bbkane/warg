@@ -73,9 +73,6 @@ type Flag struct {
 	// IsCommandFlag is set when parsing. Set to true if the flag was attached to a command (as opposed to being inherited from a section)
 	IsCommandFlag bool
 
-	// SetBy might be set when parsing. Possible values: appdefault, config, passedflag
-	SetBy string
-
 	// Value is set when parsing. Use SetBy != "" to determine whether a value was actually passed  instead of being empty
 	Value value.Value
 }
@@ -90,7 +87,6 @@ func New(helpShort HelpShort, empty value.EmptyConstructor, opts ...FlagOpt) Fla
 		EnvVars:               nil,
 		Required:              false,
 		IsCommandFlag:         false,
-		SetBy:                 "",
 		UnsetSentinel:         "",
 		Value:                 nil,
 	}

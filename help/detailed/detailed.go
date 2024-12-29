@@ -115,14 +115,14 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 		)
 	}
 
-	if f.SetBy != "" {
+	if f.Value.UpdatedBy() != value.UpdatedByUnset {
 		switch v := f.Value.(type) {
 		case value.DictValue:
 			fmt.Fprintf(
 				w,
 				"    %s (set by %s):\n",
 				color.Add(color.Bold, "currentvalue"),
-				color.Add(color.Bold, f.SetBy),
+				color.Add(color.Bold, string(f.Value.UpdatedBy())),
 			)
 			m := v.StringMap()
 			for _, key := range common.SortedKeys(m) {
@@ -145,7 +145,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 			fmt.Fprintf(w,
 				"    %s (set by %s) :\n",
 				color.Add(color.Bold, "currentvalue"),
-				color.Add(color.Bold, f.SetBy),
+				color.Add(color.Bold, string(f.Value.UpdatedBy())),
 			)
 
 			for i, e := range v.StringSlice() {
@@ -166,7 +166,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *fla
 				w,
 				"    %s (set by %s) : %s\n",
 				color.Add(color.Bold, "currentvalue"),
-				color.Add(color.Bold, f.SetBy),
+				color.Add(color.Bold, string(f.Value.UpdatedBy())),
 				v.String(),
 			)
 		default:

@@ -140,6 +140,10 @@ func (v *sliceValue[_]) Update(s string, u value.UpdatedBy) error {
 	return nil
 }
 
+func (v *sliceValue[_]) UpdatedBy() value.UpdatedBy {
+	return v.updatedBy
+}
+
 func (v *sliceValue[_]) ReplaceFromDefault(u value.UpdatedBy) {
 	if v.hasDefault {
 		v.vals = v.defaultVals

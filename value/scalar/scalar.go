@@ -124,6 +124,10 @@ func (v *scalarValue[T]) Update(s string, u value.UpdatedBy) error {
 	return nil
 }
 
+func (v *scalarValue[_]) UpdatedBy() value.UpdatedBy {
+	return v.updatedBy
+}
+
 func (v *scalarValue[_]) ReplaceFromDefault(u value.UpdatedBy) {
 	if v.defaultVal != nil {
 		v.updatedBy = u

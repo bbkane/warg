@@ -8,9 +8,9 @@ type UpdatedBy string
 
 const (
 	UpdatedByUnset   UpdatedBy = ""
-	UpdatedByDefault UpdatedBy = "default"
+	UpdatedByDefault UpdatedBy = "appdefault"
 	UpdatedByEnvVar  UpdatedBy = "envvar"
-	UpdatedByFlag    UpdatedBy = "flag"
+	UpdatedByFlag    UpdatedBy = "passedflag"
 	UpdatedByConfig  UpdatedBy = "config"
 )
 
@@ -40,6 +40,9 @@ type Value interface {
 	// Update appends to container type Values from a string (useful for CLI flags, env vars, default values)
 	// and replaces scalar Values
 	Update(string, UpdatedBy) error
+
+	// UpdatedBy returns the source of the last update
+	UpdatedBy() UpdatedBy
 
 	// ReplaceFromDefault updates the Value from a pre-set default, if one exists. use HasDefault to check whether a default exists
 	ReplaceFromDefault(u UpdatedBy)

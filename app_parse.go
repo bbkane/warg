@@ -199,8 +199,7 @@ func resolveFlag(
 			}
 		}
 
-		if fl.SetBy == "" && len(strValues) > 0 {
-
+		if fl.Value.UpdatedBy() == value.UpdatedByUnset && len(strValues) > 0 {
 			_, isScalar := val.(value.ScalarValue)
 			if isScalar && len(strValues) > 1 {
 				return fmt.Errorf("flag error: %v: flag passed multiple times, it's value (type %v), can only be updated once", name, fl.Value.Description())
@@ -224,14 +223,13 @@ func resolveFlag(
 				if err != nil {
 					return fmt.Errorf("error updating flag %v from passed flag value %v: %w", name, v, err)
 				}
-				fl.SetBy = "passedflag"
 			}
 		}
 	}
 
 	// update from config
 	{
-		if canUpdate && fl.SetBy == "" && configReader != nil {
+		if canUpdate && fl.Value.UpdatedBy() == value.UpdatedByUnset && configReader != nil {
 			fpr, err := configReader.Search(fl.ConfigPath)
 			if err != nil {
 				return err
@@ -247,7 +245,6 @@ func resolveFlag(
 							err,
 						)
 					}
-					fl.SetBy = "config"
 				} else {
 					v, ok := fl.Value.(value.SliceValue)
 					if !ok {
@@ -264,7 +261,6 @@ func resolveFlag(
 							return fmt.Errorf("could not update container type value: err: %w", err)
 						}
 					}
-					fl.SetBy = "config"
 					fl.Value = v
 				}
 			}
@@ -273,7 +269,7 @@ func resolveFlag(
 
 	// update from envvars
 	{
-		if canUpdate && fl.SetBy == "" && len(fl.EnvVars) > 0 {
+		if canUpdate && fl.Value.UpdatedBy() == value.UpdatedByUnset && len(fl.EnvVars) > 0 {
 			for _, e := range fl.EnvVars {
 				val, exists := lookupEnv(e)
 				if exists {
@@ -281,7 +277,6 @@ func resolveFlag(
 					if err != nil {
 						return fmt.Errorf("error updating flag %v from envvar %v: %w", name, val, err)
 					}
-					fl.SetBy = "envvar"
 					break // stop looking for envvars
 				}
 
@@ -291,9 +286,8 @@ func resolveFlag(
 
 	// update from default
 	{
-		if canUpdate && fl.SetBy == "" && fl.Value.HasDefault() {
+		if canUpdate && fl.Value.UpdatedBy() == value.UpdatedByUnset && fl.Value.HasDefault() {
 			fl.Value.ReplaceFromDefault(value.UpdatedByDefault)
-			fl.SetBy = "appdefault"
 		}
 	}
 
@@ -467,7 +461,8 @@ func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult,
 		}
 
 		if !gar.HelpPassed {
-			if fl.Required && fl.SetBy == "" {
+			// TODO: do I need all the checks
+			if fl.Required && fl.Value.UpdatedBy() == value.UpdatedByUnset {
 				return nil, fmt.Errorf("flag required but not set: %s", name)
 			}
 		}
@@ -488,7 +483,7 @@ func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult,
 
 	pfs := make(command.PassedFlags)
 	for name, fl := range ftar.AllowedFlags {
-		if fl.SetBy != "" {
+		if fl.Value.UpdatedBy() != value.UpdatedByUnset {
 			pfs[string(name)] = fl.Value.Get()
 		}
 	}

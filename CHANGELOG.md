@@ -10,7 +10,7 @@ below this description) is likely unreleased.
 
 ## Changed
 
-- Moved `SetBy` into the `Value` interface - this allows `Flag` to be readonly and we need to update `SetBy` anyway
+- Moved `SetBy` into the `Value` interface (`value.UpdatedBy()` - this allows `Flag` to be readonly and and makes the coupling between setting the value and updating `UpdatedBy` explicit
 
 # v0.0.25
 
