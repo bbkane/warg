@@ -61,7 +61,7 @@ func TestDict_ReplaceFromInterface(t *testing.T) {
 			v := constructor()
 			dictVal := v.(value.DictValue)
 
-			actualErr := dictVal.ReplaceFromInterface(tt.update)
+			actualErr := dictVal.ReplaceFromInterface(tt.update, value.UpdatedByFlag)
 			require.Equal(t, tt.expectedErr, actualErr)
 			require.Equal(t, tt.expectedValue, dictVal.Get())
 		})
@@ -73,7 +73,7 @@ func TestDict_Update(t *testing.T) {
 	v := constructor()
 	dictVal := v.(value.DictValue)
 
-	err := dictVal.Update("key=1.1.1.1")
+	err := dictVal.Update("key=1.1.1.1", value.UpdatedByFlag)
 	require.Nil(t, err)
 	expected := map[string]netip.Addr{
 		"key": netip.MustParseAddr("1.1.1.1"),

@@ -220,7 +220,7 @@ func resolveFlag(
 					continue
 				}
 				canUpdate = true
-				err := fl.Value.Update(v)
+				err := fl.Value.Update(v, value.UpdatedByFlag)
 				if err != nil {
 					return fmt.Errorf("error updating flag %v from passed flag value %v: %w", name, v, err)
 				}
@@ -238,7 +238,7 @@ func resolveFlag(
 			}
 			if fpr != nil {
 				if !fpr.IsAggregated {
-					err := fl.Value.ReplaceFromInterface(fpr.IFace)
+					err := fl.Value.ReplaceFromInterface(fpr.IFace, value.UpdatedByConfig)
 					if err != nil {
 						return fmt.Errorf(
 							"could not replace container type value:\nval:\n%#v\nreplacement:\n%#v\nerr: %w",
@@ -259,7 +259,7 @@ func resolveFlag(
 						return fmt.Errorf("expected []interface{}, got: %#v", under)
 					}
 					for _, e := range under {
-						err = v.AppendFromInterface(e)
+						err = v.AppendFromInterface(e, value.UpdatedByConfig)
 						if err != nil {
 							return fmt.Errorf("could not update container type value: err: %w", err)
 						}
@@ -277,7 +277,7 @@ func resolveFlag(
 			for _, e := range fl.EnvVars {
 				val, exists := lookupEnv(e)
 				if exists {
-					err := fl.Value.Update(val)
+					err := fl.Value.Update(val, value.UpdatedByEnvVar)
 					if err != nil {
 						return fmt.Errorf("error updating flag %v from envvar %v: %w", name, val, err)
 					}
@@ -292,7 +292,7 @@ func resolveFlag(
 	// update from default
 	{
 		if canUpdate && fl.SetBy == "" && fl.Value.HasDefault() {
-			fl.Value.ReplaceFromDefault()
+			fl.Value.ReplaceFromDefault(value.UpdatedByDefault)
 			fl.SetBy = "appdefault"
 		}
 	}

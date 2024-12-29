@@ -13,6 +13,7 @@ type sliceValue[T comparable] struct {
 	hasDefault  bool
 	inner       contained.TypeInfo[T]
 	vals        []T
+	updatedBy   value.UpdatedBy
 }
 
 type SliceOpt[T comparable] func(*sliceValue[T])
@@ -25,6 +26,7 @@ func New[T comparable](hc contained.TypeInfo[T], opts ...SliceOpt[T]) value.Empt
 			hasDefault:  false,
 			inner:       hc,
 			vals:        nil,
+			updatedBy:   value.UpdatedByUnset,
 		}
 		for _, opt := range opts {
 			opt(&sv)
@@ -76,7 +78,7 @@ func (v *sliceValue[_]) HasDefault() bool {
 	return v.hasDefault
 }
 
-func (v *sliceValue[T]) ReplaceFromInterface(iFace interface{}) error {
+func (v *sliceValue[T]) ReplaceFromInterface(iFace interface{}, u value.UpdatedBy) error {
 	under, ok := iFace.([]interface{})
 	if !ok {
 		return contained.ErrIncompatibleInterface
@@ -91,6 +93,7 @@ func (v *sliceValue[T]) ReplaceFromInterface(iFace interface{}) error {
 		}
 		newVals = append(newVals, underE)
 	}
+	v.updatedBy = u
 	v.vals = newVals
 	return nil
 }
@@ -124,24 +127,35 @@ func (v *sliceValue[T]) update(val T) error {
 	return nil
 }
 
-func (v *sliceValue[_]) Update(s string) error {
+func (v *sliceValue[_]) Update(s string, u value.UpdatedBy) error {
 	val, err := v.inner.FromString(s)
 	if err != nil {
 		return err
 	}
-	return v.update(val)
+	err = v.update(val)
+	if err != nil {
+		return err
+	}
+	v.updatedBy = u
+	return nil
 }
 
-func (v *sliceValue[_]) ReplaceFromDefault() {
+func (v *sliceValue[_]) ReplaceFromDefault(u value.UpdatedBy) {
 	if v.hasDefault {
 		v.vals = v.defaultVals
+		v.updatedBy = u
 	}
 }
 
-func (v *sliceValue[_]) AppendFromInterface(iFace interface{}) error {
+func (v *sliceValue[_]) AppendFromInterface(iFace interface{}, u value.UpdatedBy) error {
 	val, err := v.inner.FromIFace(iFace)
 	if err != nil {
 		return err
 	}
-	return v.update(val)
+	err = v.update(val)
+	if err != nil {
+		return err
+	}
+	v.updatedBy = u
+	return nil
 }

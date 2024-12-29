@@ -4,6 +4,16 @@ import (
 	"fmt"
 )
 
+type UpdatedBy string
+
+const (
+	UpdatedByUnset   UpdatedBy = ""
+	UpdatedByDefault UpdatedBy = "default"
+	UpdatedByEnvVar  UpdatedBy = "envvar"
+	UpdatedByFlag    UpdatedBy = "flag"
+	UpdatedByConfig  UpdatedBy = "config"
+)
+
 // Value is a "generic" type to store different types into flags
 // Inspired by https://golang.org/src/flag/flag.go .
 // There are two underlying "type" families designed to fit in Value:
@@ -25,14 +35,14 @@ type Value interface {
 
 	// ReplaceFromInterface replaces a value with one found in an interface.
 	// Useful to update a Value from a config.
-	ReplaceFromInterface(interface{}) error
+	ReplaceFromInterface(interface{}, UpdatedBy) error
 
 	// Update appends to container type Values from a string (useful for CLI flags, env vars, default values)
 	// and replaces scalar Values
-	Update(string) error
+	Update(string, UpdatedBy) error
 
 	// ReplaceFromDefault updates the Value from a pre-set default, if one exists. use HasDefault to check whether a default exists
-	ReplaceFromDefault()
+	ReplaceFromDefault(u UpdatedBy)
 }
 
 type ScalarValue interface {
@@ -55,12 +65,11 @@ type SliceValue interface {
 	StringSlice() []string
 
 	// AppendFromInterface updates a container type Value from an interface (useful for configs)
-	// and replaces scalar values (for scalar values, AppendFromInterface is the same as ReplaceFromInterface).
 	// Note that AppendFromInterface must be called with the "contained" type for container type Values
 	// For example, the StringSlice.AppendFromInterface
 	// must be called with a string, not a []string
 	// It returns ErrIncompatibleInterface if the interface can't be decoded
-	AppendFromInterface(interface{}) error
+	AppendFromInterface(interface{}, UpdatedBy) error
 }
 
 type DictValue interface {

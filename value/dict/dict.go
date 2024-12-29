@@ -14,11 +14,10 @@ type dictValue[T comparable] struct {
 	hasDefault  bool
 	inner       contained.TypeInfo[T]
 	vals        map[string]T
+	updatedBy   value.UpdatedBy
 }
 
 type DictOpt[T comparable] func(*dictValue[T])
-
-// TODO: TEST THIS, but lets try to get more sleep
 
 func New[T comparable](inner contained.TypeInfo[T], opts ...DictOpt[T]) value.EmptyConstructor {
 	return func() value.Value {
@@ -28,6 +27,7 @@ func New[T comparable](inner contained.TypeInfo[T], opts ...DictOpt[T]) value.Em
 			hasDefault:  false,
 			inner:       inner,
 			vals:        make(map[string]T),
+			updatedBy:   value.UpdatedByUnset,
 		}
 		for _, opt := range opts {
 			opt(&dv)
@@ -77,7 +77,7 @@ func (v *dictValue[_]) HasDefault() bool {
 	return v.hasDefault
 }
 
-func (v *dictValue[T]) ReplaceFromInterface(iFace interface{}) error {
+func (v *dictValue[T]) ReplaceFromInterface(iFace interface{}, u value.UpdatedBy) error {
 	under, ok := iFace.(map[string]interface{})
 	if !ok {
 		return contained.ErrIncompatibleInterface // TODO: should ErrIncompatibleInterface be in value?
@@ -93,6 +93,7 @@ func (v *dictValue[T]) ReplaceFromInterface(iFace interface{}) error {
 		newVals[k] = underE
 	}
 	v.vals = newVals
+	v.updatedBy = u
 	return nil
 }
 
@@ -125,7 +126,7 @@ func (v *dictValue[T]) update(key string, val T) error {
 	return nil
 }
 
-func (v *dictValue[_]) Update(s string) error {
+func (v *dictValue[_]) Update(s string, u value.UpdatedBy) error {
 	key, strValue, found := strings.Cut(s, "=")
 	if !found {
 		return fmt.Errorf("Could not parse key=value for %v", s)
@@ -134,11 +135,17 @@ func (v *dictValue[_]) Update(s string) error {
 	if err != nil {
 		return err
 	}
-	return v.update(key, val)
+	err = v.update(key, val)
+	if err != nil {
+		return err
+	}
+	v.updatedBy = u
+	return nil
 }
 
-func (v *dictValue[_]) ReplaceFromDefault() {
+func (v *dictValue[_]) ReplaceFromDefault(u value.UpdatedBy) {
 	if v.hasDefault {
 		v.vals = v.defaultVals
+		v.updatedBy = u
 	}
 }

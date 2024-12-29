@@ -12,6 +12,7 @@ type scalarValue[T comparable] struct {
 	defaultVal *T
 	inner      contained.TypeInfo[T]
 	val        T
+	updatedBy  value.UpdatedBy
 }
 
 type ScalarOpt[T comparable] func(*scalarValue[T])
@@ -25,6 +26,7 @@ func newScalarValue[T comparable](
 		defaultVal: nil,
 		inner:      inner,
 		val:        inner.Empty(),
+		updatedBy:  value.UpdatedByUnset,
 	}
 	for _, opt := range opts {
 		opt(&sv)
@@ -82,12 +84,13 @@ func (v *scalarValue[_]) HasDefault() bool {
 	return v.defaultVal != nil
 }
 
-func (v *scalarValue[_]) ReplaceFromInterface(iFace interface{}) error {
+func (v *scalarValue[_]) ReplaceFromInterface(iFace interface{}, u value.UpdatedBy) error {
 	val, err := v.inner.FromIFace(iFace)
 	if err != nil {
 		return err
 	}
 	v.val = val
+	v.updatedBy = u
 	return nil
 }
 
@@ -108,7 +111,7 @@ func withinChoices[T comparable](val T, choices []T) bool {
 	return false
 }
 
-func (v *scalarValue[T]) Update(s string) error {
+func (v *scalarValue[T]) Update(s string, u value.UpdatedBy) error {
 	val, err := v.inner.FromString(s)
 	if err != nil {
 		return err
@@ -117,11 +120,13 @@ func (v *scalarValue[T]) Update(s string) error {
 		return value.ErrInvalidChoice[T]{Choices: v.choices}
 	}
 	v.val = val
+	v.updatedBy = u
 	return nil
 }
 
-func (v *scalarValue[_]) ReplaceFromDefault() {
+func (v *scalarValue[_]) ReplaceFromDefault(u value.UpdatedBy) {
 	if v.defaultVal != nil {
+		v.updatedBy = u
 		v.val = *v.defaultVal
 	}
 }
