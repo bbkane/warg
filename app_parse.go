@@ -229,7 +229,7 @@ func resolveFlag(
 
 	// update from config
 	{
-		if canUpdate && fl.Value.UpdatedBy() == value.UpdatedByUnset && configReader != nil {
+		if canUpdate && fl.Value.UpdatedBy() == value.UpdatedByUnset && configReader != nil && fl.ConfigPath != "" {
 			fpr, err := configReader.Search(fl.ConfigPath)
 			if err != nil {
 				return err
