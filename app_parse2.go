@@ -16,13 +16,13 @@ type FlagValue struct {
 	Value value.Value
 }
 
-type FlagValueMap map[flag.Name]*FlagValue
+type FlagValueMap map[flag.Name]value.Value
 
 func (m FlagValueMap) ToPassedFlags() command.PassedFlags {
 	pf := make(command.PassedFlags)
-	for name, f := range m {
-		if f.SetBy != "" {
-			pf[string(name)] = f.Value
+	for name, v := range m {
+		if v.UpdatedBy() != value.UpdatedByUnset {
+			pf[string(name)] = v
 		}
 	}
 	return pf
@@ -70,15 +70,8 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 
 	// fill the FlagValues map with empty values from the app
 	for flagName := range a.globalFlags {
-		val, err := a.globalFlags[flagName].EmptyValueConstructor()
-		// TODO: make this not an error!
-		if err != nil {
-			panic(err)
-		}
-		pr.FlagValues[flagName] = &FlagValue{
-			SetBy: "",
-			Value: val,
-		}
+		val := a.globalFlags[flagName].EmptyValueConstructor()
+		pr.FlagValues[flagName] = val
 	}
 
 	for i, arg := range args {
@@ -91,11 +84,10 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 			pr.HelpPassed = true
 			// set the value of --help if an arg was passed, otherwise let it resolve with the rest of them...
 			if i == len(args)-2 {
-				err := pr.FlagValues[a.helpFlagName].Value.Update(args[i+1])
+				err := pr.FlagValues[a.helpFlagName].Update(args[i+1], value.UpdatedByFlag)
 				if err != nil {
 					return pr, fmt.Errorf("error updating help flag: %w", err)
 				}
-				pr.FlagValues[a.helpFlagName].SetBy = "passedarg"
 			}
 
 			return pr, nil
@@ -110,13 +102,13 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 				pr.CurrentCommand = &childCommand
 				pr.CurrentCommandName = command.Name(arg)
 
-				for flagName := range pr.CurrentCommand.Flags {
+				for flagName, f := range pr.CurrentCommand.Flags {
 					_, exists := pr.FlagValues[flagName]
 					if exists {
 						// NOTE: move this check to app construction
 						panic("app flags and command flags cannot share a name: " + flagName)
 					}
-					pr.FlagValues[flagName] = &FlagValue{}
+					pr.FlagValues[flagName] = f.EmptyValueConstructor()
 				}
 
 				pr.State = Parse_ExpectingFlagNameOrEnd
@@ -140,11 +132,10 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 			}
 
 		case Parse_ExpectingFlagValue:
-			err := pr.FlagValues[pr.CurrentFlagName].Value.Update(arg)
+			err := pr.FlagValues[pr.CurrentFlagName].Update(arg, value.UpdatedByFlag)
 			if err != nil {
 				return pr, err
 			}
-			pr.FlagValues[pr.CurrentFlagName].SetBy = "passedarg"
 			pr.State = Parse_ExpectingFlagNameOrEnd
 
 		default:
