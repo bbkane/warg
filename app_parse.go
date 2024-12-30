@@ -391,6 +391,8 @@ func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
 
 func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult, error) {
 
+	return app.parseWithOptHolder2(parseOptHolder)
+
 	osArgs := parseOptHolder.Args
 	osLookupEnv := parseOptHolder.LookupFunc
 
@@ -540,7 +542,7 @@ func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult,
 					return &pr, nil
 				}
 			}
-			return nil, fmt.Errorf("some problem with section help: info: %v", helpInfo)
+			return nil, fmt.Errorf("some problem with command help: info: %v", helpInfo)
 		} else {
 
 			pr := ParseResult{
