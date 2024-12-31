@@ -198,7 +198,6 @@ func resolveFlag2(
 				flagValues[flagName] = v
 			}
 		}
-		return true, nil
 	}
 
 	// envvar
@@ -232,7 +231,7 @@ func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValue
 			return fmt.Errorf("resolveFlag error for flag %s: %w", a.configFlagName, err)
 		}
 		if resolved {
-			configPath := flagValues[flag.Name(a.configFlag.ConfigPath)].Get().(path.Path)
+			configPath := flagValues[a.configFlagName].Get().(path.Path)
 			configPathStr, err := configPath.Expand()
 			if err != nil {
 				return fmt.Errorf("error expanding config path ( %s ) : %w", configPath, err)
@@ -313,6 +312,14 @@ func (a *App) Parse2(args []string, lookupEnv LookupFunc) (*ParseResult2, error)
 }
 
 func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult, error) {
+
+	// --config flag...
+	// original Parse treats it specially
+	// Parse2 expects it to be in app.GlobalFlags
+	if app.configFlag != nil {
+		app.globalFlags[app.configFlagName] = *app.configFlag
+	}
+
 	pr2, err := app.Parse2(parseOptHolder.Args[1:], parseOptHolder.LookupFunc)
 	if err != nil {
 		return nil, fmt.Errorf("parseWithOptHolder2 err: %w", err)
@@ -340,7 +347,10 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 	pfs := pr2.FlagValues.ToPassedFlags()
 
 	// port gar.Path
-	garPath := slices.Concat(pr2.SectionPath, []string{string(pr2.CurrentCommandName)})
+	garPath := pr2.SectionPath
+	if pr2.CurrentCommandName != "" {
+		garPath = slices.Concat(pr2.SectionPath, []string{string(pr2.CurrentCommandName)})
+	}
 
 	// TODO: handle aliases and sentinel values later
 
