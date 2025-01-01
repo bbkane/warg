@@ -271,6 +271,11 @@ func (a *App) Parse2(args []string, lookupEnv LookupFunc) (*ParseResult2, error)
 		return nil, fmt.Errorf("Parse error: %w", err)
 	}
 
+	// If we're in a section, just print the help
+	if pr.State == Parse_ExpectingSectionOrCommand {
+		pr.HelpPassed = true
+	}
+
 	// --help means we don't need to do a lot of error checking
 	if pr.HelpPassed {
 		err = a.resolveFlags(pr.CurrentCommand, pr.FlagValues, lookupEnv)
