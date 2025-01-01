@@ -155,47 +155,48 @@ func resolveFlag2(
 	flagValues FlagValueMap, // this gets updated - all other params are readonly
 	configReader config.Reader,
 	lookupEnv LookupFunc,
-) (bool, error) {
+) error {
 
 	// maybe it's set by args already
-	isSet := flagValues[flagName].UpdatedBy() != value.UpdatedByUnset
-	if isSet {
-		return true, nil
+	if flagValues[flagName].UpdatedBy() != value.UpdatedByUnset {
+		return nil
 	}
 
 	// config
 	if fl.ConfigPath != "" && configReader != nil {
 		fpr, err := configReader.Search(fl.ConfigPath)
 		if err != nil {
-			return false, err
+			return err
 		}
 		if fpr != nil {
 			if !fpr.IsAggregated {
 				err := flagValues[flagName].ReplaceFromInterface(fpr.IFace, value.UpdatedByConfig)
 				if err != nil {
-					return false, fmt.Errorf(
+					return fmt.Errorf(
 						"could not replace container type value:\nval:\n%#v\nreplacement:\n%#v\nerr: %w",
 						flagValues[flagName],
 						fpr.IFace,
 						err,
 					)
 				}
+				return nil
 			} else {
 				v, ok := flagValues[flagName].(value.SliceValue)
 				if !ok {
-					return false, fmt.Errorf("could not update scalar value with aggregated value from config: name: %v, configPath: %v", flagName, fl.ConfigPath)
+					return fmt.Errorf("could not update scalar value with aggregated value from config: name: %v, configPath: %v", flagName, fl.ConfigPath)
 				}
 				under, ok := fpr.IFace.([]interface{})
 				if !ok {
-					return false, fmt.Errorf("expected []interface{}, got: %#v", under)
+					return fmt.Errorf("expected []interface{}, got: %#v", under)
 				}
 				for _, e := range under {
 					err := v.AppendFromInterface(e, value.UpdatedByConfig)
 					if err != nil {
-						return false, fmt.Errorf("could not update container type value: err: %w", err)
+						return fmt.Errorf("could not update container type value: err: %w", err)
 					}
 				}
 				flagValues[flagName] = v
+				return nil
 			}
 		}
 	}
@@ -206,31 +207,31 @@ func resolveFlag2(
 		if exists {
 			err := flagValues[flagName].Update(val, value.UpdatedByEnvVar)
 			if err != nil {
-				return false, fmt.Errorf("error updating flag %v from envvar %v: %w", flagName, val, err)
+				return fmt.Errorf("error updating flag %v from envvar %v: %w", flagName, val, err)
 			}
 			// Use first env var found
-			return true, nil
+			return nil
 		}
 	}
 
 	// default
 	if flagValues[flagName].HasDefault() {
 		flagValues[flagName].ReplaceFromDefault(value.UpdatedByDefault)
-		return true, nil
+		return nil
 	}
-	return false, nil
+	return nil
 }
 
 func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValueMap, lookupEnv LookupFunc) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
 	if a.configFlagName != "" {
-		resolved, err := resolveFlag2(
+		err := resolveFlag2(
 			a.configFlagName, a.globalFlags[a.configFlagName], flagValues, nil, lookupEnv)
 		if err != nil {
 			return fmt.Errorf("resolveFlag error for flag %s: %w", a.configFlagName, err)
 		}
-		if resolved {
+		if flagValues[a.configFlagName].UpdatedBy() != value.UpdatedByUnset {
 			configPath := flagValues[a.configFlagName].Get().(path.Path)
 			configPathStr, err := configPath.Expand()
 			if err != nil {
@@ -246,7 +247,7 @@ func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValue
 
 	// resolve app global flags
 	for flagName, fl := range a.globalFlags {
-		_, err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv)
+		err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv)
 		if err != nil {
 			return fmt.Errorf("resolveFlag error for flag %s: %w", flagName, err)
 		}
@@ -255,7 +256,7 @@ func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValue
 	// resolve current command flags
 	if currentCommand != nil { // can be nil in the case of --help
 		for flagName, fl := range currentCommand.Flags {
-			_, err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv)
+			err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv)
 			if err != nil {
 				return fmt.Errorf("resolveFlag error for flag %s: %w", flagName, err)
 			}
