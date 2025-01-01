@@ -10,20 +10,25 @@ import (
 )
 
 func TestIntScalar(t *testing.T) {
-	v := scalar.Int(
+	constructor := scalar.Int(
 		scalar.Choices(1, 2),
 		scalar.Default(2),
-	)()
+	)
 
+	// update, then try to update again
+	v := constructor()
 	err := v.Update("1", value.UpdatedByFlag)
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.Equal(t, v.Get().(int), 1)
 
-	err = v.Update("-1", value.UpdatedByFlag)
-	require.NotNil(t, err)
+	// Should only be able to be updated once
+	err = v.Update("1", value.UpdatedByFlag)
+	require.Error(t, err)
 	require.Equal(t, v.Get().(int), 1)
 
-	v.ReplaceFromDefault(value.UpdatedByDefault)
+	v = constructor()
+	err = v.ReplaceFromDefault(value.UpdatedByDefault)
+	require.NoError(t, err)
 	require.Equal(t, v.Get().(int), 2)
 }
 
@@ -61,7 +66,8 @@ func TestIntSlice(t *testing.T) {
 		v.Get().([]int),
 	)
 
-	v.ReplaceFromDefault(value.UpdatedByFlag)
+	err = v.ReplaceFromDefault(value.UpdatedByFlag)
+	require.NoError(t, err)
 	require.Equal(
 		t,
 		[]int{1, 1, 1},

@@ -287,7 +287,10 @@ func resolveFlag(
 	// update from default
 	{
 		if canUpdate && fl.Value.UpdatedBy() == value.UpdatedByUnset && fl.Value.HasDefault() {
-			fl.Value.ReplaceFromDefault(value.UpdatedByDefault)
+			err := fl.Value.ReplaceFromDefault(value.UpdatedByDefault)
+			if err != nil {
+				return fmt.Errorf("error updating flag %v from default: %w", name, err)
+			}
 		}
 	}
 

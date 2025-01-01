@@ -148,12 +148,6 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 			}
 
 		case Parse_ExpectingFlagValue:
-			// don't allow scalar flags to be passed more than once
-			// TODO: Move this inside the scalarValue update check
-			if val, isScalar := pr.FlagValues[pr.CurrentFlagName].(value.ScalarValue); isScalar && val.UpdatedBy() != value.UpdatedByUnset {
-				return pr, fmt.Errorf("scalar flag %s passed more than once", pr.CurrentFlagName)
-			}
-
 			// TODO: unset the flag if UnsetSentinel is passed. Search though global flags and command flags, reset the value to unset sentinal and store in the parseResult that it was unset so calls to resolveFlags won't set it...
 
 			err := pr.FlagValues[pr.CurrentFlagName].Update(arg, value.UpdatedByFlag)
@@ -236,7 +230,10 @@ func resolveFlag2(
 
 	// default
 	if flagValues[flagName].HasDefault() {
-		flagValues[flagName].ReplaceFromDefault(value.UpdatedByDefault)
+		err := flagValues[flagName].ReplaceFromDefault(value.UpdatedByDefault)
+		if err != nil {
+			return fmt.Errorf("error updating flag %v from default: %w", flagName, err)
+		}
 		return nil
 	}
 	return nil

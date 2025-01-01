@@ -147,9 +147,10 @@ func (v *dictValue[_]) UpdatedBy() value.UpdatedBy {
 	return v.updatedBy
 }
 
-func (v *dictValue[_]) ReplaceFromDefault(u value.UpdatedBy) {
+func (v *dictValue[_]) ReplaceFromDefault(u value.UpdatedBy) error {
 	if v.hasDefault {
 		v.vals = v.defaultVals
 		v.updatedBy = u
 	}
+	return nil
 }
