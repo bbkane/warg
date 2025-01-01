@@ -2,6 +2,7 @@
 package warg
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -259,57 +260,39 @@ func LookupMap(m map[string]string) LookupFunc {
 	}
 }
 
-type flagNameSet map[flag.Name]struct{}
-
-// addFlags adds a flag's name and alias to the set. Returns an error
-// if the name OR alias already exists
-func (fs flagNameSet) addFlags(fm flag.FlagMap) error {
-	for flagName := range fm {
-		_, exists := fs[flagName]
-		if exists {
-			return fmt.Errorf("flag or alias name exists twice: %v", flagName)
-		}
-		fs[flagName] = struct{}{}
-
-		alias := fm[flagName].Alias
-		if alias != "" {
-			_, exists := fs[alias]
-			if exists {
-				return fmt.Errorf("flag or alias name exists twice: %v", alias)
-			}
-			fs[alias] = struct{}{}
-		}
-	}
-	return nil
-}
-
-func validateFlags(
+// validateFlags2 checks that global and command flag names and aliases start with "-" and are unique.
+// It does not need to check the following scenarios:
+//
+//   - global flag names don't collide with global flag names (app will panic when adding the second global flag) - TOOD: ensure there's a test for this
+//   - command flag names in the same command don't collide with each other (app will panic when adding the second command flag) TODO: ensure there's a test for this
+//   - command flag names/aliases don't collide with command flag names/aliases in other commands (since only one command will be run, this is not a problem)
+func validateFlags2(
 	globalFlags flag.FlagMap,
 	comFlags flag.FlagMap,
 ) error {
-	nameSet := make(flagNameSet)
-	var err error
-
-	err = nameSet.addFlags(globalFlags)
-	if err != nil {
-		return err
-	}
-
-	err = nameSet.addFlags(comFlags)
-	if err != nil {
-		return err
-	}
-
-	// fmt.Printf("%#v\n", nameSet)
-
-	for name := range nameSet {
-		if !strings.HasPrefix(string(name), "-") {
-			return fmt.Errorf("flag and alias names must start with '-': %#v", name)
+	nameCount := make(map[flag.Name]int)
+	for name, fl := range globalFlags {
+		nameCount[name]++
+		if fl.Alias != "" {
+			nameCount[fl.Alias]++
 		}
 	}
-
-	return nil
-
+	for name, fl := range comFlags {
+		nameCount[name]++
+		if fl.Alias != "" {
+			nameCount[fl.Alias]++
+		}
+	}
+	var errs []error
+	for name, count := range nameCount {
+		if !strings.HasPrefix(string(name), "-") {
+			errs = append(errs, fmt.Errorf("flag and alias names must start with '-': %#v", name))
+		}
+		if count > 1 {
+			errs = append(errs, fmt.Errorf("flag or alias name exists %d times: %v", count, name))
+		}
+	}
+	return errors.Join(errs...)
 }
 
 // Validate checks app for creation errors. It checks:
@@ -346,7 +329,7 @@ func (app *App) Validate() error {
 				return fmt.Errorf("command names must not start with '-': %#v", name)
 			}
 
-			err := validateFlags(app.globalFlags, com.Flags)
+			err := validateFlags2(app.globalFlags, com.Flags)
 			if err != nil {
 				return err
 			}

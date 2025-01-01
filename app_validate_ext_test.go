@@ -100,7 +100,7 @@ func TestApp_Validate(t *testing.T) {
 		},
 
 		{
-			name: "flagNameAliasConflict",
+			name: "commandFlagAliasCommandFlagNameConflict",
 			app: warg.New(
 				"newAppName",
 				section.New("",
@@ -114,7 +114,62 @@ func TestApp_Validate(t *testing.T) {
 			expectedErr: true,
 		},
 		{
-			name: "globalFlagNameAliasConflict",
+			name: "commandFlagAliasGlobalFlagAliasConflict",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+						command.Flag(
+							"--commandflag",
+							"global flag conflict",
+							scalar.String(),
+							flag.Alias("--global"),
+						),
+					),
+				),
+				warg.SkipValidation(),
+				warg.GlobalFlag(
+					"--globalflag",
+					"global flag",
+					scalar.String(),
+					flag.Alias("--global"),
+				),
+			),
+			expectedErr: true,
+		},
+		{
+			name: "commandFlagAliasGlobalFlagNameConflict",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+						command.Flag(
+							"--commandflag",
+							"global flag conflict",
+							scalar.String(),
+							flag.Alias("--global"),
+						),
+					),
+				),
+				warg.SkipValidation(),
+				warg.GlobalFlag(
+					"--global",
+					"global flag",
+					scalar.String(),
+				),
+			),
+			expectedErr: true,
+		},
+		{
+			name: "commandFlagNameGlobalFlagNameConflict",
 			app: warg.New(
 				"newAppName",
 				section.New(
@@ -145,10 +200,10 @@ func TestApp_Validate(t *testing.T) {
 			actualErr := tt.app.Validate()
 
 			if tt.expectedErr {
-				require.NotNil(t, actualErr)
+				require.Error(t, actualErr)
 				return
 			} else {
-				require.Nil(t, actualErr)
+				require.NoError(t, actualErr)
 			}
 		})
 	}
