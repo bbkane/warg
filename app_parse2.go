@@ -57,7 +57,7 @@ const (
 
 func (a *App) parseArgs(args []string) (ParseResult2, error) {
 	pr := ParseResult2{
-		SectionPath:    []string{},
+		SectionPath:    nil,
 		CurrentSection: &a.rootSection,
 
 		CurrentCommandName: "",
