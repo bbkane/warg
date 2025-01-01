@@ -72,6 +72,13 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 		State: Parse_ExpectingSectionOrCommand,
 	}
 
+	aliasToFlagName := make(map[flag.Name]flag.Name)
+	for flagName, fl := range a.globalFlags {
+		if fl.Alias != "" {
+			aliasToFlagName[flag.Name(fl.Alias)] = flagName
+		}
+	}
+
 	// fill the FlagValues map with empty values from the app
 	for flagName := range a.globalFlags {
 		val := a.globalFlags[flagName].EmptyValueConstructor()
@@ -106,28 +113,33 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 				pr.CurrentCommand = &childCommand
 				pr.CurrentCommandName = command.Name(arg)
 
+				// fill the FlagValues map with empty values from the command
+				// All names in (command flag names, command flag aliases, global flag names, global flag aliases)
+				// should be unique because app.Validate should have caught any conflicts
 				for flagName, f := range pr.CurrentCommand.Flags {
-					_, exists := pr.FlagValues[flagName]
-					if exists {
-						// NOTE: move this check to app construction
-						panic("app flags and command flags cannot share a name: " + flagName)
-					}
 					pr.FlagValues[flagName] = f.EmptyValueConstructor()
-				}
 
+					if f.Alias != "" {
+						aliasToFlagName[flag.Name(f.Alias)] = flagName
+					}
+
+				}
 				pr.State = Parse_ExpectingFlagNameOrEnd
 			} else {
 				return pr, fmt.Errorf("expecting section or command, got %s", arg)
 			}
 
 		case Parse_ExpectingFlagNameOrEnd:
-			// TODO: handle aliases of flags
-			if flagFromArg, exists := a.globalFlags[flag.Name(arg)]; exists {
-				pr.CurrentFlagName = flag.Name(arg)
+			flagName := flag.Name(arg)
+			if actualFlagName, exists := aliasToFlagName[flagName]; exists {
+				flagName = actualFlagName
+			}
+			if flagFromArg, exists := a.globalFlags[flagName]; exists {
+				pr.CurrentFlagName = flagName
 				pr.CurrentFlag = &flagFromArg
 				pr.State = Parse_ExpectingFlagValue
-			} else if flagFromArg, exists := pr.CurrentCommand.Flags[flag.Name(arg)]; exists {
-				pr.CurrentFlagName = flag.Name(arg)
+			} else if flagFromArg, exists := pr.CurrentCommand.Flags[flagName]; exists {
+				pr.CurrentFlagName = flagName
 				pr.CurrentFlag = &flagFromArg
 				pr.State = Parse_ExpectingFlagValue
 			} else {
