@@ -103,7 +103,7 @@ func TestAppHelp(t *testing.T) {
 				grabbitSection(),
 				warg.SkipValidation(),
 			),
-			args:   []string{"grabbit", "--help", "detailed"},
+			args:   []string{"grabbit", "-h", "outline"},
 			lookup: warg.LookupMap(nil),
 		},
 

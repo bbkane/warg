@@ -109,7 +109,7 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 
 		// --help <helptype> or --help must be the last thing passed and can appear at any state we aren't expecting a flag value
 		if i >= len(args)-2 &&
-			flag.Name(arg) == a.helpFlagName &&
+			(flag.Name(arg) == a.helpFlagName || flag.Name(arg) == a.helpFlagAlias) &&
 			pr.State != Parse_ExpectingFlagValue {
 
 			pr.HelpPassed = true
