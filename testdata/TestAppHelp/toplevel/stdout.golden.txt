@@ -1,0 +1,13 @@
+grab those images!
+
+Sections:
+
+  config : Change grabbit's config
+  section2 : another section
+  section3 : another section
+
+Commands:
+
+  command2 : another command
+  command3 : another command
+  grab : do the grabbity grabbity

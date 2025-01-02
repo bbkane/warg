@@ -487,8 +487,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 			expectedErr: false,
 		},
 		{
-			// A scalar flag can only be passed once - either to set it to something or to ensure it's unset with unsetSentinel. There's no point in allowing it to be passed multiples times since all desired outcomes can be accomplished with a single pass.
-			name: "unsetSentinelScalarError",
+			name: "unsetSentinelScalarUpdate",
 			app: warg.New(
 				"newAppName",
 				section.New(
@@ -507,11 +506,11 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 				),
 				warg.SkipValidation(),
 			),
-			args:                     []string{t.Name(), "test", "--flag", "UNSET", "--flag", "justsayno"},
+			args:                     []string{t.Name(), "test", "--flag", "UNSET", "--flag", "setAfter"},
 			lookup:                   warg.LookupMap(nil),
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: nil,
-			expectedErr:              true,
+			expectedPassedFlagValues: command.PassedFlags{"--flag": "setAfter", "--help": "default"},
+			expectedErr:              false,
 		},
 		{
 			name: "unsetSentinelSlice",
@@ -553,10 +552,10 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 			actualPR, actualErr := tt.app.Parse(warg.OverrideArgs(tt.args), warg.OverrideLookupFunc(tt.lookup))
 
 			if tt.expectedErr {
-				require.NotNil(t, actualErr)
+				require.Error(t, actualErr)
 				return
 			} else {
-				require.Nil(t, actualErr)
+				require.NoError(t, actualErr)
 			}
 			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)

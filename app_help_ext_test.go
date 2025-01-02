@@ -95,6 +95,17 @@ func TestAppHelp(t *testing.T) {
 		args   []string
 		lookup warg.LookupFunc
 	}{
+		// toplevel just a toplevel help!
+		{
+			name: "toplevel",
+			app: warg.New(
+				"grabbit",
+				grabbitSection(),
+				warg.SkipValidation(),
+			),
+			args:   []string{"grabbit", "--help", "detailed"},
+			lookup: warg.LookupMap(nil),
+		},
 
 		// allcommands (no command help)
 		{

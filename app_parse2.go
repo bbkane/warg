@@ -32,6 +32,33 @@ func (m FlagValueMap) ToPassedFlags() command.PassedFlags {
 	return pf
 }
 
+// -- ParseState
+
+type ParseState string
+
+const (
+	Parse_ExpectingSectionOrCommand ParseState = "Parse_ExpectingSectionOrCommand"
+	Parse_ExpectingFlagNameOrEnd    ParseState = "Parse_ExpectingFlagNameOrEnd"
+	Parse_ExpectingFlagValue        ParseState = "Parse_ExpectingFlagValue"
+)
+
+// -- unsetFlagNameSet
+
+type UnsetFlagNameSet map[flag.Name]struct{}
+
+func (u UnsetFlagNameSet) Add(name flag.Name) {
+	u[name] = struct{}{}
+}
+
+func (u UnsetFlagNameSet) Delete(name flag.Name) {
+	delete(u, name)
+}
+
+func (u UnsetFlagNameSet) Contains(name flag.Name) bool {
+	_, exists := u[name]
+	return exists
+}
+
 type ParseResult2 struct {
 	SectionPath    []string
 	CurrentSection *section.SectionT
@@ -41,19 +68,12 @@ type ParseResult2 struct {
 
 	CurrentFlagName flag.Name
 	CurrentFlag     *flag.Flag
+	FlagValues      FlagValueMap
+	UnsetFlagNames  UnsetFlagNameSet
 
-	FlagValues FlagValueMap
-	State      ParseState
 	HelpPassed bool
+	State      ParseState
 }
-
-type ParseState string
-
-const (
-	Parse_ExpectingSectionOrCommand ParseState = "Parse_ExpectingSectionOrCommand"
-	Parse_ExpectingFlagNameOrEnd    ParseState = "Parse_ExpectingFlagNameOrEnd"
-	Parse_ExpectingFlagValue        ParseState = "Parse_ExpectingFlagValue"
-)
 
 func (a *App) parseArgs(args []string) (ParseResult2, error) {
 	pr := ParseResult2{
@@ -66,10 +86,10 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 		CurrentFlagName: "",
 		CurrentFlag:     nil,
 		FlagValues:      make(FlagValueMap),
+		UnsetFlagNames:  make(UnsetFlagNameSet),
 
 		HelpPassed: false,
-
-		State: Parse_ExpectingSectionOrCommand,
+		State:      Parse_ExpectingSectionOrCommand,
 	}
 
 	aliasToFlagName := make(map[flag.Name]flag.Name)
@@ -134,25 +154,26 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 			if actualFlagName, exists := aliasToFlagName[flagName]; exists {
 				flagName = actualFlagName
 			}
-			if flagFromArg, exists := a.globalFlags[flagName]; exists {
-				pr.CurrentFlagName = flagName
-				pr.CurrentFlag = &flagFromArg
-				pr.State = Parse_ExpectingFlagValue
-			} else if flagFromArg, exists := pr.CurrentCommand.Flags[flagName]; exists {
-				pr.CurrentFlagName = flagName
-				pr.CurrentFlag = &flagFromArg
-				pr.State = Parse_ExpectingFlagValue
-			} else {
+			fl := findFlag(flagName, a.globalFlags, pr.CurrentCommand.Flags)
+			if fl == nil {
 				// return pr, fmt.Errorf("expecting command flag name %v or app flag name %v, got %s", pr.CurrentCommand.ChildrenNames(), a.GlobalFlags.SortedNames(), arg)
 				return pr, fmt.Errorf("expecting flag name, got %s", arg)
 			}
+			pr.CurrentFlagName = flagName
+			pr.CurrentFlag = fl
+			pr.State = Parse_ExpectingFlagValue
 
 		case Parse_ExpectingFlagValue:
 			// TODO: unset the flag if UnsetSentinel is passed. Search though global flags and command flags, reset the value to unset sentinal and store in the parseResult that it was unset so calls to resolveFlags won't set it...
-
-			err := pr.FlagValues[pr.CurrentFlagName].Update(arg, value.UpdatedByFlag)
-			if err != nil {
-				return pr, err
+			if arg == pr.CurrentFlag.UnsetSentinel {
+				pr.FlagValues[pr.CurrentFlagName] = pr.CurrentFlag.EmptyValueConstructor()
+				pr.UnsetFlagNames.Add(pr.CurrentFlagName)
+			} else {
+				err := pr.FlagValues[pr.CurrentFlagName].Update(arg, value.UpdatedByFlag)
+				if err != nil {
+					return pr, err
+				}
+				pr.UnsetFlagNames.Delete(pr.CurrentFlagName)
 			}
 			pr.State = Parse_ExpectingFlagNameOrEnd
 
@@ -163,16 +184,27 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 	return pr, nil
 }
 
+func findFlag(flagName flag.Name, globalFlags flag.FlagMap, currentCommandFlags flag.FlagMap) *flag.Flag {
+	if fl, exists := globalFlags[flagName]; exists {
+		return &fl
+	}
+	if fl, exists := currentCommandFlags[flagName]; exists {
+		return &fl
+	}
+	return nil
+}
+
 func resolveFlag2(
 	flagName flag.Name,
 	fl flag.Flag,
 	flagValues FlagValueMap, // this gets updated - all other params are readonly
 	configReader config.Reader,
 	lookupEnv LookupFunc,
+	unsetFlagNames UnsetFlagNameSet,
 ) error {
 
-	// maybe it's set by args already
-	if flagValues[flagName].UpdatedBy() != value.UpdatedByUnset {
+	// don't update if its been explicitly unset or already set
+	if unsetFlagNames.Contains(flagName) || flagValues[flagName].UpdatedBy() != value.UpdatedByUnset {
 		return nil
 	}
 
@@ -239,12 +271,12 @@ func resolveFlag2(
 	return nil
 }
 
-func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValueMap, lookupEnv LookupFunc) error {
+func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValueMap, lookupEnv LookupFunc, unsetFlagNames UnsetFlagNameSet) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
 	if a.configFlagName != "" {
 		err := resolveFlag2(
-			a.configFlagName, a.globalFlags[a.configFlagName], flagValues, nil, lookupEnv)
+			a.configFlagName, a.globalFlags[a.configFlagName], flagValues, nil, lookupEnv, unsetFlagNames)
 		if err != nil {
 			return fmt.Errorf("resolveFlag error for flag %s: %w", a.configFlagName, err)
 		}
@@ -264,7 +296,7 @@ func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValue
 
 	// resolve app global flags
 	for flagName, fl := range a.globalFlags {
-		err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv)
+		err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
 		if err != nil {
 			return fmt.Errorf("resolveFlag error for flag %s: %w", flagName, err)
 		}
@@ -273,7 +305,7 @@ func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValue
 	// resolve current command flags
 	if currentCommand != nil { // can be nil in the case of --help
 		for flagName, fl := range currentCommand.Flags {
-			err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv)
+			err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
 			if err != nil {
 				return fmt.Errorf("resolveFlag error for flag %s: %w", flagName, err)
 			}
@@ -296,7 +328,7 @@ func (a *App) Parse2(args []string, lookupEnv LookupFunc) (*ParseResult2, error)
 
 	// --help means we don't need to do a lot of error checking
 	if pr.HelpPassed {
-		err = a.resolveFlags(pr.CurrentCommand, pr.FlagValues, lookupEnv)
+		err = a.resolveFlags(pr.CurrentCommand, pr.FlagValues, lookupEnv, pr.UnsetFlagNames)
 		if err != nil {
 			return nil, err
 		}
@@ -308,7 +340,7 @@ func (a *App) Parse2(args []string, lookupEnv LookupFunc) (*ParseResult2, error)
 		return nil, fmt.Errorf("unexpected parse state: %s", pr.State)
 	}
 
-	err = a.resolveFlags(pr.CurrentCommand, pr.FlagValues, lookupEnv)
+	err = a.resolveFlags(pr.CurrentCommand, pr.FlagValues, lookupEnv, pr.UnsetFlagNames)
 	if err != nil {
 		return nil, err
 	}
@@ -451,8 +483,6 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 }
 
 // next steps:
-// - port gzc Parse -> Parse2
-// - make warg.Parse call Parse2 instead of doing the parsing
 // - make all the tests pass (unsetsentinel, etc...)
 // - test against CLI apps
 // - release version
