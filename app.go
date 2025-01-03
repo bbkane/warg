@@ -322,6 +322,27 @@ func (app *App) Validate() error {
 			return fmt.Errorf("sections must have either child sections or child commands: %#v", secName)
 		}
 
+		{
+			// child section names should not clash with child command names
+			nameCount := make(map[string]int)
+			for name := range flatSec.Sec.Commands {
+				nameCount[string(name)]++
+			}
+			for name := range flatSec.Sec.Sections {
+				nameCount[string(name)]++
+			}
+			errs := []error{}
+			for name, count := range nameCount {
+				if count > 1 {
+					errs = append(errs, fmt.Errorf("command and section name clash: %s", name))
+				}
+			}
+			err := errors.Join(errs...)
+			if err != nil {
+				return fmt.Errorf("name collision: %w", err)
+			}
+		}
+
 		for name, com := range flatSec.Sec.Commands {
 
 			// Commands must not start wtih "-"

@@ -481,11 +481,3 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 		return nil, fmt.Errorf("internal Error: invalid parse state: currentSection == %v, currentCommand == %v", pr2.SectionPath, pr2.CurrentCommandName)
 	}
 }
-
-// next steps:
-// - make all the tests pass (unsetsentinel, etc...)
-// - test against CLI apps
-// - release version
-// - delete old parsing code
-// - update warg.Parse's signature and tests
-// - actually add tab completion (need to stringify values so they can be suggested as flag values)
