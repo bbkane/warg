@@ -285,35 +285,6 @@ func TestApp_Parse(t *testing.T) {
 			expectedErr:              true,
 		},
 		{
-			name: "addSectionFlags",
-			app: func() warg.App {
-				fm := flag.FlagMap{
-					"--flag1": flag.New("--flag1 value", scalar.String()),
-					"--flag2": flag.New("--flag1 value", scalar.String()),
-				}
-				app := warg.New(
-					"newAppName",
-					section.New(
-						"help for section",
-						section.Command(
-							"test",
-							"help for test",
-							command.DoNothing,
-							command.ExistingFlags(fm),
-						),
-					),
-					warg.SkipValidation(),
-				)
-				return app
-			}(),
-
-			args:                     []string{t.Name(), "test", "--flag1", "val1"},
-			lookup:                   warg.LookupMap(nil),
-			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: command.PassedFlags{"--flag1": "val1", "--help": "default"},
-			expectedErr:              false,
-		},
-		{
 			name: "addCommandFlags",
 			app: func() warg.App {
 				fm := flag.FlagMap{
@@ -399,6 +370,27 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedPath:       []string{"com1"},
 			expectedPassedFlagValues: command.PassedFlags{"--flag": map[string]bool{"true": true, "false": false}, "--help": "default"},
 			expectedErr:              false,
+		},
+		{
+			name: "passAbsentSection",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+					),
+				),
+				warg.SkipValidation(),
+			),
+
+			args:                     []string{"app", "badSectionName"},
+			lookup:                   warg.LookupMap(nil),
+			expectedPassedPath:       []string{"com1"},
+			expectedPassedFlagValues: command.PassedFlags{"--help": "default"},
+			expectedErr:              true,
 		},
 		{
 			name: "scalarFlagPassedTwice",
