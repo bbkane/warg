@@ -318,7 +318,7 @@ func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValue
 func (a *App) Parse2(args []string, lookupEnv LookupFunc) (*ParseResult2, error) {
 	pr, err := a.parseArgs(args)
 	if err != nil {
-		return nil, fmt.Errorf("Parse error: %w", err)
+		return nil, fmt.Errorf("Parse args error: %w", err)
 	}
 
 	// If we're in a section, just print the help
@@ -377,7 +377,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 
 	pr2, err := app.Parse2(parseOptHolder.Args[1:], parseOptHolder.LookupFunc)
 	if err != nil {
-		return nil, fmt.Errorf("parseWithOptHolder2 err: %w", err)
+		return nil, fmt.Errorf("Parse err: %w", err)
 	}
 
 	// build ftar.AvailableFlags - it's a map of string to flag for the app globals + current command. Don't forget to set each flag.IsCommandFlag and Value for now..

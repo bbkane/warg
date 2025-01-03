@@ -393,9 +393,6 @@ func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
 }
 
 func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult, error) {
-
-	return app.parseWithOptHolder2(parseOptHolder)
-
 	osArgs := parseOptHolder.Args
 	osLookupEnv := parseOptHolder.LookupFunc
 
@@ -571,5 +568,6 @@ func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult,
 func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 
 	parseOptHolder := NewParseOptHolder(opts...)
-	return app.parseWithOptHolder(parseOptHolder)
+	return app.parseWithOptHolder2(parseOptHolder)
+	// return app.parseWithOptHolder(parseOptHolder)
 }
