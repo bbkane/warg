@@ -418,6 +418,32 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: command.PassedFlags{"--flag": int(1), "--help": "default"},
 			expectedErr:              true,
 		},
+		{
+			name: "passedFlagBeforeCommand",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+						command.Flag(
+							"--flag",
+							"flag help",
+							scalar.Int(),
+						),
+					),
+				),
+				warg.SkipValidation(),
+			),
+
+			args:                     []string{"app", "--flag", "1", "com"},
+			lookup:                   warg.LookupMap(nil),
+			expectedPassedPath:       []string{"com"},
+			expectedPassedFlagValues: command.PassedFlags{"--flag": int(1), "--help": "default"},
+			expectedErr:              true,
+		},
 	}
 	for _, tt := range tests {
 
