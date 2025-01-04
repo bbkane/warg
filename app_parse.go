@@ -568,6 +568,8 @@ func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult,
 func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 
 	parseOptHolder := NewParseOptHolder(opts...)
+	if _, exists := os.LookupEnv("WARG_PRE_V0_0_26_PARSE_ALGORITHM"); exists {
+		return app.parseWithOptHolder(parseOptHolder)
+	}
 	return app.parseWithOptHolder2(parseOptHolder)
-	// return app.parseWithOptHolder(parseOptHolder)
 }

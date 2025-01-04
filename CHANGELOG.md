@@ -10,7 +10,31 @@ below this description) is likely unreleased.
 
 ## Changed
 
-- Moved `SetBy` into the `Value` interface (`value.UpdatedBy()` - this allows `Flag` to be readonly and and makes the coupling between setting the value and updating `UpdatedBy` explicit
+- Moved `SetBy` into the `Value` interface (`value.UpdatedBy()` - this allows
+`Flag` to be readonly and and makes the coupling between setting the value and
+updating `UpdatedBy` explicit
+- Flags must now be the last things passed - i.e. `<appname> <section>
+<command> <flag>...`. In addition, the only flag allowed after a `<section>` is
+the `--help` flag (unfortunately the `--color` flag is NOT currently allowed to
+be passed for section help). This simplifies the parsing and will help with tab
+completion, and after that's implemented I might try to restore the old
+behavior if I get too annoyed with this limitation. Temporarily, the old
+behavior can be restored by setting the `WARG_PRE_V0_0_26_PARSE_ALGORITHM`
+environment variable, but I plan to remove that in the next version.
+
+Examples:
+
+```
+$ go run ./examples/butler --color false -h
+Parse err: Parse args error: expecting section or command, got --color
+exit status 64
+```
+
+```
+$ WARG_PRE_V0_0_26_PARSE_ALGORITHM=1 go run ./examples/butler --color false -h
+A virtual assistant
+# ... more text ...
+```
 
 # v0.0.25
 
