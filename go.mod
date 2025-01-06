@@ -1,6 +1,6 @@
 module go.bbkane.com/warg
 
-go 1.21
+go 1.23
 
 require (
 	github.com/mattn/go-isatty v0.0.20

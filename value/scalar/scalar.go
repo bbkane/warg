@@ -84,7 +84,10 @@ func (v *scalarValue[_]) HasDefault() bool {
 	return v.defaultVal != nil
 }
 
-func (v *scalarValue[_]) ReplaceFromInterface(iFace interface{}, u value.UpdatedBy) error {
+func (v *scalarValue[T]) ReplaceFromInterface(iFace interface{}, u value.UpdatedBy) error {
+	if v.updatedBy != value.UpdatedByUnset {
+		return value.ErrUpdatedMoreThanOnce[T]{CurrentValue: v.val, UpdatedBy: v.updatedBy}
+	}
 	val, err := v.inner.FromIFace(iFace)
 	if err != nil {
 		return err
@@ -112,6 +115,9 @@ func withinChoices[T comparable](val T, choices []T) bool {
 }
 
 func (v *scalarValue[T]) Update(s string, u value.UpdatedBy) error {
+	if v.updatedBy != value.UpdatedByUnset {
+		return value.ErrUpdatedMoreThanOnce[T]{CurrentValue: v.val, UpdatedBy: v.updatedBy}
+	}
 	val, err := v.inner.FromString(s)
 	if err != nil {
 		return err
@@ -128,9 +134,13 @@ func (v *scalarValue[_]) UpdatedBy() value.UpdatedBy {
 	return v.updatedBy
 }
 
-func (v *scalarValue[_]) ReplaceFromDefault(u value.UpdatedBy) {
+func (v *scalarValue[T]) ReplaceFromDefault(u value.UpdatedBy) error {
+	if v.updatedBy != value.UpdatedByUnset {
+		return value.ErrUpdatedMoreThanOnce[T]{CurrentValue: v.val, UpdatedBy: v.updatedBy}
+	}
 	if v.defaultVal != nil {
 		v.updatedBy = u
 		v.val = *v.defaultVal
 	}
+	return nil
 }

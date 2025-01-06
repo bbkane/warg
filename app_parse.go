@@ -229,7 +229,7 @@ func resolveFlag(
 
 	// update from config
 	{
-		if canUpdate && fl.Value.UpdatedBy() == value.UpdatedByUnset && configReader != nil {
+		if canUpdate && fl.Value.UpdatedBy() == value.UpdatedByUnset && configReader != nil && fl.ConfigPath != "" {
 			fpr, err := configReader.Search(fl.ConfigPath)
 			if err != nil {
 				return err
@@ -287,7 +287,10 @@ func resolveFlag(
 	// update from default
 	{
 		if canUpdate && fl.Value.UpdatedBy() == value.UpdatedByUnset && fl.Value.HasDefault() {
-			fl.Value.ReplaceFromDefault(value.UpdatedByDefault)
+			err := fl.Value.ReplaceFromDefault(value.UpdatedByDefault)
+			if err != nil {
+				return fmt.Errorf("error updating flag %v from default: %w", name, err)
+			}
 		}
 	}
 
@@ -390,7 +393,6 @@ func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
 }
 
 func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult, error) {
-
 	osArgs := parseOptHolder.Args
 	osLookupEnv := parseOptHolder.LookupFunc
 
@@ -540,7 +542,7 @@ func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult,
 					return &pr, nil
 				}
 			}
-			return nil, fmt.Errorf("some problem with section help: info: %v", helpInfo)
+			return nil, fmt.Errorf("some problem with command help: info: %v", helpInfo)
 		} else {
 
 			pr := ParseResult{
@@ -566,5 +568,8 @@ func (app *App) parseWithOptHolder(parseOptHolder ParseOptHolder) (*ParseResult,
 func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 
 	parseOptHolder := NewParseOptHolder(opts...)
-	return app.parseWithOptHolder(parseOptHolder)
+	if _, exists := os.LookupEnv("WARG_PRE_V0_0_26_PARSE_ALGORITHM"); exists {
+		return app.parseWithOptHolder(parseOptHolder)
+	}
+	return app.parseWithOptHolder2(parseOptHolder)
 }

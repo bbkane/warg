@@ -45,7 +45,7 @@ type Value interface {
 	UpdatedBy() UpdatedBy
 
 	// ReplaceFromDefault updates the Value from a pre-set default, if one exists. use HasDefault to check whether a default exists
-	ReplaceFromDefault(u UpdatedBy)
+	ReplaceFromDefault(u UpdatedBy) error
 }
 
 type ScalarValue interface {
@@ -95,4 +95,14 @@ type ErrInvalidChoice[T comparable] struct {
 
 func (e ErrInvalidChoice[T]) Error() string {
 	return "invalid choice for value: choices: " + fmt.Sprint(e.Choices)
+}
+
+// ErrUpdatedMoreThanOnce is returned when a value is updated more than once. Only applicable to Scalar Values
+type ErrUpdatedMoreThanOnce[T comparable] struct {
+	CurrentValue T
+	UpdatedBy    UpdatedBy
+}
+
+func (e ErrUpdatedMoreThanOnce[T]) Error() string {
+	return fmt.Sprintf("value already updated to %#v by %s", e.CurrentValue, e.UpdatedBy)
 }

@@ -285,35 +285,6 @@ func TestApp_Parse(t *testing.T) {
 			expectedErr:              true,
 		},
 		{
-			name: "addSectionFlags",
-			app: func() warg.App {
-				fm := flag.FlagMap{
-					"--flag1": flag.New("--flag1 value", scalar.String()),
-					"--flag2": flag.New("--flag1 value", scalar.String()),
-				}
-				app := warg.New(
-					"newAppName",
-					section.New(
-						"help for section",
-						section.Command(
-							"test",
-							"help for test",
-							command.DoNothing,
-							command.ExistingFlags(fm),
-						),
-					),
-					warg.SkipValidation(),
-				)
-				return app
-			}(),
-
-			args:                     []string{t.Name(), "test", "--flag1", "val1"},
-			lookup:                   warg.LookupMap(nil),
-			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: command.PassedFlags{"--flag1": "val1", "--help": "default"},
-			expectedErr:              false,
-		},
-		{
 			name: "addCommandFlags",
 			app: func() warg.App {
 				fm := flag.FlagMap{
@@ -400,6 +371,79 @@ func TestApp_Parse(t *testing.T) {
 			expectedPassedFlagValues: command.PassedFlags{"--flag": map[string]bool{"true": true, "false": false}, "--help": "default"},
 			expectedErr:              false,
 		},
+		{
+			name: "passAbsentSection",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+					),
+				),
+				warg.SkipValidation(),
+			),
+
+			args:                     []string{"app", "badSectionName"},
+			lookup:                   warg.LookupMap(nil),
+			expectedPassedPath:       []string{"com1"},
+			expectedPassedFlagValues: command.PassedFlags{"--help": "default"},
+			expectedErr:              true,
+		},
+		{
+			name: "scalarFlagPassedTwice",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"com",
+						"help for com1",
+						command.DoNothing,
+						command.Flag(
+							"--flag",
+							"flag help",
+							scalar.Int(),
+						),
+					),
+				),
+				warg.SkipValidation(),
+			),
+
+			args:                     []string{"app", "com", "--flag", "1", "--flag", "2"},
+			lookup:                   warg.LookupMap(nil),
+			expectedPassedPath:       []string{"com"},
+			expectedPassedFlagValues: command.PassedFlags{"--flag": int(1), "--help": "default"},
+			expectedErr:              true,
+		},
+		{
+			name: "passedFlagBeforeCommand",
+			app: warg.New(
+				"newAppName",
+				section.New(
+					"help for test",
+					section.Command(
+						"com",
+						"help for com",
+						command.DoNothing,
+						command.Flag(
+							"--flag",
+							"flag help",
+							scalar.Int(),
+						),
+					),
+				),
+				warg.SkipValidation(),
+			),
+
+			args:                     []string{"app", "--flag", "1", "com"},
+			lookup:                   warg.LookupMap(nil),
+			expectedPassedPath:       []string{"com"},
+			expectedPassedFlagValues: command.PassedFlags{"--flag": int(1), "--help": "default"},
+			expectedErr:              true,
+		},
 	}
 	for _, tt := range tests {
 
@@ -461,8 +505,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 			expectedErr: false,
 		},
 		{
-			// A scalar flag can only be passed once - either to set it to something or to ensure it's unset with unsetSentinel. There's no point in allowing it to be passed multiples times since all desired outcomes can be accomplished with a single pass.
-			name: "unsetSentinelScalarError",
+			name: "unsetSentinelScalarUpdate",
 			app: warg.New(
 				"newAppName",
 				section.New(
@@ -481,11 +524,11 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 				),
 				warg.SkipValidation(),
 			),
-			args:                     []string{t.Name(), "test", "--flag", "UNSET", "--flag", "justsayno"},
+			args:                     []string{t.Name(), "test", "--flag", "UNSET", "--flag", "setAfter"},
 			lookup:                   warg.LookupMap(nil),
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: nil,
-			expectedErr:              true,
+			expectedPassedFlagValues: command.PassedFlags{"--flag": "setAfter", "--help": "default"},
+			expectedErr:              false,
 		},
 		{
 			name: "unsetSentinelSlice",
@@ -527,10 +570,10 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 			actualPR, actualErr := tt.app.Parse(warg.OverrideArgs(tt.args), warg.OverrideLookupFunc(tt.lookup))
 
 			if tt.expectedErr {
-				require.NotNil(t, actualErr)
+				require.Error(t, actualErr)
 				return
 			} else {
-				require.Nil(t, actualErr)
+				require.NoError(t, actualErr)
 			}
 			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)

@@ -144,11 +144,12 @@ func (v *sliceValue[_]) UpdatedBy() value.UpdatedBy {
 	return v.updatedBy
 }
 
-func (v *sliceValue[_]) ReplaceFromDefault(u value.UpdatedBy) {
+func (v *sliceValue[_]) ReplaceFromDefault(u value.UpdatedBy) error {
 	if v.hasDefault {
 		v.vals = v.defaultVals
 		v.updatedBy = u
 	}
+	return nil
 }
 
 func (v *sliceValue[_]) AppendFromInterface(iFace interface{}, u value.UpdatedBy) error {

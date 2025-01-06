@@ -90,7 +90,7 @@ func ExampleApp_Parse_flag_value_options() {
 		log.Fatalf("write error: %e", err)
 	}
 	app.MustRun(
-		warg.OverrideArgs([]string{"calc", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "show", "--scalar-flag", "b"}),
+		warg.OverrideArgs([]string{"calc", "show", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "--scalar-flag", "b"}),
 	)
 	// Output:
 	// --scalar-flag: "b"
