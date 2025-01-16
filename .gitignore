@@ -1,5 +1,4 @@
-tmp*
 .DS_Store
-tags
-__debug_bin
+__debug_bin*
 dist/
+tmp*
