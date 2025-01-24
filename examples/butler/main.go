@@ -31,7 +31,6 @@ func app() *warg.App {
 			section.ExistingCommand("version", warg.VersionCommand()),
 		),
 		warg.ExistingGlobalFlag("--color", warg.ColorFlag()),
-		warg.SkipValidation(),
 	)
 	return &app
 }
