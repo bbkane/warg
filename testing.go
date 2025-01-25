@@ -42,7 +42,7 @@ func GoldenTest(
 	OverrideStderr(stderrTmpFile)(&parseOptHolder)
 	OverrideStdout(stdoutTmpFile)(&parseOptHolder)
 
-	pr, parseErr := args.App.parseWithOptHolder(parseOptHolder)
+	pr, parseErr := args.App.parseWithOptHolder2(parseOptHolder)
 	require.Nil(t, parseErr)
 
 	actionErr := pr.Action(pr.Context)

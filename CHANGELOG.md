@@ -6,6 +6,12 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.0.27
+
+## Removed
+
+- Removed `WARG_PRE_V0_0_26_PARSE_ALGORITHM` environment variable and the associated parse algorithm. We're 500 lines of code simpler now!
+
 # v0.0.26
 
 ## Changed
