@@ -49,6 +49,7 @@ Inherited Section Flags:
     type : string
     choices : [true false auto]
     default : auto
+    envvars : [WARG_COLOR]
     currentvalue (set by appdefault) : auto
 
   --help , -h : Print help

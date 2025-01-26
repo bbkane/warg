@@ -167,6 +167,7 @@ func ColorFlagMap() flag.FlagMap {
 				scalar.Choices("true", "false", "auto"),
 				scalar.Default("auto"),
 			),
+			flag.EnvVars("WARG_COLOR"),
 		),
 	}
 }
