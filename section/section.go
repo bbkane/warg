@@ -77,6 +77,15 @@ func ExistingSection(name Name, value SectionT) SectionOpt {
 	}
 }
 
+// ExistingSections adds existing Sections underneath this Section. Panics if a Section with the same name already exists
+func ExistingSections(sections SectionMap) SectionOpt {
+	return func(app *SectionT) {
+		for name, value := range sections {
+			ExistingSection(name, value)(app)
+		}
+	}
+}
+
 // ExistingCommand adds an existing Command underneath this Section. Panics if a Command with the same name already exists
 func ExistingCommand(name command.Name, value command.Command) SectionOpt {
 	return func(app *SectionT) {
@@ -84,6 +93,15 @@ func ExistingCommand(name command.Name, value command.Command) SectionOpt {
 			app.Commands[name] = value
 		} else {
 			log.Panicf("command already exists: %#v\n", name)
+		}
+	}
+}
+
+// ExistingCommands adds existing Commands underneath this Section. Panics if a Command with the same name already exists
+func ExistingCommands(commands command.CommandMap) SectionOpt {
+	return func(app *SectionT) {
+		for name, value := range commands {
+			ExistingCommand(name, value)(app)
 		}
 	}
 }

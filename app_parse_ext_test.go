@@ -413,6 +413,39 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			expectedPassedFlagValues: command.PassedFlags{"--flag": int(1), "--help": "default"},
 			expectedErr:              true,
 		},
+		{
+			name: "existingSectionsExistingCommands",
+			rootSection: section.New(
+				"help for test",
+				section.ExistingSections(
+					section.SectionMap{
+						"section": section.New(
+							"help for section",
+							section.ExistingCommands(
+								command.CommandMap{
+									"command": command.New(
+										"help for command",
+										command.DoNothing,
+										command.Flag(
+											"--flag",
+											"flag help",
+											scalar.Int(),
+										),
+									),
+								},
+							),
+						),
+					},
+				),
+			),
+			args:               []string{"app", "section", "command", "--flag", "1"},
+			expectedPassedPath: []string{"section", "command"},
+			expectedPassedFlagValues: command.PassedFlags{
+				"--flag": 1,
+				"--help": "default",
+			},
+			expectedErr: false,
+		},
 	}
 
 	for _, tt := range tests {

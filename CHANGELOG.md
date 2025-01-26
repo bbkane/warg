@@ -8,6 +8,10 @@ below this description) is likely unreleased.
 
 # v0.0.28
 
+## Added
+
+- `section.ExistingCommands` and `section.ExistingSections` for pre-existing sections and commands
+
 ## Changed
 
 - `version` is now a parameter to `warg.New` instead of the (now removed)
