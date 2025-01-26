@@ -165,13 +165,13 @@ func app() *warg.App {
 			"open",
 			"Open spreadsheet in browser",
 			gSheetsOpen,
-			command.ExistingFlags(sheetFlags),
+			command.FlagMap(sheetFlags),
 		),
 		section.Command(
 			"upload",
 			"Upload CSV to Google Sheets. This will overwrite whatever is in the spreadsheet",
 			gSheetsUpload,
-			command.ExistingFlags(sheetFlags),
+			command.FlagMap(sheetFlags),
 			command.Flag(
 				"--csv-path",
 				"CSV file to upload",

@@ -13,14 +13,14 @@ type Name string
 // HelpShort is a required short description of the section
 type HelpShort string
 
-// SectionMap holds Sections - used by other Sections
-type SectionMap map[Name]SectionT
+// SectionMapT holds Sections - used by other Sections
+type SectionMapT map[Name]SectionT
 
-func (fm SectionMap) Empty() bool {
+func (fm SectionMapT) Empty() bool {
 	return len(fm) == 0
 }
 
-func (fm SectionMap) SortedNames() []Name {
+func (fm SectionMapT) SortedNames() []Name {
 	keys := make([]Name, 0, len(fm))
 	for k := range fm {
 		keys = append(keys, k)
@@ -42,7 +42,7 @@ type SectionT struct {
 	// Commands holds the Commands under this Section
 	Commands command.CommandMap
 	// Sections holds the Sections under this Section
-	Sections SectionMap
+	Sections SectionMapT
 	// HelpShort is a required one-line descripiton of this section
 	HelpShort HelpShort
 	// HelpLong is an optional longer description of this section
@@ -55,7 +55,7 @@ type SectionT struct {
 func New(helpShort HelpShort, opts ...SectionOpt) SectionT {
 	section := SectionT{
 		HelpShort: helpShort,
-		Sections:  make(SectionMap),
+		Sections:  make(SectionMapT),
 		Commands:  make(command.CommandMap),
 		HelpLong:  "",
 		Footer:    "",
@@ -77,8 +77,8 @@ func ExistingSection(name Name, value SectionT) SectionOpt {
 	}
 }
 
-// ExistingSections adds existing Sections underneath this Section. Panics if a Section with the same name already exists
-func ExistingSections(sections SectionMap) SectionOpt {
+// SectionMap adds existing Sections underneath this Section. Panics if a Section with the same name already exists
+func SectionMap(sections SectionMapT) SectionOpt {
 	return func(app *SectionT) {
 		for name, value := range sections {
 			ExistingSection(name, value)(app)
@@ -97,8 +97,8 @@ func ExistingCommand(name command.Name, value command.Command) SectionOpt {
 	}
 }
 
-// ExistingCommands adds existing Commands underneath this Section. Panics if a Command with the same name already exists
-func ExistingCommands(commands command.CommandMap) SectionOpt {
+// CommandMap adds existing Commands underneath this Section. Panics if a Command with the same name already exists
+func CommandMap(commands command.CommandMap) SectionOpt {
 	return func(app *SectionT) {
 		for name, value := range commands {
 			ExistingCommand(name, value)(app)

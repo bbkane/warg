@@ -76,7 +76,7 @@ Homepage: https://github.com/bbkane/grabbit
 				"grab",
 				"Grab images. Optionally use `config edit` first to create a config",
 				grab,
-				command.ExistingFlags(logFlags),
+				command.FlagMap(logFlags),
 				command.Flag(
 					"--subreddit-name",
 					"Subreddit to grab",
@@ -138,7 +138,7 @@ Homepage: https://github.com/bbkane/grabbit
 					"edit",
 					"Edit or create configuration file.",
 					editConfig,
-					command.ExistingFlags(logFlags),
+					command.FlagMap(logFlags),
 					command.Flag(
 						"--editor",
 						"Path to editor",

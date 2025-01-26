@@ -97,7 +97,7 @@ func TestApp_Parse(t *testing.T) {
 							"test",
 							"help for test",
 							command.DoNothing,
-							command.ExistingFlags(fm),
+							command.FlagMap(fm),
 						),
 					),
 					warg.SkipValidation(),
@@ -417,11 +417,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "existingSectionsExistingCommands",
 			rootSection: section.New(
 				"help for test",
-				section.ExistingSections(
-					section.SectionMap{
+				section.SectionMap(
+					section.SectionMapT{
 						"section": section.New(
 							"help for section",
-							section.ExistingCommands(
+							section.CommandMap(
 								command.CommandMap{
 									"command": command.New(
 										"help for command",

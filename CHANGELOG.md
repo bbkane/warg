@@ -10,10 +10,11 @@ below this description) is likely unreleased.
 
 ## Added
 
-- `section.ExistingCommands` and `section.ExistingSections` for pre-existing sections and commands
+- `section.CommandMap` and `section.SectionMap` for pre-existing sections and commands
 
 ## Changed
 
+- Renamed `command.ExistingFlags` to `commamd.FlagMap`. The plural name is awkward when adding a one-element `FlagMap` is perfectly ok (and nice when you don't want to keep typing the name...)
 - `version` is now a parameter to `warg.New` instead of the (now removed)
 `warg.OverrideVersion`. Changed because I ALWAYS want to set the version and I
 think thats common for real-world CLIs. If passed an empty string, warg will

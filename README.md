@@ -21,30 +21,28 @@ See API docs (including code examples) at [pkg.go.dev](https://pkg.go.dev/go.bbk
 Simple "butler" example (full source [here](examples/butler/main.go)):
 
 ```go
-func app() *warg.App {
-	app := warg.New(
-		"butler",
-		section.New(
-			section.HelpShort("A virtual assistant"),
-			section.Command(
-				"present",
-				"Formally present a guest (guests are never introduced, always presented).",
-				present,
-				command.Flag(
-					"--name",
-					"Guest to address.",
-					scalar.String(),
-					flag.Alias("-n"),
-					flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),
-					flag.Required(),
-				),
-			),
-			section.ExistingCommand("version", warg.VersionCommand()),
-		),
-		warg.ExistingGlobalFlag("--color", warg.ColorFlag()),
-	)
-	return &app
-}
+app := warg.New(
+  "butler",
+  "v1.0.0",
+  section.New(
+    section.HelpShort("A virtual assistant"),
+    section.Command(
+      "present",
+      "Formally present a guest (guests are never introduced, always presented).",
+      present,
+      command.Flag(
+        "--name",
+        "Guest to address.",
+        scalar.String(),
+        flag.Alias("-n"),
+        flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),
+        flag.Required(),
+      ),
+    ),
+    section.ExistingCommand("version", warg.VersionCommand()),
+  ),
+  warg.ExistingGlobalFlag("--color", warg.ColorFlag()),
+)
 ```
 
 <p align="center">

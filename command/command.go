@@ -107,7 +107,8 @@ func ExistingFlag(name flag.Name, value flag.Flag) CommandOpt {
 	}
 }
 
-func ExistingFlags(flagMap flag.FlagMap) CommandOpt {
+// FlagMap adds existing flags to a Command. It panics if a flag with the same name exists
+func FlagMap(flagMap flag.FlagMap) CommandOpt {
 	return func(com *Command) {
 		com.Flags.AddFlags(flagMap)
 	}
