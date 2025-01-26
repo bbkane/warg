@@ -225,7 +225,7 @@ func app() *warg.App {
 		"v1.0.0",
 		section.New(
 			"Save GitHub Starred Repos",
-			section.ExistingCommand("version", warg.VersionCommand()),
+			section.CommandMap(warg.VersionCommandMap()),
 			section.ExistingCommand(
 				"download",
 				downloadCmd,
@@ -244,7 +244,7 @@ func app() *warg.App {
 			),
 			section.Footer("Homepage: https://github.com/bbkane/starghaze"),
 		),
-		warg.ExistingGlobalFlag("--color", warg.ColorFlag()),
+		warg.GlobalFlagMap(warg.ColorFlagMap()),
 		warg.SkipValidation(),
 	)
 	return &app

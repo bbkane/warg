@@ -103,8 +103,8 @@ func ExistingGlobalFlag(name flag.Name, value flag.Flag) AppOpt {
 	}
 }
 
-// ExistingGlobalFlags adds existing flags to a Command. It panics if a flag with the same name exists
-func ExistingGlobalFlags(flagMap flag.FlagMap) AppOpt {
+// GlobalFlagMap adds existing flags to a Command. It panics if a flag with the same name exists
+func GlobalFlagMap(flagMap flag.FlagMap) AppOpt {
 	return func(com *App) {
 		com.globalFlags.AddFlags(flagMap)
 	}
@@ -154,28 +154,38 @@ func debugBuildInfoVersion() string {
 	return info.Main.Version
 }
 
-// ColorFlag returns a flag indicating whether use user wants colored output.
-// By convention, if this flag is named "--color", it will be respected by the different help commands. Usage:
+// ColorFlagMap returns a map with a single "--color" flag that can be used to control color output.
 //
-//	section.ExistingFlag("--color", warg.ColorFlag()),
-func ColorFlag() flag.Flag {
-	return flag.New(
-		"Use ANSI colors",
-		scalar.String(
-			scalar.Choices("true", "false", "auto"),
-			scalar.Default("auto"),
+// Example:
+//
+//	warg.GlobalFlagMap(warg.ColorFlagMap())
+func ColorFlagMap() flag.FlagMap {
+	return flag.FlagMap{
+		"--color": flag.New(
+			"Use ANSI colors",
+			scalar.String(
+				scalar.Choices("true", "false", "auto"),
+				scalar.Default("auto"),
+			),
 		),
-	)
+	}
 }
 
-func VersionCommand() command.Command {
-	return command.New(
-		"Print version",
-		func(ctx command.Context) error {
-			fmt.Fprintln(ctx.Stdout, ctx.Version)
-			return nil
-		},
-	)
+// VersioncommandMap returns a map with a single "version" command that prints the app version.
+//
+// Example:
+//
+//	warg.GlobalFlagMap(warg.ColorFlagMap())
+func VersionCommandMap() command.CommandMap {
+	return command.CommandMap{
+		"version": command.New(
+			"Print version",
+			func(ctx command.Context) error {
+				fmt.Fprintln(ctx.Stdout, ctx.Version)
+				return nil
+			},
+		),
+	}
 }
 
 // New creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.

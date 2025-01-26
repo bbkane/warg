@@ -29,9 +29,9 @@ func app() *warg.App {
 					flag.Required(),
 				),
 			),
-			section.ExistingCommand("version", warg.VersionCommand()),
+			section.CommandMap(warg.VersionCommandMap()),
 		),
-		warg.ExistingGlobalFlag("--color", warg.ColorFlag()),
+		warg.GlobalFlagMap(warg.ColorFlagMap()),
 	)
 	return &app
 }
