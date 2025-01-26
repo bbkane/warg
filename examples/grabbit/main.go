@@ -69,6 +69,7 @@ Homepage: https://github.com/bbkane/grabbit
 
 	app := warg.New(
 		"grabbit",
+		"v1.0.0",
 		section.New(
 			"Get top images from subreddits",
 			section.Command(

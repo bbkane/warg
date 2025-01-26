@@ -28,6 +28,7 @@ func exampleConfigFlagTextAdd(ctx command.Context) error {
 func ExampleConfigFlag() {
 	app := warg.New(
 		"newAppName",
+		"v1.0.0",
 		section.New(
 			"do math",
 			section.Command(

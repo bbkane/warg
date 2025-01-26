@@ -6,6 +6,15 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.0.28
+
+## Changed
+
+- `version` is now a parameter to `warg.New` instead of the (now removed)
+`warg.OverrideVersion`. Changed because I ALWAYS want to set the version and I
+think thats common for real-world CLIs. If passed an empty string, warg will
+attempt to use the go module version.
+
 # v0.0.27
 
 ## Removed

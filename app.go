@@ -96,13 +96,6 @@ func OverrideHelpFlag(
 	}
 }
 
-// OverrideVersion lets you set a custom version string. The default is read from debug.BuildInfo
-func OverrideVersion(version string) AppOpt {
-	return func(a *App) {
-		a.version = version
-	}
-}
-
 // ExistingGlobalFlag adds an existing flag to a Command. It panics if a flag with the same name exists
 func ExistingGlobalFlag(name flag.Name, value flag.Flag) AppOpt {
 	return func(com *App) {
@@ -155,9 +148,7 @@ func debugBuildInfoVersion() string {
 	// If installed via `go install`, we'll be able to read runtime version info
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
-		// This shouldn't happen with modern versions of Go
-		// unless someone strips the binary, and I don't support that
-		panic("unable to read build info")
+		return "unknown"
 	}
 	// when run with `go run`, this will return "(devel)"
 	return info.Main.Version
@@ -187,8 +178,8 @@ func VersionCommand() command.Command {
 	)
 }
 
-// New builds a new App!
-func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
+// New creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.
+func New(name string, version string, rootSection section.SectionT, opts ...AppOpt) App {
 	app := App{
 		name:            name,
 		rootSection:     rootSection,
@@ -199,7 +190,7 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 		helpFlagAlias:   "",
 		helpMappings:    nil,
 		skipValidation:  false,
-		version:         "",
+		version:         version,
 		globalFlags:     make(flag.FlagMap),
 	}
 	for _, opt := range opts {
@@ -217,7 +208,7 @@ func New(name string, rootSection section.SectionT, opts ...AppOpt) App {
 	}
 
 	if app.version == "" {
-		OverrideVersion(debugBuildInfoVersion())(&app)
+		app.version = debugBuildInfoVersion()
 	}
 
 	// validate or not and return

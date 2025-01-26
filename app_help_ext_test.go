@@ -91,52 +91,31 @@ func TestAppHelp(t *testing.T) {
 	updateGolden := os.Getenv("WARG_TEST_UPDATE_GOLDEN") != ""
 	tests := []struct {
 		name   string
-		app    warg.App
 		args   []string
 		lookup warg.LookupFunc
 	}{
 		// toplevel just a toplevel help!
 		{
-			name: "toplevel",
-			app: warg.New(
-				"grabbit",
-				grabbitSection(),
-				warg.SkipValidation(),
-			),
+			name:   "toplevel",
 			args:   []string{"grabbit", "-h", "outline"},
 			lookup: warg.LookupMap(nil),
 		},
 
 		// allcommands (no command help)
 		{
-			name: "allcommandsSection",
-			app: warg.New(
-				"grabbit",
-				grabbitSection(),
-				warg.SkipValidation(),
-			),
+			name:   "allcommandsSection",
 			args:   []string{"grabbit", "config", "--help"},
 			lookup: warg.LookupMap(nil),
 		},
 
 		// detailed
 		{
-			name: "detailedCommand",
-			app: warg.New(
-				"newAppName",
-				grabbitSection(),
-				warg.SkipValidation(),
-			),
+			name:   "detailedCommand",
 			args:   []string{"grabbit", "config", "edit", "--help"},
 			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
-			name: "detailedSection",
-			app: warg.New(
-				"newAppName",
-				grabbitSection(),
-				warg.SkipValidation(),
-			),
+			name:   "detailedSection",
 			args:   []string{"grabbit", "--help", "detailed"},
 			lookup: warg.LookupMap(nil),
 		},
@@ -144,23 +123,13 @@ func TestAppHelp(t *testing.T) {
 		// outline
 		{
 			// TODO: make this print global flags!
-			name: "outlineCommand",
-			app: warg.New(
-				"grabbit",
-				grabbitSection(),
-				warg.SkipValidation(),
-			),
+			name:   "outlineCommand",
 			args:   []string{"grabbit", "config", "edit", "--help", "outline"},
 			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
 			// TODO: make this print global flags!
-			name: "outlineSection",
-			app: warg.New(
-				"grabbit",
-				grabbitSection(),
-				warg.SkipValidation(),
-			),
+			name:   "outlineSection",
 			args:   []string{"grabbit", "--help", "outline"},
 			lookup: warg.LookupMap(nil),
 		},
@@ -168,10 +137,16 @@ func TestAppHelp(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			app := warg.New(
+				"grabbit",
+				"v1.0.0",
+				grabbitSection(),
+				warg.SkipValidation(),
+			)
 			warg.GoldenTest(
 				t,
 				warg.GoldenTestArgs{
-					App:             &tt.app,
+					App:             &app,
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},
