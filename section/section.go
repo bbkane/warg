@@ -187,3 +187,16 @@ func (s *SectionIterator) Next() FlatSection {
 func (s *SectionIterator) HasNext() bool {
 	return len(s.queue) > 0
 }
+
+func (s *SectionT) ChildrenNames() []string {
+	ret := []string{}
+
+	for _, n := range s.Commands.SortedNames() {
+		ret = append(ret, string(n))
+	}
+
+	for _, n := range s.Sections.SortedNames() {
+		ret = append(ret, string(n))
+	}
+	return ret
+}
