@@ -26,11 +26,11 @@ app := warg.New(
   "v1.0.0",
   section.New(
     section.HelpShort("A virtual assistant"),
-    section.Command(
+    section.NewCommand(
       "present",
       "Formally present a guest (guests are never introduced, always presented).",
       present,
-      command.Flag(
+      command.NewFlag(
         "--name",
         "Guest to address.",
         scalar.String(),
@@ -46,7 +46,7 @@ app := warg.New(
 ```
 
 <p align="center">
-  <img src="img/image-20220114212104654.png" alt="Sublime's custom image"/>
+  <img src="img/image-20220114212104654.png" alt="Butler help screenshot"/>
 </p>
 
 # When to avoid warg
