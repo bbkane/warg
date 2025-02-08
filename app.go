@@ -96,8 +96,8 @@ func OverrideHelpFlag(
 	}
 }
 
-// ExistingGlobalFlag adds an existing flag to a Command. It panics if a flag with the same name exists
-func ExistingGlobalFlag(name flag.Name, value flag.Flag) AppOpt {
+// GlobalFlag adds an existing flag to a Command. It panics if a flag with the same name exists
+func GlobalFlag(name flag.Name, value flag.Flag) AppOpt {
 	return func(com *App) {
 		com.globalFlags.AddFlag(name, value)
 	}
@@ -110,9 +110,9 @@ func GlobalFlagMap(flagMap flag.FlagMap) AppOpt {
 	}
 }
 
-// GlobalFlag adds a flag to the app. It panics if a flag with the same name exists
-func GlobalFlag(name flag.Name, helpShort flag.HelpShort, empty value.EmptyConstructor, opts ...flag.FlagOpt) AppOpt {
-	return ExistingGlobalFlag(name, flag.New(helpShort, empty, opts...))
+// NewGlobalFlag adds a flag to the app. It panics if a flag with the same name exists
+func NewGlobalFlag(name flag.Name, helpShort flag.HelpShort, empty value.EmptyConstructor, opts ...flag.FlagOpt) AppOpt {
+	return GlobalFlag(name, flag.New(helpShort, empty, opts...))
 
 }
 

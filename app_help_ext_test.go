@@ -37,31 +37,31 @@ func grabbitSection() section.SectionT {
 
 	sec := section.New(
 		"grab those images!",
-		section.Command(
+		section.NewCommand(
 			"grab",
 			"do the grabbity grabbity",
 			command.DoNothing,
 		),
-		section.Command(
+		section.NewCommand(
 			"command2",
 			"another command",
 			command.DoNothing,
 		),
-		section.Command(
+		section.NewCommand(
 			"command3",
 			"another command",
 			command.DoNothing,
 		),
-		section.Section(
+		section.NewSection(
 			"config",
 			"Change grabbit's config",
 			section.Footer(rootFooter),
-			section.Command(
+			section.NewCommand(
 				"edit",
 				"Edit the config. A default config will be created if it doesn't exist",
 				command.DoNothing,
 				command.Footer(configEditFooter),
-				command.Flag(
+				command.NewFlag(
 					"--editor",
 					"path to editor",
 					scalar.String(
@@ -73,15 +73,15 @@ func grabbitSection() section.SectionT {
 				),
 			),
 		),
-		section.Section(
+		section.NewSection(
 			"section2",
 			"another section",
-			section.Command("com", "Dummy command to pass validation", command.DoNothing),
+			section.NewCommand("com", "Dummy command to pass validation", command.DoNothing),
 		),
-		section.Section(
+		section.NewSection(
 			"section3",
 			"another section",
-			section.Command("com", "Dummy command to pass validation", command.DoNothing),
+			section.NewCommand("com", "Dummy command to pass validation", command.DoNothing),
 		),
 	)
 	return sec

@@ -31,7 +31,7 @@ func TestApp_Validate(t *testing.T) {
 			name: "appNameWithDash",
 			app: warg.New("newAppName", "v1.0.0",
 				section.New("",
-					section.Command("com", "command for validation", command.DoNothing),
+					section.NewCommand("com", "command for validation", command.DoNothing),
 				),
 				warg.SkipValidation(),
 			),
@@ -41,8 +41,8 @@ func TestApp_Validate(t *testing.T) {
 			name: "sectionNameWithDash",
 			app: warg.New("newAppName", "v1.0.0",
 				section.New("",
-					section.Section("-name", "",
-						section.Command("com", "command for validation", command.DoNothing),
+					section.NewSection("-name", "",
+						section.NewCommand("com", "command for validation", command.DoNothing),
 					),
 				),
 				warg.SkipValidation(),
@@ -53,8 +53,8 @@ func TestApp_Validate(t *testing.T) {
 			name: "commandNameWithDash",
 			app: warg.New("newAppName", "v1.0.0",
 				section.New("",
-					section.Section("name", "",
-						section.Command("-com", "starts with dash", command.DoNothing),
+					section.NewSection("name", "",
+						section.NewCommand("-com", "starts with dash", command.DoNothing),
 					),
 				),
 				warg.SkipValidation(),
@@ -65,11 +65,11 @@ func TestApp_Validate(t *testing.T) {
 			name: "flagNameNoDash",
 			app: warg.New("newAppName", "v1.0.0",
 				section.New("",
-					section.Command(
+					section.NewCommand(
 						"c",
 						"",
 						command.DoNothing,
-						command.Flag("f", "", nil),
+						command.NewFlag("f", "", nil),
 					),
 				),
 				warg.SkipValidation(),
@@ -80,11 +80,11 @@ func TestApp_Validate(t *testing.T) {
 			name: "aliasNameNoDash",
 			app: warg.New("newAppName", "v1.0.0",
 				section.New("",
-					section.Command(
+					section.NewCommand(
 						"c",
 						"",
 						command.DoNothing,
-						command.Flag("-f", "", scalar.Bool(),
+						command.NewFlag("-f", "", scalar.Bool(),
 							flag.Alias("f"),
 						)),
 				),
@@ -97,9 +97,9 @@ func TestApp_Validate(t *testing.T) {
 			name: "commandFlagAliasCommandFlagNameConflict",
 			app: warg.New("newAppName", "v1.0.0",
 				section.New("",
-					section.Command("c", "", command.DoNothing,
-						command.Flag("-f", "", scalar.Bool()),
-						command.Flag("--other", "", scalar.Bool(), flag.Alias("-f")),
+					section.NewCommand("c", "", command.DoNothing,
+						command.NewFlag("-f", "", scalar.Bool()),
+						command.NewFlag("--other", "", scalar.Bool(), flag.Alias("-f")),
 					),
 				),
 				warg.SkipValidation(),
@@ -111,11 +111,11 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New("newAppName", "v1.0.0",
 				section.New(
 					"help for test",
-					section.Command(
+					section.NewCommand(
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--commandflag",
 							"global flag conflict",
 							scalar.String(),
@@ -124,7 +124,7 @@ func TestApp_Validate(t *testing.T) {
 					),
 				),
 				warg.SkipValidation(),
-				warg.GlobalFlag(
+				warg.NewGlobalFlag(
 					"--globalflag",
 					"global flag",
 					scalar.String(),
@@ -138,11 +138,11 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New("newAppName", "v1.0.0",
 				section.New(
 					"help for test",
-					section.Command(
+					section.NewCommand(
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--commandflag",
 							"global flag conflict",
 							scalar.String(),
@@ -151,7 +151,7 @@ func TestApp_Validate(t *testing.T) {
 					),
 				),
 				warg.SkipValidation(),
-				warg.GlobalFlag(
+				warg.NewGlobalFlag(
 					"--global",
 					"global flag",
 					scalar.String(),
@@ -164,11 +164,11 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New("newAppName", "v1.0.0",
 				section.New(
 					"help for test",
-					section.Command(
+					section.NewCommand(
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--global",
 							"global flag conflict",
 							scalar.String(),
@@ -176,7 +176,7 @@ func TestApp_Validate(t *testing.T) {
 					),
 				),
 				warg.SkipValidation(),
-				warg.GlobalFlag(
+				warg.NewGlobalFlag(
 					"--global",
 					"global flag",
 					scalar.String(),
@@ -189,18 +189,18 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New("newAppName", "v1.0.0",
 				section.New(
 					"help for test",
-					section.Command(
+					section.NewCommand(
 						"conflict",
 						"help for com",
 						command.DoNothing,
 					),
-					section.Section(
+					section.NewSection(
 						"conflict",
 						"help for section",
 					),
 				),
 				warg.SkipValidation(),
-				warg.GlobalFlag(
+				warg.NewGlobalFlag(
 					"--global",
 					"global flag",
 					scalar.String(),

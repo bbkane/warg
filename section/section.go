@@ -66,8 +66,8 @@ func New(helpShort HelpShort, opts ...SectionOpt) SectionT {
 	return section
 }
 
-// ExistingSection adds an existing Section underneath this Section. Panics if a Section with the same name already exists
-func ExistingSection(name Name, value SectionT) SectionOpt {
+// Section adds an existing Section underneath this Section. Panics if a Section with the same name already exists
+func Section(name Name, value SectionT) SectionOpt {
 	return func(app *SectionT) {
 		if _, alreadyThere := app.Sections[name]; !alreadyThere {
 			app.Sections[name] = value
@@ -81,13 +81,13 @@ func ExistingSection(name Name, value SectionT) SectionOpt {
 func SectionMap(sections SectionMapT) SectionOpt {
 	return func(app *SectionT) {
 		for name, value := range sections {
-			ExistingSection(name, value)(app)
+			Section(name, value)(app)
 		}
 	}
 }
 
-// ExistingCommand adds an existing Command underneath this Section. Panics if a Command with the same name already exists
-func ExistingCommand(name command.Name, value command.Command) SectionOpt {
+// Command adds an existing Command underneath this Section. Panics if a Command with the same name already exists
+func Command(name command.Name, value command.Command) SectionOpt {
 	return func(app *SectionT) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
@@ -101,19 +101,19 @@ func ExistingCommand(name command.Name, value command.Command) SectionOpt {
 func CommandMap(commands command.CommandMap) SectionOpt {
 	return func(app *SectionT) {
 		for name, value := range commands {
-			ExistingCommand(name, value)(app)
+			Command(name, value)(app)
 		}
 	}
 }
 
-// Section creates a Section and adds it underneath this Section. Panics if a Section with the same name already exists
-func Section(name Name, helpShort HelpShort, opts ...SectionOpt) SectionOpt {
-	return ExistingSection(name, New(helpShort, opts...))
+// NewSection creates a NewSection and adds it underneath this NewSection. Panics if a NewSection with the same name already exists
+func NewSection(name Name, helpShort HelpShort, opts ...SectionOpt) SectionOpt {
+	return Section(name, New(helpShort, opts...))
 }
 
-// Command creates a Command and adds it underneath this Section. Panics if a Command with the same name already exists
-func Command(name command.Name, helpShort command.HelpShort, action command.Action, opts ...command.CommandOpt) SectionOpt {
-	return ExistingCommand(name, command.New(helpShort, action, opts...))
+// NewCommand creates a NewCommand and adds it underneath this Section. Panics if a NewCommand with the same name already exists
+func NewCommand(name command.Name, helpShort command.HelpShort, action command.Action, opts ...command.CommandOpt) SectionOpt {
+	return Command(name, command.New(helpShort, action, opts...))
 }
 
 // Footer adds an optional help string to this Section

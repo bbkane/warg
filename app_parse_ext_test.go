@@ -54,11 +54,11 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
-					section.Command(
+					section.NewCommand(
 						"test",
 						"blah",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--flag",
 							"help for --flag",
 							scalar.String(),
@@ -93,7 +93,7 @@ func TestApp_Parse(t *testing.T) {
 					"newAppName", "v1.0.0",
 					section.New(
 						"help for section",
-						section.Command(
+						section.NewCommand(
 							"test",
 							"help for test",
 							command.DoNothing,
@@ -119,11 +119,11 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName", "v1.0.0",
 				section.New(
 					section.HelpShort("A virtual assistant"),
-					section.Command(
+					section.NewCommand(
 						"present",
 						"Formally present a guest (guests are never introduced, always presented).",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--name",
 							"Guest to address.",
 							scalar.String(scalar.Choices("bob")),
@@ -178,14 +178,14 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "fromMain",
 			rootSection: section.New(
 				"help for test",
-				section.Section(
+				section.NewSection(
 					"cat1",
 					"help for cat1",
-					section.Command(
+					section.NewCommand(
 						"com1",
 						"help for com1",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--com1f1",
 							"flag help",
 							scalar.Int(
@@ -204,7 +204,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "noSection",
 			rootSection: section.New(
 				"help for test",
-				section.Command("com", "command for validation", command.DoNothing),
+				section.NewCommand("com", "command for validation", command.DoNothing),
 			),
 
 			args:                     []string{"app"},
@@ -216,11 +216,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "flagDefault",
 			rootSection: section.New(
 				"help for test",
-				section.Command(
+				section.NewCommand(
 					"com",
 					"com help",
 					command.DoNothing,
-					command.Flag(
+					command.NewFlag(
 						"--flag",
 						"flag help",
 						scalar.String(
@@ -238,11 +238,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "extraFlag",
 			rootSection: section.New(
 				"help for test",
-				section.Command(
+				section.NewCommand(
 					"com",
 					"com help",
 					command.DoNothing,
-					command.Flag(
+					command.NewFlag(
 						"--flag",
 						"flag help",
 						scalar.String(
@@ -260,11 +260,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "requiredFlag",
 			rootSection: section.New(
 				"help for test",
-				section.Command(
+				section.NewCommand(
 					"test",
 					"blah",
 					command.DoNothing,
-					command.Flag(
+					command.NewFlag(
 						"--flag",
 						"help for --flag",
 						scalar.String(),
@@ -281,11 +281,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "flagAlias",
 			rootSection: section.New(
 				"help for section",
-				section.Command(
+				section.NewCommand(
 					"test",
 					"help for test",
 					command.DoNothing,
-					command.Flag(
+					command.NewFlag(
 						"--flag",
 						"help for --flag",
 						scalar.String(),
@@ -302,11 +302,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "flagAliasWithList",
 			rootSection: section.New(
 				"help for section",
-				section.Command(
+				section.NewCommand(
 					"test",
 					"help for test",
 					command.DoNothing,
-					command.Flag(
+					command.NewFlag(
 						"--flag",
 						"help for --flag",
 						slice.String(),
@@ -323,7 +323,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "badHelp",
 			rootSection: section.New(
 				"help for section",
-				section.Command(
+				section.NewCommand(
 					"test",
 					"help for test",
 					command.DoNothing,
@@ -338,11 +338,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "dictUpdate",
 			rootSection: section.New(
 				"help for test",
-				section.Command(
+				section.NewCommand(
 					"com1",
 					"help for com1",
 					command.DoNothing,
-					command.Flag(
+					command.NewFlag(
 						flag.Name("--flag"),
 						"flag help",
 						dict.Bool(),
@@ -359,7 +359,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "passAbsentSection",
 			rootSection: section.New(
 				"help for test",
-				section.Command(
+				section.NewCommand(
 					"com",
 					"help for com",
 					command.DoNothing,
@@ -375,11 +375,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "scalarFlagPassedTwice",
 			rootSection: section.New(
 				"help for test",
-				section.Command(
+				section.NewCommand(
 					"com",
 					"help for com1",
 					command.DoNothing,
-					command.Flag(
+					command.NewFlag(
 						"--flag",
 						"flag help",
 						scalar.Int(),
@@ -396,11 +396,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "passedFlagBeforeCommand",
 			rootSection: section.New(
 				"help for test",
-				section.Command(
+				section.NewCommand(
 					"com",
 					"help for com",
 					command.DoNothing,
-					command.Flag(
+					command.NewFlag(
 						"--flag",
 						"flag help",
 						scalar.Int(),
@@ -426,7 +426,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 									"command": command.New(
 										"help for command",
 										command.DoNothing,
-										command.Flag(
+										command.NewFlag(
 											"--flag",
 											"flag help",
 											scalar.Int(),
@@ -486,7 +486,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 	}{
 		{
 			name: "unsetSentinelScalarSuccess",
-			flagDef: command.Flag(
+			flagDef: command.NewFlag(
 				"--flag",
 				"help for --flag",
 				scalar.String(scalar.Default("default")),
@@ -501,7 +501,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 		},
 		{
 			name: "unsetSentinelScalarUpdate",
-			flagDef: command.Flag(
+			flagDef: command.NewFlag(
 				"--flag",
 				"help for --flag",
 				scalar.String(scalar.Default("default")),
@@ -514,7 +514,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 		},
 		{
 			name: "unsetSentinelSlice",
-			flagDef: command.Flag(
+			flagDef: command.NewFlag(
 				"--flag",
 				"help for --flag",
 				slice.String(slice.Default([]string{"default"})),
@@ -537,7 +537,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
-					section.Command(
+					section.NewCommand(
 						"test",
 						"help for test",
 						command.DoNothing,
@@ -580,11 +580,11 @@ func TestApp_Parse_config(t *testing.T) {
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
-					section.Command(
+					section.NewCommand(
 						"print",
 						"print key value",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--key",
 							"a key",
 							scalar.String(
@@ -631,11 +631,11 @@ func TestApp_Parse_config(t *testing.T) {
 			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New("help for test",
-					section.Command(
+					section.NewCommand(
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--val",
 							"flag help",
 							scalar.String(),
@@ -672,11 +672,11 @@ func TestApp_Parse_config(t *testing.T) {
 			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New("help for test",
-					section.Command(
+					section.NewCommand(
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--intval",
 							"flag help",
 							scalar.Int(),
@@ -714,11 +714,11 @@ func TestApp_Parse_config(t *testing.T) {
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
-					section.Command(
+					section.NewCommand(
 						"print",
 						"print key value",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--subreddits",
 							"the subreddits",
 							slice.String(),
@@ -753,11 +753,11 @@ func TestApp_Parse_config(t *testing.T) {
 			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New("help for test",
-					section.Command(
+					section.NewCommand(
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--val",
 							"flag help",
 							slice.String(),
@@ -792,11 +792,11 @@ func TestApp_Parse_config(t *testing.T) {
 			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New("help for test",
-					section.Command(
+					section.NewCommand(
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--val",
 							"flag help",
 							slice.String(),
@@ -833,11 +833,11 @@ func TestApp_Parse_config(t *testing.T) {
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
-					section.Command(
+					section.NewCommand(
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.Flag(
+						command.NewFlag(
 							"--val",
 							"flag help",
 							dict.Int(),
@@ -907,14 +907,14 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
-					section.Command(
+					section.NewCommand(
 						"com",
 						"help for com",
 						command.DoNothing,
 					),
 				),
 				warg.SkipValidation(),
-				warg.GlobalFlag(
+				warg.NewGlobalFlag(
 					"--global",
 					"global flag",
 					scalar.String(),
@@ -956,7 +956,7 @@ func TestCustomVersion(t *testing.T) {
 		expectedVersion,
 		section.New(
 			"test",
-			section.Command("version", "Print version", command.DoNothing),
+			section.NewCommand("version", "Print version", command.DoNothing),
 		),
 	)
 	err := app.Validate()
@@ -977,7 +977,7 @@ func TestContextContainsValue(t *testing.T) {
 		"v1.0.0",
 		section.New(
 			"test",
-			section.Command("version", "Print version", command.DoNothing),
+			section.NewCommand("version", "Print version", command.DoNothing),
 		),
 	)
 	err := app.Validate()

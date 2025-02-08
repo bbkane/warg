@@ -15,11 +15,31 @@ below this description) is likely unreleased.
 ## Changed
 
 - Changed `warg.VersionCommand` to `warg.VersionCommandMap` and `warg.ColorFlag` to `warg.ColorFlagMap`. This somewhat standardizes the name.
-- Renamed `command.ExistingFlags` to `commamd.FlagMap` and `warg.ExistingGlobalFlags` to `warg.GlobalFlagMap`. The plural name is awkward when adding a one-element `FlagMap` is perfectly ok (and nice when you don't want to keep typing the name...)
+- Renamed `command.ExistingFlags` to `commamd.FlagMap` and `warg.ExistingGlobalFlags` to `warg.GlobalFlagMap`. The plural name is awkward when adding a one-element `FlagMap` is perfectly ok (and nice when you don't want to keep typing the name...) (see below)
+- Renamed `Xxx` option functions to `NewXxx` (see below)
+- Renamed `ExistingXxx` functiosn to `Xxx` (see below)
 - `version` is now a parameter to `warg.New` instead of the (now removed)
 `warg.OverrideVersion`. Changed because I ALWAYS want to set the version and I
 think thats common for real-world CLIs. If passed an empty string, warg will
 attempt to use the go module version.
+
+Since I've renamed these to be a bit more consistent, here's a summary:
+
+For:
+
+- `GlobalFlag` (as an `AppOpt`)
+- `Section` (as a `SectionOpt`)
+- `Command` (as a `SectionOpt`)
+- `Flag` (as a `CommandOpt`)
+
+The syntax is:
+
+| Name      | Purpose                                                      | Examples                                | Notes                                                |
+| --------- | ------------------------------------------------------------ | --------------------------------------- | ---------------------------------------------------- |
+| `xxx.New` | Create a new  standalone `Xxx`  (i.e.,without adding it as a named child) | `section.New(...)`                      | `xxx` is the package name of the object              |
+| `NewXxx`  | Create a new named child `Xxx` (usually with a name) and forward remaining arguments to `xxx.New`. | `section.NewCommand("myname", ...)`     | Formerly named `Xxx` (changed in `v0.0.28`)          |
+| `Xxx`     | Attach an existing `Xxx`  as a named child                   | `section.Command("mycommand", command)` | Formerly named `ExistingXxx` (changed in `v0.0.28`)  |
+| `XxxMap`  | Attach an existing map of name to `Xxx` as named children    | `section.CommandMap(commandMap)`        | Formerly named `ExistingXxxs` (changed in `v0.0.28`) |
 
 # v0.0.27
 

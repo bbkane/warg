@@ -72,12 +72,12 @@ Homepage: https://github.com/bbkane/grabbit
 		"v1.0.0",
 		section.New(
 			"Get top images from subreddits",
-			section.Command(
+			section.NewCommand(
 				"grab",
 				"Grab images. Optionally use `config edit` first to create a config",
 				grab,
 				command.FlagMap(logFlags),
-				command.Flag(
+				command.NewFlag(
 					"--subreddit-name",
 					"Subreddit to grab",
 					slice.String(
@@ -87,7 +87,7 @@ Homepage: https://github.com/bbkane/grabbit
 					flag.ConfigPath("subreddits[].name"),
 					flag.Required(),
 				),
-				command.Flag(
+				command.NewFlag(
 					"--subreddit-destination",
 					"Where to store the subreddit",
 					slice.Path(
@@ -97,7 +97,7 @@ Homepage: https://github.com/bbkane/grabbit
 					flag.ConfigPath("subreddits[].destination"),
 					flag.Required(),
 				),
-				command.Flag(
+				command.NewFlag(
 					"--subreddit-timeframe",
 					"Take the top subreddits from this timeframe",
 					slice.String(
@@ -108,7 +108,7 @@ Homepage: https://github.com/bbkane/grabbit
 					flag.ConfigPath("subreddits[].timeframe"),
 					flag.Required(),
 				),
-				command.Flag(
+				command.NewFlag(
 					"--subreddit-limit",
 					"Max number of links to try to download",
 					slice.Int(
@@ -118,7 +118,7 @@ Homepage: https://github.com/bbkane/grabbit
 					flag.ConfigPath("subreddits[].limit"),
 					flag.Required(),
 				),
-				command.Flag(
+				command.NewFlag(
 					"--timeout",
 					"Timeout for a single download",
 					scalar.Duration(
@@ -131,15 +131,15 @@ Homepage: https://github.com/bbkane/grabbit
 
 			section.Footer(appFooter),
 
-			section.Section(
+			section.NewSection(
 				"config",
 				"Config commands",
-				section.Command(
+				section.NewCommand(
 					"edit",
 					"Edit or create configuration file.",
 					editConfig,
 					command.FlagMap(logFlags),
-					command.Flag(
+					command.NewFlag(
 						"--editor",
 						"Path to editor",
 						scalar.String(

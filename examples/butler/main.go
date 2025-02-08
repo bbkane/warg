@@ -16,11 +16,11 @@ func app() *warg.App {
 		"v1.0.0",
 		section.New(
 			section.HelpShort("A virtual assistant"),
-			section.Command(
+			section.NewCommand(
 				"present",
 				"Formally present a guest (guests are never introduced, always presented).",
 				present,
-				command.Flag(
+				command.NewFlag(
 					"--name",
 					"Guest to address.",
 					scalar.String(),

@@ -39,7 +39,7 @@ func ExampleOverrideHelpFlag() {
 		"v1.0.0",
 		section.New(
 			"work with a fictional blog platform",
-			section.Command(
+			section.NewCommand(
 				"login",
 				"Login to the platform",
 				exampleOverrideHelpFlaglogin,

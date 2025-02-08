@@ -57,13 +57,13 @@ func app() *warg.App {
 		"v1.0.0",
 		section.New(
 			"Link and unlink directory heirarchies ",
-			section.Command(
+			section.NewCommand(
 				"link",
 				"Create links",
 				link,
 				command.FlagMap(linkUnlinkFlags),
 			),
-			section.Command(
+			section.NewCommand(
 				"unlink",
 				"Unlink previously created links",
 				unlink,

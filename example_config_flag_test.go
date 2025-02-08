@@ -31,11 +31,11 @@ func ExampleConfigFlag() {
 		"v1.0.0",
 		section.New(
 			"do math",
-			section.Command(
+			section.NewCommand(
 				command.Name("add"),
 				"add integers",
 				exampleConfigFlagTextAdd,
-				command.Flag(
+				command.NewFlag(
 					flag.Name("--addend"),
 					"Integer to add. Flag is repeatible",
 					slice.Int(),

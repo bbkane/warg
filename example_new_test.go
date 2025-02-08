@@ -46,16 +46,16 @@ func ExampleNew() {
 		"v1.0.0",
 		section.New(
 			"work with a fictional blog platform",
-			section.Command(
+			section.NewCommand(
 				"login",
 				"Login to the platform",
 				login,
 				command.FlagMap(commonFlags),
 			),
-			section.Section(
+			section.NewSection(
 				"comments",
 				"Deal with comments",
-				section.Command(
+				section.NewCommand(
 					"list",
 					"List all comments",
 					// still prototyping how we want this

@@ -40,11 +40,11 @@ func ExampleApp_Parse_flag_value_options() {
 		"v1.0.0",
 		section.New(
 			"demo flag overrides",
-			section.Command(
+			section.NewCommand(
 				command.Name("show"),
 				"Show final flag values",
 				action,
-				command.Flag(
+				command.NewFlag(
 					"--scalar-flag",
 					"Demo scalar flag",
 					scalar.String(
@@ -54,7 +54,7 @@ func ExampleApp_Parse_flag_value_options() {
 					flag.ConfigPath("args.scalar-flag"),
 					flag.Required(),
 				),
-				command.Flag(
+				command.NewFlag(
 					"--slice-flag",
 					"Demo slice flag",
 					slice.Int(

@@ -16,33 +16,33 @@ func app() *warg.App {
 	downloadCmd := command.New(
 		"Download star info",
 		githubStarsDownload,
-		command.Flag(
+		command.NewFlag(
 			"--include-readmes",
 			"Search for README.md.",
 			scalar.Bool(
 				scalar.Default(false),
 			),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--max-languages",
 			"Max number of languages to query on a repo",
 			scalar.Int(
 				scalar.Default(20),
 			),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--max-repo-topics",
 			"Max number of topics to query on a repo",
 			scalar.Int(
 				scalar.Default(20),
 			),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--after-cursor",
 			"PageInfo EndCursor to start from",
 			scalar.String(),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--max-pages",
 			"Max number of pages to fetch",
 			scalar.Int(
@@ -50,14 +50,14 @@ func app() *warg.App {
 			),
 			flag.Required(),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--output",
 			"Output filepath. Must not exist",
 			scalar.Path(
 				scalar.Default(path.New("starghaze_download.jsonl")),
 			),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--page-size",
 			"Number of starred repos in page",
 			scalar.Int(
@@ -65,7 +65,7 @@ func app() *warg.App {
 			),
 			flag.Required(),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--timeout",
 			"Timeout for a run. Use https://pkg.go.dev/time#Duration to build it",
 			scalar.Duration(
@@ -73,7 +73,7 @@ func app() *warg.App {
 			),
 			flag.Required(),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--token",
 			"Github PAT",
 			scalar.String(),
@@ -85,7 +85,7 @@ func app() *warg.App {
 	formatCmd := command.New(
 		"Format downloaded GitHub Stars",
 		format,
-		command.Flag(
+		command.NewFlag(
 			"--format",
 			"Output format",
 			scalar.String(
@@ -94,12 +94,12 @@ func app() *warg.App {
 			),
 			flag.Required(),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--date-format",
 			"Datetime output format. See https://github.com/lestrrat-go/strftime for details. If not passed, the GitHub default is RFC 3339. Consider using '%b %d, %Y' for csv format",
 			scalar.String(),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--include-readmes",
 			"Search for README.md.",
 			scalar.Bool(
@@ -107,21 +107,21 @@ func app() *warg.App {
 			),
 			flag.Required(),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--sqlite-dsn",
 			"Sqlite DSN. Usually the file name. Only used for --format sqlite",
 			scalar.String(
 				scalar.Default("starghaze.db"),
 			),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--zinc-index-name",
 			"Only used for --format zinc.",
 			scalar.String(
 				scalar.Default("starghaze"),
 			),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--input",
 			"Input file",
 			scalar.Path(
@@ -129,7 +129,7 @@ func app() *warg.App {
 			),
 			flag.Required(),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--max-line-size",
 			"Max line size in the file in MB",
 			scalar.Int(
@@ -137,7 +137,7 @@ func app() *warg.App {
 			),
 			flag.Required(),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--output",
 			"output file. Prints to stdout if not passed",
 			scalar.Path(),
@@ -161,24 +161,24 @@ func app() *warg.App {
 
 	gsheetsSection := section.New(
 		"Google Sheets commands",
-		section.Command(
+		section.NewCommand(
 			"open",
 			"Open spreadsheet in browser",
 			gSheetsOpen,
 			command.FlagMap(sheetFlags),
 		),
-		section.Command(
+		section.NewCommand(
 			"upload",
 			"Upload CSV to Google Sheets. This will overwrite whatever is in the spreadsheet",
 			gSheetsUpload,
 			command.FlagMap(sheetFlags),
-			command.Flag(
+			command.NewFlag(
 				"--csv-path",
 				"CSV file to upload",
 				scalar.Path(),
 				flag.Required(),
 			),
-			command.Flag(
+			command.NewFlag(
 				"--timeout",
 				"Timeout for a run. Use https://pkg.go.dev/time#Duration to build it",
 				scalar.Duration(
@@ -193,7 +193,7 @@ func app() *warg.App {
 
 		"Full text search SQLite database",
 		search,
-		command.Flag(
+		command.NewFlag(
 			"--limit",
 			"Max number of results",
 			scalar.Int(
@@ -201,7 +201,7 @@ func app() *warg.App {
 			),
 			flag.Required(),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--sqlite-dsn",
 			"Sqlite DSN. Usually the file name.",
 			scalar.String(
@@ -209,7 +209,7 @@ func app() *warg.App {
 			),
 			flag.Required(),
 		),
-		command.Flag(
+		command.NewFlag(
 			"--term",
 			"Search for this term",
 			scalar.String(),
@@ -226,19 +226,19 @@ func app() *warg.App {
 		section.New(
 			"Save GitHub Starred Repos",
 			section.CommandMap(warg.VersionCommandMap()),
-			section.ExistingCommand(
+			section.Command(
 				"download",
 				downloadCmd,
 			),
-			section.ExistingCommand(
+			section.Command(
 				"format",
 				formatCmd,
 			),
-			section.ExistingCommand(
+			section.Command(
 				"search",
 				searchCmd,
 			),
-			section.ExistingSection(
+			section.Section(
 				"gsheets",
 				gsheetsSection,
 			),
