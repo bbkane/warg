@@ -9,7 +9,10 @@ import (
 	"runtime/debug"
 	"strings"
 
+	"slices"
+
 	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
@@ -238,17 +241,46 @@ func New(name string, version string, rootSection section.SectionT, opts ...AppO
 // Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
 // Any errors on an Action will be printed to stderr and os.Exit(1) will be called.
 func (app *App) MustRun(opts ...ParseOpt) {
-	pr, err := app.Parse(opts...)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		// https://unix.stackexchange.com/a/254747/185953
-		os.Exit(64)
+	// TODO: make this better
+	if slices.Equal(os.Args, []string{os.Args[0], "--completion-script-zsh"}) {
+		// app --completion-script-zsh
+		completion.WriteCompletionScriptZsh(os.Stdout, app.name)
+	} else if len(os.Args) >= 3 && os.Args[1] == "--completion-bash" {
+		// app --completion-bash <args> . Note that <args> must be something, even if it's the empty string
+
+		// chop off the last arg since it's either:
+		//  - the empty string (if the user just typed space)
+		//  - a partial string (if the user pressed tab after typing part of something)
+		toComplete := os.Args[2 : len(os.Args)-1]
+		candidates, err := app.CompletionCandidates(toComplete)
+
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		// TODO: print errors to stderr maybe? For now just silently fail...
+		if err == nil {
+			fmt.Println(candidates.Type)
+			for _, candidate := range candidates.Values {
+				fmt.Println(candidate.Name)
+				fmt.Println(candidate.Name + " - " + candidate.Description)
+			}
+		}
+	} else {
+		pr, err := app.Parse(opts...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			// https://unix.stackexchange.com/a/254747/185953
+			os.Exit(64)
+		}
+		err = pr.Action(pr.Context)
+		if err != nil {
+			fmt.Fprintln(pr.Context.Stderr, err)
+			os.Exit(1)
+		}
+
 	}
-	err = pr.Action(pr.Context)
-	if err != nil {
-		fmt.Fprintln(pr.Context.Stderr, err)
-		os.Exit(1)
-	}
+
 }
 
 // Look up keys (meant for environment variable parsing) - fulfillable with os.LookupEnv or warg.LookupMap(map)
@@ -360,4 +392,21 @@ func (app *App) Validate() error {
 	}
 
 	return nil
+}
+
+func (a *App) CompletionCandidates(args []string) (*completion.CompletionCandidates, error) {
+	pr, err := a.parseArgs(args)
+	if err != nil {
+		return nil, fmt.Errorf("unexpected parseArgs err: %w", err)
+	}
+	switch pr.State {
+	case Parse_ExpectingSectionOrCommand:
+		candidates, err := pr.CurrentSection.CompletionCandidates()
+		if err != nil {
+			return nil, fmt.Errorf("Parse_ExpectingSectionOrCommand CompletionCandidates err: %w", err)
+		}
+		return &candidates, nil
+	default:
+		return nil, fmt.Errorf("unexpected ParseState: %v", pr.State)
+	}
 }

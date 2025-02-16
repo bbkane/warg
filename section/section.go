@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/completion"
 )
 
 // Name of the section
@@ -186,4 +187,24 @@ func (s *SectionIterator) Next() FlatSection {
 // HasNext is used in BreadthFirst. See BreadthFirst docs
 func (s *SectionIterator) HasNext() bool {
 	return len(s.queue) > 0
+}
+
+func (s *SectionT) CompletionCandidates() (completion.CompletionCandidates, error) {
+	ret := completion.CompletionCandidates{
+		Type:   completion.CompletionType_ValueDescription,
+		Values: []completion.CompletionCandidate{},
+	}
+	for _, name := range s.Commands.SortedNames() {
+		ret.Values = append(ret.Values, completion.CompletionCandidate{
+			Name:        string(name),
+			Description: string(s.Commands[name].HelpShort),
+		})
+	}
+	for _, name := range s.Sections.SortedNames() {
+		ret.Values = append(ret.Values, completion.CompletionCandidate{
+			Name:        string(name),
+			Description: string(s.Sections[name].HelpShort),
+		})
+	}
+	return ret, nil
 }
