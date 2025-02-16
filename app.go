@@ -406,6 +406,33 @@ func (a *App) CompletionCandidates(args []string) (*completion.CompletionCandida
 			return nil, fmt.Errorf("Parse_ExpectingSectionOrCommand CompletionCandidates err: %w", err)
 		}
 		return &candidates, nil
+	case Parse_ExpectingFlagNameOrEnd:
+		// TODO: if a scalar flag has been passsed, don't suggest it again
+		// TODO: get a better order for the flags. For example, envelope needs to db first (unless it's resolved) so further flags can use that
+		candidates := &completion.CompletionCandidates{
+			Type:   completion.CompletionType_ValueDescription,
+			Values: []completion.CompletionCandidate{},
+		}
+		// command flags
+		for _, name := range pr.CurrentCommand.Flags.SortedNames() {
+			candidates.Values = append(candidates.Values, completion.CompletionCandidate{
+				Name:        string(name),
+				Description: string(pr.CurrentCommand.Flags[name].HelpShort),
+			})
+		}
+		// global flags
+		for _, name := range a.globalFlags.SortedNames() {
+			candidates.Values = append(candidates.Values, completion.CompletionCandidate{
+				Name:        string(name),
+				Description: string(a.globalFlags[name].HelpShort),
+			})
+		}
+		return candidates, nil
+	case Parse_ExpectingFlagValue:
+		// OK, this is the hard part. Flags need to to not only produce completion candidates, but ALSO look at the value of other flags.
+		// Let's start with the easy part: suggest defaults and/or choices.
+		// TODO: finish this. Also need tests.
+		return nil, errors.New("TODO: implement Parse_ExpectingFlagValue CompletionCandidates")
 	default:
 		return nil, fmt.Errorf("unexpected ParseState: %v", pr.State)
 	}
