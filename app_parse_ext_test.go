@@ -996,3 +996,39 @@ func TestContextContainsValue(t *testing.T) {
 
 	require.Equal(t, expectedValue, actualPR.Context.Context.Value(contextKey{}).(string))
 }
+
+func TestAppFlagToAddr(t *testing.T) {
+	require := require.New(t)
+	var flagVal string
+	expectedFlagVal := "flag value"
+	app := warg.New(
+		"appName",
+		"v1.0.0",
+		section.New(
+			"test",
+			section.NewCommand(
+				"command",
+				"Test Command",
+				func(ctx command.Context) error {
+					require.Equal(expectedFlagVal, flagVal)
+					return nil
+				},
+				command.NewFlag(
+					"--flag",
+					"Flag for test",
+					scalar.String(
+						scalar.PointerTo(&flagVal),
+					),
+				),
+			),
+		),
+	)
+	err := app.Validate()
+	require.NoError(err)
+
+	pr, err := app.Parse(warg.OverrideArgs([]string{"appName", "command", "--flag", "flag value"}))
+	require.NoError(err)
+	err = pr.Action(pr.Context)
+	require.NoError(err)
+	require.Equal(expectedFlagVal, flagVal)
+}

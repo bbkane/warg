@@ -11,7 +11,7 @@ type scalarValue[T comparable] struct {
 	choices    []T
 	defaultVal *T
 	inner      contained.TypeInfo[T]
-	val        T
+	val        *T
 	updatedBy  value.UpdatedBy
 }
 
@@ -25,7 +25,7 @@ func newScalarValue[T comparable](
 		choices:    []T{},
 		defaultVal: nil,
 		inner:      inner,
-		val:        inner.Empty(),
+		val:        new(T),
 		updatedBy:  value.UpdatedByUnset,
 	}
 	for _, opt := range opts {
@@ -41,6 +41,12 @@ func New[T comparable](hc contained.TypeInfo[T], opts ...ScalarOpt[T]) value.Emp
 			opts...,
 		)
 		return &s
+	}
+}
+
+func PointerTo[T comparable](addr *T) ScalarOpt[T] {
+	return func(v *scalarValue[T]) {
+		v.val = addr
 	}
 }
 
@@ -77,7 +83,7 @@ func (v *scalarValue[_]) Description() string {
 }
 
 func (v *scalarValue[_]) Get() interface{} {
-	return v.val
+	return *v.val
 }
 
 func (v *scalarValue[_]) HasDefault() bool {
@@ -86,19 +92,19 @@ func (v *scalarValue[_]) HasDefault() bool {
 
 func (v *scalarValue[T]) ReplaceFromInterface(iFace interface{}, u value.UpdatedBy) error {
 	if v.updatedBy != value.UpdatedByUnset {
-		return value.ErrUpdatedMoreThanOnce[T]{CurrentValue: v.val, UpdatedBy: v.updatedBy}
+		return value.ErrUpdatedMoreThanOnce[T]{CurrentValue: *v.val, UpdatedBy: v.updatedBy}
 	}
 	val, err := v.inner.FromIFace(iFace)
 	if err != nil {
 		return err
 	}
-	v.val = val
+	*v.val = val
 	v.updatedBy = u
 	return nil
 }
 
 func (v *scalarValue[_]) String() string {
-	return fmt.Sprint(v.val)
+	return fmt.Sprint(*v.val)
 }
 
 func withinChoices[T comparable](val T, choices []T) bool {
@@ -116,7 +122,7 @@ func withinChoices[T comparable](val T, choices []T) bool {
 
 func (v *scalarValue[T]) Update(s string, u value.UpdatedBy) error {
 	if v.updatedBy != value.UpdatedByUnset {
-		return value.ErrUpdatedMoreThanOnce[T]{CurrentValue: v.val, UpdatedBy: v.updatedBy}
+		return value.ErrUpdatedMoreThanOnce[T]{CurrentValue: *v.val, UpdatedBy: v.updatedBy}
 	}
 	val, err := v.inner.FromString(s)
 	if err != nil {
@@ -125,7 +131,7 @@ func (v *scalarValue[T]) Update(s string, u value.UpdatedBy) error {
 	if !withinChoices(val, v.choices) {
 		return value.ErrInvalidChoice[T]{Choices: v.choices}
 	}
-	v.val = val
+	*v.val = val
 	v.updatedBy = u
 	return nil
 }
@@ -136,11 +142,11 @@ func (v *scalarValue[_]) UpdatedBy() value.UpdatedBy {
 
 func (v *scalarValue[T]) ReplaceFromDefault(u value.UpdatedBy) error {
 	if v.updatedBy != value.UpdatedByUnset {
-		return value.ErrUpdatedMoreThanOnce[T]{CurrentValue: v.val, UpdatedBy: v.updatedBy}
+		return value.ErrUpdatedMoreThanOnce[T]{CurrentValue: *v.val, UpdatedBy: v.updatedBy}
 	}
 	if v.defaultVal != nil {
 		v.updatedBy = u
-		v.val = *v.defaultVal
+		*v.val = *v.defaultVal
 	}
 	return nil
 }
