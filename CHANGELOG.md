@@ -6,6 +6,20 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.0.29
+
+## Added
+
+- Basic `zsh` tab completion!! Sections and commands and flag names complete just fine, but completion is only triggered on flag values if its value has `Choices`. More complex flag value completion (file/directory, dynamic from other flag values) is on the way, but will require a large "package flattening" refactoring to avoid circular imports. I'm also punting on tests until this refactor...
+
+Assuming `~/fbin` is on the `zsh` `$fpath`, run:
+
+```zsh
+$ ./butler "--completion-script-zsh" > ~/fbin/_butler
+```
+
+and restart the shell
+
 # v0.0.28
 
 ## Added

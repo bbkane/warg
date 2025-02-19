@@ -245,8 +245,8 @@ func (app *App) MustRun(opts ...ParseOpt) {
 	if slices.Equal(os.Args, []string{os.Args[0], "--completion-script-zsh"}) {
 		// app --completion-script-zsh
 		completion.WriteCompletionScriptZsh(os.Stdout, app.name)
-	} else if len(os.Args) >= 3 && os.Args[1] == "--completion-bash" {
-		// app --completion-bash <args> . Note that <args> must be something, even if it's the empty string
+	} else if len(os.Args) >= 3 && os.Args[1] == "--completion-zsh" {
+		// app --completion-zsh <args> . Note that <args> must be something, even if it's the empty string
 
 		// chop off the last arg since it's either:
 		//  - the empty string (if the user just typed space)
@@ -408,7 +408,7 @@ func (a *App) CompletionCandidates(args []string) (*completion.CompletionCandida
 		return &candidates, nil
 	case Parse_ExpectingFlagNameOrEnd:
 		// TODO: if a scalar flag has been passsed, don't suggest it again
-		// TODO: get a better order for the flags. For example, envelope needs to db first (unless it's resolved) so further flags can use that
+		// TODO: get a better order for the flags. For example, envelope needs to db first (unless it's resolved) so further flags can use that. Add an order or "depends on" param?
 		candidates := &completion.CompletionCandidates{
 			Type:   completion.CompletionType_ValueDescription,
 			Values: []completion.CompletionCandidate{},
@@ -429,10 +429,21 @@ func (a *App) CompletionCandidates(args []string) (*completion.CompletionCandida
 		}
 		return candidates, nil
 	case Parse_ExpectingFlagValue:
-		// OK, this is the hard part. Flags need to to not only produce completion candidates, but ALSO look at the value of other flags.
-		// Let's start with the easy part: suggest defaults and/or choices.
-		// TODO: finish this. Also need tests.
-		return nil, errors.New("TODO: implement Parse_ExpectingFlagValue CompletionCandidates")
+		// TODO: allow flags to look at the values of other flags before offering options.
+		// This will require some package "flattening" as ParseResult is defined in App, which also import Flag. So... flag shouldn't import the app code...
+		// For now, only suggest the flags choices
+		candidates := &completion.CompletionCandidates{
+			Type:   completion.CompletionType_ValueDescription,
+			Values: []completion.CompletionCandidate{},
+		}
+		// pr.FlagValues is always filled with at least the empty values
+		for _, name := range pr.FlagValues[pr.CurrentFlagName].Choices() {
+			candidates.Values = append(candidates.Values, completion.CompletionCandidate{
+				Name:        name,
+				Description: "NO DESCRIPTION",
+			})
+		}
+		return candidates, nil
 	default:
 		return nil, fmt.Errorf("unexpected ParseState: %v", pr.State)
 	}

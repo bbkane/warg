@@ -29,7 +29,7 @@ while IFS= read -r line && [[ -n "$line" ]]; do
         comp_descriptions+=("$line")
         state="expecting_value"
     fi
-done < <(${words[1]} --completion-bash "${(@)words[2,$CURRENT]}")
+done < <(${words[1]} --completion-zsh "${(@)words[2,$CURRENT]}")
 
 echo "$comp_values" >> ~/_{{.Name}}.log
 
