@@ -5,6 +5,8 @@ import (
 	"sort"
 
 	"go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/contained"
+	"go.bbkane.com/warg/value/scalar"
 )
 
 // Name of a flag
@@ -75,6 +77,53 @@ type Flag struct {
 
 	// Value is set when parsing. Use SetBy != "" to determine whether a value was actually passed  instead of being empty
 	Value value.Value
+}
+
+func Ptr[T any](v T) *T {
+	return &v
+}
+
+//exhaustruct:ignore
+type ScalarFlagOpt[T comparable] struct {
+	Alias         Name
+	Choices       []T
+	ConfigPath    string
+	Default       *T
+	EnvVars       []string
+	PointerTo     *T
+	Required      bool
+	TypeInfo      contained.TypeInfo[T]
+	UnsetSentinel string
+} //exhaustruct:ignore
+
+func NewScalarFlag[T comparable](helpShort HelpShort, typeInfo contained.TypeInfo[T], opts *ScalarFlagOpt[T]) Flag {
+	if opts == nil {
+		opts = &ScalarFlagOpt[T]{}
+	}
+	valueOpts := []scalar.ScalarOpt[T]{}
+	if opts.PointerTo != nil {
+		valueOpts = append(valueOpts, scalar.PointerTo(opts.PointerTo))
+	}
+	if opts.Default != nil {
+		valueOpts = append(valueOpts, scalar.Default(*opts.Default))
+	}
+	if len(opts.Choices) > 0 {
+		valueOpts = append(valueOpts, scalar.Choices(opts.Choices...))
+	}
+
+	return Flag{
+		HelpShort:             helpShort,
+		EmptyValueConstructor: scalar.New(typeInfo, valueOpts...),
+		Alias:                 opts.Alias,
+		ConfigPath:            opts.ConfigPath,
+		EnvVars:               opts.EnvVars,
+		Required:              opts.Required,
+		UnsetSentinel:         opts.UnsetSentinel,
+
+		// TODO: rm these...
+		IsCommandFlag: false,
+		Value:         nil,
+	}
 }
 
 // New creates a Flag with options!

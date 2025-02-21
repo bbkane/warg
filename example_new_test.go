@@ -8,6 +8,7 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
+	"go.bbkane.com/warg/value/contained"
 	"go.bbkane.com/warg/value/scalar"
 )
 
@@ -29,9 +30,22 @@ func login(ctx command.Context) error {
 
 func ExampleNew() {
 	commonFlags := flag.FlagMap{
+		"--timeout2": flag.NewScalarFlag[int](
+			"Optional timeout. Defaults to no timeout",
+			contained.Int(),
+			&flag.ScalarFlagOpt[int]{
+				Alias:   "-t",
+				EnvVars: []string{"TIMEOUT"},
+				Default: flag.Ptr(0),
+			},
+		),
 		"--timeout": flag.New(
 			"Optional timeout. Defaults to no timeout",
-			scalar.Int(),
+			scalar.Int(
+				scalar.Default(0),
+			),
+			flag.Alias("-t"),
+			flag.EnvVars("TIMEOUT"),
 		),
 		"--url": flag.New(
 			"URL of the blog",
