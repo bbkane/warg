@@ -25,11 +25,17 @@ type TypeInfo[T comparable] struct {
 	FromIFace func(iFace interface{}) (T, error)
 
 	FromString func(string) (T, error)
+
+	// Initalized to the Empty value, but used for updating stuff in the container type
+	Empty func() T
 }
 
 func Addr() TypeInfo[netip.Addr] {
 	return TypeInfo[netip.Addr]{
 		Description: "IP address",
+		Empty: func() netip.Addr {
+			return netip.Addr{}
+		},
 		FromIFace: func(iFace interface{}) (netip.Addr, error) {
 			switch under := iFace.(type) {
 			case netip.Addr:
@@ -54,6 +60,9 @@ func Addr() TypeInfo[netip.Addr] {
 func AddrPort() TypeInfo[netip.AddrPort] {
 	return TypeInfo[netip.AddrPort]{
 		Description: "IP and Port number separated by a colon: ip:port ",
+		Empty: func() netip.AddrPort {
+			return netip.AddrPort{}
+		},
 		FromIFace: func(iFace interface{}) (netip.AddrPort, error) {
 			switch under := iFace.(type) {
 			case netip.AddrPort:
@@ -71,6 +80,7 @@ func AddrPort() TypeInfo[netip.AddrPort] {
 func Bool() TypeInfo[bool] {
 	return TypeInfo[bool]{
 		Description: "bool",
+		Empty:       func() bool { return false },
 		FromIFace: func(iFace interface{}) (bool, error) {
 			under, ok := iFace.(bool)
 			if !ok {
@@ -102,7 +112,10 @@ func durationFromString(s string) (time.Duration, error) {
 func Duration() TypeInfo[time.Duration] {
 	return TypeInfo[time.Duration]{
 		Description: "duration",
-
+		Empty: func() time.Duration {
+			var t time.Duration = 0
+			return t
+		},
 		FromIFace: func(iFace interface{}) (time.Duration, error) {
 			under, ok := iFace.(string)
 			if !ok {
@@ -136,13 +149,14 @@ func Int() TypeInfo[int] {
 			}
 		},
 		FromString: intFromString,
+		Empty:      func() int { return 0 },
 	}
 }
 
 func Path() TypeInfo[path.Path] {
 	return TypeInfo[path.Path]{
 		Description: "path",
-
+		Empty:       func() path.Path { return path.New("") },
 		FromIFace: func(iFace interface{}) (path.Path, error) {
 			under, ok := iFace.(string)
 			if !ok {
@@ -172,6 +186,7 @@ func runeFromString(s string) (rune, error) {
 func Rune() TypeInfo[rune] {
 	return TypeInfo[rune]{
 		Description: "rune",
+		Empty:       func() rune { return emptyRune },
 		FromIFace: func(iFace interface{}) (rune, error) {
 			switch under := iFace.(type) {
 			case rune:
@@ -189,6 +204,7 @@ func Rune() TypeInfo[rune] {
 func String() TypeInfo[string] {
 	return TypeInfo[string]{
 		Description: "string",
+		Empty:       func() string { return "" },
 		FromIFace: func(iFace interface{}) (string, error) {
 			under, ok := iFace.(string)
 			if !ok {

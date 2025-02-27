@@ -21,11 +21,12 @@ func newScalarValue[T comparable](
 	inner contained.TypeInfo[T],
 	opts ...ScalarOpt[T],
 ) scalarValue[T] {
+	empty := inner.Empty()
 	sv := scalarValue[T]{
 		choices:    []T{},
 		defaultVal: nil,
 		inner:      inner,
-		val:        new(T),
+		val:        &empty,
 		updatedBy:  value.UpdatedByUnset,
 	}
 	for _, opt := range opts {
