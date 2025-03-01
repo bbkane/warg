@@ -18,6 +18,9 @@ Assuming `~/fbin` is on the `zsh` `$fpath`, run:
 $ ./butler "--completion-script-zsh" > ~/fbin/_butler
 ```
 
+
+- Added `scalar.PointerTo` to bind how a scalar updates from flags/interfaces to a pre-existing variable. Still need to do this for dicts and slices
+
 and restart the shell
 
 # v0.0.28
