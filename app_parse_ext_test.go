@@ -343,7 +343,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					"help for com1",
 					command.DoNothing,
 					command.NewFlag(
-						flag.Name("--flag"),
+						string("--flag"),
 						"flag help",
 						dict.Bool(),
 					),

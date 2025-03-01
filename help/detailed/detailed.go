@@ -16,7 +16,7 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
-func detailedPrintFlag(w io.Writer, color *gocolor.Color, name flag.Name, f *flag.Flag) {
+func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *flag.Flag) {
 	if f.Alias != "" {
 		fmt.Fprintf(
 			w,

@@ -29,7 +29,7 @@ type AppOpt func(*App)
 // Create a new App with New()
 type App struct {
 	// Config()
-	configFlagName  flag.Name
+	configFlagName  string
 	newConfigReader config.NewReader
 	configFlag      *flag.Flag
 
@@ -37,9 +37,9 @@ type App struct {
 
 	// New Help()
 	name         string
-	helpFlagName flag.Name
+	helpFlagName string
 	// Note that this can be ""
-	helpFlagAlias flag.Name
+	helpFlagAlias string
 	helpMappings  []help.HelpFlagMapping
 
 	// rootSection holds the good stuff!
@@ -54,8 +54,8 @@ type App struct {
 func OverrideHelpFlag(
 	mappings []help.HelpFlagMapping,
 	defaultChoice string,
-	flagName flag.Name,
-	flagHelp flag.HelpShort,
+	flagName string,
+	flagHelp string,
 	flagOpts ...flag.FlagOpt,
 ) AppOpt {
 	return func(a *App) {
@@ -100,7 +100,7 @@ func OverrideHelpFlag(
 }
 
 // GlobalFlag adds an existing flag to a Command. It panics if a flag with the same name exists
-func GlobalFlag(name flag.Name, value flag.Flag) AppOpt {
+func GlobalFlag(name string, value flag.Flag) AppOpt {
 	return func(com *App) {
 		com.globalFlags.AddFlag(name, value)
 	}
@@ -114,7 +114,7 @@ func GlobalFlagMap(flagMap flag.FlagMap) AppOpt {
 }
 
 // NewGlobalFlag adds a flag to the app. It panics if a flag with the same name exists
-func NewGlobalFlag(name flag.Name, helpShort flag.HelpShort, empty value.EmptyConstructor, opts ...flag.FlagOpt) AppOpt {
+func NewGlobalFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) AppOpt {
 	return GlobalFlag(name, flag.New(helpShort, empty, opts...))
 
 }
@@ -123,11 +123,11 @@ func NewGlobalFlag(name flag.Name, helpShort flag.HelpShort, empty value.EmptyCo
 // This flag will be parsed and any resulting config will be read before other flag value sources.
 func ConfigFlag(
 	// TODO: put the new stuff at the front to be consistent with OverrideHelpFlag
-	configFlagName flag.Name,
+	configFlagName string,
 	// TODO: can I make this nicer?
 	scalarOpts []scalar.ScalarOpt[path.Path],
 	newConfigReader config.NewReader,
-	helpShort flag.HelpShort,
+	helpShort string,
 	flagOpts ...flag.FlagOpt,
 ) AppOpt {
 	return func(app *App) {
@@ -304,7 +304,7 @@ func validateFlags2(
 	globalFlags flag.FlagMap,
 	comFlags flag.FlagMap,
 ) error {
-	nameCount := make(map[flag.Name]int)
+	nameCount := make(map[string]int)
 	for name, fl := range globalFlags {
 		nameCount[name]++
 		if fl.Alias != "" {

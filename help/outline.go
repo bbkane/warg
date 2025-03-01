@@ -13,7 +13,7 @@ import (
 	"go.bbkane.com/warg/section"
 )
 
-func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName flag.Name, f flag.Flag, indent int) {
+func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f flag.Flag, indent int) {
 	str := common.FmtFlagName(color, flagName)
 	if f.Alias != "" {
 		str = str + " , " + common.FmtFlagAlias(color, f.Alias)
