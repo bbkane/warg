@@ -38,7 +38,7 @@ func ExampleApp_Parse_flag_value_options() {
 	app := warg.New(
 		"flag-overrides",
 		"v1.0.0",
-		section.New(
+		warg.NewSection(
 			"demo flag overrides",
 			section.NewCommand(
 				string("show"),

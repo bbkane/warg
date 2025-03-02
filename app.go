@@ -13,10 +13,8 @@ import (
 
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
 	"go.bbkane.com/warg/path"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/scalar"
 )
@@ -42,7 +40,7 @@ type App struct {
 	helpMappings  []help.HelpFlagMapping
 
 	// rootSection holds the good stuff!
-	rootSection section.SectionT
+	rootSection SectionT
 
 	skipValidation bool
 
@@ -163,14 +161,14 @@ func debugBuildInfoVersion() string {
 //	warg.GlobalFlagMap(warg.ColorFlagMap())
 func ColorFlagMap() FlagMap {
 	return FlagMap{
-		"--color": NewFlag(
-			"Use ANSI colors",
-			scalar.String(
+		"--color": Flag{
+			HelpShort: "Use ANSI colors",
+			EmptyValueConstructor: scalar.String(
 				scalar.Choices("true", "false", "auto"),
 				scalar.Default("auto"),
 			),
-			flag.EnvVars("WARG_COLOR"),
-		),
+			EnvVars: []string{"WARG_COLOR"},
+		},
 	}
 }
 
@@ -192,7 +190,7 @@ func VersionCommandMap() CommandMap {
 }
 
 // New creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.
-func New(name string, version string, rootSection section.SectionT, opts ...AppOpt) App {
+func New(name string, version string, rootSection SectionT, opts ...AppOpt) App {
 	app := App{
 		name:            name,
 		rootSection:     rootSection,
@@ -216,7 +214,9 @@ func New(name string, version string, rootSection section.SectionT, opts ...AppO
 			"default",
 			"--help",
 			"Print help",
-			flag.Alias("-h"),
+			func(f *Flag) {
+				f.Alias = "-h"
+			},
 		)(&app)
 	}
 
@@ -338,7 +338,7 @@ func validateFlags2(
 func (app *App) Validate() error {
 	// NOTE: we need to be able to validate before we parse, and we may not know the app name
 	// till after prsing so set the root path to "root"
-	rootPath := []section.Name{section.Name(app.name)}
+	rootPath := []string{string(app.name)}
 	it := app.rootSection.BreadthFirst(rootPath)
 
 	for it.HasNext() {

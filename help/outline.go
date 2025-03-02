@@ -67,7 +67,7 @@ func OutlineSectionHelp(_ *section.SectionT, hi common.HelpInfo) warg.Action {
 		}
 
 		fmt.Fprintln(f, "# "+string(hi.RootSection.HelpShort))
-		fmt.Fprintf(f, "%s\n", common.FmtSectionName(&col, section.Name(cmdCtx.AppName)))
+		fmt.Fprintf(f, "%s\n", common.FmtSectionName(&col, string(cmdCtx.AppName)))
 
 		outlineHelper(f, &col, hi.RootSection, 1)
 

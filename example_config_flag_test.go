@@ -29,7 +29,7 @@ func ExampleConfigFlag() {
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		section.New(
+		warg.NewSection(
 			"do math",
 			section.NewCommand(
 				string("add"),

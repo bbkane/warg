@@ -24,7 +24,7 @@ func exampleOverrideHelpFlagCustomCommandHelp(_ *warg.Command, _ common.HelpInfo
 	}
 }
 
-func exampleOverrideHelpFlagCustomSectionHelp(_ *section.SectionT, _ common.HelpInfo) warg.Action {
+func exampleOverrideHelpFlagCustomSectionHelp(_ *warg.SectionT, _ common.HelpInfo) warg.Action {
 	return func(ctx warg.CommandContext) error {
 		file := ctx.Stdout
 		fmt.Fprintln(file, "Custom section help")
@@ -36,7 +36,7 @@ func ExampleOverrideHelpFlag() {
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		section.New(
+		warg.NewSection(
 			"work with a fictional blog platform",
 			section.NewCommand(
 				"login",

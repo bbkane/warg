@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/section"
 )
@@ -13,25 +14,25 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 	// so just set action to nil
 	tests := []struct {
 		name          string
-		rootName      section.Name
-		sec           section.SectionT
-		expected      []section.FlatSection
+		rootName      string
+		sec           warg.SectionT
+		expected      []warg.FlatSection
 		expectedPanic bool
 	}{
 		{
 			name:     "simple",
 			rootName: "r",
-			sec: section.New(
+			sec: warg.NewSection(
 				"root section help",
 				section.NewCommand("c1", "", nil),
 				section.NewSection("s1", "",
 					section.NewCommand("c2", "", nil),
 				),
 			),
-			expected: []section.FlatSection{
+			expected: []warg.FlatSection{
 				{
-					Path: []section.Name{"r"},
-					Sec: section.New(
+					Path: []string{"r"},
+					Sec: warg.NewSection(
 						"root section help",
 						section.NewCommand("c1", "", nil),
 						section.NewSection("s1", "",
@@ -40,8 +41,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				},
 				{
-					Path: []section.Name{"r", "s1"},
-					Sec: section.New(
+					Path: []string{"r", "s1"},
+					Sec: warg.NewSection(
 						"", section.NewCommand("c2", "", nil),
 					),
 				},
@@ -51,7 +52,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "sortedOrder",
 			rootName: "r",
-			sec: section.New("",
+			sec: warg.NewSection("",
 				section.NewSection("sc", "",
 					section.NewCommand("c", "", nil),
 				),
@@ -62,10 +63,10 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					section.NewCommand("c", "", nil),
 				),
 			),
-			expected: []section.FlatSection{
+			expected: []warg.FlatSection{
 				{
-					Path: []section.Name{"r"},
-					Sec: section.New("",
+					Path: []string{"r"},
+					Sec: warg.NewSection("",
 						section.NewSection("sc", "",
 							section.NewCommand("c", "", nil),
 						),
@@ -78,20 +79,20 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				},
 				{
-					Path: []section.Name{"r", "sa"},
-					Sec: section.New("",
+					Path: []string{"r", "sa"},
+					Sec: warg.NewSection("",
 						section.NewCommand("c", "", nil),
 					),
 				},
 				{
-					Path: []section.Name{"r", "sb"},
-					Sec: section.New("",
+					Path: []string{"r", "sb"},
+					Sec: warg.NewSection("",
 						section.NewCommand("c", "", nil),
 					),
 				},
 				{
-					Path: []section.Name{"r", "sc"},
-					Sec: section.New("",
+					Path: []string{"r", "sc"},
+					Sec: warg.NewSection("",
 						section.NewCommand("c", "", nil),
 					),
 				},
@@ -101,7 +102,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "dupFlagNamesSeparatePaths",
 			rootName: "r",
-			sec: section.New("",
+			sec: warg.NewSection("",
 				section.NewSection("s1", "",
 					section.NewCommand(
 						"c1",
@@ -119,10 +120,10 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				),
 			),
-			expected: []section.FlatSection{
+			expected: []warg.FlatSection{
 				{
-					Path: []section.Name{"r"},
-					Sec: section.New("",
+					Path: []string{"r"},
+					Sec: warg.NewSection("",
 						section.NewSection("s1", "",
 							section.NewCommand(
 								"c1",
@@ -142,8 +143,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				},
 				{
-					Path: []section.Name{"r", "s1"},
-					Sec: section.New("",
+					Path: []string{"r", "s1"},
+					Sec: warg.NewSection("",
 						section.NewCommand(
 							"c1",
 							"",
@@ -153,8 +154,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				},
 				{
-					Path: []section.Name{"r", "s2"},
-					Sec: section.New("",
+					Path: []string{"r", "s2"},
+					Sec: warg.NewSection("",
 						section.NewCommand(
 							"c1",
 							"",
@@ -174,7 +175,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				require.Panics(
 					t,
 					func() {
-						it := tt.sec.BreadthFirst([]section.Name{tt.rootName})
+						it := tt.sec.BreadthFirst([]string{tt.rootName})
 						for it.HasNext() {
 							it.Next()
 						}
@@ -183,8 +184,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				return
 			}
 
-			actual := make([]section.FlatSection, 0, 1)
-			it := tt.sec.BreadthFirst([]section.Name{tt.rootName})
+			actual := make([]warg.FlatSection, 0, 1)
+			it := tt.sec.BreadthFirst([]string{tt.rootName})
 			for it.HasNext() {
 				actual = append(actual, it.Next())
 			}

@@ -14,7 +14,7 @@ import (
 )
 
 // A grabbitSection is a simple section to test help
-func grabbitSection() section.SectionT {
+func grabbitSection() warg.SectionT {
 
 	rootFooter := `Examples:
 
@@ -35,7 +35,7 @@ func grabbitSection() section.SectionT {
 	grabbit config edit --config-path /path/to/config --editor code
 	`
 
-	sec := section.New(
+	sec := warg.NewSection(
 		"grab those images!",
 		section.NewCommand(
 			"grab",

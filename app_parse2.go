@@ -7,7 +7,6 @@ import (
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/path"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 )
 
@@ -59,7 +58,7 @@ func (u UnsetFlagNameSet) Contains(name string) bool {
 
 type ParseResult2 struct {
 	SectionPath    []string
-	CurrentSection *section.SectionT
+	CurrentSection *SectionT
 
 	CurrentCommandName string
 	CurrentCommand     *Command
@@ -124,7 +123,7 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 
 		switch pr.State {
 		case Parse_ExpectingSectionOrCommand:
-			if childSection, exists := pr.CurrentSection.Sections[section.Name(arg)]; exists {
+			if childSection, exists := pr.CurrentSection.Sections[string(arg)]; exists {
 				pr.CurrentSection = &childSection
 				pr.SectionPath = append(pr.SectionPath, arg)
 			} else if childCommand, exists := pr.CurrentSection.Commands[string(arg)]; exists {
