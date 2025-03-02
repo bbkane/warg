@@ -28,12 +28,12 @@ func login(ctx command.Context) error {
 }
 
 func ExampleNew() {
-	commonFlags := flag.FlagMap{
-		"--timeout": flag.New(
+	commonFlags := warg.FlagMap{
+		"--timeout": warg.NewFlag(
 			"Optional timeout. Defaults to no timeout",
 			scalar.Int(),
 		),
-		"--url": flag.New(
+		"--url": warg.NewFlag(
 			"URL of the blog",
 			scalar.String(
 				scalar.Default("https://www.myblog.com"),

@@ -1,112 +1,24 @@
 package flag
 
-import (
-	"log"
-	"sort"
-
-	"go.bbkane.com/warg/value"
-)
-
-// FlagMap holds flags - used by Commands and Sections
-type FlagMap map[string]Flag
-
-func (fm *FlagMap) SortedNames() []string {
-	keys := make([]string, 0, len(*fm))
-	for k := range *fm {
-		keys = append(keys, k)
-	}
-	sort.Slice(keys, func(i, j int) bool {
-		return string(keys[i]) < string(keys[j])
-	})
-	return keys
-}
-
-// AddFlag adds a new flag and panics if it already exists
-func (fm FlagMap) AddFlag(name string, value Flag) {
-	if _, alreadyThere := (fm)[name]; !alreadyThere {
-		(fm)[name] = value
-	} else {
-		log.Panicf("flag already exists: %#v\n", name)
-	}
-}
-
-// AddFlags adds another FlagMap to this one and  and panics if a flag name already exists
-func (fm FlagMap) AddFlags(flagMap FlagMap) {
-	for name, value := range flagMap {
-		fm.AddFlag(name, value)
-	}
-}
-
-// FlagOpt customizes a Flag on creation
-type FlagOpt func(*Flag)
-
-type Flag struct {
-	// Alias is an alternative name for a flag, usually shorter :)
-	Alias string
-
-	// ConfigPath is the path from the config to the value the flag updates
-	ConfigPath string
-
-	// Envvars holds a list of environment variables to update this flag. Only the first one that exists will be used.
-	EnvVars []string
-
-	// EmptyConstructor tells flag how to make a value
-	EmptyValueConstructor value.EmptyConstructor
-
-	// HelpShort is a message for the user on how to use this flag
-	HelpShort string
-
-	// Required means the user MUST fill this flag
-	Required bool
-
-	// When UnsetSentinal is passed as a flag value, Value is reset and SetBy is set to ""
-	UnsetSentinel string
-
-	// -- the following are set when parsing
-
-	// IsCommandFlag is set when parsing. Set to true if the flag was attached to a command (as opposed to being inherited from a section)
-	IsCommandFlag bool
-
-	// Value is set when parsing. Use SetBy != "" to determine whether a value was actually passed  instead of being empty
-	Value value.Value
-}
-
-// New creates a Flag with options!
-func New(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) Flag {
-	flag := Flag{
-		HelpShort:             helpShort,
-		EmptyValueConstructor: empty,
-		Alias:                 "",
-		ConfigPath:            "",
-		EnvVars:               nil,
-		Required:              false,
-		IsCommandFlag:         false,
-		UnsetSentinel:         "",
-		Value:                 nil,
-	}
-	for _, opt := range opts {
-		opt(&flag)
-	}
-	return flag
-}
+import "go.bbkane.com/warg"
 
 // Alias is an alternative name for a flag, usually shorter :)
-func Alias(alias string) FlagOpt {
-	return func(f *Flag) {
+func Alias(alias string) warg.FlagOpt {
+	return func(f *warg.Flag) {
 		f.Alias = alias
 	}
 }
 
 // ConfigPath adds a configpath to a flag
-func ConfigPath(path string) FlagOpt {
-	return func(flag *Flag) {
+func ConfigPath(path string) warg.FlagOpt {
+	return func(flag *warg.Flag) {
 		flag.ConfigPath = path
 	}
 }
 
 // EnvVars adds a list of environmental variables to search through to update this flag. The first one that exists will be used to update the flag. Further existing envvars will be ignored.
-func EnvVars(name ...string) FlagOpt {
-	return func(f *Flag) {
+func EnvVars(name ...string) warg.FlagOpt {
+	return func(f *warg.Flag) {
 		f.EnvVars = name
 	}
 }
@@ -122,15 +34,15 @@ func EnvVars(name ...string) FlagOpt {
 // Slice example:
 //
 //	app --flag a --flag b --flag UNSET --flag c --flag d // ends up with []string{"c", "d"}
-func UnsetSentinel(name string) FlagOpt {
-	return func(f *Flag) {
+func UnsetSentinel(name string) warg.FlagOpt {
+	return func(f *warg.Flag) {
 		f.UnsetSentinel = name
 	}
 }
 
 // Required means the user MUST fill this flag
-func Required() FlagOpt {
-	return func(f *Flag) {
+func Required() warg.FlagOpt {
+	return func(f *warg.Flag) {
 		f.Required = true
 	}
 }

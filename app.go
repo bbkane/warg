@@ -31,9 +31,9 @@ type App struct {
 	// Config()
 	configFlagName  string
 	newConfigReader config.NewReader
-	configFlag      *flag.Flag
+	configFlag      *Flag
 
-	globalFlags flag.FlagMap
+	globalFlags FlagMap
 
 	// New Help()
 	name         string
@@ -56,7 +56,7 @@ func OverrideHelpFlag(
 	defaultChoice string,
 	flagName string,
 	flagHelp string,
-	flagOpts ...flag.FlagOpt,
+	flagOpts ...FlagOpt,
 ) AppOpt {
 	return func(a *App) {
 
@@ -81,7 +81,7 @@ func OverrideHelpFlag(
 			panic(fmt.Sprintf("default (%#v) not found in helpValues (%#v)", defaultChoice, helpValues))
 		}
 
-		helpFlag := flag.New(
+		helpFlag := NewFlag(
 			flagHelp,
 			scalar.String(
 				scalar.Choices(helpValues...),
@@ -100,22 +100,22 @@ func OverrideHelpFlag(
 }
 
 // GlobalFlag adds an existing flag to a Command. It panics if a flag with the same name exists
-func GlobalFlag(name string, value flag.Flag) AppOpt {
+func GlobalFlag(name string, value Flag) AppOpt {
 	return func(com *App) {
 		com.globalFlags.AddFlag(name, value)
 	}
 }
 
 // GlobalFlagMap adds existing flags to a Command. It panics if a flag with the same name exists
-func GlobalFlagMap(flagMap flag.FlagMap) AppOpt {
+func GlobalFlagMap(flagMap FlagMap) AppOpt {
 	return func(com *App) {
 		com.globalFlags.AddFlags(flagMap)
 	}
 }
 
 // NewGlobalFlag adds a flag to the app. It panics if a flag with the same name exists
-func NewGlobalFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) AppOpt {
-	return GlobalFlag(name, flag.New(helpShort, empty, opts...))
+func NewGlobalFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) AppOpt {
+	return GlobalFlag(name, NewFlag(helpShort, empty, opts...))
 
 }
 
@@ -128,13 +128,13 @@ func ConfigFlag(
 	scalarOpts []scalar.ScalarOpt[path.Path],
 	newConfigReader config.NewReader,
 	helpShort string,
-	flagOpts ...flag.FlagOpt,
+	flagOpts ...FlagOpt,
 ) AppOpt {
 	return func(app *App) {
 		app.configFlagName = configFlagName
 		app.newConfigReader = newConfigReader
 		// TODO: need to have value opts here
-		configFlag := flag.New(helpShort, scalar.Path(scalarOpts...), flagOpts...)
+		configFlag := NewFlag(helpShort, scalar.Path(scalarOpts...), flagOpts...)
 		app.configFlag = &configFlag
 	}
 }
@@ -162,9 +162,9 @@ func debugBuildInfoVersion() string {
 // Example:
 //
 //	warg.GlobalFlagMap(warg.ColorFlagMap())
-func ColorFlagMap() flag.FlagMap {
-	return flag.FlagMap{
-		"--color": flag.New(
+func ColorFlagMap() FlagMap {
+	return FlagMap{
+		"--color": NewFlag(
 			"Use ANSI colors",
 			scalar.String(
 				scalar.Choices("true", "false", "auto"),
@@ -205,7 +205,7 @@ func New(name string, version string, rootSection section.SectionT, opts ...AppO
 		helpMappings:    nil,
 		skipValidation:  false,
 		version:         version,
-		globalFlags:     make(flag.FlagMap),
+		globalFlags:     make(FlagMap),
 	}
 	for _, opt := range opts {
 		opt(&app)
@@ -301,8 +301,8 @@ func LookupMap(m map[string]string) LookupFunc {
 //   - command flag names in the same command don't collide with each other (app will panic when adding the second command flag) TODO: ensure there's a test for this
 //   - command flag names/aliases don't collide with command flag names/aliases in other commands (since only one command will be run, this is not a problem)
 func validateFlags2(
-	globalFlags flag.FlagMap,
-	comFlags flag.FlagMap,
+	globalFlags FlagMap,
+	comFlags FlagMap,
 ) error {
 	nameCount := make(map[string]int)
 	for name, fl := range globalFlags {

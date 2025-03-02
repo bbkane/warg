@@ -6,7 +6,6 @@ import (
 
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
@@ -67,7 +66,7 @@ type ParseResult2 struct {
 	CurrentCommand     *command.Command
 
 	CurrentFlagName string
-	CurrentFlag     *flag.Flag
+	CurrentFlag     *Flag
 	FlagValues      FlagValueMap
 	UnsetFlagNames  UnsetFlagNameSet
 
@@ -184,7 +183,7 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 	return pr, nil
 }
 
-func findFlag(flagName string, globalFlags flag.FlagMap, currentCommandFlags flag.FlagMap) *flag.Flag {
+func findFlag(flagName string, globalFlags FlagMap, currentCommandFlags FlagMap) *Flag {
 	if fl, exists := globalFlags[flagName]; exists {
 		return &fl
 	}
@@ -196,7 +195,7 @@ func findFlag(flagName string, globalFlags flag.FlagMap, currentCommandFlags fla
 
 func resolveFlag2(
 	flagName string,
-	fl flag.Flag,
+	fl Flag,
 	flagValues FlagValueMap, // this gets updated - all other params are readonly
 	configReader config.Reader,
 	lookupEnv LookupFunc,
@@ -382,7 +381,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 
 	// build ftar.AvailableFlags - it's a map of string to flag for the app globals + current command. Don't forget to set each flag.IsCommandFlag and Value for now..
 	// TODO:
-	ftarAllowedFlags := make(flag.FlagMap)
+	ftarAllowedFlags := make(FlagMap)
 	for flagName, fl := range app.globalFlags {
 		fl.Value = pr2.FlagValues[flagName]
 		fl.IsCommandFlag = false

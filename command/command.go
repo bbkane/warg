@@ -6,7 +6,7 @@ import (
 	"os"
 	"sort"
 
-	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/value"
 )
 
@@ -67,7 +67,7 @@ type Command struct {
 	Action Action
 
 	// Parsed Flags
-	Flags flag.FlagMap
+	Flags warg.FlagMap
 
 	// Footer is yet another optional longer description.
 	Footer string
@@ -90,7 +90,7 @@ func New(helpShort HelpShort, action Action, opts ...CommandOpt) Command {
 	command := Command{
 		HelpShort: helpShort,
 		Action:    action,
-		Flags:     make(flag.FlagMap),
+		Flags:     make(warg.FlagMap),
 		Footer:    "",
 		HelpLong:  "",
 	}
@@ -101,22 +101,22 @@ func New(helpShort HelpShort, action Action, opts ...CommandOpt) Command {
 }
 
 // Flag adds an existing flag to a Command. It panics if a flag with the same name exists
-func Flag(name string, value flag.Flag) CommandOpt {
+func Flag(name string, value warg.Flag) CommandOpt {
 	return func(com *Command) {
 		com.Flags.AddFlag(name, value)
 	}
 }
 
 // FlagMap adds existing flags to a Command. It panics if a flag with the same name exists
-func FlagMap(flagMap flag.FlagMap) CommandOpt {
+func FlagMap(flagMap warg.FlagMap) CommandOpt {
 	return func(com *Command) {
 		com.Flags.AddFlags(flagMap)
 	}
 }
 
 // NewFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
-func NewFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
-	return Flag(name, flag.New(helpShort, empty, opts...))
+func NewFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...warg.FlagOpt) CommandOpt {
+	return Flag(name, warg.NewFlag(helpShort, empty, opts...))
 }
 
 // Footer adds an Help string to the command - useful from a help function

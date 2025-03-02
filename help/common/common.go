@@ -6,8 +6,8 @@ import (
 
 	"github.com/mattn/go-isatty"
 	"go.bbkane.com/gocolor"
+	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/command"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
 )
 
@@ -16,7 +16,7 @@ type HelpInfo struct {
 
 	// AvailableFlags for the current section or commmand, including inherted flags from parent sections.
 	// All flags are Resolved if possible (i.e., flag.SetBy != "")
-	AvailableFlags flag.FlagMap
+	AvailableFlags warg.FlagMap
 	// RootSection of the app. Especially useful for printing all sections and commands
 	RootSection section.SectionT
 }

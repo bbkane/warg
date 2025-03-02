@@ -144,14 +144,14 @@ func app() *warg.App {
 		),
 	)
 
-	sheetFlags := flag.FlagMap{
-		"--sheet-id": flag.New(
+	sheetFlags := warg.FlagMap{
+		"--sheet-id": warg.NewFlag(
 			"ID For the particulare sheet. Viewable from `gid` URL param",
 			scalar.Int(),
 			flag.EnvVars("STARGHAZE_SHEET_ID"),
 			flag.Required(),
 		),
-		"--spreadsheet-id": flag.New(
+		"--spreadsheet-id": warg.NewFlag(
 			"ID for the whole spreadsheet. Viewable from URL",
 			scalar.String(),
 			flag.EnvVars("STARGHAZE_SPREADSHEET_ID"),
