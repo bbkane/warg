@@ -4,7 +4,7 @@ import (
 	"log"
 	"sort"
 
-	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/completion"
 )
 
@@ -41,7 +41,7 @@ type SectionOpt func(*SectionT)
 // SectionT is the type name because we need the more user-visible `Section` as a function name.
 type SectionT struct {
 	// Commands holds the Commands under this Section
-	Commands command.CommandMap
+	Commands warg.CommandMap
 	// Sections holds the Sections under this Section
 	Sections SectionMapT
 	// HelpShort is a required one-line descripiton of this section
@@ -57,7 +57,7 @@ func New(helpShort HelpShort, opts ...SectionOpt) SectionT {
 	section := SectionT{
 		HelpShort: helpShort,
 		Sections:  make(SectionMapT),
-		Commands:  make(command.CommandMap),
+		Commands:  make(warg.CommandMap),
 		HelpLong:  "",
 		Footer:    "",
 	}
@@ -88,7 +88,7 @@ func SectionMap(sections SectionMapT) SectionOpt {
 }
 
 // Command adds an existing Command underneath this Section. Panics if a Command with the same name already exists
-func Command(name command.Name, value command.Command) SectionOpt {
+func Command(name string, value warg.Command) SectionOpt {
 	return func(app *SectionT) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
@@ -99,7 +99,7 @@ func Command(name command.Name, value command.Command) SectionOpt {
 }
 
 // CommandMap adds existing Commands underneath this Section. Panics if a Command with the same name already exists
-func CommandMap(commands command.CommandMap) SectionOpt {
+func CommandMap(commands warg.CommandMap) SectionOpt {
 	return func(app *SectionT) {
 		for name, value := range commands {
 			Command(name, value)(app)
@@ -113,8 +113,8 @@ func NewSection(name Name, helpShort HelpShort, opts ...SectionOpt) SectionOpt {
 }
 
 // NewCommand creates a NewCommand and adds it underneath this Section. Panics if a NewCommand with the same name already exists
-func NewCommand(name command.Name, helpShort command.HelpShort, action command.Action, opts ...command.CommandOpt) SectionOpt {
-	return Command(name, command.New(helpShort, action, opts...))
+func NewCommand(name string, helpShort string, action warg.Action, opts ...warg.CommandOpt) SectionOpt {
+	return Command(name, warg.NewCommand(helpShort, action, opts...))
 }
 
 // Footer adds an optional help string to this Section

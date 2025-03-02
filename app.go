@@ -11,7 +11,6 @@ import (
 
 	"slices"
 
-	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/flag"
@@ -180,11 +179,11 @@ func ColorFlagMap() FlagMap {
 // Example:
 //
 //	warg.GlobalFlagMap(warg.ColorFlagMap())
-func VersionCommandMap() command.CommandMap {
-	return command.CommandMap{
-		"version": command.New(
+func VersionCommandMap() CommandMap {
+	return CommandMap{
+		"version": NewCommand(
 			"Print version",
-			func(ctx command.Context) error {
+			func(ctx CommandContext) error {
 				fmt.Fprintln(ctx.Stdout, ctx.Version)
 				return nil
 			},

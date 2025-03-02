@@ -7,7 +7,6 @@ import (
 	"github.com/mattn/go-isatty"
 	"go.bbkane.com/gocolor"
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/section"
 )
 
@@ -35,7 +34,7 @@ func LeftPad(s string, pad string, plength int) string {
 // ConditionallyEnableColor looks for a passed --color flag with an underlying string value. If
 // it exists and is set to "true", or if it exists, is set to "auto",
 // and the passed file is a TTY, an enabled Color is returned.
-func ConditionallyEnableColor(pf command.PassedFlags, file *os.File) (gocolor.Color, error) {
+func ConditionallyEnableColor(pf warg.PassedFlags, file *os.File) (gocolor.Color, error) {
 	// default to trying to use color
 	useColor := "auto"
 	// respect a --color string
@@ -58,7 +57,7 @@ func FmtSectionName(col *gocolor.Color, sectionName section.Name) string {
 	return col.Add(col.Bold+col.FgCyan, string(sectionName))
 }
 
-func FmtCommandName(col *gocolor.Color, commandName command.Name) string {
+func FmtCommandName(col *gocolor.Color, commandName string) string {
 	return col.Add(col.Bold+col.FgGreen, string(commandName))
 }
 

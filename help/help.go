@@ -1,15 +1,15 @@
 package help
 
 import (
-	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/help/allcommands"
 	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/help/detailed"
 	"go.bbkane.com/warg/section"
 )
 
-type CommandHelp func(cur *command.Command, helpInfo common.HelpInfo) command.Action
-type SectionHelp func(cur *section.SectionT, helpInfo common.HelpInfo) command.Action
+type CommandHelp func(cur *warg.Command, helpInfo common.HelpInfo) warg.Action
+type SectionHelp func(cur *section.SectionT, helpInfo common.HelpInfo) warg.Action
 
 // HelpFlagMapping adds a new option to your --help flag
 type HelpFlagMapping struct {

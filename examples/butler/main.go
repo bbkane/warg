@@ -36,7 +36,7 @@ func app() *warg.App {
 	return &app
 }
 
-func present(ctx command.Context) error {
+func present(ctx warg.CommandContext) error {
 	// this is a required flag, so we know it exists
 	name := ctx.Flags["--name"].(string)
 	fmt.Fprintf(ctx.Stdout, "May I present to you %s.\n", name)

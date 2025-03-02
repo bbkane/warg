@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"slices"
 
-	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/path"
@@ -21,8 +20,8 @@ type FlagValue struct {
 
 type FlagValueMap map[string]value.Value
 
-func (m FlagValueMap) ToPassedFlags() command.PassedFlags {
-	pf := make(command.PassedFlags)
+func (m FlagValueMap) ToPassedFlags() PassedFlags {
+	pf := make(PassedFlags)
 	for name, v := range m {
 		if v.UpdatedBy() != value.UpdatedByUnset {
 			pf[string(name)] = v.Get()
@@ -62,8 +61,8 @@ type ParseResult2 struct {
 	SectionPath    []string
 	CurrentSection *section.SectionT
 
-	CurrentCommandName command.Name
-	CurrentCommand     *command.Command
+	CurrentCommandName string
+	CurrentCommand     *Command
 
 	CurrentFlagName string
 	CurrentFlag     *Flag
@@ -128,9 +127,9 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 			if childSection, exists := pr.CurrentSection.Sections[section.Name(arg)]; exists {
 				pr.CurrentSection = &childSection
 				pr.SectionPath = append(pr.SectionPath, arg)
-			} else if childCommand, exists := pr.CurrentSection.Commands[command.Name(arg)]; exists {
+			} else if childCommand, exists := pr.CurrentSection.Commands[string(arg)]; exists {
 				pr.CurrentCommand = &childCommand
-				pr.CurrentCommandName = command.Name(arg)
+				pr.CurrentCommandName = string(arg)
 
 				// fill the FlagValues map with empty values from the command
 				// All names in (command flag names, command flag aliases, global flag names, global flag aliases)
@@ -270,7 +269,7 @@ func resolveFlag2(
 	return nil
 }
 
-func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValueMap, lookupEnv LookupFunc, unsetFlagNames UnsetFlagNameSet) error {
+func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, lookupEnv LookupFunc, unsetFlagNames UnsetFlagNameSet) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
 	if a.configFlagName != "" {
@@ -419,7 +418,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 		for _, e := range app.helpMappings {
 			if e.Name == helpType {
 				pr := ParseResult{
-					Context: command.Context{
+					Context: CommandContext{
 						AppName: app.name,
 						Context: parseOptHolder.Context,
 						Flags:   pfs,
@@ -445,7 +444,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 			for _, e := range app.helpMappings {
 				if e.Name == helpType {
 					pr := ParseResult{
-						Context: command.Context{
+						Context: CommandContext{
 							AppName: app.name,
 							Context: parseOptHolder.Context,
 							Flags:   pfs,
@@ -462,7 +461,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 			return nil, fmt.Errorf("some problem with command help: info: %v", helpInfo)
 		} else {
 			pr := ParseResult{
-				Context: command.Context{
+				Context: CommandContext{
 					AppName: app.name,
 					Context: parseOptHolder.Context,
 					Flags:   pfs,

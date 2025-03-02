@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
 	"go.bbkane.com/warg/help/common"
@@ -12,21 +11,21 @@ import (
 	"go.bbkane.com/warg/section"
 )
 
-func exampleOverrideHelpFlaglogin(_ command.Context) error {
+func exampleOverrideHelpFlaglogin(_ warg.CommandContext) error {
 	fmt.Println("Logging in")
 	return nil
 }
 
-func exampleOverrideHelpFlagCustomCommandHelp(_ *command.Command, _ common.HelpInfo) command.Action {
-	return func(ctx command.Context) error {
+func exampleOverrideHelpFlagCustomCommandHelp(_ *warg.Command, _ common.HelpInfo) warg.Action {
+	return func(ctx warg.CommandContext) error {
 		file := ctx.Stdout
 		fmt.Fprintln(file, "Custom command help")
 		return nil
 	}
 }
 
-func exampleOverrideHelpFlagCustomSectionHelp(_ *section.SectionT, _ common.HelpInfo) command.Action {
-	return func(ctx command.Context) error {
+func exampleOverrideHelpFlagCustomSectionHelp(_ *section.SectionT, _ common.HelpInfo) warg.Action {
+	return func(ctx warg.CommandContext) error {
 		file := ctx.Stdout
 		fmt.Fprintln(file, "Custom section help")
 		return nil

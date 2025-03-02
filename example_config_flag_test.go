@@ -15,7 +15,7 @@ import (
 	"go.bbkane.com/warg/value/slice"
 )
 
-func exampleConfigFlagTextAdd(ctx command.Context) error {
+func exampleConfigFlagTextAdd(ctx warg.CommandContext) error {
 	addends := ctx.Flags["--addend"].([]int)
 	sum := 0
 	for _, a := range addends {
@@ -32,7 +32,7 @@ func ExampleConfigFlag() {
 		section.New(
 			"do math",
 			section.NewCommand(
-				command.Name("add"),
+				string("add"),
 				"add integers",
 				exampleConfigFlagTextAdd,
 				command.NewFlag(

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/section"
 )
 
-func AllCommandsSectionHelp(cur *section.SectionT, helpInfo common.HelpInfo) command.Action {
-	return func(cmdCtx command.Context) error {
+func AllCommandsSectionHelp(cur *section.SectionT, helpInfo common.HelpInfo) warg.Action {
+	return func(cmdCtx warg.CommandContext) error {
 		file := cmdCtx.Stdout
 
 		f := bufio.NewWriter(file)
@@ -52,7 +52,7 @@ func AllCommandsSectionHelp(cur *section.SectionT, helpInfo common.HelpInfo) com
 				fmt.Fprintf(f, "  ")
 
 				for _, p := range flatSec.Path {
-					fmt.Fprint(f, common.FmtCommandName(&col, command.Name(p))+" ")
+					fmt.Fprint(f, common.FmtCommandName(&col, string(p))+" ")
 				}
 				fmt.Fprintln(f, common.FmtCommandName(&col, name))
 

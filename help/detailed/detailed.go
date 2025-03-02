@@ -9,14 +9,13 @@ import (
 	"os"
 
 	"go.bbkane.com/gocolor"
-	"go.bbkane.com/warg/command"
-	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 )
 
-func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *flag.Flag) {
+func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *warg.Flag) {
 	if f.Alias != "" {
 		fmt.Fprintf(
 			w,
@@ -177,8 +176,8 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *flag.F
 	fmt.Fprintln(w)
 }
 
-func DetailedCommandHelp(cur *command.Command, helpInfo common.HelpInfo) command.Action {
-	return func(pf command.Context) error {
+func DetailedCommandHelp(cur *warg.Command, helpInfo common.HelpInfo) warg.Action {
+	return func(pf warg.CommandContext) error {
 		file := pf.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
@@ -234,8 +233,8 @@ func DetailedCommandHelp(cur *command.Command, helpInfo common.HelpInfo) command
 	}
 }
 
-func DetailedSectionHelp(cur *section.SectionT, _ common.HelpInfo) command.Action {
-	return func(pf command.Context) error {
+func DetailedSectionHelp(cur *section.SectionT, _ common.HelpInfo) warg.Action {
+	return func(pf warg.CommandContext) error {
 		file := pf.Stdout
 
 		f := bufio.NewWriter(file)
@@ -282,7 +281,7 @@ func DetailedSectionHelp(cur *section.SectionT, _ common.HelpInfo) command.Actio
 					f,
 					"  %s : %s\n",
 					common.FmtCommandName(&col, k),
-					cur.Commands[command.Name(k)].HelpShort,
+					cur.Commands[string(k)].HelpShort,
 				)
 			}
 		}

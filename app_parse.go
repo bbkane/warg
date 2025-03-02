@@ -3,15 +3,13 @@ package warg
 import (
 	"context"
 	"os"
-
-	"go.bbkane.com/warg/command"
 )
 
 // ParseResult holds the result of parsing the command line.
 type ParseResult struct {
-	Context command.Context
+	Context CommandContext
 	// Action holds the passed command's action to execute.
-	Action command.Action
+	Action Action
 }
 
 type ParseOptHolder struct {

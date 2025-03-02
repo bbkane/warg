@@ -7,13 +7,12 @@ import (
 	"os"
 
 	"go.bbkane.com/gocolor"
-	"go.bbkane.com/warg/command"
-	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/section"
 )
 
-func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f flag.Flag, indent int) {
+func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f warg.Flag, indent int) {
 	str := common.FmtFlagName(color, flagName)
 	if f.Alias != "" {
 		str = str + " , " + common.FmtFlagAlias(color, f.Alias)
@@ -28,11 +27,11 @@ func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f fla
 func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, indent int) {
 	// commands and command flags
 	for _, comName := range sec.Commands.SortedNames() {
-		com := sec.Commands[command.Name(comName)]
+		com := sec.Commands[string(comName)]
 		fmt.Fprintln(w, common.LeftPad("# "+string(com.HelpShort), "  ", indent))
 		fmt.Fprintln(
 			w,
-			common.LeftPad(common.FmtCommandName(color, command.Name(comName)), "  ", indent),
+			common.LeftPad(common.FmtCommandName(color, string(comName)), "  ", indent),
 		)
 		for _, flagName := range com.Flags.SortedNames() {
 			outlineFlagHelper(w, color, flagName, com.Flags[flagName], indent+1)
@@ -56,8 +55,8 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, inde
 
 }
 
-func OutlineSectionHelp(_ *section.SectionT, hi common.HelpInfo) command.Action {
-	return func(cmdCtx command.Context) error {
+func OutlineSectionHelp(_ *section.SectionT, hi common.HelpInfo) warg.Action {
+	return func(cmdCtx warg.CommandContext) error {
 		file := cmdCtx.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
@@ -76,6 +75,6 @@ func OutlineSectionHelp(_ *section.SectionT, hi common.HelpInfo) command.Action 
 	}
 }
 
-func OutlineCommandHelp(cur *command.Command, helpInfo common.HelpInfo) command.Action {
+func OutlineCommandHelp(cur *warg.Command, helpInfo common.HelpInfo) warg.Action {
 	return OutlineSectionHelp(nil, helpInfo)
 }

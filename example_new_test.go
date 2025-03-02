@@ -11,7 +11,7 @@ import (
 	"go.bbkane.com/warg/value/scalar"
 )
 
-func login(ctx command.Context) error {
+func login(ctx warg.CommandContext) error {
 	url := ctx.Flags["--url"].(string)
 
 	// timeout doesn't have a default value,

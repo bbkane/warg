@@ -13,7 +13,7 @@ import (
 
 func app() *warg.App {
 
-	downloadCmd := command.New(
+	downloadCmd := warg.NewCommand(
 		"Download star info",
 		githubStarsDownload,
 		command.NewFlag(
@@ -82,7 +82,7 @@ func app() *warg.App {
 		),
 	)
 
-	formatCmd := command.New(
+	formatCmd := warg.NewCommand(
 		"Format downloaded GitHub Stars",
 		format,
 		command.NewFlag(
@@ -189,7 +189,7 @@ func app() *warg.App {
 		),
 	)
 
-	searchCmd := command.New(
+	searchCmd := warg.NewCommand(
 
 		"Full text search SQLite database",
 		search,

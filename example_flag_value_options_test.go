@@ -19,7 +19,7 @@ import (
 // It's also possible to use '--help detailed' to see the current value of a flag and what set it.
 func ExampleApp_Parse_flag_value_options() {
 
-	action := func(ctx command.Context) error {
+	action := func(ctx warg.CommandContext) error {
 		// flag marked as Required(), so no need to check for existance
 		scalarVal := ctx.Flags["--scalar-flag"].(string)
 		// flag might not exist in config, so check for existance
@@ -41,7 +41,7 @@ func ExampleApp_Parse_flag_value_options() {
 		section.New(
 			"demo flag overrides",
 			section.NewCommand(
-				command.Name("show"),
+				string("show"),
 				"Show final flag values",
 				action,
 				command.NewFlag(
