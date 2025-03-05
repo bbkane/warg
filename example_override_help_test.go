@@ -34,7 +34,7 @@ func exampleOverrideHelpFlagCustomSectionHelp(_ *section.SectionT, _ common.Help
 }
 
 func ExampleOverrideHelpFlag() {
-	app := warg.New(
+	app := warg.NewApp(
 		"newAppName",
 		"v1.0.0",
 		section.NewSectionT(

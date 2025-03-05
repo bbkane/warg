@@ -35,7 +35,7 @@ func ExampleApp_Parse_flag_value_options() {
 		return nil
 	}
 
-	app := warg.New(
+	app := warg.NewApp(
 		"flag-overrides",
 		"v1.0.0",
 		section.NewSectionT(

@@ -41,7 +41,7 @@ func ExampleNew() {
 			flag.EnvVars("BLOG_URL"),
 		),
 	}
-	app := warg.New(
+	app := warg.NewApp(
 		"newAppName",
 		"v1.0.0",
 		section.NewSectionT(

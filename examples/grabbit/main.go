@@ -67,7 +67,7 @@ Homepage: https://github.com/bbkane/grabbit
 		),
 	}
 
-	app := warg.New(
+	app := warg.NewApp(
 		"grabbit",
 		"v1.0.0",
 		section.NewSectionT(

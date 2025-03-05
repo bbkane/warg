@@ -11,7 +11,7 @@ import (
 )
 
 func app() *warg.App {
-	app := warg.New(
+	app := warg.NewApp(
 		"butler",
 		"v1.0.0",
 		section.NewSectionT(

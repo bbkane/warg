@@ -29,25 +29,25 @@ type AppOpt func(*App)
 // Create a new App with New()
 type App struct {
 	// Config()
-	configFlagName  string
-	newConfigReader config.NewReader
-	configFlag      *flag.Flag
+	ConfigFlagName  string
+	NewConfigReader config.NewReader
+	ConfigFlag      *flag.Flag
 
-	globalFlags flag.FlagMap
+	GlobalFlags flag.FlagMap
 
 	// New Help()
-	name         string
-	helpFlagName string
+	Name         string
+	HelpFlagName string
 	// Note that this can be ""
-	helpFlagAlias string
-	helpMappings  []help.HelpFlagMapping
+	HelpFlagAlias string
+	HelpMappings  []help.HelpFlagMapping
 
-	// rootSection holds the good stuff!
-	rootSection section.SectionT
+	// RootSection holds the good stuff!
+	RootSection section.SectionT
 
-	skipValidation bool
+	SkipValidation bool
 
-	version string
+	Version string
 }
 
 // OverrideHelpFlag customizes your --help. If you write a custom --help function, you'll want to add it to your app here!
@@ -64,7 +64,7 @@ func OverrideHelpFlag(
 			log.Panicf("flagName should start with '-': %#v\n", flagName)
 		}
 
-		if _, alreadyThere := a.globalFlags[flagName]; alreadyThere {
+		if _, alreadyThere := a.GlobalFlags[flagName]; alreadyThere {
 			log.Panicf("flag already exists: %#v\n", flagName)
 		}
 
@@ -90,11 +90,11 @@ func OverrideHelpFlag(
 			flagOpts...,
 		)
 
-		a.globalFlags[flagName] = helpFlag
+		a.GlobalFlags[flagName] = helpFlag
 		// This is used in parsing, so no need to strongly type it
-		a.helpFlagName = flagName
-		a.helpFlagAlias = helpFlag.Alias
-		a.helpMappings = mappings
+		a.HelpFlagName = flagName
+		a.HelpFlagAlias = helpFlag.Alias
+		a.HelpMappings = mappings
 
 	}
 }
@@ -102,14 +102,14 @@ func OverrideHelpFlag(
 // GlobalFlag adds an existing flag to a Command. It panics if a flag with the same name exists
 func GlobalFlag(name string, value flag.Flag) AppOpt {
 	return func(com *App) {
-		com.globalFlags.AddFlag(name, value)
+		com.GlobalFlags.AddFlag(name, value)
 	}
 }
 
 // GlobalFlagMap adds existing flags to a Command. It panics if a flag with the same name exists
 func GlobalFlagMap(flagMap flag.FlagMap) AppOpt {
 	return func(com *App) {
-		com.globalFlags.AddFlags(flagMap)
+		com.GlobalFlags.AddFlags(flagMap)
 	}
 }
 
@@ -131,11 +131,11 @@ func ConfigFlag(
 	flagOpts ...flag.FlagOpt,
 ) AppOpt {
 	return func(app *App) {
-		app.configFlagName = configFlagName
-		app.newConfigReader = newConfigReader
+		app.ConfigFlagName = configFlagName
+		app.NewConfigReader = newConfigReader
 		// TODO: need to have value opts here
 		configFlag := flag.NewFlag(helpShort, scalar.Path(scalarOpts...), flagOpts...)
-		app.configFlag = &configFlag
+		app.ConfigFlag = &configFlag
 	}
 }
 
@@ -143,7 +143,7 @@ func ConfigFlag(
 // If used, make sure to call app.Validate() in a test!
 func SkipValidation() AppOpt {
 	return func(a *App) {
-		a.skipValidation = true
+		a.SkipValidation = true
 	}
 }
 
@@ -192,26 +192,26 @@ func VersionCommandMap() command.CommandMap {
 	}
 }
 
-// New creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.
-func New(name string, version string, rootSection section.SectionT, opts ...AppOpt) App {
+// NewApp creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.
+func NewApp(name string, version string, rootSection section.SectionT, opts ...AppOpt) App {
 	app := App{
-		name:            name,
-		rootSection:     rootSection,
-		configFlagName:  "",
-		newConfigReader: nil,
-		configFlag:      nil,
-		helpFlagName:    "",
-		helpFlagAlias:   "",
-		helpMappings:    nil,
-		skipValidation:  false,
-		version:         version,
-		globalFlags:     make(flag.FlagMap),
+		Name:            name,
+		RootSection:     rootSection,
+		ConfigFlagName:  "",
+		NewConfigReader: nil,
+		ConfigFlag:      nil,
+		HelpFlagName:    "",
+		HelpFlagAlias:   "",
+		HelpMappings:    nil,
+		SkipValidation:  false,
+		Version:         version,
+		GlobalFlags:     make(flag.FlagMap),
 	}
 	for _, opt := range opts {
 		opt(&app)
 	}
 
-	if app.helpFlagName == "" {
+	if app.HelpFlagName == "" {
 		OverrideHelpFlag(
 			help.BuiltinHelpFlagMappings(),
 			"default",
@@ -221,12 +221,12 @@ func New(name string, version string, rootSection section.SectionT, opts ...AppO
 		)(&app)
 	}
 
-	if app.version == "" {
-		app.version = debugBuildInfoVersion()
+	if app.Version == "" {
+		app.Version = debugBuildInfoVersion()
 	}
 
 	// validate or not and return
-	if app.skipValidation {
+	if app.SkipValidation {
 		return app
 	}
 
@@ -244,7 +244,7 @@ func (app *App) MustRun(opts ...ParseOpt) {
 	// TODO: make this better
 	if slices.Equal(os.Args, []string{os.Args[0], "--completion-script-zsh"}) {
 		// app --completion-script-zsh
-		completion.WriteCompletionScriptZsh(os.Stdout, app.name)
+		completion.WriteCompletionScriptZsh(os.Stdout, app.Name)
 	} else if len(os.Args) >= 3 && os.Args[1] == "--completion-zsh" {
 		// app --completion-zsh <args> . Note that <args> must be something, even if it's the empty string
 
@@ -339,8 +339,8 @@ func validateFlags2(
 func (app *App) Validate() error {
 	// NOTE: we need to be able to validate before we parse, and we may not know the app name
 	// till after prsing so set the root path to "root"
-	rootPath := []string{string(app.name)}
-	it := app.rootSection.BreadthFirst(rootPath)
+	rootPath := []string{string(app.Name)}
+	it := app.RootSection.BreadthFirst(rootPath)
 
 	for it.HasNext() {
 		flatSec := it.Next()
@@ -384,7 +384,7 @@ func (app *App) Validate() error {
 				return fmt.Errorf("command names must not start with '-': %#v", name)
 			}
 
-			err := validateFlags2(app.globalFlags, com.Flags)
+			err := validateFlags2(app.GlobalFlags, com.Flags)
 			if err != nil {
 				return err
 			}
@@ -421,10 +421,10 @@ func (a *App) CompletionCandidates(args []string) (*completion.CompletionCandida
 			})
 		}
 		// global flags
-		for _, name := range a.globalFlags.SortedNames() {
+		for _, name := range a.GlobalFlags.SortedNames() {
 			candidates.Values = append(candidates.Values, completion.CompletionCandidate{
 				Name:        string(name),
-				Description: string(a.globalFlags[name].HelpShort),
+				Description: string(a.GlobalFlags[name].HelpShort),
 			})
 		}
 		return candidates, nil

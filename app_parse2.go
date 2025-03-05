@@ -78,7 +78,7 @@ type ParseResult2 struct {
 func (a *App) parseArgs(args []string) (ParseResult2, error) {
 	pr := ParseResult2{
 		SectionPath:    nil,
-		CurrentSection: &a.rootSection,
+		CurrentSection: &a.RootSection,
 
 		CurrentCommandName: "",
 		CurrentCommand:     nil,
@@ -93,15 +93,15 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 	}
 
 	aliasToFlagName := make(map[string]string)
-	for flagName, fl := range a.globalFlags {
+	for flagName, fl := range a.GlobalFlags {
 		if fl.Alias != "" {
 			aliasToFlagName[string(fl.Alias)] = flagName
 		}
 	}
 
 	// fill the FlagValues map with empty values from the app
-	for flagName := range a.globalFlags {
-		val := a.globalFlags[flagName].EmptyValueConstructor()
+	for flagName := range a.GlobalFlags {
+		val := a.GlobalFlags[flagName].EmptyValueConstructor()
 		pr.FlagValues[flagName] = val
 	}
 
@@ -109,13 +109,13 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 
 		// --help <helptype> or --help must be the last thing passed and can appear at any state we aren't expecting a flag value
 		if i >= len(args)-2 &&
-			(string(arg) == a.helpFlagName || string(arg) == a.helpFlagAlias) &&
+			(string(arg) == a.HelpFlagName || string(arg) == a.HelpFlagAlias) &&
 			pr.State != Parse_ExpectingFlagValue {
 
 			pr.HelpPassed = true
 			// set the value of --help if an arg was passed, otherwise let it resolve with the rest of them...
 			if i == len(args)-2 {
-				err := pr.FlagValues[a.helpFlagName].Update(args[i+1], value.UpdatedByFlag)
+				err := pr.FlagValues[a.HelpFlagName].Update(args[i+1], value.UpdatedByFlag)
 				if err != nil {
 					return pr, fmt.Errorf("error updating help flag: %w", err)
 				}
@@ -154,7 +154,7 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 			if actualFlagName, exists := aliasToFlagName[flagName]; exists {
 				flagName = actualFlagName
 			}
-			fl := findFlag(flagName, a.globalFlags, pr.CurrentCommand.Flags)
+			fl := findFlag(flagName, a.GlobalFlags, pr.CurrentCommand.Flags)
 			if fl == nil {
 				// return pr, fmt.Errorf("expecting command flag name %v or app flag name %v, got %s", pr.CurrentCommand.ChildrenNames(), a.GlobalFlags.SortedNames(), arg)
 				return pr, fmt.Errorf("expecting flag name, got %s", arg)
@@ -274,19 +274,19 @@ func resolveFlag2(
 func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValueMap, lookupEnv LookupFunc, unsetFlagNames UnsetFlagNameSet) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
-	if a.configFlagName != "" {
+	if a.ConfigFlagName != "" {
 		err := resolveFlag2(
-			a.configFlagName, a.globalFlags[a.configFlagName], flagValues, nil, lookupEnv, unsetFlagNames)
+			a.ConfigFlagName, a.GlobalFlags[a.ConfigFlagName], flagValues, nil, lookupEnv, unsetFlagNames)
 		if err != nil {
-			return fmt.Errorf("resolveFlag error for flag %s: %w", a.configFlagName, err)
+			return fmt.Errorf("resolveFlag error for flag %s: %w", a.ConfigFlagName, err)
 		}
-		if flagValues[a.configFlagName].UpdatedBy() != value.UpdatedByUnset {
-			configPath := flagValues[a.configFlagName].Get().(path.Path)
+		if flagValues[a.ConfigFlagName].UpdatedBy() != value.UpdatedByUnset {
+			configPath := flagValues[a.ConfigFlagName].Get().(path.Path)
 			configPathStr, err := configPath.Expand()
 			if err != nil {
 				return fmt.Errorf("error expanding config path ( %s ) : %w", configPath, err)
 			}
-			configReader, err = a.newConfigReader(configPathStr)
+			configReader, err = a.NewConfigReader(configPathStr)
 			if err != nil {
 				return fmt.Errorf("error reading config path ( %s ) : %w", configPath, err)
 			}
@@ -295,7 +295,7 @@ func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValue
 	}
 
 	// resolve app global flags
-	for flagName, fl := range a.globalFlags {
+	for flagName, fl := range a.GlobalFlags {
 		err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
 		if err != nil {
 			return fmt.Errorf("resolveFlag error for flag %s: %w", flagName, err)
@@ -346,7 +346,7 @@ func (a *App) Parse2(args []string, lookupEnv LookupFunc) (*ParseResult2, error)
 	}
 
 	missingRequiredFlags := []string{}
-	for flagName, flag := range a.globalFlags {
+	for flagName, flag := range a.GlobalFlags {
 		if flag.Required && pr.FlagValues[flagName].UpdatedBy() == value.UpdatedByUnset {
 			missingRequiredFlags = append(missingRequiredFlags, string(flagName))
 		}
@@ -371,8 +371,8 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 	// --config flag...
 	// original Parse treats it specially
 	// Parse2 expects it to be in app.GlobalFlags
-	if app.configFlag != nil {
-		app.globalFlags[app.configFlagName] = *app.configFlag
+	if app.ConfigFlag != nil {
+		app.GlobalFlags[app.ConfigFlagName] = *app.ConfigFlag
 	}
 
 	pr2, err := app.Parse2(parseOptHolder.Args[1:], parseOptHolder.LookupFunc)
@@ -383,7 +383,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 	// build ftar.AvailableFlags - it's a map of string to flag for the app globals + current command. Don't forget to set each flag.IsCommandFlag and Value for now..
 	// TODO:
 	ftarAllowedFlags := make(flag.FlagMap)
-	for flagName, fl := range app.globalFlags {
+	for flagName, fl := range app.GlobalFlags {
 		fl.Value = pr2.FlagValues[flagName]
 		fl.IsCommandFlag = false
 		ftarAllowedFlags.AddFlag(flagName, fl)
@@ -413,21 +413,21 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 		// no legit actions, just print the help
 		helpInfo := common.HelpInfo{
 			AvailableFlags: ftarAllowedFlags,
-			RootSection:    app.rootSection,
+			RootSection:    app.RootSection,
 		}
 		// We know the helpFlag has a default so this is safe
-		helpType := ftarAllowedFlags[string(app.helpFlagName)].Value.Get().(string)
-		for _, e := range app.helpMappings {
+		helpType := ftarAllowedFlags[string(app.HelpFlagName)].Value.Get().(string)
+		for _, e := range app.HelpMappings {
 			if e.Name == helpType {
 				pr := ParseResult{
 					Context: command.Context{
-						AppName: app.name,
+						AppName: app.Name,
 						Context: parseOptHolder.Context,
 						Flags:   pfs,
 						Path:    garPath,
 						Stderr:  parseOptHolder.Stderr,
 						Stdout:  parseOptHolder.Stdout,
-						Version: app.version,
+						Version: app.Version,
 					},
 					Action: e.SectionHelp(pr2.CurrentSection, helpInfo),
 				}
@@ -439,21 +439,21 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 		if pr2.HelpPassed {
 			helpInfo := common.HelpInfo{
 				AvailableFlags: ftarAllowedFlags,
-				RootSection:    app.rootSection,
+				RootSection:    app.RootSection,
 			}
 			// We know the helpFlag has a default so this is safe
-			helpType := ftarAllowedFlags[string(app.helpFlagName)].Value.Get().(string)
-			for _, e := range app.helpMappings {
+			helpType := ftarAllowedFlags[string(app.HelpFlagName)].Value.Get().(string)
+			for _, e := range app.HelpMappings {
 				if e.Name == helpType {
 					pr := ParseResult{
 						Context: command.Context{
-							AppName: app.name,
+							AppName: app.Name,
 							Context: parseOptHolder.Context,
 							Flags:   pfs,
 							Path:    garPath,
 							Stderr:  parseOptHolder.Stderr,
 							Stdout:  parseOptHolder.Stdout,
-							Version: app.version,
+							Version: app.Version,
 						},
 						Action: e.CommandHelp(pr2.CurrentCommand, helpInfo),
 					}
@@ -464,13 +464,13 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 		} else {
 			pr := ParseResult{
 				Context: command.Context{
-					AppName: app.name,
+					AppName: app.Name,
 					Context: parseOptHolder.Context,
 					Flags:   pfs,
 					Path:    garPath,
 					Stderr:  parseOptHolder.Stderr,
 					Stdout:  parseOptHolder.Stdout,
-					Version: app.version,
+					Version: app.Version,
 				},
 				Action: pr2.CurrentCommand.Action,
 			}
