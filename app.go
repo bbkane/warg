@@ -182,7 +182,7 @@ func ColorFlagMap() flag.FlagMap {
 //	warg.GlobalFlagMap(warg.ColorFlagMap())
 func VersionCommandMap() command.CommandMap {
 	return command.CommandMap{
-		"version": command.New(
+		"version": command.NewCommand(
 			"Print version",
 			func(ctx command.Context) error {
 				fmt.Fprintln(ctx.Stdout, ctx.Version)

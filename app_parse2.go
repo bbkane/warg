@@ -63,7 +63,7 @@ type ParseResult2 struct {
 	SectionPath    []string
 	CurrentSection *section.SectionT
 
-	CurrentCommandName command.Name
+	CurrentCommandName string
 	CurrentCommand     *command.Command
 
 	CurrentFlagName string
@@ -129,9 +129,9 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 			if childSection, exists := pr.CurrentSection.Sections[section.Name(arg)]; exists {
 				pr.CurrentSection = &childSection
 				pr.SectionPath = append(pr.SectionPath, arg)
-			} else if childCommand, exists := pr.CurrentSection.Commands[command.Name(arg)]; exists {
+			} else if childCommand, exists := pr.CurrentSection.Commands[string(arg)]; exists {
 				pr.CurrentCommand = &childCommand
-				pr.CurrentCommandName = command.Name(arg)
+				pr.CurrentCommandName = string(arg)
 
 				// fill the FlagValues map with empty values from the command
 				// All names in (command flag names, command flag aliases, global flag names, global flag aliases)

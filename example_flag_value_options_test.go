@@ -41,7 +41,7 @@ func ExampleApp_Parse_flag_value_options() {
 		section.New(
 			"demo flag overrides",
 			section.NewCommand(
-				command.Name("show"),
+				string("show"),
 				"Show final flag values",
 				action,
 				command.NewFlag(

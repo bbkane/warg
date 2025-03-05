@@ -58,7 +58,7 @@ func FmtSectionName(col *gocolor.Color, sectionName section.Name) string {
 	return col.Add(col.Bold+col.FgCyan, string(sectionName))
 }
 
-func FmtCommandName(col *gocolor.Color, commandName command.Name) string {
+func FmtCommandName(col *gocolor.Color, commandName string) string {
 	return col.Add(col.Bold+col.FgGreen, string(commandName))
 }
 

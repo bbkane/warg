@@ -423,7 +423,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 							"help for section",
 							section.CommandMap(
 								command.CommandMap{
-									"command": command.New(
+									"command": command.NewCommand(
 										"help for command",
 										command.DoNothing,
 										command.NewFlag(

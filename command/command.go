@@ -33,20 +33,15 @@ type Context struct {
 // An Action is run as the result of a command
 type Action func(Context) error
 
-type HelpShort string
-
-// Name of the command
-type Name string
-
 // A CommandMap holds Commands and is used by Sections
-type CommandMap map[Name]Command
+type CommandMap map[string]Command
 
 func (fm CommandMap) Empty() bool {
 	return len(fm) == 0
 }
 
-func (fm CommandMap) SortedNames() []Name {
-	keys := make([]Name, 0, len(fm))
+func (fm CommandMap) SortedNames() []string {
+	keys := make([]string, 0, len(fm))
 	for k := range fm {
 		keys = append(keys, k)
 	}
@@ -76,7 +71,7 @@ type Command struct {
 	HelpLong string
 
 	// HelpShort is a required one-line description
-	HelpShort HelpShort
+	HelpShort string
 }
 
 // DoNothing is a command action that simply returns an error.
@@ -85,8 +80,8 @@ func DoNothing(_ Context) error {
 	return errors.New("NOTE: replace this command.DoNothing call")
 }
 
-// New builds a Command
-func New(helpShort HelpShort, action Action, opts ...CommandOpt) Command {
+// NewCommand builds a Command
+func NewCommand(helpShort string, action Action, opts ...CommandOpt) Command {
 	command := Command{
 		HelpShort: helpShort,
 		Action:    action,

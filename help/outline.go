@@ -28,11 +28,11 @@ func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f fla
 func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, indent int) {
 	// commands and command flags
 	for _, comName := range sec.Commands.SortedNames() {
-		com := sec.Commands[command.Name(comName)]
+		com := sec.Commands[string(comName)]
 		fmt.Fprintln(w, common.LeftPad("# "+string(com.HelpShort), "  ", indent))
 		fmt.Fprintln(
 			w,
-			common.LeftPad(common.FmtCommandName(color, command.Name(comName)), "  ", indent),
+			common.LeftPad(common.FmtCommandName(color, string(comName)), "  ", indent),
 		)
 		for _, flagName := range com.Flags.SortedNames() {
 			outlineFlagHelper(w, color, flagName, com.Flags[flagName], indent+1)

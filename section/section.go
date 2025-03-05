@@ -88,7 +88,7 @@ func SectionMap(sections SectionMapT) SectionOpt {
 }
 
 // Command adds an existing Command underneath this Section. Panics if a Command with the same name already exists
-func Command(name command.Name, value command.Command) SectionOpt {
+func Command(name string, value command.Command) SectionOpt {
 	return func(app *SectionT) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
@@ -113,8 +113,8 @@ func NewSection(name Name, helpShort HelpShort, opts ...SectionOpt) SectionOpt {
 }
 
 // NewCommand creates a NewCommand and adds it underneath this Section. Panics if a NewCommand with the same name already exists
-func NewCommand(name command.Name, helpShort command.HelpShort, action command.Action, opts ...command.CommandOpt) SectionOpt {
-	return Command(name, command.New(helpShort, action, opts...))
+func NewCommand(name string, helpShort string, action command.Action, opts ...command.CommandOpt) SectionOpt {
+	return Command(name, command.NewCommand(helpShort, action, opts...))
 }
 
 // Footer adds an optional help string to this Section

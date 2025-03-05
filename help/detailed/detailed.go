@@ -282,7 +282,7 @@ func DetailedSectionHelp(cur *section.SectionT, _ common.HelpInfo) command.Actio
 					f,
 					"  %s : %s\n",
 					common.FmtCommandName(&col, k),
-					cur.Commands[command.Name(k)].HelpShort,
+					cur.Commands[string(k)].HelpShort,
 				)
 			}
 		}

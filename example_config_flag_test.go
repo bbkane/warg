@@ -32,7 +32,7 @@ func ExampleConfigFlag() {
 		section.New(
 			"do math",
 			section.NewCommand(
-				command.Name("add"),
+				string("add"),
 				"add integers",
 				exampleConfigFlagTextAdd,
 				command.NewFlag(
