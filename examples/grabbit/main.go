@@ -33,7 +33,7 @@ Homepage: https://github.com/bbkane/grabbit
 `
 
 	logFlags := flag.FlagMap{
-		"--log-filename": flag.New(
+		"--log-filename": flag.NewFlag(
 			"Log filename",
 			scalar.Path(
 				scalar.Default(path.New("~/.config/grabbit.jsonl")),
@@ -41,7 +41,7 @@ Homepage: https://github.com/bbkane/grabbit
 			flag.ConfigPath("lumberjacklogger.filename"),
 			flag.Required(),
 		),
-		"--log-maxage": flag.New(
+		"--log-maxage": flag.NewFlag(
 			"Max age before log rotation in days", // TODO: change to duration flag
 			scalar.Int(
 				scalar.Default(30),
@@ -49,7 +49,7 @@ Homepage: https://github.com/bbkane/grabbit
 			flag.ConfigPath("lumberjacklogger.maxage"),
 			flag.Required(),
 		),
-		"--log-maxbackups": flag.New(
+		"--log-maxbackups": flag.NewFlag(
 			"Num backups for the log",
 			scalar.Int(
 				scalar.Default(0),
@@ -57,7 +57,7 @@ Homepage: https://github.com/bbkane/grabbit
 			flag.ConfigPath("lumberjacklogger.maxbackups"),
 			flag.Required(),
 		),
-		"--log-maxsize": flag.New(
+		"--log-maxsize": flag.NewFlag(
 			"Max size of log in megabytes",
 			scalar.Int(
 				scalar.Default(5),

@@ -20,7 +20,7 @@ type FlagValue struct {
 	Value value.Value
 }
 
-type FlagValueMap map[flag.Name]value.Value
+type FlagValueMap map[string]value.Value
 
 func (m FlagValueMap) ToPassedFlags() command.PassedFlags {
 	pf := make(command.PassedFlags)
@@ -44,17 +44,17 @@ const (
 
 // -- unsetFlagNameSet
 
-type UnsetFlagNameSet map[flag.Name]struct{}
+type UnsetFlagNameSet map[string]struct{}
 
-func (u UnsetFlagNameSet) Add(name flag.Name) {
+func (u UnsetFlagNameSet) Add(name string) {
 	u[name] = struct{}{}
 }
 
-func (u UnsetFlagNameSet) Delete(name flag.Name) {
+func (u UnsetFlagNameSet) Delete(name string) {
 	delete(u, name)
 }
 
-func (u UnsetFlagNameSet) Contains(name flag.Name) bool {
+func (u UnsetFlagNameSet) Contains(name string) bool {
 	_, exists := u[name]
 	return exists
 }
@@ -66,7 +66,7 @@ type ParseResult2 struct {
 	CurrentCommandName command.Name
 	CurrentCommand     *command.Command
 
-	CurrentFlagName flag.Name
+	CurrentFlagName string
 	CurrentFlag     *flag.Flag
 	FlagValues      FlagValueMap
 	UnsetFlagNames  UnsetFlagNameSet
@@ -92,10 +92,10 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 		State:      Parse_ExpectingSectionOrCommand,
 	}
 
-	aliasToFlagName := make(map[flag.Name]flag.Name)
+	aliasToFlagName := make(map[string]string)
 	for flagName, fl := range a.globalFlags {
 		if fl.Alias != "" {
-			aliasToFlagName[flag.Name(fl.Alias)] = flagName
+			aliasToFlagName[string(fl.Alias)] = flagName
 		}
 	}
 
@@ -109,7 +109,7 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 
 		// --help <helptype> or --help must be the last thing passed and can appear at any state we aren't expecting a flag value
 		if i >= len(args)-2 &&
-			(flag.Name(arg) == a.helpFlagName || flag.Name(arg) == a.helpFlagAlias) &&
+			(string(arg) == a.helpFlagName || string(arg) == a.helpFlagAlias) &&
 			pr.State != Parse_ExpectingFlagValue {
 
 			pr.HelpPassed = true
@@ -140,7 +140,7 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 					pr.FlagValues[flagName] = f.EmptyValueConstructor()
 
 					if f.Alias != "" {
-						aliasToFlagName[flag.Name(f.Alias)] = flagName
+						aliasToFlagName[string(f.Alias)] = flagName
 					}
 
 				}
@@ -150,7 +150,7 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 			}
 
 		case Parse_ExpectingFlagNameOrEnd:
-			flagName := flag.Name(arg)
+			flagName := string(arg)
 			if actualFlagName, exists := aliasToFlagName[flagName]; exists {
 				flagName = actualFlagName
 			}
@@ -184,7 +184,7 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 	return pr, nil
 }
 
-func findFlag(flagName flag.Name, globalFlags flag.FlagMap, currentCommandFlags flag.FlagMap) *flag.Flag {
+func findFlag(flagName string, globalFlags flag.FlagMap, currentCommandFlags flag.FlagMap) *flag.Flag {
 	if fl, exists := globalFlags[flagName]; exists {
 		return &fl
 	}
@@ -195,7 +195,7 @@ func findFlag(flagName flag.Name, globalFlags flag.FlagMap, currentCommandFlags 
 }
 
 func resolveFlag2(
-	flagName flag.Name,
+	flagName string,
 	fl flag.Flag,
 	flagValues FlagValueMap, // this gets updated - all other params are readonly
 	configReader config.Reader,
@@ -416,7 +416,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 			RootSection:    app.rootSection,
 		}
 		// We know the helpFlag has a default so this is safe
-		helpType := ftarAllowedFlags[flag.Name(app.helpFlagName)].Value.Get().(string)
+		helpType := ftarAllowedFlags[string(app.helpFlagName)].Value.Get().(string)
 		for _, e := range app.helpMappings {
 			if e.Name == helpType {
 				pr := ParseResult{
@@ -442,7 +442,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 				RootSection:    app.rootSection,
 			}
 			// We know the helpFlag has a default so this is safe
-			helpType := ftarAllowedFlags[flag.Name(app.helpFlagName)].Value.Get().(string)
+			helpType := ftarAllowedFlags[string(app.helpFlagName)].Value.Get().(string)
 			for _, e := range app.helpMappings {
 				if e.Name == helpType {
 					pr := ParseResult{

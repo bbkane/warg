@@ -86,8 +86,8 @@ func TestApp_Parse(t *testing.T) {
 			name: "addCommandFlags",
 			app: func() warg.App {
 				fm := flag.FlagMap{
-					"--flag1": flag.New("--flag1 value", scalar.String()),
-					"--flag2": flag.New("--flag1 value", scalar.String()),
+					"--flag1": flag.NewFlag("--flag1 value", scalar.String()),
+					"--flag2": flag.NewFlag("--flag1 value", scalar.String()),
 				}
 				app := warg.New(
 					"newAppName", "v1.0.0",
@@ -343,7 +343,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					"help for com1",
 					command.DoNothing,
 					command.NewFlag(
-						flag.Name("--flag"),
+						string("--flag"),
 						"flag help",
 						dict.Bool(),
 					),

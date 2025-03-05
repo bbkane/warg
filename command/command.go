@@ -101,7 +101,7 @@ func New(helpShort HelpShort, action Action, opts ...CommandOpt) Command {
 }
 
 // Flag adds an existing flag to a Command. It panics if a flag with the same name exists
-func Flag(name flag.Name, value flag.Flag) CommandOpt {
+func Flag(name string, value flag.Flag) CommandOpt {
 	return func(com *Command) {
 		com.Flags.AddFlag(name, value)
 	}
@@ -115,8 +115,8 @@ func FlagMap(flagMap flag.FlagMap) CommandOpt {
 }
 
 // NewFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
-func NewFlag(name flag.Name, helpShort flag.HelpShort, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
-	return Flag(name, flag.New(helpShort, empty, opts...))
+func NewFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
+	return Flag(name, flag.NewFlag(helpShort, empty, opts...))
 }
 
 // Footer adds an Help string to the command - useful from a help function

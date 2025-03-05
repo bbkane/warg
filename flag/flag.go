@@ -7,17 +7,11 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
-// Name of a flag
-type Name string
-
-// HelpShort is a description of what this flag does.
-type HelpShort string
-
 // FlagMap holds flags - used by Commands and Sections
-type FlagMap map[Name]Flag
+type FlagMap map[string]Flag
 
-func (fm *FlagMap) SortedNames() []Name {
-	keys := make([]Name, 0, len(*fm))
+func (fm *FlagMap) SortedNames() []string {
+	keys := make([]string, 0, len(*fm))
 	for k := range *fm {
 		keys = append(keys, k)
 	}
@@ -28,7 +22,7 @@ func (fm *FlagMap) SortedNames() []Name {
 }
 
 // AddFlag adds a new flag and panics if it already exists
-func (fm FlagMap) AddFlag(name Name, value Flag) {
+func (fm FlagMap) AddFlag(name string, value Flag) {
 	if _, alreadyThere := (fm)[name]; !alreadyThere {
 		(fm)[name] = value
 	} else {
@@ -48,7 +42,7 @@ type FlagOpt func(*Flag)
 
 type Flag struct {
 	// Alias is an alternative name for a flag, usually shorter :)
-	Alias Name
+	Alias string
 
 	// ConfigPath is the path from the config to the value the flag updates
 	ConfigPath string
@@ -60,7 +54,7 @@ type Flag struct {
 	EmptyValueConstructor value.EmptyConstructor
 
 	// HelpShort is a message for the user on how to use this flag
-	HelpShort HelpShort
+	HelpShort string
 
 	// Required means the user MUST fill this flag
 	Required bool
@@ -77,8 +71,8 @@ type Flag struct {
 	Value value.Value
 }
 
-// New creates a Flag with options!
-func New(helpShort HelpShort, empty value.EmptyConstructor, opts ...FlagOpt) Flag {
+// NewFlag creates a Flag with options!
+func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) Flag {
 	flag := Flag{
 		HelpShort:             helpShort,
 		EmptyValueConstructor: empty,
@@ -97,7 +91,7 @@ func New(helpShort HelpShort, empty value.EmptyConstructor, opts ...FlagOpt) Fla
 }
 
 // Alias is an alternative name for a flag, usually shorter :)
-func Alias(alias Name) FlagOpt {
+func Alias(alias string) FlagOpt {
 	return func(f *Flag) {
 		f.Alias = alias
 	}
