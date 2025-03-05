@@ -13,7 +13,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 	// so just set action to nil
 	tests := []struct {
 		name          string
-		rootName      section.Name
+		rootName      string
 		sec           section.SectionT
 		expected      []section.FlatSection
 		expectedPanic bool
@@ -21,7 +21,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "simple",
 			rootName: "r",
-			sec: section.New(
+			sec: section.NewSectionT(
 				"root section help",
 				section.NewCommand("c1", "", nil),
 				section.NewSection("s1", "",
@@ -30,8 +30,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			),
 			expected: []section.FlatSection{
 				{
-					Path: []section.Name{"r"},
-					Sec: section.New(
+					Path: []string{"r"},
+					Sec: section.NewSectionT(
 						"root section help",
 						section.NewCommand("c1", "", nil),
 						section.NewSection("s1", "",
@@ -40,8 +40,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				},
 				{
-					Path: []section.Name{"r", "s1"},
-					Sec: section.New(
+					Path: []string{"r", "s1"},
+					Sec: section.NewSectionT(
 						"", section.NewCommand("c2", "", nil),
 					),
 				},
@@ -51,7 +51,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "sortedOrder",
 			rootName: "r",
-			sec: section.New("",
+			sec: section.NewSectionT("",
 				section.NewSection("sc", "",
 					section.NewCommand("c", "", nil),
 				),
@@ -64,8 +64,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			),
 			expected: []section.FlatSection{
 				{
-					Path: []section.Name{"r"},
-					Sec: section.New("",
+					Path: []string{"r"},
+					Sec: section.NewSectionT("",
 						section.NewSection("sc", "",
 							section.NewCommand("c", "", nil),
 						),
@@ -78,20 +78,20 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				},
 				{
-					Path: []section.Name{"r", "sa"},
-					Sec: section.New("",
+					Path: []string{"r", "sa"},
+					Sec: section.NewSectionT("",
 						section.NewCommand("c", "", nil),
 					),
 				},
 				{
-					Path: []section.Name{"r", "sb"},
-					Sec: section.New("",
+					Path: []string{"r", "sb"},
+					Sec: section.NewSectionT("",
 						section.NewCommand("c", "", nil),
 					),
 				},
 				{
-					Path: []section.Name{"r", "sc"},
-					Sec: section.New("",
+					Path: []string{"r", "sc"},
+					Sec: section.NewSectionT("",
 						section.NewCommand("c", "", nil),
 					),
 				},
@@ -101,7 +101,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "dupFlagNamesSeparatePaths",
 			rootName: "r",
-			sec: section.New("",
+			sec: section.NewSectionT("",
 				section.NewSection("s1", "",
 					section.NewCommand(
 						"c1",
@@ -121,8 +121,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			),
 			expected: []section.FlatSection{
 				{
-					Path: []section.Name{"r"},
-					Sec: section.New("",
+					Path: []string{"r"},
+					Sec: section.NewSectionT("",
 						section.NewSection("s1", "",
 							section.NewCommand(
 								"c1",
@@ -142,8 +142,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				},
 				{
-					Path: []section.Name{"r", "s1"},
-					Sec: section.New("",
+					Path: []string{"r", "s1"},
+					Sec: section.NewSectionT("",
 						section.NewCommand(
 							"c1",
 							"",
@@ -153,8 +153,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				},
 				{
-					Path: []section.Name{"r", "s2"},
-					Sec: section.New("",
+					Path: []string{"r", "s2"},
+					Sec: section.NewSectionT("",
 						section.NewCommand(
 							"c1",
 							"",
@@ -174,7 +174,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				require.Panics(
 					t,
 					func() {
-						it := tt.sec.BreadthFirst([]section.Name{tt.rootName})
+						it := tt.sec.BreadthFirst([]string{tt.rootName})
 						for it.HasNext() {
 							it.Next()
 						}
@@ -184,7 +184,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			}
 
 			actual := make([]section.FlatSection, 0, 1)
-			it := tt.sec.BreadthFirst([]section.Name{tt.rootName})
+			it := tt.sec.BreadthFirst([]string{tt.rootName})
 			for it.HasNext() {
 				actual = append(actual, it.Next())
 			}

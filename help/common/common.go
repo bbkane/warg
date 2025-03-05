@@ -54,7 +54,7 @@ func FmtHeader(col *gocolor.Color, header string) string {
 	return col.Add(col.Bold+col.Underline, header)
 }
 
-func FmtSectionName(col *gocolor.Color, sectionName section.Name) string {
+func FmtSectionName(col *gocolor.Color, sectionName string) string {
 	return col.Add(col.Bold+col.FgCyan, string(sectionName))
 }
 

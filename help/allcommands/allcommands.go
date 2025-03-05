@@ -34,9 +34,9 @@ func AllCommandsSectionHelp(cur *section.SectionT, helpInfo common.HelpInfo) com
 		fmt.Fprintln(f, common.FmtHeader(&col, "All Commands")+" (use <cmd> -h to see flag details):")
 		fmt.Fprintln(f)
 
-		path := []section.Name{section.Name(cmdCtx.AppName)}
+		path := []string{string(cmdCtx.AppName)}
 		for _, e := range cmdCtx.Path {
-			path = append(path, section.Name(e))
+			path = append(path, string(e))
 		}
 
 		it := cur.BreadthFirst(path)

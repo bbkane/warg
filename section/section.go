@@ -8,21 +8,15 @@ import (
 	"go.bbkane.com/warg/completion"
 )
 
-// Name of the section
-type Name string
-
-// HelpShort is a required short description of the section
-type HelpShort string
-
 // SectionMapT holds Sections - used by other Sections
-type SectionMapT map[Name]SectionT
+type SectionMapT map[string]SectionT
 
 func (fm SectionMapT) Empty() bool {
 	return len(fm) == 0
 }
 
-func (fm SectionMapT) SortedNames() []Name {
-	keys := make([]Name, 0, len(fm))
+func (fm SectionMapT) SortedNames() []string {
+	keys := make([]string, 0, len(fm))
 	for k := range fm {
 		keys = append(keys, k)
 	}
@@ -45,15 +39,15 @@ type SectionT struct {
 	// Sections holds the Sections under this Section
 	Sections SectionMapT
 	// HelpShort is a required one-line descripiton of this section
-	HelpShort HelpShort
+	HelpShort string
 	// HelpLong is an optional longer description of this section
 	HelpLong string
 	// Footer is yet another optional longer description.
 	Footer string
 }
 
-// New creates a Section!
-func New(helpShort HelpShort, opts ...SectionOpt) SectionT {
+// NewSectionT creates a Section!
+func NewSectionT(helpShort string, opts ...SectionOpt) SectionT {
 	section := SectionT{
 		HelpShort: helpShort,
 		Sections:  make(SectionMapT),
@@ -68,7 +62,7 @@ func New(helpShort HelpShort, opts ...SectionOpt) SectionT {
 }
 
 // Section adds an existing Section underneath this Section. Panics if a Section with the same name already exists
-func Section(name Name, value SectionT) SectionOpt {
+func Section(name string, value SectionT) SectionOpt {
 	return func(app *SectionT) {
 		if _, alreadyThere := app.Sections[name]; !alreadyThere {
 			app.Sections[name] = value
@@ -108,8 +102,8 @@ func CommandMap(commands command.CommandMap) SectionOpt {
 }
 
 // NewSection creates a NewSection and adds it underneath this NewSection. Panics if a NewSection with the same name already exists
-func NewSection(name Name, helpShort HelpShort, opts ...SectionOpt) SectionOpt {
-	return Section(name, New(helpShort, opts...))
+func NewSection(name string, helpShort string, opts ...SectionOpt) SectionOpt {
+	return Section(name, NewSectionT(helpShort, opts...))
 }
 
 // NewCommand creates a NewCommand and adds it underneath this Section. Panics if a NewCommand with the same name already exists
@@ -135,7 +129,7 @@ func HelpLong(helpLong string) SectionOpt {
 type FlatSection struct {
 
 	// Path to this section
-	Path []Name
+	Path []string
 	// Sec is this section
 	Sec SectionT
 }
@@ -144,7 +138,7 @@ type FlatSection struct {
 // Yielded sections should never be modified - they can share references to the same inherited flags
 // SectionIterator's Next() method panics if two sections in the path have flags with the same name.
 // Breadthfirst is used by app.Validate and help.AllCommandCommandHelp/help.AllCommandSectionHelp
-func (sec *SectionT) BreadthFirst(path []Name) SectionIterator {
+func (sec *SectionT) BreadthFirst(path []string) SectionIterator {
 
 	queue := make([]FlatSection, 0, 1)
 	queue = append(queue, FlatSection{
@@ -171,7 +165,7 @@ func (s *SectionIterator) Next() FlatSection {
 	for _, childName := range current.Sec.Sections.SortedNames() {
 
 		// child.Path = current.Path + child.name
-		childPath := make([]Name, len(current.Path)+1)
+		childPath := make([]string, len(current.Path)+1)
 		copy(childPath, current.Path)
 		childPath[len(childPath)-1] = childName
 

@@ -44,7 +44,7 @@ func ExampleNew() {
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		section.New(
+		section.NewSectionT(
 			"work with a fictional blog platform",
 			section.NewCommand(
 				"login",

@@ -159,7 +159,7 @@ func app() *warg.App {
 		),
 	}
 
-	gsheetsSection := section.New(
+	gsheetsSection := section.NewSectionT(
 		"Google Sheets commands",
 		section.NewCommand(
 			"open",
@@ -223,7 +223,7 @@ func app() *warg.App {
 	app := warg.New(
 		"starghaze",
 		"v1.0.0",
-		section.New(
+		section.NewSectionT(
 			"Save GitHub Starred Repos",
 			section.CommandMap(warg.VersionCommandMap()),
 			section.Command(

@@ -339,7 +339,7 @@ func validateFlags2(
 func (app *App) Validate() error {
 	// NOTE: we need to be able to validate before we parse, and we may not know the app name
 	// till after prsing so set the root path to "root"
-	rootPath := []section.Name{section.Name(app.name)}
+	rootPath := []string{string(app.name)}
 	it := app.rootSection.BreadthFirst(rootPath)
 
 	for it.HasNext() {

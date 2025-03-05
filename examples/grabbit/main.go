@@ -70,7 +70,7 @@ Homepage: https://github.com/bbkane/grabbit
 	app := warg.New(
 		"grabbit",
 		"v1.0.0",
-		section.New(
+		section.NewSectionT(
 			"Get top images from subreddits",
 			section.NewCommand(
 				"grab",

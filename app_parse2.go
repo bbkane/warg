@@ -126,7 +126,7 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 
 		switch pr.State {
 		case Parse_ExpectingSectionOrCommand:
-			if childSection, exists := pr.CurrentSection.Sections[section.Name(arg)]; exists {
+			if childSection, exists := pr.CurrentSection.Sections[string(arg)]; exists {
 				pr.CurrentSection = &childSection
 				pr.SectionPath = append(pr.SectionPath, arg)
 			} else if childCommand, exists := pr.CurrentSection.Commands[string(arg)]; exists {
