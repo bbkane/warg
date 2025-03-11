@@ -4,29 +4,27 @@ import (
 	"fmt"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/flag"
-	"go.bbkane.com/warg/help"
-	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/help/detailed"
 	"go.bbkane.com/warg/section"
 )
 
-func exampleOverrideHelpFlaglogin(_ command.Context) error {
+func exampleOverrideHelpFlaglogin(_ cli.Context) error {
 	fmt.Println("Logging in")
 	return nil
 }
 
-func exampleOverrideHelpFlagCustomCommandHelp(_ *command.Command, _ common.HelpInfo) command.Action {
-	return func(ctx command.Context) error {
+func exampleOverrideHelpFlagCustomCommandHelp(_ *cli.Command, _ cli.HelpInfo) cli.Action {
+	return func(ctx cli.Context) error {
 		file := ctx.Stdout
 		fmt.Fprintln(file, "Custom command help")
 		return nil
 	}
 }
 
-func exampleOverrideHelpFlagCustomSectionHelp(_ *section.SectionT, _ common.HelpInfo) command.Action {
-	return func(ctx command.Context) error {
+func exampleOverrideHelpFlagCustomSectionHelp(_ *cli.SectionT, _ cli.HelpInfo) cli.Action {
+	return func(ctx cli.Context) error {
 		file := ctx.Stdout
 		fmt.Fprintln(file, "Custom section help")
 		return nil
@@ -46,7 +44,7 @@ func ExampleOverrideHelpFlag() {
 			),
 		),
 		warg.OverrideHelpFlag(
-			[]help.HelpFlagMapping{
+			[]cli.HelpFlagMapping{
 				{
 					Name:        "default",
 					CommandHelp: detailed.DetailedCommandHelp,
@@ -66,7 +64,7 @@ func ExampleOverrideHelpFlag() {
 		),
 	)
 
-	app.MustRun(warg.OverrideArgs([]string{"blog.exe", "-h", "custom"}))
+	app.MustRun(cli.OverrideArgs([]string{"blog.exe", "-h", "custom"}))
 	// Output:
 	// Custom section help
 }

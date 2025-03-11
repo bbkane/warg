@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"go.bbkane.com/warg"
+	"go.bbkane.com/warg/cli"
 )
 
 func TestApp_Validate(t *testing.T) {
@@ -20,17 +21,17 @@ func TestRunHelp(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   []string
-		lookup warg.LookupFunc
+		lookup cli.LookupFunc
 	}{
 		{
 			name:   "starghazeDownloadHelpDetailed",
 			args:   []string{"starghaze", "download", "--help", "detailed"},
-			lookup: warg.LookupMap(nil),
+			lookup: cli.LookupMap(nil),
 		},
 		{
 			name:   "starghazeFormatHelpDetailed",
 			args:   []string{"starghaze", "format", "--help", "detailed"},
-			lookup: warg.LookupMap(nil),
+			lookup: cli.LookupMap(nil),
 		},
 	}
 
@@ -43,8 +44,8 @@ func TestRunHelp(t *testing.T) {
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},
-				warg.OverrideArgs(tt.args),
-				warg.OverrideLookupFunc(tt.lookup),
+				cli.OverrideArgs(tt.args),
+				cli.OverrideLookupFunc(tt.lookup),
 			)
 		})
 	}

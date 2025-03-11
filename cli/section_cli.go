@@ -1,9 +1,8 @@
-package section
+package cli
 
 import (
 	"sort"
 
-	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/completion"
 )
 
@@ -31,7 +30,7 @@ func (fm SectionMapT) SortedNames() []string {
 // SectionT is the type name because we need the more user-visible `Section` as a function name.
 type SectionT struct {
 	// Commands holds the Commands under this Section
-	Commands command.CommandMap
+	Commands CommandMap
 	// Sections holds the Sections under this Section
 	Sections SectionMapT
 	// HelpShort is a required one-line descripiton of this section

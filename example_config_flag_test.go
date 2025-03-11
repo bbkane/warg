@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"go.bbkane.com/warg"
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
@@ -15,7 +16,7 @@ import (
 	"go.bbkane.com/warg/value/slice"
 )
 
-func exampleConfigFlagTextAdd(ctx command.Context) error {
+func exampleConfigFlagTextAdd(ctx cli.Context) error {
 	addends := ctx.Flags["--addend"].([]int)
 	sum := 0
 	for _, a := range addends {
@@ -69,7 +70,7 @@ func ExampleConfigFlag() {
 		log.Fatalf("write error: %e", err)
 	}
 	app.MustRun(
-		warg.OverrideArgs([]string{"calc", "add", "-c", "testdata/ExampleConfigFlag/calc.yaml"}),
+		cli.OverrideArgs([]string{"calc", "add", "-c", "testdata/ExampleConfigFlag/calc.yaml"}),
 	)
 	// Output:
 	// Sum: 6

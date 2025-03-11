@@ -1,5 +1,4 @@
-// Declaratively create heirarchical command line apps.
-package warg
+package cli
 
 import (
 	"errors"
@@ -11,9 +10,6 @@ import (
 
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
-	"go.bbkane.com/warg/flag"
-	"go.bbkane.com/warg/help"
-	"go.bbkane.com/warg/section"
 )
 
 // An App contains your defined sections, commands, and flags
@@ -22,19 +18,19 @@ type App struct {
 	// Config()
 	ConfigFlagName  string
 	NewConfigReader config.NewReader
-	ConfigFlag      *flag.Flag
+	ConfigFlag      *Flag
 
-	GlobalFlags flag.FlagMap
+	GlobalFlags FlagMap
 
 	// New Help()
 	Name         string
 	HelpFlagName string
 	// Note that this can be ""
 	HelpFlagAlias string
-	HelpMappings  []help.HelpFlagMapping
+	HelpMappings  []HelpFlagMapping
 
 	// RootSection holds the good stuff!
-	RootSection section.SectionT
+	RootSection SectionT
 
 	SkipValidation bool
 
@@ -105,8 +101,8 @@ func LookupMap(m map[string]string) LookupFunc {
 //   - command flag names in the same command don't collide with each other (app will panic when adding the second command flag) TODO: ensure there's a test for this
 //   - command flag names/aliases don't collide with command flag names/aliases in other commands (since only one command will be run, this is not a problem)
 func validateFlags2(
-	globalFlags flag.FlagMap,
-	comFlags flag.FlagMap,
+	globalFlags FlagMap,
+	comFlags FlagMap,
 ) error {
 	nameCount := make(map[string]int)
 	for name, fl := range globalFlags {

@@ -5,13 +5,14 @@ import (
 	"os"
 
 	"go.bbkane.com/warg"
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 )
 
-func login(ctx command.Context) error {
+func login(ctx cli.Context) error {
 	url := ctx.Flags["--url"].(string)
 
 	// timeout doesn't have a default value,
@@ -28,7 +29,7 @@ func login(ctx command.Context) error {
 }
 
 func ExampleNew() {
-	commonFlags := flag.FlagMap{
+	commonFlags := cli.FlagMap{
 		"--timeout": flag.NewFlag(
 			"Optional timeout. Defaults to no timeout",
 			scalar.Int(),
@@ -75,7 +76,7 @@ func ExampleNew() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	app.MustRun(warg.OverrideArgs([]string{"blog.exe", "login"}))
+	app.MustRun(cli.OverrideArgs([]string{"blog.exe", "login"}))
 	// Output:
 	// Logging into https://envvar.com
 }

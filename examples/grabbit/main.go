@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"go.bbkane.com/warg"
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
@@ -13,7 +14,7 @@ import (
 	"go.bbkane.com/warg/value/slice"
 )
 
-func app() *warg.App {
+func app() *cli.App {
 	appFooter := `Examples (assuming BASH-like shell):
 
   # Grab from passed flags
@@ -32,7 +33,7 @@ func app() *warg.App {
 Homepage: https://github.com/bbkane/grabbit
 `
 
-	logFlags := flag.FlagMap{
+	logFlags := cli.FlagMap{
 		"--log-filename": flag.NewFlag(
 			"Log filename",
 			scalar.Path(

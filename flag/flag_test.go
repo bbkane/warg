@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/flag"
 )
 
 func TestFlagMap_SortedNames(t *testing.T) {
 	emptyFlag := flag.NewFlag("", nil)
 
-	fm := flag.FlagMap{
+	fm := cli.FlagMap{
 		"c": emptyFlag,
 		"a": emptyFlag,
 		"d": emptyFlag,

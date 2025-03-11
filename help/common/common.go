@@ -6,20 +6,8 @@ import (
 
 	"github.com/mattn/go-isatty"
 	"go.bbkane.com/gocolor"
-	"go.bbkane.com/warg/command"
-	"go.bbkane.com/warg/flag"
-	"go.bbkane.com/warg/section"
+	"go.bbkane.com/warg/cli"
 )
-
-// HelpInfo lists common information available to a help function
-type HelpInfo struct {
-
-	// AvailableFlags for the current section or commmand, including inherted flags from parent sections.
-	// All flags are Resolved if possible (i.e., flag.SetBy != "")
-	AvailableFlags flag.FlagMap
-	// RootSection of the app. Especially useful for printing all sections and commands
-	RootSection section.SectionT
-}
 
 // LeftPad pads a string `s` with pad `pad` `plength` times
 //
@@ -35,7 +23,7 @@ func LeftPad(s string, pad string, plength int) string {
 // ConditionallyEnableColor looks for a passed --color flag with an underlying string value. If
 // it exists and is set to "true", or if it exists, is set to "auto",
 // and the passed file is a TTY, an enabled Color is returned.
-func ConditionallyEnableColor(pf command.PassedFlags, file *os.File) (gocolor.Color, error) {
+func ConditionallyEnableColor(pf cli.PassedFlags, file *os.File) (gocolor.Color, error) {
 	// default to trying to use color
 	useColor := "auto"
 	// respect a --color string

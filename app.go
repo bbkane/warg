@@ -6,28 +6,28 @@ import (
 	"runtime/debug"
 	"strings"
 
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
 	"go.bbkane.com/warg/path"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/scalar"
 )
 
 // AppOpt let's you customize the app. Most AppOpts panic if incorrectly called
-type AppOpt func(*App)
+type AppOpt func(*cli.App)
 
 // OverrideHelpFlag customizes your --help. If you write a custom --help function, you'll want to add it to your app here!
 func OverrideHelpFlag(
-	mappings []help.HelpFlagMapping,
+	mappings []cli.HelpFlagMapping,
 	defaultChoice string,
 	flagName string,
 	flagHelp string,
 	flagOpts ...flag.FlagOpt,
 ) AppOpt {
-	return func(a *App) {
+	return func(a *cli.App) {
 
 		if !strings.HasPrefix(string(flagName), "-") {
 			log.Panicf("flagName should start with '-': %#v\n", flagName)
@@ -69,15 +69,15 @@ func OverrideHelpFlag(
 }
 
 // GlobalFlag adds an existing flag to a Command. It panics if a flag with the same name exists
-func GlobalFlag(name string, value flag.Flag) AppOpt {
-	return func(com *App) {
+func GlobalFlag(name string, value cli.Flag) AppOpt {
+	return func(com *cli.App) {
 		com.GlobalFlags.AddFlag(name, value)
 	}
 }
 
 // GlobalFlagMap adds existing flags to a Command. It panics if a flag with the same name exists
-func GlobalFlagMap(flagMap flag.FlagMap) AppOpt {
-	return func(com *App) {
+func GlobalFlagMap(flagMap cli.FlagMap) AppOpt {
+	return func(com *cli.App) {
 		com.GlobalFlags.AddFlags(flagMap)
 	}
 }
@@ -99,7 +99,7 @@ func ConfigFlag(
 	helpShort string,
 	flagOpts ...flag.FlagOpt,
 ) AppOpt {
-	return func(app *App) {
+	return func(app *cli.App) {
 		app.ConfigFlagName = configFlagName
 		app.NewConfigReader = newConfigReader
 		// TODO: need to have value opts here
@@ -111,7 +111,7 @@ func ConfigFlag(
 // SkipValidation skips (most of) the app's internal consistency checks when the app is created.
 // If used, make sure to call app.Validate() in a test!
 func SkipValidation() AppOpt {
-	return func(a *App) {
+	return func(a *cli.App) {
 		a.SkipValidation = true
 	}
 }
@@ -131,8 +131,8 @@ func debugBuildInfoVersion() string {
 // Example:
 //
 //	warg.GlobalFlagMap(warg.ColorFlagMap())
-func ColorFlagMap() flag.FlagMap {
-	return flag.FlagMap{
+func ColorFlagMap() cli.FlagMap {
+	return cli.FlagMap{
 		"--color": flag.NewFlag(
 			"Use ANSI colors",
 			scalar.String(
@@ -149,11 +149,11 @@ func ColorFlagMap() flag.FlagMap {
 // Example:
 //
 //	warg.GlobalFlagMap(warg.ColorFlagMap())
-func VersionCommandMap() command.CommandMap {
-	return command.CommandMap{
+func VersionCommandMap() cli.CommandMap {
+	return cli.CommandMap{
 		"version": command.NewCommand(
 			"Print version",
-			func(ctx command.Context) error {
+			func(ctx cli.Context) error {
 				fmt.Fprintln(ctx.Stdout, ctx.Version)
 				return nil
 			},
@@ -162,8 +162,8 @@ func VersionCommandMap() command.CommandMap {
 }
 
 // NewApp creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.
-func NewApp(name string, version string, rootSection section.SectionT, opts ...AppOpt) App {
-	app := App{
+func NewApp(name string, version string, rootSection cli.SectionT, opts ...AppOpt) cli.App {
+	app := cli.App{
 		Name:            name,
 		RootSection:     rootSection,
 		ConfigFlagName:  "",
@@ -174,7 +174,7 @@ func NewApp(name string, version string, rootSection section.SectionT, opts ...A
 		HelpMappings:    nil,
 		SkipValidation:  false,
 		Version:         version,
-		GlobalFlags:     make(flag.FlagMap),
+		GlobalFlags:     make(cli.FlagMap),
 	}
 	for _, opt := range opts {
 		opt(&app)

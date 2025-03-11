@@ -2,6 +2,7 @@ package main
 
 import (
 	"go.bbkane.com/warg"
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/path"
@@ -10,8 +11,8 @@ import (
 	"go.bbkane.com/warg/value/slice"
 )
 
-func app() *warg.App {
-	linkUnlinkFlags := flag.FlagMap{
+func app() *cli.App {
+	linkUnlinkFlags := cli.FlagMap{
 		"--ask": flag.NewFlag(
 			"Whether to ask before making changes",
 			// value.StringEnum("true", "false", "dry-run"),

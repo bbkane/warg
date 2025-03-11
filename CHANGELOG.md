@@ -6,6 +6,12 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.0.30
+
+## Changed
+
+- Moved "core" types (App, Section, Command, Flag, HelpInfo) to a new "cli" package so they can reference each other, particularly for better tab completion. I'm not particularly happy with a giant package like this; so it's in the `bbkane/the-flattening-2-split-files` branch and I'll remove it from this changelog if needed. In the mean time I want to revamp command.Action (should just take a ParseResult), help (should just be a command with access to a ParseResult), and section/command/flag.CompletionCandidates (should take a ParseResult...).
+
 # v0.0.29
 
 ## Added
@@ -17,7 +23,6 @@ Assuming `~/fbin` is on the `zsh` `$fpath`, run:
 ```zsh
 $ ./butler "--completion-script-zsh" > ~/fbin/_butler
 ```
-
 
 - Added `scalar.PointerTo` to bind how a scalar updates from flags/interfaces to a pre-existing variable. Still need to do this for dicts and slices
 

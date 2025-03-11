@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"go.bbkane.com/warg"
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
@@ -14,7 +15,7 @@ import (
 )
 
 // A grabbitSection is a simple section to test help
-func grabbitSection() section.SectionT {
+func grabbitSection() cli.SectionT {
 
 	rootFooter := `Examples:
 
@@ -92,32 +93,32 @@ func TestAppHelp(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   []string
-		lookup warg.LookupFunc
+		lookup cli.LookupFunc
 	}{
 		// toplevel just a toplevel help!
 		{
 			name:   "toplevel",
 			args:   []string{"grabbit", "-h", "outline"},
-			lookup: warg.LookupMap(nil),
+			lookup: cli.LookupMap(nil),
 		},
 
 		// allcommands (no command help)
 		{
 			name:   "allcommandsSection",
 			args:   []string{"grabbit", "config", "--help"},
-			lookup: warg.LookupMap(nil),
+			lookup: cli.LookupMap(nil),
 		},
 
 		// detailed
 		{
 			name:   "detailedCommand",
 			args:   []string{"grabbit", "config", "edit", "--help"},
-			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
+			lookup: cli.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
 			name:   "detailedSection",
 			args:   []string{"grabbit", "--help", "detailed"},
-			lookup: warg.LookupMap(nil),
+			lookup: cli.LookupMap(nil),
 		},
 
 		// outline
@@ -125,13 +126,13 @@ func TestAppHelp(t *testing.T) {
 			// TODO: make this print global flags!
 			name:   "outlineCommand",
 			args:   []string{"grabbit", "config", "edit", "--help", "outline"},
-			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
+			lookup: cli.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
 			// TODO: make this print global flags!
 			name:   "outlineSection",
 			args:   []string{"grabbit", "--help", "outline"},
-			lookup: warg.LookupMap(nil),
+			lookup: cli.LookupMap(nil),
 		},
 	}
 
@@ -150,8 +151,8 @@ func TestAppHelp(t *testing.T) {
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},
-				warg.OverrideArgs(tt.args),
-				warg.OverrideLookupFunc(tt.lookup),
+				cli.OverrideArgs(tt.args),
+				cli.OverrideLookupFunc(tt.lookup),
 			)
 		})
 	}

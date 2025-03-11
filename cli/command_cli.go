@@ -1,11 +1,9 @@
-package command
+package cli
 
 import (
 	"context"
 	"os"
 	"sort"
-
-	"go.bbkane.com/warg/flag"
 )
 
 // PassedFlags holds a map of flag names to flag Values
@@ -57,7 +55,7 @@ type Command struct {
 	Action Action
 
 	// Parsed Flags
-	Flags flag.FlagMap
+	Flags FlagMap
 
 	// Footer is yet another optional longer description.
 	Footer string

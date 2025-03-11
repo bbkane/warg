@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"go.bbkane.com/warg"
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
@@ -19,7 +20,7 @@ import (
 // It's also possible to use '--help detailed' to see the current value of a flag and what set it.
 func ExampleApp_Parse_flag_value_options() {
 
-	action := func(ctx command.Context) error {
+	action := func(ctx cli.Context) error {
 		// flag marked as Required(), so no need to check for existance
 		scalarVal := ctx.Flags["--scalar-flag"].(string)
 		// flag might not exist in config, so check for existance
@@ -91,7 +92,7 @@ func ExampleApp_Parse_flag_value_options() {
 		log.Fatalf("write error: %e", err)
 	}
 	app.MustRun(
-		warg.OverrideArgs([]string{"calc", "show", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "--scalar-flag", "b"}),
+		cli.OverrideArgs([]string{"calc", "show", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "--scalar-flag", "b"}),
 	)
 	// Output:
 	// --scalar-flag: "b"

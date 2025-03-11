@@ -7,13 +7,11 @@ import (
 	"os"
 
 	"go.bbkane.com/gocolor"
-	"go.bbkane.com/warg/command"
-	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/help/common"
-	"go.bbkane.com/warg/section"
 )
 
-func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f flag.Flag, indent int) {
+func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f cli.Flag, indent int) {
 	str := common.FmtFlagName(color, flagName)
 	if f.Alias != "" {
 		str = str + " , " + common.FmtFlagAlias(color, f.Alias)
@@ -25,7 +23,7 @@ func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f fla
 	)
 }
 
-func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, indent int) {
+func outlineHelper(w io.Writer, color *gocolor.Color, sec cli.SectionT, indent int) {
 	// commands and command flags
 	for _, comName := range sec.Commands.SortedNames() {
 		com := sec.Commands[string(comName)]
@@ -56,8 +54,8 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec section.SectionT, inde
 
 }
 
-func OutlineSectionHelp(_ *section.SectionT, hi common.HelpInfo) command.Action {
-	return func(cmdCtx command.Context) error {
+func OutlineSectionHelp(_ *cli.SectionT, hi cli.HelpInfo) cli.Action {
+	return func(cmdCtx cli.Context) error {
 		file := cmdCtx.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
@@ -76,6 +74,6 @@ func OutlineSectionHelp(_ *section.SectionT, hi common.HelpInfo) command.Action 
 	}
 }
 
-func OutlineCommandHelp(cur *command.Command, helpInfo common.HelpInfo) command.Action {
+func OutlineCommandHelp(cur *cli.Command, helpInfo cli.HelpInfo) cli.Action {
 	return OutlineSectionHelp(nil, helpInfo)
 }

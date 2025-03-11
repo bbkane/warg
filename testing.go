@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.bbkane.com/warg/cli"
 )
 
 type GoldenTestArgs struct {
-	App *App
+	App *cli.App
 
 	// UpdateGolden files for captured stderr/stdout
 	UpdateGolden bool
@@ -27,7 +28,7 @@ type GoldenTestArgs struct {
 func GoldenTest(
 	t *testing.T,
 	args GoldenTestArgs,
-	parseOpts ...ParseOpt) {
+	parseOpts ...cli.ParseOpt) {
 	stderrTmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
 	require.Nil(t, err)
 
@@ -37,12 +38,15 @@ func GoldenTest(
 	err = args.App.Validate()
 	require.Nil(t, err)
 
-	parseOptHolder := NewParseOptHolder(parseOpts...)
+	parseOpts = append(parseOpts, cli.OverrideStderr(stderrTmpFile))
+	parseOpts = append(parseOpts, cli.OverrideStdout(stdoutTmpFile))
+	pr, parseErr := args.App.Parse(parseOpts...)
 
-	OverrideStderr(stderrTmpFile)(&parseOptHolder)
-	OverrideStdout(stdoutTmpFile)(&parseOptHolder)
+	// parseOptHolder := cli.NewParseOptHolder(parseOpts...)
+	// cli.OverrideStderr(stderrTmpFile)(&parseOptHolder)
+	// cli.OverrideStdout(stdoutTmpFile)(&parseOptHolder)
+	// pr, parseErr := args.App.parseWithOptHolder2(parseOptHolder)
 
-	pr, parseErr := args.App.parseWithOptHolder2(parseOptHolder)
 	require.Nil(t, parseErr)
 
 	actionErr := pr.Action(pr.Context)

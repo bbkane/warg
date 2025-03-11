@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.bbkane.com/warg"
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
@@ -15,7 +16,7 @@ func TestApp_Validate(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		app         warg.App // NOTE:
+		app         cli.App // NOTE:
 		expectedErr bool
 	}{
 		{

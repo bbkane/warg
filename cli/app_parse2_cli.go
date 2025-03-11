@@ -1,15 +1,11 @@
-package warg
+package cli
 
 import (
 	"fmt"
 	"slices"
 
-	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config"
-	"go.bbkane.com/warg/flag"
-	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/path"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 )
 
@@ -22,8 +18,8 @@ type FlagValue struct {
 
 type FlagValueMap map[string]value.Value
 
-func (m FlagValueMap) ToPassedFlags() command.PassedFlags {
-	pf := make(command.PassedFlags)
+func (m FlagValueMap) ToPassedFlags() PassedFlags {
+	pf := make(PassedFlags)
 	for name, v := range m {
 		if v.UpdatedBy() != value.UpdatedByUnset {
 			pf[string(name)] = v.Get()
@@ -61,13 +57,13 @@ func (u UnsetFlagNameSet) Contains(name string) bool {
 
 type ParseResult2 struct {
 	SectionPath    []string
-	CurrentSection *section.SectionT
+	CurrentSection *SectionT
 
 	CurrentCommandName string
-	CurrentCommand     *command.Command
+	CurrentCommand     *Command
 
 	CurrentFlagName string
-	CurrentFlag     *flag.Flag
+	CurrentFlag     *Flag
 	FlagValues      FlagValueMap
 	UnsetFlagNames  UnsetFlagNameSet
 
@@ -184,7 +180,7 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 	return pr, nil
 }
 
-func findFlag(flagName string, globalFlags flag.FlagMap, currentCommandFlags flag.FlagMap) *flag.Flag {
+func findFlag(flagName string, globalFlags FlagMap, currentCommandFlags FlagMap) *Flag {
 	if fl, exists := globalFlags[flagName]; exists {
 		return &fl
 	}
@@ -196,7 +192,7 @@ func findFlag(flagName string, globalFlags flag.FlagMap, currentCommandFlags fla
 
 func resolveFlag2(
 	flagName string,
-	fl flag.Flag,
+	fl Flag,
 	flagValues FlagValueMap, // this gets updated - all other params are readonly
 	configReader config.Reader,
 	lookupEnv LookupFunc,
@@ -271,7 +267,7 @@ func resolveFlag2(
 	return nil
 }
 
-func (a *App) resolveFlags(currentCommand *command.Command, flagValues FlagValueMap, lookupEnv LookupFunc, unsetFlagNames UnsetFlagNameSet) error {
+func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, lookupEnv LookupFunc, unsetFlagNames UnsetFlagNameSet) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
 	if a.ConfigFlagName != "" {
@@ -382,7 +378,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 
 	// build ftar.AvailableFlags - it's a map of string to flag for the app globals + current command. Don't forget to set each flag.IsCommandFlag and Value for now..
 	// TODO:
-	ftarAllowedFlags := make(flag.FlagMap)
+	ftarAllowedFlags := make(FlagMap)
 	for flagName, fl := range app.GlobalFlags {
 		fl.Value = pr2.FlagValues[flagName]
 		fl.IsCommandFlag = false
@@ -411,7 +407,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 
 	if pr2.CurrentCommand == nil { // we got a section
 		// no legit actions, just print the help
-		helpInfo := common.HelpInfo{
+		helpInfo := HelpInfo{
 			AvailableFlags: ftarAllowedFlags,
 			RootSection:    app.RootSection,
 		}
@@ -420,7 +416,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 		for _, e := range app.HelpMappings {
 			if e.Name == helpType {
 				pr := ParseResult{
-					Context: command.Context{
+					Context: Context{
 						AppName: app.Name,
 						Context: parseOptHolder.Context,
 						Flags:   pfs,
@@ -437,7 +433,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 		return nil, fmt.Errorf("some problem with section help: info: %v", helpInfo)
 	} else if pr2.CurrentCommand != nil { // we got a command
 		if pr2.HelpPassed {
-			helpInfo := common.HelpInfo{
+			helpInfo := HelpInfo{
 				AvailableFlags: ftarAllowedFlags,
 				RootSection:    app.RootSection,
 			}
@@ -446,7 +442,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 			for _, e := range app.HelpMappings {
 				if e.Name == helpType {
 					pr := ParseResult{
-						Context: command.Context{
+						Context: Context{
 							AppName: app.Name,
 							Context: parseOptHolder.Context,
 							Flags:   pfs,
@@ -463,7 +459,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 			return nil, fmt.Errorf("some problem with command help: info: %v", helpInfo)
 		} else {
 			pr := ParseResult{
-				Context: command.Context{
+				Context: Context{
 					AppName: app.Name,
 					Context: parseOptHolder.Context,
 					Flags:   pfs,
