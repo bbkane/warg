@@ -11,14 +11,14 @@ type PassedFlags map[string]interface{} // This can just stay a string for the c
 
 // Context holds everything a command needs.
 type Context struct {
-	App *App
+	App   *App
+	Flags PassedFlags
+
+	ParseResult *ParseResult2
 
 	// Context to smuggle user-defined state (i.e., not flags) into an Action. I use this for mocks when testing
 	Context context.Context
-	Flags   PassedFlags
 
-	// Path passed either to a command or a section. Does not include executable name (os.Args[0])
-	Path   []string
 	Stderr *os.File
 	Stdout *os.File
 }

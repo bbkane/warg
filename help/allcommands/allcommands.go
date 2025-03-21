@@ -34,7 +34,7 @@ func AllCommandsSectionHelp(cur *cli.SectionT, helpInfo cli.HelpInfo) cli.Action
 		fmt.Fprintln(f)
 
 		path := []string{string(cmdCtx.App.Name)}
-		for _, e := range cmdCtx.Path {
+		for _, e := range cmdCtx.ParseResult.SectionPath {
 			path = append(path, string(e))
 		}
 

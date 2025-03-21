@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"slices"
 
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/path"
@@ -397,12 +396,6 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 	// port pfs
 	pfs := pr2.FlagValues.ToPassedFlags()
 
-	// port gar.Path
-	garPath := pr2.SectionPath
-	if pr2.CurrentCommandName != "" {
-		garPath = slices.Concat(pr2.SectionPath, []string{string(pr2.CurrentCommandName)})
-	}
-
 	// TODO: handle aliases and sentinel values later
 
 	if pr2.CurrentCommand == nil { // we got a section
@@ -417,12 +410,12 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 			if e.Name == helpType {
 				pr := ParseResult{
 					Context: Context{
-						App:     app,
-						Context: parseOptHolder.Context,
-						Flags:   pfs,
-						Path:    garPath,
-						Stderr:  parseOptHolder.Stderr,
-						Stdout:  parseOptHolder.Stdout,
+						App:         app,
+						Context:     parseOptHolder.Context,
+						Flags:       pfs,
+						ParseResult: pr2,
+						Stderr:      parseOptHolder.Stderr,
+						Stdout:      parseOptHolder.Stdout,
 					},
 					Action: e.SectionHelp(pr2.CurrentSection, helpInfo),
 				}
@@ -442,12 +435,12 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 				if e.Name == helpType {
 					pr := ParseResult{
 						Context: Context{
-							App:     app,
-							Context: parseOptHolder.Context,
-							Flags:   pfs,
-							Path:    garPath,
-							Stderr:  parseOptHolder.Stderr,
-							Stdout:  parseOptHolder.Stdout,
+							App:         app,
+							Context:     parseOptHolder.Context,
+							Flags:       pfs,
+							ParseResult: pr2,
+							Stderr:      parseOptHolder.Stderr,
+							Stdout:      parseOptHolder.Stdout,
 						},
 						Action: e.CommandHelp(pr2.CurrentCommand, helpInfo),
 					}
@@ -458,12 +451,12 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 		} else {
 			pr := ParseResult{
 				Context: Context{
-					App:     app,
-					Context: parseOptHolder.Context,
-					Flags:   pfs,
-					Path:    garPath,
-					Stderr:  parseOptHolder.Stderr,
-					Stdout:  parseOptHolder.Stdout,
+					App:         app,
+					Context:     parseOptHolder.Context,
+					Flags:       pfs,
+					ParseResult: pr2,
+					Stderr:      parseOptHolder.Stderr,
+					Stdout:      parseOptHolder.Stdout,
 				},
 				Action: pr2.CurrentCommand.Action,
 			}

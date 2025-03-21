@@ -5,6 +5,7 @@ package warg_test
 import (
 	"context"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"go.bbkane.com/warg"
@@ -159,7 +160,12 @@ func TestApp_Parse(t *testing.T) {
 			} else {
 				require.Nil(t, actualErr)
 			}
-			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
+			actualPath := slices.Clone(actualPR.Context.ParseResult.SectionPath)
+			if actualPR.Context.ParseResult.CurrentCommandName != "" {
+				actualPath = append(actualPath, actualPR.Context.ParseResult.CurrentCommandName)
+			}
+
+			require.Equal(t, tt.expectedPassedPath, actualPath)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
 		})
 	}
@@ -470,7 +476,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			} else {
 				require.NoError(t, actualErr)
 			}
-			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
+			actualPath := slices.Clone(actualPR.Context.ParseResult.SectionPath)
+			if actualPR.Context.ParseResult.CurrentCommandName != "" {
+				actualPath = append(actualPath, actualPR.Context.ParseResult.CurrentCommandName)
+			}
+			require.Equal(t, tt.expectedPassedPath, actualPath)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
 		})
 	}
@@ -559,7 +569,11 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 			} else {
 				require.NoError(t, actualErr)
 			}
-			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
+			actualPath := slices.Clone(actualPR.Context.ParseResult.SectionPath)
+			if actualPR.Context.ParseResult.CurrentCommandName != "" {
+				actualPath = append(actualPath, actualPR.Context.ParseResult.CurrentCommandName)
+			}
+			require.Equal(t, tt.expectedPassedPath, actualPath)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
 		})
 	}
@@ -885,7 +899,11 @@ func TestApp_Parse_config(t *testing.T) {
 			} else {
 				require.Nil(t, actualErr)
 			}
-			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
+			actualPath := slices.Clone(actualPR.Context.ParseResult.SectionPath)
+			if actualPR.Context.ParseResult.CurrentCommandName != "" {
+				actualPath = append(actualPath, actualPR.Context.ParseResult.CurrentCommandName)
+			}
+			require.Equal(t, tt.expectedPassedPath, actualPath)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
 		})
 	}
@@ -944,7 +962,11 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 			} else {
 				require.Nil(t, actualErr)
 			}
-			require.Equal(t, tt.expectedPassedPath, actualPR.Context.Path)
+			actualPath := slices.Clone(actualPR.Context.ParseResult.SectionPath)
+			if actualPR.Context.ParseResult.CurrentCommandName != "" {
+				actualPath = append(actualPath, actualPR.Context.ParseResult.CurrentCommandName)
+			}
+			require.Equal(t, tt.expectedPassedPath, actualPath)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
 		})
 	}
