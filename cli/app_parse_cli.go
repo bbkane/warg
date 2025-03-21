@@ -15,6 +15,7 @@ type ParseResult struct {
 type ParseOptHolder struct {
 	Args []string
 
+	// Context for unstructured data. Useful for setting up mocks for tests (i.e., pass in in memory database and use it if it's here in the context)
 	Context context.Context
 
 	LookupFunc LookupFunc
