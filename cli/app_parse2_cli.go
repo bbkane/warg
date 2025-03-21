@@ -398,8 +398,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 
 	// TODO: handle aliases and sentinel values later
 
-	if pr2.CurrentCommand == nil { // we got a section
-		// no legit actions, just print the help
+	if pr2.CurrentCommand == nil { // we got a section. no legit actions, just print the help
 		helpInfo := HelpInfo{
 			AvailableFlags: ftarAllowedFlags,
 			RootSection:    app.RootSection,
