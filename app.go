@@ -154,7 +154,7 @@ func VersionCommandMap() cli.CommandMap {
 		"version": command.NewCommand(
 			"Print version",
 			func(ctx cli.Context) error {
-				fmt.Fprintln(ctx.Stdout, ctx.Version)
+				fmt.Fprintln(ctx.Stdout, ctx.App.Version)
 				return nil
 			},
 		),

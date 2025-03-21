@@ -66,7 +66,7 @@ func OutlineSectionHelp(_ *cli.SectionT, hi cli.HelpInfo) cli.Action {
 		}
 
 		fmt.Fprintln(f, "# "+string(hi.RootSection.HelpShort))
-		fmt.Fprintf(f, "%s\n", common.FmtSectionName(&col, string(cmdCtx.AppName)))
+		fmt.Fprintf(f, "%s\n", common.FmtSectionName(&col, string(cmdCtx.App.Name)))
 
 		outlineHelper(f, &col, hi.RootSection, 1)
 

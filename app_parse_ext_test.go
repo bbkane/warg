@@ -969,7 +969,7 @@ func TestCustomVersion(t *testing.T) {
 	)
 	require.Nil(t, err)
 
-	require.Equal(t, expectedVersion, actualPR.Context.Version)
+	require.Equal(t, expectedVersion, actualPR.Context.App.Version)
 }
 
 func TestContextContainsValue(t *testing.T) {

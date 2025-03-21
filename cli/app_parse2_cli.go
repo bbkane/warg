@@ -417,13 +417,12 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 			if e.Name == helpType {
 				pr := ParseResult{
 					Context: Context{
-						AppName: app.Name,
+						App:     app,
 						Context: parseOptHolder.Context,
 						Flags:   pfs,
 						Path:    garPath,
 						Stderr:  parseOptHolder.Stderr,
 						Stdout:  parseOptHolder.Stdout,
-						Version: app.Version,
 					},
 					Action: e.SectionHelp(pr2.CurrentSection, helpInfo),
 				}
@@ -443,13 +442,12 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 				if e.Name == helpType {
 					pr := ParseResult{
 						Context: Context{
-							AppName: app.Name,
+							App:     app,
 							Context: parseOptHolder.Context,
 							Flags:   pfs,
 							Path:    garPath,
 							Stderr:  parseOptHolder.Stderr,
 							Stdout:  parseOptHolder.Stdout,
-							Version: app.Version,
 						},
 						Action: e.CommandHelp(pr2.CurrentCommand, helpInfo),
 					}
@@ -460,13 +458,12 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 		} else {
 			pr := ParseResult{
 				Context: Context{
-					AppName: app.Name,
+					App:     app,
 					Context: parseOptHolder.Context,
 					Flags:   pfs,
 					Path:    garPath,
 					Stderr:  parseOptHolder.Stderr,
 					Stdout:  parseOptHolder.Stdout,
-					Version: app.Version,
 				},
 				Action: pr2.CurrentCommand.Action,
 			}
