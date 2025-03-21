@@ -7,7 +7,6 @@ import (
 	"github.com/mattn/go-isatty"
 	"go.bbkane.com/gocolor"
 	"go.bbkane.com/warg/cli"
-	"go.bbkane.com/warg/command"
 )
 
 // LeftPad pads a string `s` with pad `pad` `plength` times
@@ -68,70 +67,4 @@ func SortedKeys[M ~map[string]V, V any](m M) []string {
 	}
 	sort.Strings(r)
 	return r
-}
-
-func SectionHelpToCommand(secHelp cli.SectionHelp) cli.Command {
-	return command.NewCommand(
-		"", // This is never visible to the user as this command is generated from the help flag
-		func(cmdCtx cli.Context) error {
-			// build ftar.AvailableFlags - it's a map of string to flag for the app globals + current command. Don't forget to set each flag.IsCommandFlag and Value for now..
-			// TODO:
-			ftarAllowedFlags := make(cli.FlagMap)
-			for flagName, fl := range cmdCtx.App.GlobalFlags {
-				fl.Value = cmdCtx.ParseResult.FlagValues[flagName]
-				fl.IsCommandFlag = false
-				ftarAllowedFlags.AddFlag(flagName, fl)
-			}
-
-			// If we're in Parse_ExpectingSectionOrCommand, we haven't received a command
-			if cmdCtx.ParseResult.State != cli.Parse_ExpectingSectionOrCommand {
-				for flagName, fl := range cmdCtx.ParseResult.CurrentCommand.Flags {
-					fl.Value = cmdCtx.ParseResult.FlagValues[flagName]
-					fl.IsCommandFlag = true
-					ftarAllowedFlags.AddFlag(flagName, fl)
-				}
-			}
-
-			sec := cmdCtx.ParseResult.CurrentSection
-			hi := cli.HelpInfo{
-				AvailableFlags: ftarAllowedFlags,
-				RootSection:    cmdCtx.App.RootSection,
-			}
-
-			return secHelp(sec, hi)(cli.Context{}) //nolint:exhaustruct  // this context is not used and this is temp code to ease the porting
-		},
-	)
-}
-
-func CommandHelpToCommand(commandHelp cli.CommandHelp) cli.Command {
-	return command.NewCommand(
-		"", // This is never visible to the user as this command is generated from the help flag
-		func(cmdCtx cli.Context) error {
-			// build ftar.AvailableFlags - it's a map of string to flag for the app globals + current command. Don't forget to set each flag.IsCommandFlag and Value for now..
-			// TODO:
-			ftarAllowedFlags := make(cli.FlagMap)
-			for flagName, fl := range cmdCtx.App.GlobalFlags {
-				fl.Value = cmdCtx.ParseResult.FlagValues[flagName]
-				fl.IsCommandFlag = false
-				ftarAllowedFlags.AddFlag(flagName, fl)
-			}
-
-			// If we're in Parse_ExpectingSectionOrCommand, we haven't received a command
-			if cmdCtx.ParseResult.State != cli.Parse_ExpectingSectionOrCommand {
-				for flagName, fl := range cmdCtx.ParseResult.CurrentCommand.Flags {
-					fl.Value = cmdCtx.ParseResult.FlagValues[flagName]
-					fl.IsCommandFlag = true
-					ftarAllowedFlags.AddFlag(flagName, fl)
-				}
-			}
-
-			com := cmdCtx.ParseResult.CurrentCommand
-			hi := cli.HelpInfo{
-				AvailableFlags: ftarAllowedFlags,
-				RootSection:    cmdCtx.App.RootSection,
-			}
-
-			return commandHelp(com, hi)(cli.Context{}) //nolint:exhaustruct  // this context is not used and this is temp code to ease the porting
-		},
-	)
 }
