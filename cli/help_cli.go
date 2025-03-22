@@ -21,7 +21,7 @@ type HelpInfo struct {
 }
 
 func HelpToCommand(commandHelp CommandHelp, secHelp SectionHelp) Command {
-	return Command{
+	return Command{ //nolint:exhaustruct  // This help is never used since this is a generated command
 		Action: func(cmdCtx Context) error {
 			// build ftar.AvailableFlags - it's a map of string to flag for the app globals + current command. Don't forget to set each flag.IsCommandFlag and Value for now..
 			// TODO:

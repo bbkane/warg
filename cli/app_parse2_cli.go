@@ -266,6 +266,7 @@ func resolveFlag2(
 	return nil
 }
 
+// resolveFlags resolves the config flag first, and then uses its values to resolve the rest of the flags.
 func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, lookupEnv LookupFunc, unsetFlagNames UnsetFlagNameSet) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
@@ -377,44 +378,30 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 		return nil, fmt.Errorf("Parse err: %w", err)
 	}
 
-	// TODO: handle aliases and sentinel values later
-
-	// section or help passed
+	var command Command
 	if pr2.State == Parse_ExpectingSectionOrCommand || pr2.HelpPassed {
 		helpType := pr2.FlagValues[app.HelpFlagName].Get().(string)
-		// helpType := ftarAllowedFlags[string(app.HelpFlagName)].Value.Get().(string)
 		for _, e := range app.HelpMappings {
 			if e.Name == helpType {
-				command := HelpToCommand(e.CommandHelp, e.SectionHelp)
-				pr := ParseResult{
-					Context: Context{
-						App:         app,
-						Context:     parseOptHolder.Context,
-						Flags:       pr2.FlagValues.ToPassedFlags(),
-						ParseResult: pr2,
-						Stderr:      parseOptHolder.Stderr,
-						Stdout:      parseOptHolder.Stdout,
-					},
-					Action: command.Action,
-				}
-				return &pr, nil
+				command = HelpToCommand(e.CommandHelp, e.SectionHelp)
 			}
 		}
-		return nil, fmt.Errorf("could not find help: %v, in help mappings: %v", helpType, app.HelpMappings)
+	} else if pr2.State == Parse_ExpectingFlagNameOrEnd {
+		command = *pr2.CurrentCommand
+	} else {
+		return nil, fmt.Errorf("internal Error: invalid parse state == %v: currentSection == %v, currentCommand == %v", pr2.State, pr2.SectionPath, pr2.CurrentCommandName)
 	}
-	if pr2.State == Parse_ExpectingFlagNameOrEnd {
-		pr := ParseResult{
-			Context: Context{
-				App:         app,
-				Context:     parseOptHolder.Context,
-				Flags:       pr2.FlagValues.ToPassedFlags(),
-				ParseResult: pr2,
-				Stderr:      parseOptHolder.Stderr,
-				Stdout:      parseOptHolder.Stdout,
-			},
-			Action: pr2.CurrentCommand.Action,
-		}
-		return &pr, nil
+
+	pr := ParseResult{
+		Context: Context{
+			App:         app,
+			Context:     parseOptHolder.Context,
+			Flags:       pr2.FlagValues.ToPassedFlags(),
+			ParseResult: pr2,
+			Stderr:      parseOptHolder.Stderr,
+			Stdout:      parseOptHolder.Stdout,
+		},
+		Action: command.Action,
 	}
-	return nil, fmt.Errorf("internal Error: invalid parse state == %v: currentSection == %v, currentCommand == %v", pr2.State, pr2.SectionPath, pr2.CurrentCommandName)
+	return &pr, nil
 }
