@@ -311,6 +311,15 @@ func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, loo
 }
 
 func (a *App) Parse2(args []string, lookupEnv LookupFunc) (*ParseResult2, error) {
+
+	// --config flag...
+	// original Parse treats it specially
+	// Parse2 expects it to be in app.GlobalFlags
+	// TODO: rework the config flag handling
+	if a.ConfigFlag != nil {
+		a.GlobalFlags[a.ConfigFlagName] = *a.ConfigFlag
+	}
+
 	pr, err := a.parseArgs(args)
 	if err != nil {
 		return nil, fmt.Errorf("Parse args error: %w", err)
@@ -363,44 +372,17 @@ func (a *App) Parse2(args []string, lookupEnv LookupFunc) (*ParseResult2, error)
 
 func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult, error) {
 
-	// --config flag...
-	// original Parse treats it specially
-	// Parse2 expects it to be in app.GlobalFlags
-	if app.ConfigFlag != nil {
-		app.GlobalFlags[app.ConfigFlagName] = *app.ConfigFlag
-	}
-
 	pr2, err := app.Parse2(parseOptHolder.Args[1:], parseOptHolder.LookupFunc)
 	if err != nil {
 		return nil, fmt.Errorf("Parse err: %w", err)
 	}
 
-	// build ftar.AvailableFlags - it's a map of string to flag for the app globals + current command. Don't forget to set each flag.IsCommandFlag and Value for now..
-	// TODO:
-	ftarAllowedFlags := make(FlagMap)
-	for flagName, fl := range app.GlobalFlags {
-		fl.Value = pr2.FlagValues[flagName]
-		fl.IsCommandFlag = false
-		ftarAllowedFlags.AddFlag(flagName, fl)
-	}
-
-	// If we're in Parse_ExpectingSectionOrCommand, we haven't received a command
-	if pr2.State != Parse_ExpectingSectionOrCommand {
-		for flagName, fl := range pr2.CurrentCommand.Flags {
-			fl.Value = pr2.FlagValues[flagName]
-			fl.IsCommandFlag = true
-			ftarAllowedFlags.AddFlag(flagName, fl)
-		}
-	}
-
-	// port pfs
-	pfs := pr2.FlagValues.ToPassedFlags()
-
 	// TODO: handle aliases and sentinel values later
 
 	// section or help passed
 	if pr2.State == Parse_ExpectingSectionOrCommand || pr2.HelpPassed {
-		helpType := ftarAllowedFlags[string(app.HelpFlagName)].Value.Get().(string)
+		helpType := pr2.FlagValues[app.HelpFlagName].Get().(string)
+		// helpType := ftarAllowedFlags[string(app.HelpFlagName)].Value.Get().(string)
 		for _, e := range app.HelpMappings {
 			if e.Name == helpType {
 				command := HelpToCommand(e.CommandHelp, e.SectionHelp)
@@ -408,7 +390,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 					Context: Context{
 						App:         app,
 						Context:     parseOptHolder.Context,
-						Flags:       pfs,
+						Flags:       pr2.FlagValues.ToPassedFlags(),
 						ParseResult: pr2,
 						Stderr:      parseOptHolder.Stderr,
 						Stdout:      parseOptHolder.Stdout,
@@ -425,7 +407,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 			Context: Context{
 				App:         app,
 				Context:     parseOptHolder.Context,
-				Flags:       pfs,
+				Flags:       pr2.FlagValues.ToPassedFlags(),
 				ParseResult: pr2,
 				Stderr:      parseOptHolder.Stderr,
 				Stdout:      parseOptHolder.Stdout,
@@ -435,74 +417,4 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 		return &pr, nil
 	}
 	return nil, fmt.Errorf("internal Error: invalid parse state == %v: currentSection == %v, currentCommand == %v", pr2.State, pr2.SectionPath, pr2.CurrentCommandName)
-
-	// TODO: gotta start making my child breakfast but compare the above command logic to the below one before erasing
-
-	// if pr2.CurrentCommand == nil { // we got a section. no legit actions, just print the help
-	// 	helpInfo := HelpInfo{
-	// 		AvailableFlags: ftarAllowedFlags,
-	// 		RootSection:    app.RootSection,
-	// 	}
-	// 	// We know the helpFlag has a default so this is safe
-	// 	helpType := ftarAllowedFlags[string(app.HelpFlagName)].Value.Get().(string)
-	// 	for _, e := range app.HelpMappings {
-	// 		if e.Name == helpType {
-	// 			pr := ParseResult{
-	// 				Context: Context{
-	// 					App:         app,
-	// 					Context:     parseOptHolder.Context,
-	// 					Flags:       pfs,
-	// 					ParseResult: pr2,
-	// 					Stderr:      parseOptHolder.Stderr,
-	// 					Stdout:      parseOptHolder.Stdout,
-	// 				},
-	// 				Action: e.SectionHelp(pr2.CurrentSection, helpInfo),
-	// 			}
-	// 			return &pr, nil
-	// 		}
-	// 	}
-	// 	return nil, fmt.Errorf("some problem with section help: info: %v", helpInfo)
-	// } else if pr2.CurrentCommand != nil { // we got a command
-	// 	if pr2.HelpPassed {
-	// 		helpInfo := HelpInfo{
-	// 			AvailableFlags: ftarAllowedFlags,
-	// 			RootSection:    app.RootSection,
-	// 		}
-	// 		// We know the helpFlag has a default so this is safe
-	// 		helpType := ftarAllowedFlags[string(app.HelpFlagName)].Value.Get().(string)
-	// 		for _, e := range app.HelpMappings {
-	// 			if e.Name == helpType {
-	// 				pr := ParseResult{
-	// 					Context: Context{
-	// 						App:         app,
-	// 						Context:     parseOptHolder.Context,
-	// 						Flags:       pfs,
-	// 						ParseResult: pr2,
-	// 						Stderr:      parseOptHolder.Stderr,
-	// 						Stdout:      parseOptHolder.Stdout,
-	// 					},
-	// 					Action: e.CommandHelp(pr2.CurrentCommand, helpInfo),
-	// 				}
-	// 				return &pr, nil
-	// 			}
-	// 		}
-	// 		return nil, fmt.Errorf("some problem with command help: info: %v", helpInfo)
-	// 	} else {
-	// 		pr := ParseResult{
-	// 			Context: Context{
-	// 				App:         app,
-	// 				Context:     parseOptHolder.Context,
-	// 				Flags:       pfs,
-	// 				ParseResult: pr2,
-	// 				Stderr:      parseOptHolder.Stderr,
-	// 				Stdout:      parseOptHolder.Stdout,
-	// 			},
-	// 			Action: pr2.CurrentCommand.Action,
-	// 		}
-	// 		return &pr, nil
-	// 	}
-
-	// } else {
-	// 	return nil, fmt.Errorf("internal Error: invalid parse state: currentSection == %v, currentCommand == %v", pr2.SectionPath, pr2.CurrentCommandName)
-	// }
 }
