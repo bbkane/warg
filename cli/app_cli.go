@@ -10,31 +10,26 @@ import (
 
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
+	"go.bbkane.com/warg/value"
 )
 
 // An App contains your defined sections, commands, and flags
 // Create a new App with New()
 type App struct {
-	// Config()
+	// Config
 	ConfigFlagName  string
 	NewConfigReader config.NewReader
 	ConfigFlag      *Flag
 
-	GlobalFlags FlagMap
-
-	// New Help()
-	Name         string
+	// Help
 	HelpFlagName string
-	// Note that this can be ""
-	HelpFlagAlias string
-	HelpMappings  []HelpFlagMapping
+	HelpCommands CommandMap
 
-	// RootSection holds the good stuff!
-	RootSection SectionT
-
+	GlobalFlags    FlagMap
+	Name           string
+	RootSection    SectionT
 	SkipValidation bool
-
-	Version string
+	Version        string
 }
 
 // MustRun runs the app.
@@ -131,12 +126,39 @@ func validateFlags2(
 
 // Validate checks app for creation errors. It checks:
 //
-// - Sections and commands don't start with "-" (needed for parsing)
-//
-// - Flag names and aliases do start with "-" (needed for parsing)
-//
-// - Flag names and aliases don't collide
+//   - the help flag is the right type
+//   - Sections and commands don't start with "-" (needed for parsing)
+//   - Flag names and aliases do start with "-" (needed for parsing)
+//   - Flag names and aliases don't collide
 func (app *App) Validate() error {
+
+	// validate --help flag
+	if app.HelpFlagName == "" {
+		return fmt.Errorf("HelpFlagName must be set")
+	}
+	helpFlag, exists := app.GlobalFlags[app.HelpFlagName]
+	if !exists {
+		return fmt.Errorf("HelpFlagName not found in GlobalFlags: %v", app.HelpFlagName)
+	}
+	helpFlagValEmpty, ok := helpFlag.EmptyValueConstructor().(value.ScalarValue)
+	if !ok {
+		return fmt.Errorf("HelpFlagName must be a scalar: %v", app.HelpFlagName)
+	}
+	if _, ok := helpFlagValEmpty.Get().(string); !ok {
+		return fmt.Errorf("HelpFlagName must be a string: %v", app.HelpFlagName)
+	}
+	if !helpFlagValEmpty.HasDefault() {
+		return fmt.Errorf("HelpFlagName must have a default value: %v", app.HelpFlagName)
+	}
+	if !slices.Equal(helpFlagValEmpty.Choices(), app.HelpCommands.SortedNames()) {
+		return fmt.Errorf("HelpFlagName choices must match HelpCommands: %v", app.HelpFlagName)
+	}
+	if !slices.Contains(helpFlagValEmpty.Choices(), helpFlagValEmpty.DefaultString()) {
+		return fmt.Errorf("HelpFlagName default value (%v) must be in choices (%v): %v", helpFlagValEmpty.DefaultString(), helpFlagValEmpty.Choices(), app.HelpFlagName)
+	}
+
+	// TODO: check that the default value is in the choices and the choices match app help mappings and that the flag is a scalar
+
 	// NOTE: we need to be able to validate before we parse, and we may not know the app name
 	// till after prsing so set the root path to "root"
 	rootPath := []string{string(app.Name)}

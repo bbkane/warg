@@ -104,7 +104,8 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 
 		// --help <helptype> or --help must be the last thing passed and can appear at any state we aren't expecting a flag value
 		if i >= len(args)-2 &&
-			(string(arg) == a.HelpFlagName || string(arg) == a.HelpFlagAlias) &&
+			arg != "" && // just in case there's not help flag alias
+			(arg == a.HelpFlagName || arg == a.GlobalFlags[a.HelpFlagName].Alias) &&
 			pr.State != Parse_ExpectingFlagValue {
 
 			pr.HelpPassed = true
@@ -381,11 +382,7 @@ func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult
 	var command Command
 	if pr2.State == Parse_ExpectingSectionOrCommand || pr2.HelpPassed {
 		helpType := pr2.FlagValues[app.HelpFlagName].Get().(string)
-		for _, e := range app.HelpMappings {
-			if e.Name == helpType {
-				command = HelpToCommand(e.CommandHelp, e.SectionHelp)
-			}
-		}
+		command = app.HelpCommands[helpType]
 	} else if pr2.State == Parse_ExpectingFlagNameOrEnd {
 		command = *pr2.CurrentCommand
 	} else {

@@ -2,9 +2,7 @@ package warg
 
 import (
 	"fmt"
-	"log"
 	"runtime/debug"
-	"strings"
 
 	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
@@ -19,52 +17,17 @@ import (
 // AppOpt let's you customize the app. Most AppOpts panic if incorrectly called
 type AppOpt func(*cli.App)
 
-// OverrideHelpFlag customizes your --help. If you write a custom --help function, you'll want to add it to your app here!
-func OverrideHelpFlag(
-	mappings []cli.HelpFlagMapping,
-	defaultChoice string,
-	flagName string,
-	flagHelp string,
-	flagOpts ...flag.FlagOpt,
-) AppOpt {
+// OverrideHelpFlag customizes your help flag. helpFlagName should point to a previously added global flag with the following properties:
+//
+//   - scalar string type
+//   - choices that match the names in helpCommands
+//   - default value set to one of the choices
+//
+// These properties are checked at runtime with app.Validate()
+func OverrideHelpFlag(helpFlagName string, helpCommands cli.CommandMap) AppOpt {
 	return func(a *cli.App) {
-
-		if !strings.HasPrefix(string(flagName), "-") {
-			log.Panicf("flagName should start with '-': %#v\n", flagName)
-		}
-
-		if _, alreadyThere := a.GlobalFlags[flagName]; alreadyThere {
-			log.Panicf("flag already exists: %#v\n", flagName)
-		}
-
-		defaultFound := false
-		helpValues := make([]string, len(mappings))
-		for i := range mappings {
-			helpValues[i] = mappings[i].Name
-			if helpValues[i] == defaultChoice {
-				defaultFound = true
-			}
-		}
-
-		if !defaultFound {
-			panic(fmt.Sprintf("default (%#v) not found in helpValues (%#v)", defaultChoice, helpValues))
-		}
-
-		helpFlag := flag.NewFlag(
-			flagHelp,
-			scalar.String(
-				scalar.Choices(helpValues...),
-				scalar.Default(defaultChoice),
-			),
-			flagOpts...,
-		)
-
-		a.GlobalFlags[flagName] = helpFlag
-		// This is used in parsing, so no need to strongly type it
-		a.HelpFlagName = flagName
-		a.HelpFlagAlias = helpFlag.Alias
-		a.HelpMappings = mappings
-
+		a.HelpFlagName = helpFlagName
+		a.HelpCommands = helpCommands
 	}
 }
 
@@ -170,8 +133,7 @@ func NewApp(name string, version string, rootSection cli.SectionT, opts ...AppOp
 		NewConfigReader: nil,
 		ConfigFlag:      nil,
 		HelpFlagName:    "",
-		HelpFlagAlias:   "",
-		HelpMappings:    nil,
+		HelpCommands:    make(cli.CommandMap),
 		SkipValidation:  false,
 		Version:         version,
 		GlobalFlags:     make(cli.FlagMap),
@@ -181,12 +143,10 @@ func NewApp(name string, version string, rootSection cli.SectionT, opts ...AppOp
 	}
 
 	if app.HelpFlagName == "" {
+		app.GlobalFlags.AddFlags(help.DefaultHelpFlagMap("default", help.DefaultHelpCommandMap().SortedNames()))
 		OverrideHelpFlag(
-			help.BuiltinHelpFlagMappings(),
-			"default",
 			"--help",
-			"Print help",
-			flag.Alias("-h"),
+			help.DefaultHelpCommandMap(),
 		)(&app)
 	}
 

@@ -59,7 +59,7 @@ Inherited Section Flags:
 
   --help , -h : Print help
     type : string
-    choices : [default detailed outline allcommands]
+    choices : [allcommands default detailed outline]
     default : default
     currentvalue (set by passedflag) : detailed
 

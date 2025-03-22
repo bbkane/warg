@@ -2,18 +2,30 @@ package help
 
 import (
 	"go.bbkane.com/warg/cli"
+	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help/allcommands"
 	"go.bbkane.com/warg/help/detailed"
+	"go.bbkane.com/warg/value/scalar"
 )
 
-// BuiltinHelpFlagMappings is a convenience method that contains help flag mappings built into warg.
-// Feel free to use it as a base to custimize help functions for your users
-func BuiltinHelpFlagMappings() []cli.HelpFlagMapping {
-	return []cli.HelpFlagMapping{
-		{Name: "default", CommandHelp: detailed.DetailedCommandHelp, SectionHelp: allcommands.AllCommandsSectionHelp},
-		{Name: "detailed", CommandHelp: detailed.DetailedCommandHelp, SectionHelp: detailed.DetailedSectionHelp},
-		{Name: "outline", CommandHelp: OutlineCommandHelp, SectionHelp: OutlineSectionHelp},
-		// allcommands list child commands, so it doesn't really make sense for a command
-		{Name: "allcommands", CommandHelp: detailed.DetailedCommandHelp, SectionHelp: allcommands.AllCommandsSectionHelp},
+func DefaultHelpCommandMap() cli.CommandMap {
+	return cli.CommandMap{
+		"default":     cli.HelpToCommand(detailed.DetailedCommandHelp, allcommands.AllCommandsSectionHelp),
+		"detailed":    cli.HelpToCommand(detailed.DetailedCommandHelp, detailed.DetailedSectionHelp),
+		"outline":     cli.HelpToCommand(OutlineCommandHelp, OutlineSectionHelp),
+		"allcommands": cli.HelpToCommand(detailed.DetailedCommandHelp, allcommands.AllCommandsSectionHelp),
+	}
+}
+
+func DefaultHelpFlagMap(defaultChoice string, choices []string) cli.FlagMap {
+	return cli.FlagMap{
+		"--help": flag.NewFlag(
+			"Print help",
+			scalar.String(
+				scalar.Choices(choices...),
+				scalar.Default(defaultChoice),
+			),
+			flag.Alias("-h"),
+		),
 	}
 }

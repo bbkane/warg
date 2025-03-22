@@ -5,8 +5,8 @@ import (
 
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/cli"
-	"go.bbkane.com/warg/flag"
-	"go.bbkane.com/warg/help/detailed"
+	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/help"
 	"go.bbkane.com/warg/section"
 )
 
@@ -15,23 +15,22 @@ func exampleOverrideHelpFlaglogin(_ cli.Context) error {
 	return nil
 }
 
-func exampleOverrideHelpFlagCustomCommandHelp(_ *cli.Command, _ cli.HelpInfo) cli.Action {
-	return func(ctx cli.Context) error {
-		file := ctx.Stdout
-		fmt.Fprintln(file, "Custom command help")
-		return nil
-	}
-}
-
-func exampleOverrideHelpFlagCustomSectionHelp(_ *cli.SectionT, _ cli.HelpInfo) cli.Action {
-	return func(ctx cli.Context) error {
-		file := ctx.Stdout
-		fmt.Fprintln(file, "Custom section help")
-		return nil
-	}
+func customHelpCmd() cli.Command {
+	return command.NewCommand(
+		"", // this command will be launched by the help flag, so users will never see the help
+		func(ctx cli.Context) error {
+			file := ctx.Stdout
+			fmt.Fprintln(file, "Custom help command output")
+			return nil
+		},
+	)
 }
 
 func ExampleOverrideHelpFlag() {
+
+	helpCommands := help.DefaultHelpCommandMap()
+	helpCommands["custom"] = customHelpCmd()
+
 	app := warg.NewApp(
 		"newAppName",
 		"v1.0.0",
@@ -43,28 +42,14 @@ func ExampleOverrideHelpFlag() {
 				exampleOverrideHelpFlaglogin,
 			),
 		),
+		warg.GlobalFlagMap(help.DefaultHelpFlagMap("custom", helpCommands.SortedNames())),
 		warg.OverrideHelpFlag(
-			[]cli.HelpFlagMapping{
-				{
-					Name:        "default",
-					CommandHelp: detailed.DetailedCommandHelp,
-					SectionHelp: detailed.DetailedSectionHelp,
-				},
-				{
-					Name:        "custom",
-					CommandHelp: exampleOverrideHelpFlagCustomCommandHelp,
-					SectionHelp: exampleOverrideHelpFlagCustomSectionHelp,
-				},
-			},
-			"default",
 			"--help",
-			"Print help",
-			flag.Alias("-h"),
-			// the flag default should match a name in the HelpFlagMapping
+			helpCommands,
 		),
 	)
 
 	app.MustRun(cli.OverrideArgs([]string{"blog.exe", "-h", "custom"}))
 	// Output:
-	// Custom section help
+	// Custom help command output
 }
