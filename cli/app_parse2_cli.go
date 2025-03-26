@@ -1,12 +1,112 @@
 package cli
 
 import (
+	"context"
 	"fmt"
+	"os"
 
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/value"
 )
+
+// -- moved from app_parse_cli.go
+
+type ParseOptHolder struct {
+	Args []string
+
+	// Context for unstructured data. Useful for setting up mocks for tests (i.e., pass in in memory database and use it if it's here in the context)
+	Context context.Context
+
+	LookupFunc LookupFunc
+
+	// Stderr will be passed to command.Context for user commands to print to.
+	// This file is never closed by warg, so if setting to something other than stderr/stdout,
+	// remember to close the file after running the command.
+	// Useful for saving output for tests. Defaults to os.Stderr if not passed
+	Stderr *os.File
+
+	// Stdout will be passed to command.Context for user commands to print to.
+	// This file is never closed by warg, so if setting to something other than stderr/stdout,
+	// remember to close the file after running the command.
+	// Useful for saving output for tests. Defaults to os.Stdout if not passed
+	Stdout *os.File
+}
+
+type ParseOpt func(*ParseOptHolder)
+
+func AddContext(ctx context.Context) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Context = ctx
+	}
+}
+
+func OverrideArgs(args []string) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Args = args
+	}
+}
+
+func OverrideLookupFunc(lookup LookupFunc) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.LookupFunc = lookup
+	}
+}
+
+func OverrideStderr(stderr *os.File) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Stderr = stderr
+	}
+}
+
+func OverrideStdout(stdout *os.File) ParseOpt {
+	return func(poh *ParseOptHolder) {
+		poh.Stdout = stdout
+	}
+}
+
+func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
+	parseOptHolder := ParseOptHolder{
+		Context:    nil,
+		Args:       nil,
+		LookupFunc: nil,
+		Stderr:     nil,
+		Stdout:     nil,
+	}
+
+	for _, opt := range opts {
+		opt(&parseOptHolder)
+	}
+
+	if parseOptHolder.Args == nil {
+		OverrideArgs(os.Args)(&parseOptHolder)
+	}
+
+	if parseOptHolder.Context == nil {
+		AddContext(context.Background())(&parseOptHolder)
+	}
+
+	if parseOptHolder.LookupFunc == nil {
+		OverrideLookupFunc(os.LookupEnv)(&parseOptHolder)
+	}
+
+	if parseOptHolder.Stderr == nil {
+		OverrideStderr(os.Stderr)(&parseOptHolder)
+	}
+
+	if parseOptHolder.Stdout == nil {
+		OverrideStdout(os.Stdout)(&parseOptHolder)
+	}
+
+	return parseOptHolder
+}
+
+// ParseResult holds the result of parsing the command line.
+type ParseResult struct {
+	Context Context
+	// Action holds the passed command's action to execute.
+	Action Action
+}
 
 // -- FlagValue
 
@@ -312,54 +412,65 @@ func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, loo
 	return nil
 }
 
-func (a *App) Parse2(args []string, lookupEnv LookupFunc) (*ParseResult2, error) {
+func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
+
+	parseOpts := NewParseOptHolder(opts...)
 
 	// --config flag...
 	// original Parse treats it specially
 	// Parse2 expects it to be in app.GlobalFlags
-	// TODO: rework the config flag handling
-	if a.ConfigFlag != nil {
-		a.GlobalFlags[a.ConfigFlagName] = *a.ConfigFlag
+	// TODO: rework the config flag handling. I'd prefer everything to be immutable before calling parse
+	if app.ConfigFlag != nil {
+		app.GlobalFlags[app.ConfigFlagName] = *app.ConfigFlag
 	}
 
-	pr, err := a.parseArgs(args)
+	pr2, err := app.parseArgs(parseOpts.Args[1:]) // TODO: make callers do [:1]
 	if err != nil {
 		return nil, fmt.Errorf("Parse args error: %w", err)
 	}
 
-	// If we're in a section, just print the help
-	if pr.State == Parse_ExpectingSectionOrCommand {
-		pr.HelpPassed = true
-	}
-
 	// --help means we don't need to do a lot of error checking
-	if pr.HelpPassed {
-		err = a.resolveFlags(pr.CurrentCommand, pr.FlagValues, lookupEnv, pr.UnsetFlagNames)
+	if pr2.HelpPassed || pr2.State == Parse_ExpectingSectionOrCommand {
+		err = app.resolveFlags(pr2.CurrentCommand, pr2.FlagValues, parseOpts.LookupFunc, pr2.UnsetFlagNames)
 		if err != nil {
 			return nil, err
+		}
+
+		helpType := pr2.FlagValues[app.HelpFlagName].Get().(string)
+		command := app.HelpCommands[helpType]
+		pr := ParseResult{
+			Context: Context{
+				App:         app,
+				Context:     parseOpts.Context,
+				Flags:       pr2.FlagValues.ToPassedFlags(),
+				ParseResult: &pr2,
+				Stderr:      parseOpts.Stderr,
+				Stdout:      parseOpts.Stdout,
+			},
+			Action: command.Action,
 		}
 		return &pr, nil
 	}
 
 	// ok, we're running a real command, let's do the error checking
-	if pr.State != Parse_ExpectingFlagNameOrEnd {
-		return nil, fmt.Errorf("unexpected parse state: %s", pr.State)
+	if pr2.State != Parse_ExpectingFlagNameOrEnd {
+		return nil, fmt.Errorf("unexpected parse state: %s", pr2.State)
 	}
 
-	err = a.resolveFlags(pr.CurrentCommand, pr.FlagValues, lookupEnv, pr.UnsetFlagNames)
+	err = app.resolveFlags(pr2.CurrentCommand, pr2.FlagValues, parseOpts.LookupFunc, pr2.UnsetFlagNames)
 	if err != nil {
 		return nil, err
 	}
 
 	missingRequiredFlags := []string{}
-	for flagName, flag := range a.GlobalFlags {
-		if flag.Required && pr.FlagValues[flagName].UpdatedBy() == value.UpdatedByUnset {
+	for flagName, flag := range app.GlobalFlags {
+		if flag.Required && pr2.FlagValues[flagName].UpdatedBy() == value.UpdatedByUnset {
 			missingRequiredFlags = append(missingRequiredFlags, string(flagName))
 		}
 	}
 
-	for flagName, flag := range pr.CurrentCommand.Flags {
-		if flag.Required && pr.FlagValues[flagName].UpdatedBy() == value.UpdatedByUnset {
+	for flagName, flag := range pr2.CurrentCommand.Flags {
+		if flag.Required && pr2.FlagValues[flagName].UpdatedBy() == value.UpdatedByUnset {
 			missingRequiredFlags = append(missingRequiredFlags, string(flagName))
 		}
 	}
@@ -368,37 +479,16 @@ func (a *App) Parse2(args []string, lookupEnv LookupFunc) (*ParseResult2, error)
 		return nil, fmt.Errorf("missing but required flags: %s", missingRequiredFlags)
 	}
 
-	return &pr, nil
-
-}
-
-func (app *App) parseWithOptHolder2(parseOptHolder ParseOptHolder) (*ParseResult, error) {
-
-	pr2, err := app.Parse2(parseOptHolder.Args[1:], parseOptHolder.LookupFunc)
-	if err != nil {
-		return nil, fmt.Errorf("Parse err: %w", err)
-	}
-
-	var command Command
-	if pr2.State == Parse_ExpectingSectionOrCommand || pr2.HelpPassed {
-		helpType := pr2.FlagValues[app.HelpFlagName].Get().(string)
-		command = app.HelpCommands[helpType]
-	} else if pr2.State == Parse_ExpectingFlagNameOrEnd {
-		command = *pr2.CurrentCommand
-	} else {
-		return nil, fmt.Errorf("internal Error: invalid parse state == %v: currentSection == %v, currentCommand == %v", pr2.State, pr2.SectionPath, pr2.CurrentCommandName)
-	}
-
 	pr := ParseResult{
 		Context: Context{
 			App:         app,
-			Context:     parseOptHolder.Context,
+			Context:     parseOpts.Context,
 			Flags:       pr2.FlagValues.ToPassedFlags(),
-			ParseResult: pr2,
-			Stderr:      parseOptHolder.Stderr,
-			Stdout:      parseOptHolder.Stdout,
+			ParseResult: &pr2,
+			Stderr:      parseOpts.Stderr,
+			Stdout:      parseOpts.Stdout,
 		},
-		Action: command.Action,
+		Action: pr2.CurrentCommand.Action,
 	}
 	return &pr, nil
 }

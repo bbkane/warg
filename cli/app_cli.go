@@ -73,9 +73,7 @@ func (app *App) MustRun(opts ...ParseOpt) {
 			fmt.Fprintln(pr.Context.Stderr, err)
 			os.Exit(1)
 		}
-
 	}
-
 }
 
 // Look up keys (meant for environment variable parsing) - fulfillable with os.LookupEnv or warg.LookupMap(map)
