@@ -27,7 +27,7 @@ type App struct {
 
 	GlobalFlags    FlagMap
 	Name           string
-	RootSection    SectionT
+	RootSection    Section
 	SkipValidation bool
 	Version        string
 }
@@ -219,14 +219,14 @@ func (a *App) CompletionCandidates(args []string) (*completion.CompletionCandida
 	if err != nil {
 		return nil, fmt.Errorf("unexpected parseArgs err: %w", err)
 	}
-	switch pr.State {
-	case Parse_ExpectingSectionOrCommand:
+	switch pr.ExpectingArg {
+	case ExpectingArg_SectionOrCommand:
 		candidates, err := pr.CurrentSection.CompletionCandidates()
 		if err != nil {
 			return nil, fmt.Errorf("Parse_ExpectingSectionOrCommand CompletionCandidates err: %w", err)
 		}
 		return &candidates, nil
-	case Parse_ExpectingFlagNameOrEnd:
+	case ExpectingArg_FlagNameOrEnd:
 		// TODO: if a scalar flag has been passsed, don't suggest it again
 		// TODO: get a better order for the flags. For example, envelope needs to db first (unless it's resolved) so further flags can use that. Add an order or "depends on" param?
 		candidates := &completion.CompletionCandidates{
@@ -248,7 +248,7 @@ func (a *App) CompletionCandidates(args []string) (*completion.CompletionCandida
 			})
 		}
 		return candidates, nil
-	case Parse_ExpectingFlagValue:
+	case ExpectingArg_FlagValue:
 		// TODO: allow flags to look at the values of other flags before offering options.
 		// This will require some package "flattening" as ParseResult is defined in App, which also import Flag. So... flag shouldn't import the app code...
 		// For now, only suggest the flags choices
@@ -265,6 +265,6 @@ func (a *App) CompletionCandidates(args []string) (*completion.CompletionCandida
 		}
 		return candidates, nil
 	default:
-		return nil, fmt.Errorf("unexpected ParseState: %v", pr.State)
+		return nil, fmt.Errorf("unexpected ParseState: %v", pr.ExpectingArg)
 	}
 }

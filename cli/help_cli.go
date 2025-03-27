@@ -1,7 +1,7 @@
 package cli
 
 type CommandHelp func(cur *Command, helpInfo HelpInfo) Action
-type SectionHelp func(cur *SectionT, helpInfo HelpInfo) Action
+type SectionHelp func(cur *Section, helpInfo HelpInfo) Action
 
 // HelpInfo lists common information available to a help function
 type HelpInfo struct {
@@ -10,7 +10,7 @@ type HelpInfo struct {
 	// All flags are Resolved if possible (i.e., flag.SetBy != "")
 	AvailableFlags FlagMap
 	// RootSection of the app. Especially useful for printing all sections and commands
-	RootSection SectionT
+	RootSection Section
 }
 
 func HelpToCommand(commandHelp CommandHelp, secHelp SectionHelp) Command {
@@ -20,15 +20,15 @@ func HelpToCommand(commandHelp CommandHelp, secHelp SectionHelp) Command {
 			// TODO:
 			ftarAllowedFlags := make(FlagMap)
 			for flagName, fl := range cmdCtx.App.GlobalFlags {
-				fl.Value = cmdCtx.ParseResult.FlagValues[flagName]
+				fl.Value = cmdCtx.ParseState.FlagValues[flagName]
 				fl.IsCommandFlag = false
 				ftarAllowedFlags.AddFlag(flagName, fl)
 			}
 
 			// If we're in Parse_ExpectingSectionOrCommand, we haven't received a command
-			if cmdCtx.ParseResult.State != Parse_ExpectingSectionOrCommand {
-				for flagName, fl := range cmdCtx.ParseResult.CurrentCommand.Flags {
-					fl.Value = cmdCtx.ParseResult.FlagValues[flagName]
+			if cmdCtx.ParseState.ExpectingArg != ExpectingArg_SectionOrCommand {
+				for flagName, fl := range cmdCtx.ParseState.CurrentCommand.Flags {
+					fl.Value = cmdCtx.ParseState.FlagValues[flagName]
 					fl.IsCommandFlag = true
 					ftarAllowedFlags.AddFlag(flagName, fl)
 				}
@@ -38,11 +38,11 @@ func HelpToCommand(commandHelp CommandHelp, secHelp SectionHelp) Command {
 				AvailableFlags: ftarAllowedFlags,
 				RootSection:    cmdCtx.App.RootSection,
 			}
-			com := cmdCtx.ParseResult.CurrentCommand
+			com := cmdCtx.ParseState.CurrentCommand
 			if com != nil {
 				return commandHelp(com, hi)(cmdCtx)
 			} else {
-				return secHelp(cmdCtx.ParseResult.CurrentSection, hi)(cmdCtx)
+				return secHelp(cmdCtx.ParseState.CurrentSection, hi)(cmdCtx)
 			}
 		},
 	}

@@ -15,7 +15,7 @@ import (
 )
 
 // A grabbitSection is a simple section to test help
-func grabbitSection() cli.SectionT {
+func grabbitSection() cli.Section {
 
 	rootFooter := `Examples:
 

@@ -15,7 +15,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 	tests := []struct {
 		name          string
 		rootName      string
-		sec           cli.SectionT
+		sec           cli.Section
 		expected      []cli.FlatSection
 		expectedPanic bool
 	}{

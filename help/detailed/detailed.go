@@ -232,7 +232,7 @@ func DetailedCommandHelp(cur *cli.Command, helpInfo cli.HelpInfo) cli.Action {
 	}
 }
 
-func DetailedSectionHelp(cur *cli.SectionT, _ cli.HelpInfo) cli.Action {
+func DetailedSectionHelp(cur *cli.Section, _ cli.HelpInfo) cli.Action {
 	return func(pf cli.Context) error {
 		file := pf.Stdout
 

@@ -6,14 +6,14 @@ import (
 	"go.bbkane.com/warg/completion"
 )
 
-// SectionMapT holds Sections - used by other Sections
-type SectionMapT map[string]SectionT
+// SectionMap holds Sections - used by other Sections
+type SectionMap map[string]Section
 
-func (fm SectionMapT) Empty() bool {
+func (fm SectionMap) Empty() bool {
 	return len(fm) == 0
 }
 
-func (fm SectionMapT) SortedNames() []string {
+func (fm SectionMap) SortedNames() []string {
 	keys := make([]string, 0, len(fm))
 	for k := range fm {
 		keys = append(keys, k)
@@ -26,13 +26,11 @@ func (fm SectionMapT) SortedNames() []string {
 
 // Sections are like "folders" for Commmands.
 // They should have noun names.
-// Sections should not be created in place - New/ExistingSection/Section functions.
-// SectionT is the type name because we need the more user-visible `Section` as a function name.
-type SectionT struct {
+type Section struct {
 	// Commands holds the Commands under this Section
 	Commands CommandMap
 	// Sections holds the Sections under this Section
-	Sections SectionMapT
+	Sections SectionMap
 	// HelpShort is a required one-line descripiton of this section
 	HelpShort string
 	// HelpLong is an optional longer description of this section
@@ -47,14 +45,14 @@ type FlatSection struct {
 	// Path to this section
 	Path []string
 	// Sec is this section
-	Sec SectionT
+	Sec Section
 }
 
 // Breadthfirst returns a SectionIterator that yields sections sorted alphabetically breadth-first by path.
 // Yielded sections should never be modified - they can share references to the same inherited flags
 // SectionIterator's Next() method panics if two sections in the path have flags with the same name.
 // Breadthfirst is used by app.Validate and help.AllCommandCommandHelp/help.AllCommandSectionHelp
-func (sec *SectionT) BreadthFirst(path []string) SectionIterator {
+func (sec *Section) BreadthFirst(path []string) SectionIterator {
 
 	queue := make([]FlatSection, 0, 1)
 	queue = append(queue, FlatSection{
@@ -99,7 +97,7 @@ func (s *SectionIterator) HasNext() bool {
 	return len(s.queue) > 0
 }
 
-func (s *SectionT) CompletionCandidates() (completion.CompletionCandidates, error) {
+func (s *Section) CompletionCandidates() (completion.CompletionCandidates, error) {
 	ret := completion.CompletionCandidates{
 		Type:   completion.CompletionType_ValueDescription,
 		Values: []completion.CompletionCandidate{},

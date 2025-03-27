@@ -15,6 +15,16 @@ below this description) is likely unreleased.
 - `cli.Context` now has a reference to the `App` and the `ParseResult`. As a result, I was able to remove `Path` and simplify help.
 - `help` functions are now normal commands. I currently have a "translation" layer to the old style of help functions, but those should be removed shortly.
 
+List of type changes after working more on parsing:
+
+- `SectionT` -> `Section`
+- `ParseResult2` -> `ParseState`
+- `SectionMapT` -> `SectionMap`
+- `ParseState` -> `ExpectingArg`
+- `ParseOptHolder` -> `ParseOpt` and updated constructor name.
+- removed `type FlagValue` (it's unused)
+- made `unsetFlagNameSet` private
+
 
 # v0.0.29
 

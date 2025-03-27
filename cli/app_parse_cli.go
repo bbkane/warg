@@ -12,7 +12,7 @@ import (
 
 // -- moved from app_parse_cli.go
 
-type ParseOptHolder struct {
+type ParseOpts struct {
 	Args []string
 
 	// Context for unstructured data. Useful for setting up mocks for tests (i.e., pass in in memory database and use it if it's here in the context)
@@ -33,40 +33,40 @@ type ParseOptHolder struct {
 	Stdout *os.File
 }
 
-type ParseOpt func(*ParseOptHolder)
+type ParseOpt func(*ParseOpts)
 
 func AddContext(ctx context.Context) ParseOpt {
-	return func(poh *ParseOptHolder) {
+	return func(poh *ParseOpts) {
 		poh.Context = ctx
 	}
 }
 
 func OverrideArgs(args []string) ParseOpt {
-	return func(poh *ParseOptHolder) {
+	return func(poh *ParseOpts) {
 		poh.Args = args
 	}
 }
 
 func OverrideLookupFunc(lookup LookupFunc) ParseOpt {
-	return func(poh *ParseOptHolder) {
+	return func(poh *ParseOpts) {
 		poh.LookupFunc = lookup
 	}
 }
 
 func OverrideStderr(stderr *os.File) ParseOpt {
-	return func(poh *ParseOptHolder) {
+	return func(poh *ParseOpts) {
 		poh.Stderr = stderr
 	}
 }
 
 func OverrideStdout(stdout *os.File) ParseOpt {
-	return func(poh *ParseOptHolder) {
+	return func(poh *ParseOpts) {
 		poh.Stdout = stdout
 	}
 }
 
-func NewParseOptHolder(opts ...ParseOpt) ParseOptHolder {
-	parseOptHolder := ParseOptHolder{
+func NewParseOpts(opts ...ParseOpt) ParseOpts {
+	parseOptHolder := ParseOpts{
 		Context:    nil,
 		Args:       nil,
 		LookupFunc: nil,
@@ -108,12 +108,7 @@ type ParseResult struct {
 	Action Action
 }
 
-// -- FlagValue
-
-type FlagValue struct {
-	SetBy string
-	Value value.Value
-}
+// -- FlagValueMap
 
 type FlagValueMap map[string]value.Value
 
@@ -129,34 +124,34 @@ func (m FlagValueMap) ToPassedFlags() PassedFlags {
 
 // -- ParseState
 
-type ParseState string
+type ExpectingArg string
 
 const (
-	Parse_ExpectingSectionOrCommand ParseState = "Parse_ExpectingSectionOrCommand"
-	Parse_ExpectingFlagNameOrEnd    ParseState = "Parse_ExpectingFlagNameOrEnd"
-	Parse_ExpectingFlagValue        ParseState = "Parse_ExpectingFlagValue"
+	ExpectingArg_SectionOrCommand ExpectingArg = "ExpectingArg_SectionOrCommand"
+	ExpectingArg_FlagNameOrEnd    ExpectingArg = "ExpectingArg_FlagNameOrEnd"
+	ExpectingArg_FlagValue        ExpectingArg = "ExpectingArg_FlagValue"
 )
 
 // -- unsetFlagNameSet
 
-type UnsetFlagNameSet map[string]struct{}
+type unsetFlagNameSet map[string]struct{}
 
-func (u UnsetFlagNameSet) Add(name string) {
+func (u unsetFlagNameSet) Add(name string) {
 	u[name] = struct{}{}
 }
 
-func (u UnsetFlagNameSet) Delete(name string) {
+func (u unsetFlagNameSet) Delete(name string) {
 	delete(u, name)
 }
 
-func (u UnsetFlagNameSet) Contains(name string) bool {
+func (u unsetFlagNameSet) Contains(name string) bool {
 	_, exists := u[name]
 	return exists
 }
 
-type ParseResult2 struct {
+type ParseState struct {
 	SectionPath    []string
-	CurrentSection *SectionT
+	CurrentSection *Section
 
 	CurrentCommandName string
 	CurrentCommand     *Command
@@ -164,14 +159,14 @@ type ParseResult2 struct {
 	CurrentFlagName string
 	CurrentFlag     *Flag
 	FlagValues      FlagValueMap
-	UnsetFlagNames  UnsetFlagNameSet
+	UnsetFlagNames  unsetFlagNameSet
 
-	HelpPassed bool
-	State      ParseState
+	HelpPassed   bool
+	ExpectingArg ExpectingArg
 }
 
-func (a *App) parseArgs(args []string) (ParseResult2, error) {
-	pr := ParseResult2{
+func (a *App) parseArgs(args []string) (ParseState, error) {
+	pr := ParseState{
 		SectionPath:    nil,
 		CurrentSection: &a.RootSection,
 
@@ -181,10 +176,10 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 		CurrentFlagName: "",
 		CurrentFlag:     nil,
 		FlagValues:      make(FlagValueMap),
-		UnsetFlagNames:  make(UnsetFlagNameSet),
+		UnsetFlagNames:  make(unsetFlagNameSet),
 
-		HelpPassed: false,
-		State:      Parse_ExpectingSectionOrCommand,
+		HelpPassed:   false,
+		ExpectingArg: ExpectingArg_SectionOrCommand,
 	}
 
 	aliasToFlagName := make(map[string]string)
@@ -206,7 +201,7 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 		if i >= len(args)-2 &&
 			arg != "" && // just in case there's not help flag alias
 			(arg == a.HelpFlagName || arg == a.GlobalFlags[a.HelpFlagName].Alias) &&
-			pr.State != Parse_ExpectingFlagValue {
+			pr.ExpectingArg != ExpectingArg_FlagValue {
 
 			pr.HelpPassed = true
 			// set the value of --help if an arg was passed, otherwise let it resolve with the rest of them...
@@ -220,8 +215,8 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 			return pr, nil
 		}
 
-		switch pr.State {
-		case Parse_ExpectingSectionOrCommand:
+		switch pr.ExpectingArg {
+		case ExpectingArg_SectionOrCommand:
 			if childSection, exists := pr.CurrentSection.Sections[string(arg)]; exists {
 				pr.CurrentSection = &childSection
 				pr.SectionPath = append(pr.SectionPath, arg)
@@ -240,12 +235,12 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 					}
 
 				}
-				pr.State = Parse_ExpectingFlagNameOrEnd
+				pr.ExpectingArg = ExpectingArg_FlagNameOrEnd
 			} else {
 				return pr, fmt.Errorf("expecting section or command, got %s", arg)
 			}
 
-		case Parse_ExpectingFlagNameOrEnd:
+		case ExpectingArg_FlagNameOrEnd:
 			flagName := string(arg)
 			if actualFlagName, exists := aliasToFlagName[flagName]; exists {
 				flagName = actualFlagName
@@ -257,9 +252,9 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 			}
 			pr.CurrentFlagName = flagName
 			pr.CurrentFlag = fl
-			pr.State = Parse_ExpectingFlagValue
+			pr.ExpectingArg = ExpectingArg_FlagValue
 
-		case Parse_ExpectingFlagValue:
+		case ExpectingArg_FlagValue:
 			// TODO: unset the flag if UnsetSentinel is passed. Search though global flags and command flags, reset the value to unset sentinal and store in the parseResult that it was unset so calls to resolveFlags won't set it...
 			if arg == pr.CurrentFlag.UnsetSentinel {
 				pr.FlagValues[pr.CurrentFlagName] = pr.CurrentFlag.EmptyValueConstructor()
@@ -271,10 +266,10 @@ func (a *App) parseArgs(args []string) (ParseResult2, error) {
 				}
 				pr.UnsetFlagNames.Delete(pr.CurrentFlagName)
 			}
-			pr.State = Parse_ExpectingFlagNameOrEnd
+			pr.ExpectingArg = ExpectingArg_FlagNameOrEnd
 
 		default:
-			panic("unexpected state: " + pr.State)
+			panic("unexpected state: " + pr.ExpectingArg)
 		}
 	}
 	return pr, nil
@@ -296,7 +291,7 @@ func resolveFlag2(
 	flagValues FlagValueMap, // this gets updated - all other params are readonly
 	configReader config.Reader,
 	lookupEnv LookupFunc,
-	unsetFlagNames UnsetFlagNameSet,
+	unsetFlagNames unsetFlagNameSet,
 ) error {
 
 	// don't update if its been explicitly unset or already set
@@ -368,7 +363,7 @@ func resolveFlag2(
 }
 
 // resolveFlags resolves the config flag first, and then uses its values to resolve the rest of the flags.
-func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, lookupEnv LookupFunc, unsetFlagNames UnsetFlagNameSet) error {
+func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, lookupEnv LookupFunc, unsetFlagNames unsetFlagNameSet) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
 	if a.ConfigFlagName != "" {
@@ -414,7 +409,7 @@ func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, loo
 
 func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 
-	parseOpts := NewParseOptHolder(opts...)
+	parseOpts := NewParseOpts(opts...)
 
 	// --config flag...
 	// original Parse treats it specially
@@ -424,28 +419,28 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 		app.GlobalFlags[app.ConfigFlagName] = *app.ConfigFlag
 	}
 
-	pr2, err := app.parseArgs(parseOpts.Args[1:]) // TODO: make callers do [:1]
+	parseState, err := app.parseArgs(parseOpts.Args[1:]) // TODO: make callers do [:1]
 	if err != nil {
 		return nil, fmt.Errorf("Parse args error: %w", err)
 	}
 
 	// --help means we don't need to do a lot of error checking
-	if pr2.HelpPassed || pr2.State == Parse_ExpectingSectionOrCommand {
-		err = app.resolveFlags(pr2.CurrentCommand, pr2.FlagValues, parseOpts.LookupFunc, pr2.UnsetFlagNames)
+	if parseState.HelpPassed || parseState.ExpectingArg == ExpectingArg_SectionOrCommand {
+		err = app.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupFunc, parseState.UnsetFlagNames)
 		if err != nil {
 			return nil, err
 		}
 
-		helpType := pr2.FlagValues[app.HelpFlagName].Get().(string)
+		helpType := parseState.FlagValues[app.HelpFlagName].Get().(string)
 		command := app.HelpCommands[helpType]
 		pr := ParseResult{
 			Context: Context{
-				App:         app,
-				Context:     parseOpts.Context,
-				Flags:       pr2.FlagValues.ToPassedFlags(),
-				ParseResult: &pr2,
-				Stderr:      parseOpts.Stderr,
-				Stdout:      parseOpts.Stdout,
+				App:        app,
+				Context:    parseOpts.Context,
+				Flags:      parseState.FlagValues.ToPassedFlags(),
+				ParseState: &parseState,
+				Stderr:     parseOpts.Stderr,
+				Stdout:     parseOpts.Stdout,
 			},
 			Action: command.Action,
 		}
@@ -453,24 +448,24 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 	}
 
 	// ok, we're running a real command, let's do the error checking
-	if pr2.State != Parse_ExpectingFlagNameOrEnd {
-		return nil, fmt.Errorf("unexpected parse state: %s", pr2.State)
+	if parseState.ExpectingArg != ExpectingArg_FlagNameOrEnd {
+		return nil, fmt.Errorf("unexpected parse state: %s", parseState.ExpectingArg)
 	}
 
-	err = app.resolveFlags(pr2.CurrentCommand, pr2.FlagValues, parseOpts.LookupFunc, pr2.UnsetFlagNames)
+	err = app.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupFunc, parseState.UnsetFlagNames)
 	if err != nil {
 		return nil, err
 	}
 
 	missingRequiredFlags := []string{}
 	for flagName, flag := range app.GlobalFlags {
-		if flag.Required && pr2.FlagValues[flagName].UpdatedBy() == value.UpdatedByUnset {
+		if flag.Required && parseState.FlagValues[flagName].UpdatedBy() == value.UpdatedByUnset {
 			missingRequiredFlags = append(missingRequiredFlags, string(flagName))
 		}
 	}
 
-	for flagName, flag := range pr2.CurrentCommand.Flags {
-		if flag.Required && pr2.FlagValues[flagName].UpdatedBy() == value.UpdatedByUnset {
+	for flagName, flag := range parseState.CurrentCommand.Flags {
+		if flag.Required && parseState.FlagValues[flagName].UpdatedBy() == value.UpdatedByUnset {
 			missingRequiredFlags = append(missingRequiredFlags, string(flagName))
 		}
 	}
@@ -481,14 +476,14 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 
 	pr := ParseResult{
 		Context: Context{
-			App:         app,
-			Context:     parseOpts.Context,
-			Flags:       pr2.FlagValues.ToPassedFlags(),
-			ParseResult: &pr2,
-			Stderr:      parseOpts.Stderr,
-			Stdout:      parseOpts.Stdout,
+			App:        app,
+			Context:    parseOpts.Context,
+			Flags:      parseState.FlagValues.ToPassedFlags(),
+			ParseState: &parseState,
+			Stderr:     parseOpts.Stderr,
+			Stdout:     parseOpts.Stdout,
 		},
-		Action: pr2.CurrentCommand.Action,
+		Action: parseState.CurrentCommand.Action,
 	}
 	return &pr, nil
 }

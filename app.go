@@ -125,7 +125,7 @@ func VersionCommandMap() cli.CommandMap {
 }
 
 // NewApp creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.
-func NewApp(name string, version string, rootSection cli.SectionT, opts ...AppOpt) cli.App {
+func NewApp(name string, version string, rootSection cli.Section, opts ...AppOpt) cli.App {
 	app := cli.App{
 		Name:            name,
 		RootSection:     rootSection,

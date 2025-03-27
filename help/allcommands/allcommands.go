@@ -9,7 +9,7 @@ import (
 	"go.bbkane.com/warg/help/common"
 )
 
-func AllCommandsSectionHelp(cur *cli.SectionT, helpInfo cli.HelpInfo) cli.Action {
+func AllCommandsSectionHelp(cur *cli.Section, helpInfo cli.HelpInfo) cli.Action {
 	return func(cmdCtx cli.Context) error {
 		file := cmdCtx.Stdout
 
@@ -34,7 +34,7 @@ func AllCommandsSectionHelp(cur *cli.SectionT, helpInfo cli.HelpInfo) cli.Action
 		fmt.Fprintln(f)
 
 		path := []string{string(cmdCtx.App.Name)}
-		for _, e := range cmdCtx.ParseResult.SectionPath {
+		for _, e := range cmdCtx.ParseState.SectionPath {
 			path = append(path, string(e))
 		}
 

@@ -14,7 +14,7 @@ type Context struct {
 	App   *App
 	Flags PassedFlags
 
-	ParseResult *ParseResult2
+	ParseState *ParseState
 
 	// Context to smuggle user-defined state (i.e., not flags) into an Action. I use this for mocks when testing
 	Context context.Context

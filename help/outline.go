@@ -23,7 +23,7 @@ func outlineFlagHelper(w io.Writer, color *gocolor.Color, flagName string, f cli
 	)
 }
 
-func outlineHelper(w io.Writer, color *gocolor.Color, sec cli.SectionT, indent int) {
+func outlineHelper(w io.Writer, color *gocolor.Color, sec cli.Section, indent int) {
 	// commands and command flags
 	for _, comName := range sec.Commands.SortedNames() {
 		com := sec.Commands[string(comName)]
@@ -54,7 +54,7 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec cli.SectionT, indent i
 
 }
 
-func OutlineSectionHelp(_ *cli.SectionT, hi cli.HelpInfo) cli.Action {
+func OutlineSectionHelp(_ *cli.Section, hi cli.HelpInfo) cli.Action {
 	return func(cmdCtx cli.Context) error {
 		file := cmdCtx.Stdout
 		f := bufio.NewWriter(file)
