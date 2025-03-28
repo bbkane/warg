@@ -411,14 +411,6 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 
 	parseOpts := NewParseOpts(opts...)
 
-	// --config flag...
-	// original Parse treats it specially
-	// Parse2 expects it to be in app.GlobalFlags
-	// TODO: rework the config flag handling. I'd prefer everything to be immutable before calling parse
-	if app.ConfigFlag != nil {
-		app.GlobalFlags[app.ConfigFlagName] = *app.ConfigFlag
-	}
-
 	parseState, err := app.parseArgs(parseOpts.Args[1:]) // TODO: make callers do [:1]
 	if err != nil {
 		return nil, fmt.Errorf("Parse args error: %w", err)

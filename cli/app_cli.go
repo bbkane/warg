@@ -10,6 +10,7 @@ import (
 
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
+	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/value"
 )
 
@@ -19,7 +20,6 @@ type App struct {
 	// Config
 	ConfigFlagName  string
 	NewConfigReader config.NewReader
-	ConfigFlag      *Flag
 
 	// Help
 	HelpFlagName string
@@ -153,6 +153,24 @@ func (app *App) Validate() error {
 	}
 	if !slices.Contains(helpFlagValEmpty.Choices(), helpFlagValEmpty.DefaultString()) {
 		return fmt.Errorf("HelpFlagName default value (%v) must be in choices (%v): %v", helpFlagValEmpty.DefaultString(), helpFlagValEmpty.Choices(), app.HelpFlagName)
+	}
+
+	// validate --config flag
+	if app.ConfigFlagName != "" {
+		if app.NewConfigReader == nil {
+			return fmt.Errorf("ConfigFlagName must have a NewConfigReader: %v", app.ConfigFlagName)
+		}
+		configFlag, exists := app.GlobalFlags[app.ConfigFlagName]
+		if !exists {
+			return fmt.Errorf("ConfigFlagName not found in GlobalFlags: %v", app.ConfigFlagName)
+		}
+		configFlagValEmpty, ok := configFlag.EmptyValueConstructor().(value.ScalarValue)
+		if !ok {
+			return fmt.Errorf("ConfigFlagName must be a scalar: %v", app.ConfigFlagName)
+		}
+		if _, ok := configFlagValEmpty.Get().(path.Path); !ok {
+			return fmt.Errorf("ConfigFlagName must be a path: %v", app.ConfigFlagName)
+		}
 	}
 
 	// TODO: check that the default value is in the choices and the choices match app help mappings and that the flag is a scalar

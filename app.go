@@ -9,7 +9,6 @@ import (
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
-	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/scalar"
 )
@@ -51,23 +50,15 @@ func NewGlobalFlag(name string, helpShort string, empty value.EmptyConstructor, 
 
 }
 
-// Use ConfigFlag in conjunction with flag.ConfigPath to allow users to override flag defaults with values from a config.
-// This flag will be parsed and any resulting config will be read before other flag value sources.
-func ConfigFlag(
-	// TODO: put the new stuff at the front to be consistent with OverrideHelpFlag
-	configFlagName string,
-	// TODO: can I make this nicer?
-	scalarOpts []scalar.ScalarOpt[path.Path],
-	newConfigReader config.NewReader,
-	helpShort string,
-	flagOpts ...flag.FlagOpt,
-) AppOpt {
+// ConfigFlag adds a flag that will be used to read a config file. If the passed flagMap is nil, DefaultConfigFlagMap will be used. The flag will be added to the app's global flags. When parsed, the config flag will be parsed before other flags, any config file found will be read, and any values found will be used to update other flags. This allows users to override flag defaults with values from a config file.
+func ConfigFlag(reader config.NewReader, flagMap cli.FlagMap) AppOpt {
 	return func(app *cli.App) {
-		app.ConfigFlagName = configFlagName
-		app.NewConfigReader = newConfigReader
-		// TODO: need to have value opts here
-		configFlag := flag.NewFlag(helpShort, scalar.Path(scalarOpts...), flagOpts...)
-		app.ConfigFlag = &configFlag
+		if len(flagMap) != 1 {
+			panic(fmt.Sprintf("ConfigFlagMap must have exactly one flag, got %d", len(flagMap)))
+		}
+		app.NewConfigReader = reader
+		app.ConfigFlagName = flagMap.SortedNames()[0]
+		app.GlobalFlags.AddFlags(flagMap)
 	}
 }
 
@@ -131,7 +122,6 @@ func NewApp(name string, version string, rootSection cli.Section, opts ...AppOpt
 		RootSection:     rootSection,
 		ConfigFlagName:  "",
 		NewConfigReader: nil,
-		ConfigFlag:      nil,
 		HelpFlagName:    "",
 		HelpCommands:    make(cli.CommandMap),
 		SkipValidation:  false,

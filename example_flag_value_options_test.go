@@ -68,13 +68,16 @@ func ExampleApp_Parse_flag_value_options() {
 			),
 		),
 		warg.ConfigFlag(
-			"--config",
-			[]scalar.ScalarOpt[path.Path]{
-				scalar.Default(path.New("~/.config/flag-overrides.yaml")),
-			},
 			yamlreader.New,
-			"path to YAML config file",
-			flag.Alias("-c"),
+			cli.FlagMap{
+				"--config": flag.NewFlag(
+					"Path to YAML config file",
+					scalar.Path(
+						scalar.Default(path.New("~/.config/flag-overrides.yaml")),
+					),
+					flag.Alias("-c"),
+				),
+			},
 		),
 	)
 

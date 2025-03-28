@@ -75,7 +75,7 @@ Command Flags:
 
 Inherited Section Flags:
 
-  --config , -c : Config filepath
+  --config , -c : Path to YAML config file
     type : path
     default : ~/.config/grabbit.yaml
     currentvalue (set by passedflag) : NOTTHERE

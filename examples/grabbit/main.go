@@ -154,13 +154,16 @@ Homepage: https://github.com/bbkane/grabbit
 			),
 		),
 		warg.ConfigFlag(
-			"--config",
-			[]scalar.ScalarOpt[path.Path]{
-				scalar.Default(path.New("~/.config/grabbit.yaml")),
-			},
 			yamlreader.New,
-			"Config filepath",
-			flag.Alias("-c"),
+			cli.FlagMap{
+				"--config": flag.NewFlag(
+					"Path to YAML config file",
+					scalar.Path(
+						scalar.Default(path.New("~/.config/grabbit.yaml")),
+					),
+					flag.Alias("-c"),
+				),
+			},
 		),
 		warg.SkipValidation(),
 	)
