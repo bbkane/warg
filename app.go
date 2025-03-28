@@ -16,20 +16,6 @@ import (
 // AppOpt let's you customize the app. Most AppOpts panic if incorrectly called
 type AppOpt func(*cli.App)
 
-// OverrideHelpFlag customizes your help flag. helpFlagName should point to a previously added global flag with the following properties:
-//
-//   - scalar string type
-//   - choices that match the names in helpCommands
-//   - default value set to one of the choices
-//
-// These properties are checked at runtime with app.Validate()
-func OverrideHelpFlag(helpFlagName string, helpCommands cli.CommandMap) AppOpt {
-	return func(a *cli.App) {
-		a.HelpFlagName = helpFlagName
-		a.HelpCommands = helpCommands
-	}
-}
-
 // GlobalFlag adds an existing flag to a Command. It panics if a flag with the same name exists
 func GlobalFlag(name string, value cli.Flag) AppOpt {
 	return func(com *cli.App) {
@@ -59,6 +45,30 @@ func ConfigFlag(reader config.NewReader, flagMap cli.FlagMap) AppOpt {
 		app.NewConfigReader = reader
 		app.ConfigFlagName = flagMap.SortedNames()[0]
 		app.GlobalFlags.AddFlags(flagMap)
+	}
+}
+
+// HelpFlag customizes your help flag. This option is only needed if you're also writing a custom help function. helpFlags be either `nil` to autogenerate or a flag map with one flat that with the followng properties:
+//
+//   - scalar string type
+//   - choices that match the names in helpCommands
+//   - default value set to one of the choices
+//
+// These properties are checked at runtime with app.Validate().
+func HelpFlag(helpCommands cli.CommandMap, helpFlags cli.FlagMap) AppOpt {
+	return func(a *cli.App) {
+		switch len(helpFlags) {
+		case 0:
+			helpFlags = help.DefaultHelpFlagMap("default", helpCommands.SortedNames())
+		case 1:
+			break
+		default:
+			panic(fmt.Sprintf("helpFlags must have 0 or 1 flags, got %d", len(helpFlags)))
+		}
+
+		a.HelpFlagName = helpFlags.SortedNames()[0]
+		a.HelpCommands = helpCommands
+		a.GlobalFlags.AddFlags(helpFlags)
 	}
 }
 
@@ -133,10 +143,9 @@ func NewApp(name string, version string, rootSection cli.Section, opts ...AppOpt
 	}
 
 	if app.HelpFlagName == "" {
-		app.GlobalFlags.AddFlags(help.DefaultHelpFlagMap("default", help.DefaultHelpCommandMap().SortedNames()))
-		OverrideHelpFlag(
-			"--help",
+		HelpFlag(
 			help.DefaultHelpCommandMap(),
+			help.DefaultHelpFlagMap("default", help.DefaultHelpCommandMap().SortedNames()),
 		)(&app)
 	}
 

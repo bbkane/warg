@@ -11,7 +11,7 @@ below this description) is likely unreleased.
 ## Changed
 
 - updated `warg.ConfigFlag` to now simply take a reader and a flagmap
-- Made help functions regular commands. Updated help
+- Made help functions regular commands. Renamed `OverrideHelpFlag` to `HelpFlag` and made its signature much easier.
 - Moved "core" types (App, Section, Command, Flag, HelpInfo) to a new "cli" package so they can reference each other, particularly for better tab completion. I'm not particularly happy with a giant package like this; so it's in the `bbkane/the-flattening-2-split-files` branch and I'll remove it from this changelog if needed. In the mean time I want to revamp command.Action (should just take a ParseResult), help (should just be a command with access to a ParseResult), and section/command/flag.CompletionCandidates (should take a ParseResult...).
 - `cli.Context` now has a reference to the `App` and the `ParseResult`. As a result, I was able to remove `Path` and simplify help.
 - `help` functions are now normal commands. I currently have a "translation" layer to the old style of help functions, but those should be removed shortly.

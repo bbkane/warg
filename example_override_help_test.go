@@ -10,7 +10,7 @@ import (
 	"go.bbkane.com/warg/section"
 )
 
-func exampleOverrideHelpFlaglogin(_ cli.Context) error {
+func exampleHelpFlaglogin(_ cli.Context) error {
 	fmt.Println("Logging in")
 	return nil
 }
@@ -26,8 +26,10 @@ func customHelpCmd() cli.Command {
 	)
 }
 
-func ExampleOverrideHelpFlag() {
+func ExampleHelpFlag() {
 
+	// create a custom help command map by grabbing the default one
+	// and adding our custom help command
 	helpCommands := help.DefaultHelpCommandMap()
 	helpCommands["custom"] = customHelpCmd()
 
@@ -39,13 +41,12 @@ func ExampleOverrideHelpFlag() {
 			section.NewCommand(
 				"login",
 				"Login to the platform",
-				exampleOverrideHelpFlaglogin,
+				exampleHelpFlaglogin,
 			),
 		),
-		warg.GlobalFlagMap(help.DefaultHelpFlagMap("custom", helpCommands.SortedNames())),
-		warg.OverrideHelpFlag(
-			"--help",
+		warg.HelpFlag(
 			helpCommands,
+			nil,
 		),
 	)
 

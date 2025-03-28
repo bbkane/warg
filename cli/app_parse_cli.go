@@ -390,7 +390,7 @@ func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, loo
 	for flagName, fl := range a.GlobalFlags {
 		err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
 		if err != nil {
-			return fmt.Errorf("resolveFlag error for flag %s: %w", flagName, err)
+			return fmt.Errorf("resolveFlag error for global flag %s: %w", flagName, err)
 		}
 	}
 
@@ -399,7 +399,7 @@ func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, loo
 		for flagName, fl := range currentCommand.Flags {
 			err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
 			if err != nil {
-				return fmt.Errorf("resolveFlag error for flag %s: %w", flagName, err)
+				return fmt.Errorf("resolveFlag error for command flag %s: %w", flagName, err)
 			}
 		}
 	}
