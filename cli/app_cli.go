@@ -36,18 +36,14 @@ type App struct {
 // Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
 // Any errors on an Action will be printed to stderr and os.Exit(1) will be called.
 func (app *App) MustRun(opts ...ParseOpt) {
-	// TODO: make this better
+	// TODO: make this better? Don't hardcode and use the args from the opts instead of os.Args directly
 	if slices.Equal(os.Args, []string{os.Args[0], "--completion-script-zsh"}) {
 		// app --completion-script-zsh
 		completion.WriteCompletionScriptZsh(os.Stdout, app.Name)
 	} else if len(os.Args) >= 3 && os.Args[1] == "--completion-zsh" {
 		// app --completion-zsh <args> . Note that <args> must be something, even if it's the empty string
 
-		// chop off the last arg since it's either:
-		//  - the empty string (if the user just typed space)
-		//  - a partial string (if the user pressed tab after typing part of something)
-		toComplete := os.Args[2 : len(os.Args)-1]
-		candidates, err := app.CompletionCandidates(toComplete)
+		candidates, err := app.CompletionCandidates(opts...)
 
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -232,30 +228,61 @@ func (app *App) Validate() error {
 	return nil
 }
 
-func (a *App) CompletionCandidates(args []string) (*completion.CompletionCandidates, error) {
-	pr, err := a.parseArgs(args)
+func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.CompletionCandidates, error) {
+	parseOpts := NewParseOpts(opts...)
+
+	// parseOpts.Args looks like: <exe> --completion-zsh <args>... <partialOrEmptyString>
+	// the partial or empty string is passed to us from the completion script. Empty if the user just typed space and pressed tab, partial if the user pressed tab after typing part of something. zsh will filter that for us
+	// so we need to remove the first two args and the last arg
+	args := parseOpts.Args[2 : len(parseOpts.Args)-1]
+
+	// I could to a full parse here, but that would be slower and more prone to failure than just parsing the args - we don't need a lot of info to complete section/command names
+	parseState, err := a.parseArgs(args)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected parseArgs err: %w", err)
 	}
-	switch pr.ExpectingArg {
-	case ExpectingArg_SectionOrCommand:
-		candidates, err := pr.CurrentSection.CompletionCandidates()
-		if err != nil {
-			return nil, fmt.Errorf("Parse_ExpectingSectionOrCommand CompletionCandidates err: %w", err)
+	if parseState.ExpectingArg == ExpectingArg_SectionOrCommand {
+		s := parseState.CurrentSection
+		ret := completion.CompletionCandidates{
+			Type:   completion.CompletionType_ValueDescription,
+			Values: []completion.CompletionCandidate{},
 		}
-		return &candidates, nil
-	case ExpectingArg_FlagNameOrEnd:
-		// TODO: if a scalar flag has been passsed, don't suggest it again
-		// TODO: get a better order for the flags. For example, envelope needs to db first (unless it's resolved) so further flags can use that. Add an order or "depends on" param?
+		for _, name := range s.Commands.SortedNames() {
+			ret.Values = append(ret.Values, completion.CompletionCandidate{
+				Name:        string(name),
+				Description: string(s.Commands[name].HelpShort),
+			})
+		}
+		for _, name := range s.Sections.SortedNames() {
+			ret.Values = append(ret.Values, completion.CompletionCandidate{
+				Name:        string(name),
+				Description: string(s.Sections[name].HelpShort),
+			})
+		}
+		return &ret, nil
+	}
+
+	// Finish the parse!
+	err = a.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupFunc, parseState.UnsetFlagNames)
+	if err != nil {
+		return nil, fmt.Errorf("unexpected resolveFlags err: %w", err)
+	}
+
+	if parseState.ExpectingArg == ExpectingArg_FlagNameOrEnd {
+		// TODO: flag name completion ideas that will actually use the full parse above
+		//  - if a scalar flag has been passed by arg, don't suggest it again (as args override everything else)
+		//  - if the flag is required and is not set, suggest it first
+		//  - suggest command flags before global flags
+		//  - let the flags define rank or priority for completion order
 		candidates := &completion.CompletionCandidates{
 			Type:   completion.CompletionType_ValueDescription,
 			Values: []completion.CompletionCandidate{},
 		}
 		// command flags
-		for _, name := range pr.CurrentCommand.Flags.SortedNames() {
+		for _, name := range parseState.CurrentCommand.Flags.SortedNames() {
 			candidates.Values = append(candidates.Values, completion.CompletionCandidate{
 				Name:        string(name),
-				Description: string(pr.CurrentCommand.Flags[name].HelpShort),
+				Description: string(parseState.CurrentCommand.Flags[name].HelpShort),
 			})
 		}
 		// global flags
@@ -266,23 +293,33 @@ func (a *App) CompletionCandidates(args []string) (*completion.CompletionCandida
 			})
 		}
 		return candidates, nil
-	case ExpectingArg_FlagValue:
-		// TODO: allow flags to look at the values of other flags before offering options.
-		// This will require some package "flattening" as ParseResult is defined in App, which also import Flag. So... flag shouldn't import the app code...
-		// For now, only suggest the flags choices
+	} else if parseState.ExpectingArg == ExpectingArg_FlagValue {
+
+		if parseState.CurrentFlag.CompletionCandidates != nil {
+			cmdContext := Context{
+				App:        a,
+				Context:    parseOpts.Context,
+				Flags:      parseState.FlagValues.ToPassedFlags(),
+				ParseState: &parseState,
+				Stderr:     parseOpts.Stderr,
+				Stdout:     parseOpts.Stdout,
+			}
+			return parseState.CurrentFlag.CompletionCandidates(cmdContext)
+		}
+
 		candidates := &completion.CompletionCandidates{
 			Type:   completion.CompletionType_ValueDescription,
 			Values: []completion.CompletionCandidate{},
 		}
 		// pr.FlagValues is always filled with at least the empty values
-		for _, name := range pr.FlagValues[pr.CurrentFlagName].Choices() {
+		for _, name := range parseState.FlagValues[parseState.CurrentFlagName].Choices() {
 			candidates.Values = append(candidates.Values, completion.CompletionCandidate{
 				Name:        name,
 				Description: "NO DESCRIPTION",
 			})
 		}
 		return candidates, nil
-	default:
-		return nil, fmt.Errorf("unexpected ParseState: %v", pr.ExpectingArg)
+	} else {
+		return nil, fmt.Errorf("unexpected ParseState: %v", parseState.ExpectingArg)
 	}
 }

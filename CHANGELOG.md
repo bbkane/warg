@@ -8,6 +8,10 @@ below this description) is likely unreleased.
 
 # v0.0.30
 
+## Added
+
+- User defined flag completion func with `WithCommandCompletionFunc`. TODO: I should rename that...
+
 ## Changed
 
 - updated `warg.ConfigFlag` to now simply take a reader and a flagmap

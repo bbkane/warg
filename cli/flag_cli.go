@@ -4,6 +4,7 @@ import (
 	"log"
 	"sort"
 
+	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/value"
 )
 
@@ -41,14 +42,19 @@ type Flag struct {
 	// Alias is an alternative name for a flag, usually shorter :)
 	Alias string
 
+	// CompletionCandidates is a function that returns a list of completion candidates for this flag.
+	// Note that some flags in the cli.Context Flags map may not be set, even if they're required.
+	// TODO: get a comprehensive list of restrictions on the context.
+	CompletionCandidates func(Context) (*completion.CompletionCandidates, error)
+
 	// ConfigPath is the path from the config to the value the flag updates
 	ConfigPath string
 
-	// Envvars holds a list of environment variables to update this flag. Only the first one that exists will be used.
-	EnvVars []string
-
 	// EmptyConstructor tells flag how to make a value
 	EmptyValueConstructor value.EmptyConstructor
+
+	// Envvars holds a list of environment variables to update this flag. Only the first one that exists will be used.
+	EnvVars []string
 
 	// HelpShort is a message for the user on how to use this flag
 	HelpShort string
@@ -59,11 +65,13 @@ type Flag struct {
 	// When UnsetSentinal is passed as a flag value, Value is reset and SetBy is set to ""
 	UnsetSentinel string
 
-	// -- the following are set when parsing
+	// -- the following are set when parsing and they're all deprecated for my march to immutabality
 
 	// IsCommandFlag is set when parsing. Set to true if the flag was attached to a command (as opposed to being inherited from a section)
+	// Deprecated: Check if the name is in command.Flags instead
 	IsCommandFlag bool
 
 	// Value is set when parsing. Use SetBy != "" to determine whether a value was actually passed  instead of being empty
+	// Deprecated: check the value from ParseState.FlagValues
 	Value value.Value
 }

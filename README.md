@@ -10,7 +10,7 @@ An opinionated CLI framework:
 
 # Project Status (2025-01-24)
 
-The "bones" of warg are where I want them, but I have several breaking changes I'd like to try before considering warg stable. None of them will change the basic way warg works, and I haven't had a lot of trouble updating my apps using warg. See the [CHANGELOG](./CHANGELOG.md) for past breaking changes.
+The "bones" of warg are where I want them, but I have several breaking changes I'd like to try before considering warg stable. None of them will change the basic way warg works, but I'm renaming things, changing signatures, and rearranging packages. See the [CHANGELOG](./CHANGELOG.md) for past breaking changes.
 
 # Examples
 

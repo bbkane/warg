@@ -2,6 +2,7 @@ package flag
 
 import (
 	"go.bbkane.com/warg/cli"
+	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/value"
 )
 
@@ -11,15 +12,17 @@ type FlagOpt func(*cli.Flag)
 // NewFlag creates a Flag with options!
 func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) cli.Flag {
 	flag := cli.Flag{
-		HelpShort:             helpShort,
-		EmptyValueConstructor: empty,
 		Alias:                 "",
+		CompletionCandidates:  nil,
 		ConfigPath:            "",
+		EmptyValueConstructor: empty,
 		EnvVars:               nil,
+		HelpShort:             helpShort,
 		Required:              false,
-		IsCommandFlag:         false,
 		UnsetSentinel:         "",
-		Value:                 nil,
+		// Deprecated
+		IsCommandFlag: false,
+		Value:         nil,
 	}
 	for _, opt := range opts {
 		opt(&flag)
@@ -36,8 +39,14 @@ func Alias(alias string) FlagOpt {
 
 // ConfigPath adds a configpath to a flag
 func ConfigPath(path string) FlagOpt {
+	return func(f *cli.Flag) {
+		f.ConfigPath = path
+	}
+}
+
+func CompletionCandidate(completionCandidatesFunc func(cli.Context) (*completion.CompletionCandidates, error)) FlagOpt {
 	return func(flag *cli.Flag) {
-		flag.ConfigPath = path
+		flag.CompletionCandidates = completionCandidatesFunc
 	}
 }
 
@@ -45,6 +54,13 @@ func ConfigPath(path string) FlagOpt {
 func EnvVars(name ...string) FlagOpt {
 	return func(f *cli.Flag) {
 		f.EnvVars = name
+	}
+}
+
+// Required means the user MUST fill this flag
+func Required() FlagOpt {
+	return func(f *cli.Flag) {
+		f.Required = true
 	}
 }
 
@@ -62,12 +78,5 @@ func EnvVars(name ...string) FlagOpt {
 func UnsetSentinel(name string) FlagOpt {
 	return func(f *cli.Flag) {
 		f.UnsetSentinel = name
-	}
-}
-
-// Required means the user MUST fill this flag
-func Required() FlagOpt {
-	return func(f *cli.Flag) {
-		f.Required = true
 	}
 }
