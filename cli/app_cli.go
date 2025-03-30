@@ -228,7 +228,7 @@ func (app *App) Validate() error {
 	return nil
 }
 
-func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.CompletionCandidates, error) {
+func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, error) {
 	parseOpts := NewParseOpts(opts...)
 
 	// parseOpts.Args looks like: <exe> --completion-zsh <args>... <partialOrEmptyString>
@@ -243,18 +243,18 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.CompletionCand
 	}
 	if parseState.ExpectingArg == ExpectingArg_SectionOrCommand {
 		s := parseState.CurrentSection
-		ret := completion.CompletionCandidates{
-			Type:   completion.CompletionType_ValueDescription,
-			Values: []completion.CompletionCandidate{},
+		ret := completion.Candidates{
+			Type:   completion.Type_ValueDescription,
+			Values: []completion.Candidate{},
 		}
 		for _, name := range s.Commands.SortedNames() {
-			ret.Values = append(ret.Values, completion.CompletionCandidate{
+			ret.Values = append(ret.Values, completion.Candidate{
 				Name:        string(name),
 				Description: string(s.Commands[name].HelpShort),
 			})
 		}
 		for _, name := range s.Sections.SortedNames() {
-			ret.Values = append(ret.Values, completion.CompletionCandidate{
+			ret.Values = append(ret.Values, completion.Candidate{
 				Name:        string(name),
 				Description: string(s.Sections[name].HelpShort),
 			})
@@ -274,20 +274,20 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.CompletionCand
 		//  - if the flag is required and is not set, suggest it first
 		//  - suggest command flags before global flags
 		//  - let the flags define rank or priority for completion order
-		candidates := &completion.CompletionCandidates{
-			Type:   completion.CompletionType_ValueDescription,
-			Values: []completion.CompletionCandidate{},
+		candidates := &completion.Candidates{
+			Type:   completion.Type_ValueDescription,
+			Values: []completion.Candidate{},
 		}
 		// command flags
 		for _, name := range parseState.CurrentCommand.Flags.SortedNames() {
-			candidates.Values = append(candidates.Values, completion.CompletionCandidate{
+			candidates.Values = append(candidates.Values, completion.Candidate{
 				Name:        string(name),
 				Description: string(parseState.CurrentCommand.Flags[name].HelpShort),
 			})
 		}
 		// global flags
 		for _, name := range a.GlobalFlags.SortedNames() {
-			candidates.Values = append(candidates.Values, completion.CompletionCandidate{
+			candidates.Values = append(candidates.Values, completion.Candidate{
 				Name:        string(name),
 				Description: string(a.GlobalFlags[name].HelpShort),
 			})
@@ -307,13 +307,13 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.CompletionCand
 			return parseState.CurrentFlag.CompletionCandidates(cmdContext)
 		}
 
-		candidates := &completion.CompletionCandidates{
-			Type:   completion.CompletionType_ValueDescription,
-			Values: []completion.CompletionCandidate{},
+		candidates := &completion.Candidates{
+			Type:   completion.Type_ValueDescription,
+			Values: []completion.Candidate{},
 		}
 		// pr.FlagValues is always filled with at least the empty values
 		for _, name := range parseState.FlagValues[parseState.CurrentFlagName].Choices() {
-			candidates.Values = append(candidates.Values, completion.CompletionCandidate{
+			candidates.Values = append(candidates.Values, completion.Candidate{
 				Name:        name,
 				Description: "NO DESCRIPTION",
 			})

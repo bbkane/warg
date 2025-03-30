@@ -48,16 +48,16 @@ compadd -d comp_descriptions -a comp_values
 	}
 }
 
-type CompletionType string
+type Type string
 
-const CompletionType_ValueDescription CompletionType = "WARG_COMPLETION_TYPE_VALUE_DESCRIPTION"
+const Type_ValueDescription Type = "COMPLETION_TYPE_VALUE_DESCRIPTION"
 
-type CompletionCandidate struct {
+type Candidate struct {
 	Name        string
 	Description string
 }
 
-type CompletionCandidates struct {
-	Type   CompletionType
-	Values []CompletionCandidate
+type Candidates struct {
+	Type   Type
+	Values []Candidate
 }

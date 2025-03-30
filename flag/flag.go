@@ -44,7 +44,7 @@ func ConfigPath(path string) FlagOpt {
 	}
 }
 
-func CompletionCandidate(completionCandidatesFunc func(cli.Context) (*completion.CompletionCandidates, error)) FlagOpt {
+func CompletionCandidate(completionCandidatesFunc func(cli.Context) (*completion.Candidates, error)) FlagOpt {
 	return func(flag *cli.Flag) {
 		flag.CompletionCandidates = completionCandidatesFunc
 	}
