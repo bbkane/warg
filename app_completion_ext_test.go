@@ -8,6 +8,7 @@ import (
 	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/completion"
+	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 )
@@ -31,19 +32,49 @@ func TestApp_CompletionCandidates(t *testing.T) {
 					),
 				),
 			),
-			section.NewSection("section1",
+			section.NewSection(
+				"section1",
 				"section1 help",
 				section.NewCommand(
 					"command2",
 					"command2 help",
 					command.DoNothing,
+					command.NewFlag(
+						"--flag2",
+						"flag2 help",
+						scalar.String(),
+						flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+							if ctx.Flags["--globalFlag"].(string) == "nondefault" {
+								return &completion.Candidates{
+									Type: completion.Type_ValueDescription,
+									Values: []completion.Candidate{
+										{
+											Name:        "nondefault",
+											Description: "nondefault completion",
+										},
+									},
+								}, nil
+							}
+							return &completion.Candidates{
+								Type: completion.Type_ValueDescription,
+								Values: []completion.Candidate{
+									{
+										Name:        "default",
+										Description: "default completion",
+									},
+								},
+							}, nil
+						}),
+					),
 				),
 			),
 		),
 		warg.NewGlobalFlag(
 			"--globalFlag",
 			"globalFlag help",
-			scalar.String(),
+			scalar.String(
+				scalar.Default("default"),
+			),
 		),
 	)
 	globalFlagcompletion := completion.Candidate{
@@ -111,6 +142,56 @@ func TestApp_CompletionCandidates(t *testing.T) {
 					},
 					globalFlagcompletion,
 					helpCompletion,
+				},
+			},
+		},
+		{
+			name:        "cmdFlagValue",
+			args:        []string{"command1", "--flag1"},
+			expectedErr: false,
+			expectedCandidates: &completion.Candidates{
+				Type: completion.Type_ValueDescription,
+				Values: []completion.Candidate{
+					{
+						Name:        "alpha",
+						Description: "NO DESCRIPTION",
+					},
+					{
+						Name:        "beta",
+						Description: "NO DESCRIPTION",
+					},
+					{
+						Name:        "gamma",
+						Description: "NO DESCRIPTION",
+					},
+				},
+			},
+		},
+		{
+			name:        "cmdFlagCustomCompletionDefault",
+			args:        []string{"section1", "command2", "--flag2"},
+			expectedErr: false,
+			expectedCandidates: &completion.Candidates{
+				Type: completion.Type_ValueDescription,
+				Values: []completion.Candidate{
+					{
+						Name:        "default",
+						Description: "default completion",
+					},
+				},
+			},
+		},
+		{
+			name:        "cmdFlagCustomCompletionNonDefault",
+			args:        []string{"section1", "command2", "--globalFlag", "nondefault", "--flag2"},
+			expectedErr: false,
+			expectedCandidates: &completion.Candidates{
+				Type: completion.Type_ValueDescription,
+				Values: []completion.Candidate{
+					{
+						Name:        "nondefault",
+						Description: "nondefault completion",
+					},
 				},
 			},
 		},
