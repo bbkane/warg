@@ -33,7 +33,7 @@ func ExampleHelpFlag() {
 	helpCommands := help.DefaultHelpCommandMap()
 	helpCommands["custom"] = customHelpCmd()
 
-	app := warg.NewApp(
+	app := warg.New(
 		"newAppName",
 		"v1.0.0",
 		section.New(

@@ -15,7 +15,7 @@ import (
 
 func TestApp_CompletionCandidates(t *testing.T) {
 	// To try to make this more concise, these tests are gonna share an app...
-	app := warg.NewApp(
+	app := warg.New(
 		"newAppName",
 		"v1.0.0",
 		section.New(

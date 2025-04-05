@@ -53,7 +53,7 @@ func app() *cli.App {
 		),
 	}
 
-	app := warg.NewApp(
+	app := warg.New(
 		"fling",
 		"v1.0.0",
 		section.New(

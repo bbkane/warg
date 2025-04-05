@@ -221,7 +221,7 @@ func app() *cli.App {
 		// TODO: how many results? limit by date added?
 	)
 
-	app := warg.NewApp(
+	app := warg.New(
 		"starghaze",
 		"v1.0.0",
 		section.New(

@@ -12,7 +12,7 @@ import (
 )
 
 func app() *cli.App {
-	app := warg.NewApp(
+	app := warg.New(
 		"butler",
 		"v1.0.0",
 		section.New(

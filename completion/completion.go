@@ -50,7 +50,10 @@ compadd -d comp_descriptions -a comp_values
 
 type Type string
 
-const Type_ValueDescription Type = "COMPLETION_TYPE_VALUE_DESCRIPTION"
+const (
+	Type_ValueDescription Type = "COMPLETION_TYPE_VALUE_DESCRIPTION"
+	Type_DirectoriesFiles Type = "COMPLETION_TYPE_DIRECTORIES_FILES"
+)
 
 type Candidate struct {
 	Name        string

@@ -52,7 +52,7 @@ func TestApp_Parse(t *testing.T) {
 
 		{
 			name: "envvar",
-			app: warg.NewApp(
+			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
@@ -91,7 +91,7 @@ func TestApp_Parse(t *testing.T) {
 					"--flag1": flag.New("--flag1 value", scalar.String()),
 					"--flag2": flag.New("--flag1 value", scalar.String()),
 				}
-				app := warg.NewApp(
+				app := warg.New(
 					"newAppName", "v1.0.0",
 					section.New(
 						"help for section",
@@ -117,7 +117,7 @@ func TestApp_Parse(t *testing.T) {
 		// Note: Will need to update this if https://github.com/bbkane/warg/issues/36 gets implemented
 		{
 			name: "invalidFlagsErrorEvenForHelp",
-			app: warg.NewApp(
+			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New(
 					string("A virtual assistant"),
@@ -459,7 +459,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 
-			app := warg.NewApp(
+			app := warg.New(
 				"newAppName", "v1.0.0",
 				tt.rootSection,
 				warg.SkipValidation(),
@@ -544,7 +544,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 
-			app := warg.NewApp(
+			app := warg.New(
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
@@ -591,7 +591,7 @@ func TestApp_Parse_config(t *testing.T) {
 	}{
 		{
 			name: "configFlag",
-			app: warg.NewApp(
+			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
@@ -648,7 +648,7 @@ func TestApp_Parse_config(t *testing.T) {
 		},
 		{
 			name: "simpleJSONConfig",
-			app: warg.NewApp(
+			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New("help for test",
 					section.NewCommand(
@@ -693,7 +693,7 @@ func TestApp_Parse_config(t *testing.T) {
 		{
 			// JSON needs some help to support number decoding
 			name: "numJSONConfig",
-			app: warg.NewApp(
+			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New("help for test",
 					section.NewCommand(
@@ -738,7 +738,7 @@ func TestApp_Parse_config(t *testing.T) {
 		},
 		{
 			name: "configSlice",
-			app: warg.NewApp(
+			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
@@ -782,7 +782,7 @@ func TestApp_Parse_config(t *testing.T) {
 		},
 		{
 			name: "JSONConfigStringSlice",
-			app: warg.NewApp(
+			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New("help for test",
 					section.NewCommand(
@@ -825,7 +825,7 @@ func TestApp_Parse_config(t *testing.T) {
 		},
 		{
 			name: "YAMLConfigStringSlice",
-			app: warg.NewApp(
+			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New("help for test",
 					section.NewCommand(
@@ -869,7 +869,7 @@ func TestApp_Parse_config(t *testing.T) {
 		},
 		{
 			name: "JSONConfigMap",
-			app: warg.NewApp(
+			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
@@ -951,7 +951,7 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 	}{
 		{
 			name: "globalFlag",
-			app: warg.NewApp(
+			app: warg.New(
 				"newAppName", "v1.0.0",
 				section.New(
 					"help for test",
@@ -1003,7 +1003,7 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 func TestCustomVersion(t *testing.T) {
 	expectedVersion := "customversion"
 
-	app := warg.NewApp(
+	app := warg.New(
 		"appName",
 		expectedVersion,
 		section.New(
@@ -1024,7 +1024,7 @@ func TestCustomVersion(t *testing.T) {
 }
 
 func TestContextContainsValue(t *testing.T) {
-	app := warg.NewApp(
+	app := warg.New(
 		"appName",
 		"v1.0.0",
 		section.New(
@@ -1053,7 +1053,7 @@ func TestAppFlagToAddr(t *testing.T) {
 	require := require.New(t)
 	var flagVal string
 	expectedFlagVal := "flag value"
-	app := warg.NewApp(
+	app := warg.New(
 		"appName",
 		"v1.0.0",
 		section.New(
