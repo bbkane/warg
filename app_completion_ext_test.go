@@ -9,9 +9,11 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/section"
+	"go.bbkane.com/warg/value/scalar"
 )
 
 func TestApp_CompletionCandidates(t *testing.T) {
+	// To try to make this more concise, these tests are gonna share an app...
 	app := warg.NewApp(
 		"newAppName",
 		"v1.0.0",
@@ -21,24 +23,46 @@ func TestApp_CompletionCandidates(t *testing.T) {
 				"command1",
 				"command1 help",
 				command.DoNothing,
+				command.NewFlag(
+					"--flag1",
+					"flag1 help",
+					scalar.String(
+						scalar.Choices("alpha", "beta", "gamma"),
+					),
+				),
+			),
+			section.NewSection("section1",
+				"section1 help",
+				section.NewCommand(
+					"command2",
+					"command2 help",
+					command.DoNothing,
+				),
 			),
 		),
+		warg.NewGlobalFlag(
+			"--globalFlag",
+			"globalFlag help",
+			scalar.String(),
+		),
 	)
-	nilLookup := cli.LookupMap(nil)
-	// lm := func(key, value string) cli.LookupFunc {
-	// 	return cli.LookupMap(map[string]string{key: value})
-	// }
+	globalFlagcompletion := completion.Candidate{
+		Name:        "--globalFlag",
+		Description: "globalFlag help",
+	}
+	helpCompletion := completion.Candidate{
+		Name:        "--help",
+		Description: "Print help",
+	}
 	tests := []struct {
 		name               string
 		args               []string
-		lookupFunc         cli.LookupFunc
 		expectedErr        bool
 		expectedCandidates *completion.Candidates
 	}{
 		{
-			name:        "no args",
+			name:        "noArgs",
 			args:        []string{},
-			lookupFunc:  nilLookup,
 			expectedErr: false,
 			expectedCandidates: &completion.Candidates{
 				Type: completion.Type_ValueDescription,
@@ -47,6 +71,46 @@ func TestApp_CompletionCandidates(t *testing.T) {
 						Name:        "command1",
 						Description: "command1 help",
 					},
+					{
+						Name:        "section1",
+						Description: "section1 help",
+					},
+				},
+			},
+		},
+		{
+			name:               "moreArgsThanSections",
+			args:               []string{"bob"},
+			expectedErr:        true,
+			expectedCandidates: nil,
+		},
+		{
+			name:        "childSectionCommands",
+			args:        []string{"section1"},
+			expectedErr: false,
+			expectedCandidates: &completion.Candidates{
+				Type: completion.Type_ValueDescription,
+				Values: []completion.Candidate{
+					{
+						Name:        "command2",
+						Description: "command2 help",
+					},
+				},
+			},
+		},
+		{
+			name:        "cmdFlagName",
+			args:        []string{"command1"},
+			expectedErr: false,
+			expectedCandidates: &completion.Candidates{
+				Type: completion.Type_ValueDescription,
+				Values: []completion.Candidate{
+					{
+						Name:        "--flag1",
+						Description: "flag1 help",
+					},
+					globalFlagcompletion,
+					helpCompletion,
 				},
 			},
 		},
@@ -62,7 +126,6 @@ func TestApp_CompletionCandidates(t *testing.T) {
 
 			actualCandidates, actualErr := app.CompletionCandidates(
 				cli.OverrideArgs(args),
-				cli.OverrideLookupFunc(tt.lookupFunc),
 			)
 
 			if tt.expectedErr {
