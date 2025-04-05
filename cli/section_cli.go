@@ -23,7 +23,8 @@ func (fm SectionMap) SortedNames() []string {
 }
 
 // Sections are like "folders" for Commmands.
-// They should have noun names.
+// They should usually have noun names.
+// Sections should not be be created directly, but with the APIs in [go.bbkane.com/warg/section].
 type Section struct {
 	// Commands holds the Commands under this Section
 	Commands CommandMap

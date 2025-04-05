@@ -34,7 +34,7 @@ Homepage: https://github.com/bbkane/grabbit
 `
 
 	logFlags := cli.FlagMap{
-		"--log-filename": flag.NewFlag(
+		"--log-filename": flag.New(
 			"Log filename",
 			scalar.Path(
 				scalar.Default(path.New("~/.config/grabbit.jsonl")),
@@ -42,7 +42,7 @@ Homepage: https://github.com/bbkane/grabbit
 			flag.ConfigPath("lumberjacklogger.filename"),
 			flag.Required(),
 		),
-		"--log-maxage": flag.NewFlag(
+		"--log-maxage": flag.New(
 			"Max age before log rotation in days", // TODO: change to duration flag
 			scalar.Int(
 				scalar.Default(30),
@@ -50,7 +50,7 @@ Homepage: https://github.com/bbkane/grabbit
 			flag.ConfigPath("lumberjacklogger.maxage"),
 			flag.Required(),
 		),
-		"--log-maxbackups": flag.NewFlag(
+		"--log-maxbackups": flag.New(
 			"Num backups for the log",
 			scalar.Int(
 				scalar.Default(0),
@@ -58,7 +58,7 @@ Homepage: https://github.com/bbkane/grabbit
 			flag.ConfigPath("lumberjacklogger.maxbackups"),
 			flag.Required(),
 		),
-		"--log-maxsize": flag.NewFlag(
+		"--log-maxsize": flag.New(
 			"Max size of log in megabytes",
 			scalar.Int(
 				scalar.Default(5),
@@ -71,7 +71,7 @@ Homepage: https://github.com/bbkane/grabbit
 	app := warg.NewApp(
 		"grabbit",
 		"v1.0.0",
-		section.NewSectionT(
+		section.New(
 			"Get top images from subreddits",
 			section.NewCommand(
 				"grab",
@@ -156,7 +156,7 @@ Homepage: https://github.com/bbkane/grabbit
 		warg.ConfigFlag(
 			yamlreader.New,
 			cli.FlagMap{
-				"--config": flag.NewFlag(
+				"--config": flag.New(
 					"Path to YAML config file",
 					scalar.Path(
 						scalar.Default(path.New("~/.config/grabbit.yaml")),

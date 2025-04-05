@@ -10,8 +10,8 @@ import (
 // SectionOpt customizes a Section on creation
 type SectionOpt func(*cli.Section)
 
-// NewSectionT creates a Section!
-func NewSectionT(helpShort string, opts ...SectionOpt) cli.Section {
+// New creates a standalone [cli.Section]. All section options are in the [go.bbkane.com/warg/section] package
+func New(helpShort string, opts ...SectionOpt) cli.Section {
 	section := cli.Section{
 		HelpShort: helpShort,
 		Sections:  make(cli.SectionMap),
@@ -25,7 +25,7 @@ func NewSectionT(helpShort string, opts ...SectionOpt) cli.Section {
 	return section
 }
 
-// Section adds an existing Section underneath this Section. Panics if a Section with the same name already exists
+// Section adds an existing Section as a child of this Section. Panics if a Section with the same name already exists
 func Section(name string, value cli.Section) SectionOpt {
 	return func(app *cli.Section) {
 		if _, alreadyThere := app.Sections[name]; !alreadyThere {
@@ -36,7 +36,7 @@ func Section(name string, value cli.Section) SectionOpt {
 	}
 }
 
-// SectionMap adds existing Sections underneath this Section. Panics if a Section with the same name already exists
+// SectionMap adds existing Sections as a child of this Section. Panics if a Section with the same name already exists
 func SectionMap(sections cli.SectionMap) SectionOpt {
 	return func(app *cli.Section) {
 		for name, value := range sections {
@@ -45,7 +45,7 @@ func SectionMap(sections cli.SectionMap) SectionOpt {
 	}
 }
 
-// Command adds an existing Command underneath this Section. Panics if a Command with the same name already exists
+// Command adds an existing Command as a child of this Section. Panics if a Command with the same name already exists
 func Command(name string, value cli.Command) SectionOpt {
 	return func(app *cli.Section) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
@@ -56,7 +56,7 @@ func Command(name string, value cli.Command) SectionOpt {
 	}
 }
 
-// CommandMap adds existing Commands underneath this Section. Panics if a Command with the same name already exists
+// CommandMap adds existing Commands as a child of this Section. Panics if a Command with the same name already exists
 func CommandMap(commands cli.CommandMap) SectionOpt {
 	return func(app *cli.Section) {
 		for name, value := range commands {
@@ -65,14 +65,14 @@ func CommandMap(commands cli.CommandMap) SectionOpt {
 	}
 }
 
-// NewSection creates a NewSection and adds it underneath this NewSection. Panics if a NewSection with the same name already exists
+// NewSection creates a new Section as a child of this Section. Panics if a NewSection with the same name already exists
 func NewSection(name string, helpShort string, opts ...SectionOpt) SectionOpt {
-	return Section(name, NewSectionT(helpShort, opts...))
+	return Section(name, New(helpShort, opts...))
 }
 
-// NewCommand creates a NewCommand and adds it underneath this Section. Panics if a NewCommand with the same name already exists
+// NewCommand creates a new Command as a child of this Section. Panics if a NewCommand with the same name already exists
 func NewCommand(name string, helpShort string, action cli.Action, opts ...command.CommandOpt) SectionOpt {
-	return Command(name, command.NewCommand(helpShort, action, opts...))
+	return Command(name, command.New(helpShort, action, opts...))
 }
 
 // Footer adds an optional help string to this Section

@@ -39,7 +39,7 @@ func ExampleApp_Parse_flag_value_options() {
 	app := warg.NewApp(
 		"flag-overrides",
 		"v1.0.0",
-		section.NewSectionT(
+		section.New(
 			"demo flag overrides",
 			section.NewCommand(
 				string("show"),
@@ -70,7 +70,7 @@ func ExampleApp_Parse_flag_value_options() {
 		warg.ConfigFlag(
 			yamlreader.New,
 			cli.FlagMap{
-				"--config": flag.NewFlag(
+				"--config": flag.New(
 					"Path to YAML config file",
 					scalar.Path(
 						scalar.Default(path.New("~/.config/flag-overrides.yaml")),

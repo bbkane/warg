@@ -36,7 +36,7 @@ func grabbitSection() cli.Section {
 	grabbit config edit --config-path /path/to/config --editor code
 	`
 
-	sec := section.NewSectionT(
+	sec := section.New(
 		"grab those images!",
 		section.NewCommand(
 			"grab",

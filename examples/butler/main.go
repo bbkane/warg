@@ -15,7 +15,7 @@ func app() *cli.App {
 	app := warg.NewApp(
 		"butler",
 		"v1.0.0",
-		section.NewSectionT(
+		section.New(
 			string("A virtual assistant"),
 			section.NewCommand(
 				"present",

@@ -13,7 +13,7 @@ import (
 
 func app() *cli.App {
 	linkUnlinkFlags := cli.FlagMap{
-		"--ask": flag.NewFlag(
+		"--ask": flag.New(
 			"Whether to ask before making changes",
 			// value.StringEnum("true", "false", "dry-run"),
 			scalar.String(
@@ -22,14 +22,14 @@ func app() *cli.App {
 			),
 			flag.Required(),
 		),
-		"--dotfiles": flag.NewFlag(
+		"--dotfiles": flag.New(
 			"Files/dirs starting with 'dot-' will have links starting with '.'",
 			scalar.Bool(
 				scalar.Default(true),
 			),
 			flag.Required(),
 		),
-		"--ignore": flag.NewFlag(
+		"--ignore": flag.New(
 			"Ignore file/dir if the name (not the whole path) matches passed regex",
 			slice.String(
 				slice.Default([]string{"README.*"}),
@@ -37,7 +37,7 @@ func app() *cli.App {
 			flag.Alias("-i"),
 			flag.UnsetSentinel("UNSET"),
 		),
-		"--link-dir": flag.NewFlag(
+		"--link-dir": flag.New(
 			"Symlinks will be created in this directory pointing to files/directories in --src-dir",
 			scalar.Path(
 				scalar.Default(path.New("~")),
@@ -45,7 +45,7 @@ func app() *cli.App {
 			flag.Alias("-l"),
 			flag.Required(),
 		),
-		"--src-dir": flag.NewFlag(
+		"--src-dir": flag.New(
 			"Directory containing files and directories to link to",
 			scalar.Path(),
 			flag.Alias("-s"),
@@ -56,7 +56,7 @@ func app() *cli.App {
 	app := warg.NewApp(
 		"fling",
 		"v1.0.0",
-		section.NewSectionT(
+		section.New(
 			"Link and unlink directory heirarchies ",
 			section.NewCommand(
 				"link",

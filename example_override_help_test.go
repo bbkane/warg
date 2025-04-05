@@ -16,7 +16,7 @@ func exampleHelpFlaglogin(_ cli.Context) error {
 }
 
 func customHelpCmd() cli.Command {
-	return command.NewCommand(
+	return command.New(
 		"", // this command will be launched by the help flag, so users will never see the help
 		func(ctx cli.Context) error {
 			file := ctx.Stdout
@@ -36,7 +36,7 @@ func ExampleHelpFlag() {
 	app := warg.NewApp(
 		"newAppName",
 		"v1.0.0",
-		section.NewSectionT(
+		section.New(
 			"work with a fictional blog platform",
 			section.NewCommand(
 				"login",

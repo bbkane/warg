@@ -22,7 +22,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "leafSection",
 			app: warg.NewApp("newAppName", "v1.0.0",
-				section.NewSectionT("Help for section"),
+				section.New("Help for section"),
 				warg.SkipValidation(),
 			),
 			expectedErr: true,
@@ -31,7 +31,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "appNameWithDash",
 			app: warg.NewApp("newAppName", "v1.0.0",
-				section.NewSectionT("",
+				section.New("",
 					section.NewCommand("com", "command for validation", command.DoNothing),
 				),
 				warg.SkipValidation(),
@@ -41,7 +41,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "sectionNameWithDash",
 			app: warg.NewApp("newAppName", "v1.0.0",
-				section.NewSectionT("",
+				section.New("",
 					section.NewSection("-name", "",
 						section.NewCommand("com", "command for validation", command.DoNothing),
 					),
@@ -53,7 +53,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandNameWithDash",
 			app: warg.NewApp("newAppName", "v1.0.0",
-				section.NewSectionT("",
+				section.New("",
 					section.NewSection("name", "",
 						section.NewCommand("-com", "starts with dash", command.DoNothing),
 					),
@@ -65,7 +65,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "flagNameNoDash",
 			app: warg.NewApp("newAppName", "v1.0.0",
-				section.NewSectionT("",
+				section.New("",
 					section.NewCommand(
 						"c",
 						"",
@@ -80,7 +80,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "aliasNameNoDash",
 			app: warg.NewApp("newAppName", "v1.0.0",
-				section.NewSectionT("",
+				section.New("",
 					section.NewCommand(
 						"c",
 						"",
@@ -97,7 +97,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagAliasCommandFlagNameConflict",
 			app: warg.NewApp("newAppName", "v1.0.0",
-				section.NewSectionT("",
+				section.New("",
 					section.NewCommand("c", "", command.DoNothing,
 						command.NewFlag("-f", "", scalar.Bool()),
 						command.NewFlag("--other", "", scalar.Bool(), flag.Alias("-f")),
@@ -110,7 +110,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagAliasGlobalFlagAliasConflict",
 			app: warg.NewApp("newAppName", "v1.0.0",
-				section.NewSectionT(
+				section.New(
 					"help for test",
 					section.NewCommand(
 						"com",
@@ -137,7 +137,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagAliasGlobalFlagNameConflict",
 			app: warg.NewApp("newAppName", "v1.0.0",
-				section.NewSectionT(
+				section.New(
 					"help for test",
 					section.NewCommand(
 						"com",
@@ -163,7 +163,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagNameGlobalFlagNameConflict",
 			app: warg.NewApp("newAppName", "v1.0.0",
-				section.NewSectionT(
+				section.New(
 					"help for test",
 					section.NewCommand(
 						"com",
@@ -188,7 +188,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandNameSectionNameConflict",
 			app: warg.NewApp("newAppName", "v1.0.0",
-				section.NewSectionT(
+				section.New(
 					"help for test",
 					section.NewCommand(
 						"conflict",

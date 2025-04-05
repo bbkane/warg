@@ -32,7 +32,7 @@ func GlobalFlagMap(flagMap cli.FlagMap) AppOpt {
 
 // NewGlobalFlag adds a flag to the app. It panics if a flag with the same name exists
 func NewGlobalFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) AppOpt {
-	return GlobalFlag(name, flag.NewFlag(helpShort, empty, opts...))
+	return GlobalFlag(name, flag.New(helpShort, empty, opts...))
 
 }
 
@@ -97,7 +97,7 @@ func debugBuildInfoVersion() string {
 //	warg.GlobalFlagMap(warg.ColorFlagMap())
 func ColorFlagMap() cli.FlagMap {
 	return cli.FlagMap{
-		"--color": flag.NewFlag(
+		"--color": flag.New(
 			"Use ANSI colors",
 			scalar.String(
 				scalar.Choices("true", "false", "auto"),
@@ -115,7 +115,7 @@ func ColorFlagMap() cli.FlagMap {
 //	warg.GlobalFlagMap(warg.ColorFlagMap())
 func VersionCommandMap() cli.CommandMap {
 	return cli.CommandMap{
-		"version": command.NewCommand(
+		"version": command.New(
 			"Print version",
 			func(ctx cli.Context) error {
 				fmt.Fprintln(ctx.Stdout, ctx.App.Version)

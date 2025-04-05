@@ -54,7 +54,7 @@ func TestApp_Parse(t *testing.T) {
 			name: "envvar",
 			app: warg.NewApp(
 				"newAppName", "v1.0.0",
-				section.NewSectionT(
+				section.New(
 					"help for test",
 					section.NewCommand(
 						"test",
@@ -88,12 +88,12 @@ func TestApp_Parse(t *testing.T) {
 			name: "addCommandFlags",
 			app: func() cli.App {
 				fm := cli.FlagMap{
-					"--flag1": flag.NewFlag("--flag1 value", scalar.String()),
-					"--flag2": flag.NewFlag("--flag1 value", scalar.String()),
+					"--flag1": flag.New("--flag1 value", scalar.String()),
+					"--flag2": flag.New("--flag1 value", scalar.String()),
 				}
 				app := warg.NewApp(
 					"newAppName", "v1.0.0",
-					section.NewSectionT(
+					section.New(
 						"help for section",
 						section.NewCommand(
 							"test",
@@ -119,7 +119,7 @@ func TestApp_Parse(t *testing.T) {
 			name: "invalidFlagsErrorEvenForHelp",
 			app: warg.NewApp(
 				"newAppName", "v1.0.0",
-				section.NewSectionT(
+				section.New(
 					string("A virtual assistant"),
 					section.NewCommand(
 						"present",
@@ -183,7 +183,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 	}{
 		{
 			name: "fromMain",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for test",
 				section.NewSection(
 					"cat1",
@@ -209,7 +209,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "noSection",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for test",
 				section.NewCommand("com", "command for validation", command.DoNothing),
 			),
@@ -221,7 +221,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagDefault",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for test",
 				section.NewCommand(
 					"com",
@@ -243,7 +243,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "extraFlag",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for test",
 				section.NewCommand(
 					"com",
@@ -265,7 +265,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "requiredFlag",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for test",
 				section.NewCommand(
 					"test",
@@ -286,7 +286,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagAlias",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for section",
 				section.NewCommand(
 					"test",
@@ -307,7 +307,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagAliasWithList",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for section",
 				section.NewCommand(
 					"test",
@@ -328,7 +328,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "badHelp",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for section",
 				section.NewCommand(
 					"test",
@@ -343,7 +343,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "dictUpdate",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for test",
 				section.NewCommand(
 					"com1",
@@ -364,7 +364,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "passAbsentSection",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for test",
 				section.NewCommand(
 					"com",
@@ -380,7 +380,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "scalarFlagPassedTwice",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for test",
 				section.NewCommand(
 					"com",
@@ -401,7 +401,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "passedFlagBeforeCommand",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for test",
 				section.NewCommand(
 					"com",
@@ -422,15 +422,15 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "existingSectionsExistingCommands",
-			rootSection: section.NewSectionT(
+			rootSection: section.New(
 				"help for test",
 				section.SectionMap(
 					cli.SectionMap{
-						"section": section.NewSectionT(
+						"section": section.New(
 							"help for section",
 							section.CommandMap(
 								cli.CommandMap{
-									"command": command.NewCommand(
+									"command": command.New(
 										"help for command",
 										command.DoNothing,
 										command.NewFlag(
@@ -546,7 +546,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 
 			app := warg.NewApp(
 				"newAppName", "v1.0.0",
-				section.NewSectionT(
+				section.New(
 					"help for test",
 					section.NewCommand(
 						"test",
@@ -593,7 +593,7 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "configFlag",
 			app: warg.NewApp(
 				"newAppName", "v1.0.0",
-				section.NewSectionT(
+				section.New(
 					"help for test",
 					section.NewCommand(
 						"print",
@@ -626,7 +626,7 @@ func TestApp_Parse_config(t *testing.T) {
 						return cr, nil
 					},
 					cli.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": flag.New(
 							"Path to config file",
 							scalar.Path(
 								scalar.Default(path.New("defaultconfigval")),
@@ -650,7 +650,7 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "simpleJSONConfig",
 			app: warg.NewApp(
 				"newAppName", "v1.0.0",
-				section.NewSectionT("help for test",
+				section.New("help for test",
 					section.NewCommand(
 						"com",
 						"help for com",
@@ -666,7 +666,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					jsonreader.New,
 					cli.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": flag.New(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
@@ -695,7 +695,7 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "numJSONConfig",
 			app: warg.NewApp(
 				"newAppName", "v1.0.0",
-				section.NewSectionT("help for test",
+				section.New("help for test",
 					section.NewCommand(
 						"com",
 						"help for com",
@@ -711,7 +711,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					jsonreader.New,
 					cli.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": flag.New(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
@@ -740,7 +740,7 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "configSlice",
 			app: warg.NewApp(
 				"newAppName", "v1.0.0",
-				section.NewSectionT(
+				section.New(
 					"help for test",
 					section.NewCommand(
 						"print",
@@ -757,7 +757,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					jsonreader.New,
 					cli.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": flag.New(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
@@ -784,7 +784,7 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "JSONConfigStringSlice",
 			app: warg.NewApp(
 				"newAppName", "v1.0.0",
-				section.NewSectionT("help for test",
+				section.New("help for test",
 					section.NewCommand(
 						"com",
 						"help for com",
@@ -800,7 +800,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					jsonreader.New,
 					cli.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": flag.New(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
@@ -827,7 +827,7 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "YAMLConfigStringSlice",
 			app: warg.NewApp(
 				"newAppName", "v1.0.0",
-				section.NewSectionT("help for test",
+				section.New("help for test",
 					section.NewCommand(
 						"com",
 						"help for com",
@@ -843,7 +843,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					yamlreader.New,
 					cli.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": flag.New(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
@@ -871,7 +871,7 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "JSONConfigMap",
 			app: warg.NewApp(
 				"newAppName", "v1.0.0",
-				section.NewSectionT(
+				section.New(
 					"help for test",
 					section.NewCommand(
 						"com",
@@ -888,7 +888,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					jsonreader.New,
 					cli.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": flag.New(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
@@ -953,7 +953,7 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 			name: "globalFlag",
 			app: warg.NewApp(
 				"newAppName", "v1.0.0",
-				section.NewSectionT(
+				section.New(
 					"help for test",
 					section.NewCommand(
 						"com",
@@ -1006,7 +1006,7 @@ func TestCustomVersion(t *testing.T) {
 	app := warg.NewApp(
 		"appName",
 		expectedVersion,
-		section.NewSectionT(
+		section.New(
 			"test",
 			section.NewCommand("version", "Print version", command.DoNothing),
 		),
@@ -1027,7 +1027,7 @@ func TestContextContainsValue(t *testing.T) {
 	app := warg.NewApp(
 		"appName",
 		"v1.0.0",
-		section.NewSectionT(
+		section.New(
 			"test",
 			section.NewCommand("version", "Print version", command.DoNothing),
 		),
@@ -1056,7 +1056,7 @@ func TestAppFlagToAddr(t *testing.T) {
 	app := warg.NewApp(
 		"appName",
 		"v1.0.0",
-		section.NewSectionT(
+		section.New(
 			"test",
 			section.NewCommand(
 				"command",

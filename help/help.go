@@ -19,7 +19,7 @@ func DefaultHelpCommandMap() cli.CommandMap {
 
 func DefaultHelpFlagMap(defaultChoice string, choices []string) cli.FlagMap {
 	return cli.FlagMap{
-		"--help": flag.NewFlag(
+		"--help": flag.New(
 			"Print help",
 			scalar.String(
 				scalar.Choices(choices...),

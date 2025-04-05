@@ -18,7 +18,7 @@ func TestApp_CompletionCandidates(t *testing.T) {
 	app := warg.NewApp(
 		"newAppName",
 		"v1.0.0",
-		section.NewSectionT(
+		section.New(
 			"root section help",
 			section.NewCommand(
 				"command1",

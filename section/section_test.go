@@ -22,7 +22,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "simple",
 			rootName: "r",
-			sec: section.NewSectionT(
+			sec: section.New(
 				"root section help",
 				section.NewCommand("c1", "", nil),
 				section.NewSection("s1", "",
@@ -32,7 +32,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			expected: []cli.FlatSection{
 				{
 					Path: []string{"r"},
-					Sec: section.NewSectionT(
+					Sec: section.New(
 						"root section help",
 						section.NewCommand("c1", "", nil),
 						section.NewSection("s1", "",
@@ -42,7 +42,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				},
 				{
 					Path: []string{"r", "s1"},
-					Sec: section.NewSectionT(
+					Sec: section.New(
 						"", section.NewCommand("c2", "", nil),
 					),
 				},
@@ -52,7 +52,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "sortedOrder",
 			rootName: "r",
-			sec: section.NewSectionT("",
+			sec: section.New("",
 				section.NewSection("sc", "",
 					section.NewCommand("c", "", nil),
 				),
@@ -66,7 +66,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			expected: []cli.FlatSection{
 				{
 					Path: []string{"r"},
-					Sec: section.NewSectionT("",
+					Sec: section.New("",
 						section.NewSection("sc", "",
 							section.NewCommand("c", "", nil),
 						),
@@ -80,19 +80,19 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				},
 				{
 					Path: []string{"r", "sa"},
-					Sec: section.NewSectionT("",
+					Sec: section.New("",
 						section.NewCommand("c", "", nil),
 					),
 				},
 				{
 					Path: []string{"r", "sb"},
-					Sec: section.NewSectionT("",
+					Sec: section.New("",
 						section.NewCommand("c", "", nil),
 					),
 				},
 				{
 					Path: []string{"r", "sc"},
-					Sec: section.NewSectionT("",
+					Sec: section.New("",
 						section.NewCommand("c", "", nil),
 					),
 				},
@@ -102,7 +102,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "dupFlagNamesSeparatePaths",
 			rootName: "r",
-			sec: section.NewSectionT("",
+			sec: section.New("",
 				section.NewSection("s1", "",
 					section.NewCommand(
 						"c1",
@@ -123,7 +123,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			expected: []cli.FlatSection{
 				{
 					Path: []string{"r"},
-					Sec: section.NewSectionT("",
+					Sec: section.New("",
 						section.NewSection("s1", "",
 							section.NewCommand(
 								"c1",
@@ -144,7 +144,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				},
 				{
 					Path: []string{"r", "s1"},
-					Sec: section.NewSectionT("",
+					Sec: section.New("",
 						section.NewCommand(
 							"c1",
 							"",
@@ -155,7 +155,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				},
 				{
 					Path: []string{"r", "s2"},
-					Sec: section.NewSectionT("",
+					Sec: section.New("",
 						section.NewCommand(
 							"c1",
 							"",

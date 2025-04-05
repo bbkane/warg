@@ -30,7 +30,7 @@ func ExampleConfigFlag() {
 	app := warg.NewApp(
 		"newAppName",
 		"v1.0.0",
-		section.NewSectionT(
+		section.New(
 			"do math",
 			section.NewCommand(
 				string("add"),
@@ -48,7 +48,7 @@ func ExampleConfigFlag() {
 		warg.ConfigFlag(
 			yamlreader.New,
 			cli.FlagMap{
-				"--config": flag.NewFlag(
+				"--config": flag.New(
 					"Path to YAML config file",
 					scalar.Path(
 						scalar.Default(path.New("~/.config/calc.yaml")),

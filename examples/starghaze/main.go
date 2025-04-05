@@ -14,7 +14,7 @@ import (
 
 func app() *cli.App {
 
-	downloadCmd := command.NewCommand(
+	downloadCmd := command.New(
 		"Download star info",
 		githubStarsDownload,
 		command.NewFlag(
@@ -83,7 +83,7 @@ func app() *cli.App {
 		),
 	)
 
-	formatCmd := command.NewCommand(
+	formatCmd := command.New(
 		"Format downloaded GitHub Stars",
 		format,
 		command.NewFlag(
@@ -146,13 +146,13 @@ func app() *cli.App {
 	)
 
 	sheetFlags := cli.FlagMap{
-		"--sheet-id": flag.NewFlag(
+		"--sheet-id": flag.New(
 			"ID For the particulare sheet. Viewable from `gid` URL param",
 			scalar.Int(),
 			flag.EnvVars("STARGHAZE_SHEET_ID"),
 			flag.Required(),
 		),
-		"--spreadsheet-id": flag.NewFlag(
+		"--spreadsheet-id": flag.New(
 			"ID for the whole spreadsheet. Viewable from URL",
 			scalar.String(),
 			flag.EnvVars("STARGHAZE_SPREADSHEET_ID"),
@@ -160,7 +160,7 @@ func app() *cli.App {
 		),
 	}
 
-	gsheetsSection := section.NewSectionT(
+	gsheetsSection := section.New(
 		"Google Sheets commands",
 		section.NewCommand(
 			"open",
@@ -190,7 +190,7 @@ func app() *cli.App {
 		),
 	)
 
-	searchCmd := command.NewCommand(
+	searchCmd := command.New(
 
 		"Full text search SQLite database",
 		search,
@@ -224,7 +224,7 @@ func app() *cli.App {
 	app := warg.NewApp(
 		"starghaze",
 		"v1.0.0",
-		section.NewSectionT(
+		section.New(
 			"Save GitHub Starred Repos",
 			section.CommandMap(warg.VersionCommandMap()),
 			section.Command(

@@ -9,8 +9,8 @@ import (
 // FlagOpt customizes a Flag on creation
 type FlagOpt func(*cli.Flag)
 
-// NewFlag creates a Flag with options!
-func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) cli.Flag {
+// New creates a New with options!
+func New(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) cli.Flag {
 	flag := cli.Flag{
 		Alias:                 "",
 		CompletionCandidates:  nil,

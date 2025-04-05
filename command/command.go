@@ -17,8 +17,8 @@ func DoNothing(_ cli.Context) error {
 	return errors.New("NOTE: replace this command.DoNothing call")
 }
 
-// NewCommand builds a Command
-func NewCommand(helpShort string, action cli.Action, opts ...CommandOpt) cli.Command {
+// New builds a Command
+func New(helpShort string, action cli.Action, opts ...CommandOpt) cli.Command {
 	command := cli.Command{
 		HelpShort: helpShort,
 		Action:    action,
@@ -48,7 +48,7 @@ func FlagMap(flagMap cli.FlagMap) CommandOpt {
 
 // NewFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
 func NewFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
-	return Flag(name, flag.NewFlag(helpShort, empty, opts...))
+	return Flag(name, flag.New(helpShort, empty, opts...))
 }
 
 // Footer adds an Help string to the command - useful from a help function
