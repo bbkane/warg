@@ -28,6 +28,24 @@ func BuildApp() *cli.App {
 					),
 				),
 			),
+			// TODO: actually test this
+			section.NewCommand(
+				"filecompletioncommands",
+				"filecompletioncommands help",
+				command.DoNothing,
+				command.NewFlag(
+					"--fileflag",
+					"fileflag help",
+					scalar.Path(),
+					flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+						return &completion.Candidates{
+							Type:   completion.Type_DirectoriesFiles,
+							Values: nil,
+						}, nil
+					},
+					),
+				),
+			),
 			section.NewSection(
 				"section1",
 				"section1 help",
