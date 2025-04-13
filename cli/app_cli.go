@@ -73,10 +73,10 @@ func (app *App) MustRun(opts ...ParseOpt) {
 }
 
 // Look up keys (meant for environment variable parsing) - fulfillable with os.LookupEnv or warg.LookupMap(map)
-type LookupFunc func(key string) (string, bool)
+type LookupEnv func(key string) (string, bool)
 
 // LookupMap loooks up keys from a provided map. Useful to mock os.LookupEnv when parsing
-func LookupMap(m map[string]string) LookupFunc {
+func LookupMap(m map[string]string) LookupEnv {
 	return func(key string) (string, bool) {
 		val, exists := m[key]
 		return val, exists
@@ -263,7 +263,7 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 	}
 
 	// Finish the parse!
-	err = a.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupFunc, parseState.UnsetFlagNames)
+	err = a.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected resolveFlags err: %w", err)
 	}

@@ -9,6 +9,7 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 )
@@ -206,7 +207,7 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			args = append(args, "")
 
 			actualCandidates, actualErr := app.CompletionCandidates(
-				cli.OverrideArgs(args),
+				parseopt.Args(args),
 			)
 
 			if tt.expectedErr {

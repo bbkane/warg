@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.bbkane.com/warg/cli"
+	"go.bbkane.com/warg/parseopt"
 )
 
 type GoldenTestArgs struct {
@@ -38,12 +39,12 @@ func GoldenTest(
 	err = args.App.Validate()
 	require.Nil(t, err)
 
-	parseOpts = append(parseOpts, cli.OverrideStderr(stderrTmpFile))
-	parseOpts = append(parseOpts, cli.OverrideStdout(stdoutTmpFile))
+	parseOpts = append(parseOpts, parseopt.Stderr(stderrTmpFile))
+	parseOpts = append(parseOpts, parseopt.Stdout(stdoutTmpFile))
 	pr, parseErr := args.App.Parse(parseOpts...)
 
 	// parseOptHolder := cli.NewParseOptHolder(parseOpts...)
-	// cli.OverrideStderr(stderrTmpFile)(&parseOptHolder)
+	// parseopt.OverrideStderr(stderrTmpFile)(&parseOptHolder)
 	// cli.OverrideStdout(stdoutTmpFile)(&parseOptHolder)
 	// pr, parseErr := args.App.parseWithOptHolder2(parseOptHolder)
 

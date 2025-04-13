@@ -15,6 +15,7 @@ import (
 	"go.bbkane.com/warg/config/jsonreader"
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/dict"
@@ -44,7 +45,7 @@ func TestApp_Parse(t *testing.T) {
 		name                     string
 		app                      cli.App
 		args                     []string
-		lookup                   cli.LookupFunc
+		lookup                   cli.LookupEnv
 		expectedPassedPath       []string
 		expectedPassedFlagValues cli.PassedFlags
 		expectedErr              bool
@@ -152,7 +153,7 @@ func TestApp_Parse(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := tt.app.Parse(cli.OverrideArgs(tt.args), cli.OverrideLookupFunc(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(parseopt.Args(tt.args), parseopt.LookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -468,7 +469,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			err := app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := app.Parse(cli.OverrideArgs(tt.args), cli.OverrideLookupFunc(cli.LookupMap(nil)))
+			actualPR, actualErr := app.Parse(parseopt.Args(tt.args), parseopt.LookupEnv(cli.LookupMap(nil)))
 
 			if tt.expectedErr {
 				require.Error(t, actualErr)
@@ -561,7 +562,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 			err := app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := app.Parse(cli.OverrideArgs(tt.args), cli.OverrideLookupFunc(cli.LookupMap(nil)))
+			actualPR, actualErr := app.Parse(parseopt.Args(tt.args), parseopt.LookupEnv(cli.LookupMap(nil)))
 
 			if tt.expectedErr {
 				require.Error(t, actualErr)
@@ -584,7 +585,7 @@ func TestApp_Parse_config(t *testing.T) {
 		name                     string
 		app                      cli.App
 		args                     []string
-		lookup                   cli.LookupFunc
+		lookup                   cli.LookupEnv
 		expectedPassedPath       []string
 		expectedPassedFlagValues cli.PassedFlags
 		expectedErr              bool
@@ -920,7 +921,7 @@ func TestApp_Parse_config(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := tt.app.Parse(cli.OverrideArgs(tt.args), cli.OverrideLookupFunc(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(parseopt.Args(tt.args), parseopt.LookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -944,7 +945,7 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 		name                     string
 		app                      cli.App
 		args                     []string
-		lookup                   cli.LookupFunc
+		lookup                   cli.LookupEnv
 		expectedPassedPath       []string
 		expectedPassedFlagValues cli.PassedFlags
 		expectedErr              bool
@@ -983,7 +984,7 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := tt.app.Parse(cli.OverrideArgs(tt.args), cli.OverrideLookupFunc(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(parseopt.Args(tt.args), parseopt.LookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -1015,8 +1016,8 @@ func TestCustomVersion(t *testing.T) {
 	require.Nil(t, err)
 
 	actualPR, err := app.Parse(
-		cli.OverrideArgs([]string{"appName"}),
-		cli.OverrideLookupFunc(cli.LookupMap(nil)),
+		parseopt.Args([]string{"appName"}),
+		parseopt.LookupEnv(cli.LookupMap(nil)),
 	)
 	require.Nil(t, err)
 
@@ -1040,9 +1041,9 @@ func TestContextContainsValue(t *testing.T) {
 
 	ctx := context.WithValue(context.Background(), contextKey{}, expectedValue)
 	actualPR, err := app.Parse(
-		cli.OverrideArgs([]string{"appName"}),
-		cli.OverrideLookupFunc(cli.LookupMap(nil)),
-		cli.AddContext(ctx),
+		parseopt.Args([]string{"appName"}),
+		parseopt.LookupEnv(cli.LookupMap(nil)),
+		parseopt.Context(ctx),
 	)
 	require.Nil(t, err)
 
@@ -1078,7 +1079,7 @@ func TestAppFlagToAddr(t *testing.T) {
 	err := app.Validate()
 	require.NoError(err)
 
-	pr, err := app.Parse(cli.OverrideArgs([]string{"appName", "command", "--flag", "flag value"}))
+	pr, err := app.Parse(parseopt.Args([]string{"appName", "command", "--flag", "flag value"}))
 	require.NoError(err)
 	err = pr.Action(pr.Context)
 	require.NoError(err)

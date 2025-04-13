@@ -12,13 +12,14 @@ import (
 
 // -- moved from app_parse_cli.go
 
+// ParseOpts allows overriding the default inputs to the Parse function. Useful for tests. Create it using the [go.bbkane.com/warg/parseopt] package.
 type ParseOpts struct {
 	Args []string
 
 	// Context for unstructured data. Useful for setting up mocks for tests (i.e., pass in in memory database and use it if it's here in the context)
 	Context context.Context
 
-	LookupFunc LookupFunc
+	LookupEnv LookupEnv
 
 	// Stderr will be passed to command.Context for user commands to print to.
 	// This file is never closed by warg, so if setting to something other than stderr/stdout,
@@ -35,67 +36,17 @@ type ParseOpts struct {
 
 type ParseOpt func(*ParseOpts)
 
-func AddContext(ctx context.Context) ParseOpt {
-	return func(poh *ParseOpts) {
-		poh.Context = ctx
-	}
-}
-
-func OverrideArgs(args []string) ParseOpt {
-	return func(poh *ParseOpts) {
-		poh.Args = args
-	}
-}
-
-func OverrideLookupFunc(lookup LookupFunc) ParseOpt {
-	return func(poh *ParseOpts) {
-		poh.LookupFunc = lookup
-	}
-}
-
-func OverrideStderr(stderr *os.File) ParseOpt {
-	return func(poh *ParseOpts) {
-		poh.Stderr = stderr
-	}
-}
-
-func OverrideStdout(stdout *os.File) ParseOpt {
-	return func(poh *ParseOpts) {
-		poh.Stdout = stdout
-	}
-}
-
 func NewParseOpts(opts ...ParseOpt) ParseOpts {
 	parseOptHolder := ParseOpts{
-		Context:    nil,
-		Args:       nil,
-		LookupFunc: nil,
-		Stderr:     nil,
-		Stdout:     nil,
+		Context:   context.Background(),
+		Args:      os.Args,
+		LookupEnv: os.LookupEnv,
+		Stderr:    os.Stderr,
+		Stdout:    os.Stdout,
 	}
 
 	for _, opt := range opts {
 		opt(&parseOptHolder)
-	}
-
-	if parseOptHolder.Args == nil {
-		OverrideArgs(os.Args)(&parseOptHolder)
-	}
-
-	if parseOptHolder.Context == nil {
-		AddContext(context.Background())(&parseOptHolder)
-	}
-
-	if parseOptHolder.LookupFunc == nil {
-		OverrideLookupFunc(os.LookupEnv)(&parseOptHolder)
-	}
-
-	if parseOptHolder.Stderr == nil {
-		OverrideStderr(os.Stderr)(&parseOptHolder)
-	}
-
-	if parseOptHolder.Stdout == nil {
-		OverrideStdout(os.Stdout)(&parseOptHolder)
 	}
 
 	return parseOptHolder
@@ -290,7 +241,7 @@ func resolveFlag2(
 	fl Flag,
 	flagValues FlagValueMap, // this gets updated - all other params are readonly
 	configReader config.Reader,
-	lookupEnv LookupFunc,
+	lookupEnv LookupEnv,
 	unsetFlagNames unsetFlagNameSet,
 ) error {
 
@@ -363,7 +314,7 @@ func resolveFlag2(
 }
 
 // resolveFlags resolves the config flag first, and then uses its values to resolve the rest of the flags.
-func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, lookupEnv LookupFunc, unsetFlagNames unsetFlagNameSet) error {
+func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, lookupEnv LookupEnv, unsetFlagNames unsetFlagNameSet) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
 	if a.ConfigFlagName != "" {
@@ -418,7 +369,7 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 
 	// --help means we don't need to do a lot of error checking
 	if parseState.HelpPassed || parseState.ExpectingArg == ExpectingArg_SectionOrCommand {
-		err = app.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupFunc, parseState.UnsetFlagNames)
+		err = app.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
 		if err != nil {
 			return nil, err
 		}
@@ -444,7 +395,7 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 		return nil, fmt.Errorf("unexpected parse state: %s", parseState.ExpectingArg)
 	}
 
-	err = app.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupFunc, parseState.UnsetFlagNames)
+	err = app.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
 	if err != nil {
 		return nil, err
 	}

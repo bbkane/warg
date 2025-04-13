@@ -10,6 +10,7 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
@@ -73,7 +74,7 @@ func ExampleConfigFlag() {
 		log.Fatalf("write error: %e", err)
 	}
 	app.MustRun(
-		cli.OverrideArgs([]string{"calc", "add", "-c", "testdata/ExampleConfigFlag/calc.yaml"}),
+		parseopt.Args([]string{"calc", "add", "-c", "testdata/ExampleConfigFlag/calc.yaml"}),
 	)
 	// Output:
 	// Sum: 6

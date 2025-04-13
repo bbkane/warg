@@ -8,6 +8,7 @@ import (
 	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 )
@@ -76,7 +77,7 @@ func ExampleNew() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	app.MustRun(cli.OverrideArgs([]string{"blog.exe", "login"}))
+	app.MustRun(parseopt.Args([]string{"blog.exe", "login"}))
 	// Output:
 	// Logging into https://envvar.com
 }

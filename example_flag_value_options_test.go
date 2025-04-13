@@ -10,6 +10,7 @@ import (
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
@@ -95,7 +96,7 @@ func ExampleApp_Parse_flag_value_options() {
 		log.Fatalf("write error: %e", err)
 	}
 	app.MustRun(
-		cli.OverrideArgs([]string{"calc", "show", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "--scalar-flag", "b"}),
+		parseopt.Args([]string{"calc", "show", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "--scalar-flag", "b"}),
 	)
 	// Output:
 	// --scalar-flag: "b"

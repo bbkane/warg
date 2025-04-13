@@ -6,6 +6,7 @@ import (
 
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/cli"
+	"go.bbkane.com/warg/parseopt"
 )
 
 func TestApp_Validate(t *testing.T) {
@@ -21,7 +22,7 @@ func TestRunHelp(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   []string
-		lookup cli.LookupFunc
+		lookup cli.LookupEnv
 	}{
 		{
 			name:   "linkDetailed",
@@ -39,8 +40,8 @@ func TestRunHelp(t *testing.T) {
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},
-				cli.OverrideArgs(tt.args),
-				cli.OverrideLookupFunc(tt.lookup),
+				parseopt.Args(tt.args),
+				parseopt.LookupEnv(tt.lookup),
 			)
 		})
 	}

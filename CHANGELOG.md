@@ -30,6 +30,13 @@ List of type changes after working more on parsing:
 - removed `type FlagValue` (it's unused)
 - made `unsetFlagNameSet` private
 
+- Moved ParseOpts into their own package and renamed them:
+
+- `cli.AddContext` -> `parseopt.Context`
+- `cli.OverrideArgs` -> `parseopt.Args`
+- `cli.OverrideLookupFunc` -> `parseopt.LookupEnv`
+- `cli.OverrideStderr` -> `parseopt.Stderr`
+- `cli.OverrideStdout` -> `parseopt.Stdout`
 
 # v0.0.29
 

@@ -10,6 +10,7 @@ import (
 	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 )
@@ -93,7 +94,7 @@ func TestAppHelp(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   []string
-		lookup cli.LookupFunc
+		lookup cli.LookupEnv
 	}{
 		// toplevel just a toplevel help!
 		{
@@ -151,8 +152,8 @@ func TestAppHelp(t *testing.T) {
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},
-				cli.OverrideArgs(tt.args),
-				cli.OverrideLookupFunc(tt.lookup),
+				parseopt.Args(tt.args),
+				parseopt.LookupEnv(tt.lookup),
 			)
 		})
 	}

@@ -7,6 +7,7 @@ import (
 	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/help"
+	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/section"
 )
 
@@ -50,7 +51,7 @@ func ExampleHelpFlag() {
 		),
 	)
 
-	app.MustRun(cli.OverrideArgs([]string{"blog.exe", "-h", "custom"}))
+	app.MustRun(parseopt.Args([]string{"blog.exe", "-h", "custom"}))
 	// Output:
 	// Custom help command output
 }
