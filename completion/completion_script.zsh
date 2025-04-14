@@ -5,23 +5,45 @@ date >> ~/_WARG_COMPLETION_APPNAME_completion.log
 local -a comp_values=()
 local -a comp_descriptions=()
 local -a comp_type
-
-local state="expecting_type"
 local line
-# TODO: switch on comp_type to switch on the rest of the lines
-while IFS= read -r line && [[ -n "$line" ]]; do
-    if [[ "$state" == "expecting_type" ]]; then
-        comp_type="$line"
-        state="expecting_value"
-    elif [[ "$state" == "expecting_value" ]]; then
-        comp_values+=("$line")
-        state="expecting_description"
-    else
-        comp_descriptions+=("$line")
-        state="expecting_value"
-    fi
-done < <(${words[1]} --completion-zsh "${(@)words[2,$CURRENT]}")
 
-echo "$comp_values" >> ~/_WARG_COMPLETION_APPNAME.log
+local -a output
+output=("${(@f)$(${words[1]} --completion-zsh "${(@)words[2,$CURRENT]}")}")
 
-compadd -d comp_descriptions -a comp_values
+# Check if we got any output
+[[ ${#output} -eq 0 ]] && return 1
+
+# First line is the type
+comp_type="${output[1]}"
+
+# Log type
+echo "TYPE: $comp_type" >> ~/_WARG_COMPLETION_APPNAME_completion.log
+
+# Process based on type
+case "$comp_type" in
+    COMPLETION_TYPE_VALUE_DESCRIPTION)
+        local i=2
+        while (( i <= ${#output} )); do
+            comp_values+=("${output[i]}")
+            (( i++ ))
+            if (( i <= ${#output} )); then
+                comp_descriptions+=("${output[i]}")
+                (( i++ ))
+            fi
+        done
+        compadd -d comp_descriptions -a comp_values
+        ;;
+
+    COMPLETION_TYPE_DIRECTORIES_FILES)
+        # Skip the first line (already stored in comp_type)
+        # TODO: try removing this
+        comp_values=("${(@)output[2,-1]}")
+        # TODO: what do these options do?
+        _files -W . -g '*'
+        ;;
+
+    *)
+        echo "Unknown completion type: $comp_type" >> ~/_WARG_COMPLETION_APPNAME_completion.log
+        return 1
+        ;;
+esac
