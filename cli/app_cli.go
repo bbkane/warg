@@ -241,6 +241,22 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 	if err != nil {
 		return nil, fmt.Errorf("unexpected parseArgs err: %w", err)
 	}
+
+	// if the help flag is we're done. Just pick from the choices
+	if parseState.HelpPassed {
+		res := &completion.Candidates{
+			Type:   completion.Type_ValueDescription,
+			Values: []completion.Candidate{},
+		}
+		for _, name := range a.HelpCommands.SortedNames() {
+			res.Values = append(res.Values, completion.Candidate{
+				Name:        string(name),
+				Description: string(a.HelpCommands[name].HelpShort),
+			})
+		}
+		return res, nil
+	}
+
 	if parseState.ExpectingArg == ExpectingArg_SectionOrCommand {
 		s := parseState.CurrentSection
 		ret := completion.Candidates{

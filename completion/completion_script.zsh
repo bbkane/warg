@@ -35,11 +35,7 @@ case "$comp_type" in
         ;;
 
     COMPLETION_TYPE_DIRECTORIES_FILES)
-        # Skip the first line (already stored in comp_type)
-        # TODO: try removing this
-        comp_values=("${(@)output[2,-1]}")
-        # TODO: what do these options do?
-        _files -W . -g '*'
+        _files
         ;;
 
     *)
