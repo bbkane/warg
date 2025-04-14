@@ -12,7 +12,7 @@ import (
 
 func BuildApp() *cli.App {
 	app := warg.New(
-		"newAppName",
+		"testappcmd",
 		"v1.0.0",
 		section.New(
 			"root section help",
