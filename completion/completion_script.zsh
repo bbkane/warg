@@ -21,7 +21,7 @@ echo "TYPE: $comp_type" >> ~/_WARG_COMPLETION_APPNAME_completion.log
 
 # Process based on type
 case "$comp_type" in
-    COMPLETION_TYPE_VALUE_DESCRIPTION)
+    COMPLETION_TYPE_VALUES_DESCRIPTIONS)
         local i=2
         while (( i <= ${#output} )); do
             comp_values+=("${output[i]}")

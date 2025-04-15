@@ -245,7 +245,7 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 	// if the help flag is we're done. Just pick from the choices
 	if parseState.HelpPassed {
 		res := &completion.Candidates{
-			Type:   completion.Type_ValueDescription,
+			Type:   completion.Type_ValuesDescriptions,
 			Values: []completion.Candidate{},
 		}
 		for _, name := range a.HelpCommands.SortedNames() {
@@ -260,7 +260,7 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 	if parseState.ExpectingArg == ExpectingArg_SectionOrCommand {
 		s := parseState.CurrentSection
 		ret := completion.Candidates{
-			Type:   completion.Type_ValueDescription,
+			Type:   completion.Type_ValuesDescriptions,
 			Values: []completion.Candidate{},
 		}
 		for _, name := range s.Commands.SortedNames() {
@@ -291,7 +291,7 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 		//  - suggest command flags before global flags
 		//  - let the flags define rank or priority for completion order
 		candidates := &completion.Candidates{
-			Type:   completion.Type_ValueDescription,
+			Type:   completion.Type_ValuesDescriptions,
 			Values: []completion.Candidate{},
 		}
 		// command flags
@@ -324,7 +324,7 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 		}
 
 		candidates := &completion.Candidates{
-			Type:   completion.Type_ValueDescription,
+			Type:   completion.Type_ValuesDescriptions,
 			Values: []completion.Candidate{},
 		}
 		// pr.FlagValues is always filled with at least the empty values

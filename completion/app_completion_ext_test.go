@@ -32,7 +32,7 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			args:        []string{},
 			expectedErr: false,
 			expectedCandidates: &completion.Candidates{
-				Type: completion.Type_ValueDescription,
+				Type: completion.Type_ValuesDescriptions,
 				Values: []completion.Candidate{
 					{
 						Name:        "command1",
@@ -60,7 +60,7 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			args:        []string{"section1"},
 			expectedErr: false,
 			expectedCandidates: &completion.Candidates{
-				Type: completion.Type_ValueDescription,
+				Type: completion.Type_ValuesDescriptions,
 				Values: []completion.Candidate{
 					{
 						Name:        "command2",
@@ -74,7 +74,7 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			args:        []string{"command1"},
 			expectedErr: false,
 			expectedCandidates: &completion.Candidates{
-				Type: completion.Type_ValueDescription,
+				Type: completion.Type_ValuesDescriptions,
 				Values: []completion.Candidate{
 					{
 						Name:        "--flag1",
@@ -90,7 +90,7 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			args:        []string{"command1", "--flag1"},
 			expectedErr: false,
 			expectedCandidates: &completion.Candidates{
-				Type: completion.Type_ValueDescription,
+				Type: completion.Type_ValuesDescriptions,
 				Values: []completion.Candidate{
 					{
 						Name:        "alpha",
@@ -112,7 +112,7 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			args:        []string{"section1", "command2", "--flag2"},
 			expectedErr: false,
 			expectedCandidates: &completion.Candidates{
-				Type: completion.Type_ValueDescription,
+				Type: completion.Type_ValuesDescriptions,
 				Values: []completion.Candidate{
 					{
 						Name:        "default",
@@ -126,7 +126,7 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			args:        []string{"section1", "command2", "--globalFlag", "nondefault", "--flag2"},
 			expectedErr: false,
 			expectedCandidates: &completion.Candidates{
-				Type: completion.Type_ValueDescription,
+				Type: completion.Type_ValuesDescriptions,
 				Values: []completion.Candidate{
 					{
 						Name:        "nondefault",

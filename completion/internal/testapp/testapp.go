@@ -60,7 +60,7 @@ func BuildApp() *cli.App {
 						flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
 							if ctx.Flags["--globalFlag"].(string) == "nondefault" {
 								return &completion.Candidates{
-									Type: completion.Type_ValueDescription,
+									Type: completion.Type_ValuesDescriptions,
 									Values: []completion.Candidate{
 										{
 											Name:        "nondefault",
@@ -70,7 +70,7 @@ func BuildApp() *cli.App {
 								}, nil
 							}
 							return &completion.Candidates{
-								Type: completion.Type_ValueDescription,
+								Type: completion.Type_ValuesDescriptions,
 								Values: []completion.Candidate{
 									{
 										Name:        "default",

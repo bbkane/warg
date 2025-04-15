@@ -20,8 +20,11 @@ func WriteCompletionScriptZsh(w io.Writer, appName string) {
 type Type string
 
 const (
-	Type_ValueDescription Type = "COMPLETION_TYPE_VALUE_DESCRIPTION"
-	Type_DirectoriesFiles Type = "COMPLETION_TYPE_DIRECTORIES_FILES"
+	Type_Directories        Type = "COMPLETION_TYPE_DIRECTORIES"
+	Type_DirectoriesFiles   Type = "COMPLETION_TYPE_DIRECTORIES_FILES"
+	Type_None               Type = "COMPLETION_TYPE_NONE"
+	Type_Values             Type = "COMPLETION_TYPE_VALUES"
+	Type_ValuesDescriptions Type = "COMPLETION_TYPE_VALUES_DESCRIPTIONS"
 )
 
 type Candidate struct {
