@@ -18,3 +18,25 @@ cd ~/go/bin  # default $GOBIN
 # open a new shell to load completions
 ./testappcmd ...  # tab away!!
 ```
+
+# Manual tests
+
+Just tab after all of these...
+
+TODO: organize these by checking the branches of the completion function
+
+## `COMPLETION_TYPE_DIRECTORIES`
+
+## `COMPLETION_TYPE_DIRECTORIES_FILES`
+
+## `COMPLETION_TYPE_NONE`
+
+## `COMPLETION_TYPE_VALUES`
+
+./
+
+## `COMPLETION_TYPE_VALUES_DESCRIPTIONS`
+
+```zsh
+./testappcmd
+```

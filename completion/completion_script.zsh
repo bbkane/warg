@@ -21,6 +21,27 @@ echo "TYPE: $comp_type" >> ~/_WARG_COMPLETION_APPNAME_completion.log
 
 # Process based on type
 case "$comp_type" in
+    COMPLETION_TYPE_DIRECTORIES)
+        _files -/
+        ;;
+
+    COMPLETION_TYPE_DIRECTORIES_FILES)
+        _files
+        ;;
+
+    COMPLETION_TYPE_NONE)
+        return 0
+        ;;
+
+    COMPLETION_TYPE_VALUES)
+        local i=2
+        while (( i <= ${#output} )); do
+            comp_values+=("${output[i]}")
+            (( i++ ))
+        done
+        compadd -a comp_values
+        ;;
+
     COMPLETION_TYPE_VALUES_DESCRIPTIONS)
         local i=2
         while (( i <= ${#output} )); do
@@ -32,10 +53,6 @@ case "$comp_type" in
             fi
         done
         compadd -d comp_descriptions -a comp_values
-        ;;
-
-    COMPLETION_TYPE_DIRECTORIES_FILES)
-        _files
         ;;
 
     *)
