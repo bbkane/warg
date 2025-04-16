@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
 )
 
@@ -108,7 +109,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 						"c1",
 						"",
 						nil,
-						command.NewFlag("-f1", "", nil),
+						command.NewFlag("-f1", "", nil, flag.CompletionCandidates(nil)),
 					),
 				),
 				section.NewSection("s2", "",
@@ -116,7 +117,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 						"c1",
 						"",
 						nil,
-						command.NewFlag("-f1", "", nil),
+						command.NewFlag("-f1", "", nil, flag.CompletionCandidates(nil)),
 					),
 				),
 			),
@@ -129,7 +130,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 								"c1",
 								"",
 								nil,
-								command.NewFlag("-f1", "", nil),
+								command.NewFlag("-f1", "", nil, flag.CompletionCandidates(nil)),
 							),
 						),
 						section.NewSection("s2", "",
@@ -137,7 +138,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 								"c1",
 								"",
 								nil,
-								command.NewFlag("-f1", "", nil),
+								command.NewFlag("-f1", "", nil, flag.CompletionCandidates(nil)),
 							),
 						),
 					),
@@ -149,7 +150,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 							"c1",
 							"",
 							nil,
-							command.NewFlag("-f1", "", nil),
+							command.NewFlag("-f1", "", nil, flag.CompletionCandidates(nil)),
 						),
 					),
 				},
@@ -160,7 +161,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 							"c1",
 							"",
 							nil,
-							command.NewFlag("-f1", "", nil),
+							command.NewFlag("-f1", "", nil, flag.CompletionCandidates(nil)),
 						),
 					),
 				},

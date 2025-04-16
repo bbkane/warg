@@ -13,7 +13,7 @@ type FlagOpt func(*cli.Flag)
 func New(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) cli.Flag {
 	flag := cli.Flag{
 		Alias:                 "",
-		CompletionCandidates:  nil,
+		CompletionCandidates:  DefaultCompletionCandidates,
 		ConfigPath:            "",
 		EmptyValueConstructor: empty,
 		EnvVars:               nil,
@@ -42,6 +42,22 @@ func ConfigPath(path string) FlagOpt {
 	return func(f *cli.Flag) {
 		f.ConfigPath = path
 	}
+}
+
+func DefaultCompletionCandidates(cmdCtx cli.Context) (*completion.Candidates, error) {
+
+	candidates := &completion.Candidates{
+		Type:   completion.Type_Values,
+		Values: []completion.Candidate{},
+	}
+	// pr.FlagValues is always filled with at least the empty values
+	for _, name := range cmdCtx.ParseState.FlagValues[cmdCtx.ParseState.CurrentFlagName].Choices() {
+		candidates.Values = append(candidates.Values, completion.Candidate{
+			Name:        name,
+			Description: "",
+		})
+	}
+	return candidates, nil
 }
 
 func CompletionCandidates(completionCandidatesFunc func(cli.Context) (*completion.Candidates, error)) FlagOpt {

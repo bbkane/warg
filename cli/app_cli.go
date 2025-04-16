@@ -316,31 +316,16 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 		}
 		return candidates, nil
 	} else if parseState.ExpectingArg == ExpectingArg_FlagValue {
+		cmdContext := Context{
+			App:        a,
+			Context:    parseOpts.Context,
+			Flags:      parseState.FlagValues.ToPassedFlags(),
+			ParseState: &parseState,
+			Stderr:     parseOpts.Stderr,
+			Stdout:     parseOpts.Stdout,
+		}
+		return parseState.CurrentFlag.CompletionCandidates(cmdContext)
 
-		if parseState.CurrentFlag.CompletionCandidates != nil {
-			cmdContext := Context{
-				App:        a,
-				Context:    parseOpts.Context,
-				Flags:      parseState.FlagValues.ToPassedFlags(),
-				ParseState: &parseState,
-				Stderr:     parseOpts.Stderr,
-				Stdout:     parseOpts.Stdout,
-			}
-			return parseState.CurrentFlag.CompletionCandidates(cmdContext)
-		}
-
-		candidates := &completion.Candidates{
-			Type:   completion.Type_ValuesDescriptions,
-			Values: []completion.Candidate{},
-		}
-		// pr.FlagValues is always filled with at least the empty values
-		for _, name := range parseState.FlagValues[parseState.CurrentFlagName].Choices() {
-			candidates.Values = append(candidates.Values, completion.Candidate{
-				Name:        name,
-				Description: "NO DESCRIPTION",
-			})
-		}
-		return candidates, nil
 	} else {
 		return nil, fmt.Errorf("unexpected ParseState: %v", parseState.ExpectingArg)
 	}

@@ -98,19 +98,19 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			args:        []string{"command1", "--flag1"},
 			expectedErr: false,
 			expectedCandidates: &completion.Candidates{
-				Type: completion.Type_ValuesDescriptions,
+				Type: completion.Type_Values,
 				Values: []completion.Candidate{
 					{
 						Name:        "alpha",
-						Description: "NO DESCRIPTION",
+						Description: "",
 					},
 					{
 						Name:        "beta",
-						Description: "NO DESCRIPTION",
+						Description: "",
 					},
 					{
 						Name:        "gamma",
-						Description: "NO DESCRIPTION",
+						Description: "",
 					},
 				},
 			},
