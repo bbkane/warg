@@ -37,7 +37,7 @@ func BuildApp() *cli.App {
 					"--dirs",
 					"dirs completion",
 					scalar.Path(),
-					flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+					flag.CompletionCandidates(func(ctx cli.Context) (*completion.Candidates, error) {
 						return &completion.Candidates{
 							Type:   completion.Type_Directories,
 							Values: nil,
@@ -48,7 +48,7 @@ func BuildApp() *cli.App {
 					"--dirs-files",
 					"dirs/files completion",
 					scalar.Path(),
-					flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+					flag.CompletionCandidates(func(ctx cli.Context) (*completion.Candidates, error) {
 						return &completion.Candidates{
 							Type:   completion.Type_DirectoriesFiles,
 							Values: nil,
@@ -59,7 +59,7 @@ func BuildApp() *cli.App {
 					"--none",
 					"no completion",
 					scalar.String(),
-					flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+					flag.CompletionCandidates(func(ctx cli.Context) (*completion.Candidates, error) {
 						return &completion.Candidates{
 							Type:   completion.Type_None,
 							Values: nil,
@@ -70,7 +70,7 @@ func BuildApp() *cli.App {
 					"--values",
 					"values completion",
 					scalar.String(),
-					flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+					flag.CompletionCandidates(func(ctx cli.Context) (*completion.Candidates, error) {
 						return &completion.Candidates{
 							Type: completion.Type_Values,
 							Values: []completion.Candidate{
@@ -84,7 +84,7 @@ func BuildApp() *cli.App {
 					"--values-descriptions",
 					"values completion with descriptions",
 					scalar.String(),
-					flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+					flag.CompletionCandidates(func(ctx cli.Context) (*completion.Candidates, error) {
 						return &completion.Candidates{
 							Type: completion.Type_ValuesDescriptions,
 							Values: []completion.Candidate{
@@ -106,7 +106,7 @@ func BuildApp() *cli.App {
 						"--flag2",
 						"flag2 help",
 						scalar.String(),
-						flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+						flag.CompletionCandidates(func(ctx cli.Context) (*completion.Candidates, error) {
 							if ctx.Flags["--globalFlag"].(string) == "nondefault" {
 								return &completion.Candidates{
 									Type: completion.Type_ValuesDescriptions,
