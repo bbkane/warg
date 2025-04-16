@@ -289,43 +289,19 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 	if err != nil {
 		return nil, fmt.Errorf("unexpected resolveFlags err: %w", err)
 	}
+	cmdContext := Context{
+		App:        a,
+		Context:    parseOpts.Context,
+		Flags:      parseState.FlagValues.ToPassedFlags(),
+		ParseState: &parseState,
+		Stderr:     parseOpts.Stderr,
+		Stdout:     parseOpts.Stdout,
+	}
 
 	if parseState.ExpectingArg == ExpectingArg_FlagNameOrEnd {
-		// TODO: flag name completion ideas that will actually use the full parse above
-		//  - if a scalar flag has been passed by arg, don't suggest it again (as args override everything else)
-		//  - if the flag is required and is not set, suggest it first
-		//  - suggest command flags before global flags
-		//  - let the flags define rank or priority for completion order
-		candidates := &completion.Candidates{
-			Type:   completion.Type_ValuesDescriptions,
-			Values: []completion.Candidate{},
-		}
-		// command flags
-		for _, name := range parseState.CurrentCommand.Flags.SortedNames() {
-			candidates.Values = append(candidates.Values, completion.Candidate{
-				Name:        string(name),
-				Description: string(parseState.CurrentCommand.Flags[name].HelpShort),
-			})
-		}
-		// global flags
-		for _, name := range a.GlobalFlags.SortedNames() {
-			candidates.Values = append(candidates.Values, completion.Candidate{
-				Name:        string(name),
-				Description: string(a.GlobalFlags[name].HelpShort),
-			})
-		}
-		return candidates, nil
+		return parseState.CurrentCommand.CompletionCandidates(cmdContext)
 	} else if parseState.ExpectingArg == ExpectingArg_FlagValue {
-		cmdContext := Context{
-			App:        a,
-			Context:    parseOpts.Context,
-			Flags:      parseState.FlagValues.ToPassedFlags(),
-			ParseState: &parseState,
-			Stderr:     parseOpts.Stderr,
-			Stdout:     parseOpts.Stdout,
-		}
 		return parseState.CurrentFlag.CompletionCandidates(cmdContext)
-
 	} else {
 		return nil, fmt.Errorf("unexpected ParseState: %v", parseState.ExpectingArg)
 	}

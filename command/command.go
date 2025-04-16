@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"go.bbkane.com/warg/cli"
+	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/value"
 )
@@ -20,16 +21,50 @@ func DoNothing(_ cli.Context) error {
 // New builds a Command
 func New(helpShort string, action cli.Action, opts ...CommandOpt) cli.Command {
 	command := cli.Command{
-		HelpShort: helpShort,
-		Action:    action,
-		Flags:     make(cli.FlagMap),
-		Footer:    "",
-		HelpLong:  "",
+		HelpShort:            helpShort,
+		Action:               action,
+		CompletionCandidates: DefaultCompletionCandidates,
+		Flags:                make(cli.FlagMap),
+		Footer:               "",
+		HelpLong:             "",
 	}
 	for _, opt := range opts {
 		opt(&command)
 	}
 	return command
+}
+
+func DefaultCompletionCandidates(cmdCtx cli.Context) (*completion.Candidates, error) {
+	// TODO: flag name completion ideas that will actually use the full parse above
+	//  - if a scalar flag has been passed by arg, don't suggest it again (as args override everything else)
+	//  - if the flag is required and is not set, suggest it first
+	//  - suggest command flags before global flags
+	//  - let the flags define rank or priority for completion order
+	candidates := &completion.Candidates{
+		Type:   completion.Type_ValuesDescriptions,
+		Values: []completion.Candidate{},
+	}
+	// command flags
+	for _, name := range cmdCtx.ParseState.CurrentCommand.Flags.SortedNames() {
+		candidates.Values = append(candidates.Values, completion.Candidate{
+			Name:        string(name),
+			Description: string(cmdCtx.ParseState.CurrentCommand.Flags[name].HelpShort),
+		})
+	}
+	// global flags
+	for _, name := range cmdCtx.App.GlobalFlags.SortedNames() {
+		candidates.Values = append(candidates.Values, completion.Candidate{
+			Name:        string(name),
+			Description: string(cmdCtx.App.GlobalFlags[name].HelpShort),
+		})
+	}
+	return candidates, nil
+}
+
+func CompletionCandidates(completionCandidatesFunc func(cli.Context) (*completion.Candidates, error)) CommandOpt {
+	return func(flag *cli.Command) {
+		flag.CompletionCandidates = completionCandidatesFunc
+	}
 }
 
 // Flag adds an existing flag to a Command. It panics if a flag with the same name exists
