@@ -39,8 +39,8 @@ func TestApp_CompletionCandidates(t *testing.T) {
 						Description: "command1 help",
 					},
 					{
-						Name:        "filecompletioncommands",
-						Description: "filecompletioncommands help",
+						Name:        "manual",
+						Description: "commands with flags using all completion types for manual testing",
 					},
 					{
 						Name:        "section1",

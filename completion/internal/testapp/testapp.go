@@ -30,20 +30,69 @@ func BuildApp() *cli.App {
 			),
 			// TODO: actually test this
 			section.NewCommand(
-				"filecompletioncommands",
-				"filecompletioncommands help",
+				"manual",
+				"commands with flags using all completion types for manual testing",
 				command.DoNothing,
 				command.NewFlag(
-					"--fileflag",
-					"fileflag help",
+					"--dirs",
+					"dirs completion",
+					scalar.Path(),
+					flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+						return &completion.Candidates{
+							Type:   completion.Type_Directories,
+							Values: nil,
+						}, nil
+					}),
+				),
+				command.NewFlag(
+					"--dirs-files",
+					"dirs/files completion",
 					scalar.Path(),
 					flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
 						return &completion.Candidates{
 							Type:   completion.Type_DirectoriesFiles,
 							Values: nil,
 						}, nil
-					},
-					),
+					}),
+				),
+				command.NewFlag(
+					"--none",
+					"no completion",
+					scalar.String(),
+					flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+						return &completion.Candidates{
+							Type:   completion.Type_None,
+							Values: nil,
+						}, nil
+					}),
+				),
+				command.NewFlag(
+					"--values",
+					"values completion",
+					scalar.String(),
+					flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+						return &completion.Candidates{
+							Type: completion.Type_Values,
+							Values: []completion.Candidate{
+								{Name: "alpha", Description: "THIS SHOULDN'T SHOW"},
+								{Name: "beta", Description: "THIS SHOULDN'T SHOW"},
+							},
+						}, nil
+					}),
+				),
+				command.NewFlag(
+					"--values-descriptions",
+					"values completion with descriptions",
+					scalar.String(),
+					flag.CompletionCandidate(func(ctx cli.Context) (*completion.Candidates, error) {
+						return &completion.Candidates{
+							Type: completion.Type_ValuesDescriptions,
+							Values: []completion.Candidate{
+								{Name: "gamma", Description: "THIS SHOULD SHOW"},
+								{Name: "delta", Description: "THIS SHOULD SHOW"},
+							},
+						}, nil
+					}),
 				),
 			),
 			section.NewSection(
