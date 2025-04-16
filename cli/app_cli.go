@@ -235,16 +235,25 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 		return nil, fmt.Errorf("unexpected parseArgs err: %w", err)
 	}
 
-	// if the help flag is we're done. Just pick from the choices
+	// special case if help is passed
 	if parseState.HelpPassed {
+		// if the value of the flag has been passed, don't suggest anything
+		if parseState.FlagValues[a.HelpFlagName].UpdatedBy() == value.UpdatedByFlag {
+			return &completion.Candidates{
+				Type:   completion.Type_None,
+				Values: nil,
+			}, nil
+		}
+
+		// otherwise suggest the help commands as the values of the help flag
 		res := &completion.Candidates{
-			Type:   completion.Type_ValuesDescriptions,
+			Type:   completion.Type_Values,
 			Values: []completion.Candidate{},
 		}
 		for _, name := range a.HelpCommands.SortedNames() {
 			res.Values = append(res.Values, completion.Candidate{
 				Name:        string(name),
-				Description: string(a.HelpCommands[name].HelpShort),
+				Description: "",
 			})
 		}
 		return res, nil
@@ -268,6 +277,10 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 				Description: string(s.Sections[name].HelpShort),
 			})
 		}
+		ret.Values = append(ret.Values, completion.Candidate{
+			Name:        a.HelpFlagName,
+			Description: a.GlobalFlags[a.HelpFlagName].HelpShort,
+		})
 		return &ret, nil
 	}
 

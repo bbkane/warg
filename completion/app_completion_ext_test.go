@@ -46,6 +46,10 @@ func TestApp_CompletionCandidates(t *testing.T) {
 						Name:        "section1",
 						Description: "section1 help",
 					},
+					{
+						Name:        "--help",
+						Description: "Print help",
+					},
 				},
 			},
 		},
@@ -65,6 +69,10 @@ func TestApp_CompletionCandidates(t *testing.T) {
 					{
 						Name:        "command2",
 						Description: "command2 help",
+					},
+					{
+						Name:        "--help",
+						Description: "Print help",
 					},
 				},
 			},
@@ -133,6 +141,41 @@ func TestApp_CompletionCandidates(t *testing.T) {
 						Description: "nondefault completion",
 					},
 				},
+			},
+		},
+		{
+			name:        "helpPassedNoValue",
+			args:        []string{"--help"},
+			expectedErr: false,
+			expectedCandidates: &completion.Candidates{
+				Type: completion.Type_Values,
+				Values: []completion.Candidate{
+					{
+						Name:        "allcommands",
+						Description: "",
+					},
+					{
+						Name:        "default",
+						Description: "",
+					},
+					{
+						Name:        "detailed",
+						Description: "",
+					},
+					{
+						Name:        "outline",
+						Description: "",
+					},
+				},
+			},
+		},
+		{
+			name:        "helpPassedValue",
+			args:        []string{"--help", "default"},
+			expectedErr: false,
+			expectedCandidates: &completion.Candidates{
+				Type:   completion.Type_None,
+				Values: nil,
 			},
 		},
 	}
