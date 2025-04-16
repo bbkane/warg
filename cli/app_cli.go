@@ -39,24 +39,17 @@ func (app *App) MustRun(opts ...ParseOpt) {
 	// TODO: make this better? Don't hardcode and use the args from the opts instead of os.Args directly
 	if slices.Equal(os.Args, []string{os.Args[0], "--completion-script-zsh"}) {
 		// app --completion-script-zsh
-		completion.WriteCompletionScriptZsh(os.Stdout, app.Name)
+		completion.ZshCompletionScriptWrite(os.Stdout, app.Name)
 	} else if len(os.Args) >= 3 && os.Args[1] == "--completion-zsh" {
 		// app --completion-zsh <args> . Note that <args> must be something, even if it's the empty string
 
 		candidates, err := app.CompletionCandidates(opts...)
-
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		// TODO: print errors to stderr maybe? For now just silently fail...
-		if err == nil {
-			fmt.Println(candidates.Type)
-			for _, candidate := range candidates.Values {
-				fmt.Println(candidate.Name)
-				fmt.Println(candidate.Name + " - " + candidate.Description)
-			}
-		}
+		completion.ZshCompletionsWrite(os.Stdout, candidates)
+
 	} else {
 		pr, err := app.Parse(opts...)
 		if err != nil {

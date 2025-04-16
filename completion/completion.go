@@ -3,17 +3,38 @@ package completion
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"io"
 )
 
 //go:embed completion_script.zsh
-var CompletionScriptZsh []byte
+var ZshCompletionScript []byte
 
-func WriteCompletionScriptZsh(w io.Writer, appName string) {
-	script := bytes.ReplaceAll(CompletionScriptZsh, []byte("WARG_COMPLETION_APPNAME"), []byte(appName))
+func ZshCompletionScriptWrite(w io.Writer, appName string) {
+	script := bytes.ReplaceAll(ZshCompletionScript, []byte("WARG_COMPLETION_APPNAME"), []byte(appName))
 	_, err := w.Write(script)
 	if err != nil {
 		panic("unexpected CompletionScriptZsh err " + err.Error())
+	}
+}
+
+func ZshCompletionsWrite(w io.Writer, c *Candidates) {
+	fmt.Fprintln(w, c.Type)
+	switch c.Type {
+	case Type_Directories, Type_DirectoriesFiles, Type_None:
+		// nothing else needed
+		return
+	case Type_Values:
+		for _, v := range c.Values {
+			fmt.Fprintln(w, v.Name)
+		}
+	case Type_ValuesDescriptions:
+		for _, v := range c.Values {
+			fmt.Fprintln(w, v.Name)
+			fmt.Fprintln(w, v.Name+" - "+v.Description)
+		}
+	default:
+		panic("unexpected completion type: " + string(c.Type))
 	}
 }
 
