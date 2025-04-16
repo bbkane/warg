@@ -10,7 +10,8 @@ below this description) is likely unreleased.
 
 ## Added
 
-- User defined flag completion func with `WithCommandCompletionFunc`. TODO: I should rename that...
+- Expand tab completion to directory completion, directory + file completion, values completion, values+descriptions completion, and "None" completion (i.e., no results).
+- Allow user-specified completion overriding and default completion funcs
 
 ## Changed
 

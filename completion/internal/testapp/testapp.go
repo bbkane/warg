@@ -28,7 +28,6 @@ func BuildApp() *cli.App {
 					),
 				),
 			),
-			// TODO: actually test this
 			section.NewCommand(
 				"manual",
 				"commands with flags using all completion types for manual testing",

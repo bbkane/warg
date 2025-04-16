@@ -116,6 +116,17 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			},
 		},
 		{
+			name:        "cmdFlagScalarValuePassed",
+			args:        []string{"command1", "--flag1", "alpha"},
+			expectedErr: false,
+			expectedCandidates: &completion.Candidates{
+				Type: completion.Type_ValuesDescriptions,
+				Values: []completion.Candidate{
+					{Name: "--globalFlag", Description: "globalFlag help"},
+					{Name: "--help", Description: "Print help"}},
+			},
+		},
+		{
 			name:        "cmdFlagCustomCompletionDefault",
 			args:        []string{"section1", "command2", "--flag2"},
 			expectedErr: false,

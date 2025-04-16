@@ -46,6 +46,11 @@ func DefaultCompletionCandidates(cmdCtx cli.Context) (*completion.Candidates, er
 	}
 	// command flags
 	for _, name := range cmdCtx.ParseState.CurrentCommand.Flags.SortedNames() {
+		// scalar flags set by passed arg can't be appended to or overridden, so don't suggest them
+		val, isScalar := cmdCtx.ParseState.FlagValues[name].(value.ScalarValue)
+		if isScalar && val.UpdatedBy() == value.UpdatedByFlag {
+			continue
+		}
 		candidates.Values = append(candidates.Values, completion.Candidate{
 			Name:        string(name),
 			Description: string(cmdCtx.ParseState.CurrentCommand.Flags[name].HelpShort),
