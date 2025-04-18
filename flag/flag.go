@@ -45,19 +45,27 @@ func ConfigPath(path string) FlagOpt {
 }
 
 func DefaultCompletionCandidates(cmdCtx cli.Context) (*completion.Candidates, error) {
+	choices := cmdCtx.ParseState.FlagValues[cmdCtx.ParseState.CurrentFlagName].Choices()
+	if len(choices) > 0 {
+		candidates := &completion.Candidates{
+			Type:   completion.Type_Values,
+			Values: []completion.Candidate{},
+		}
+		// pr.FlagValues is always filled with at least the empty values
+		for _, name := range choices {
+			candidates.Values = append(candidates.Values, completion.Candidate{
+				Name:        name,
+				Description: "",
+			})
+		}
+		return candidates, nil
+	}
+	// default
+	return &completion.Candidates{
+		Type:   completion.Type_DirectoriesFiles,
+		Values: nil,
+	}, nil
 
-	candidates := &completion.Candidates{
-		Type:   completion.Type_Values,
-		Values: []completion.Candidate{},
-	}
-	// pr.FlagValues is always filled with at least the empty values
-	for _, name := range cmdCtx.ParseState.FlagValues[cmdCtx.ParseState.CurrentFlagName].Choices() {
-		candidates.Values = append(candidates.Values, completion.Candidate{
-			Name:        name,
-			Description: "",
-		})
-	}
-	return candidates, nil
 }
 
 func CompletionCandidates(completionCandidatesFunc func(cli.Context) (*completion.Candidates, error)) FlagOpt {
