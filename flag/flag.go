@@ -68,7 +68,7 @@ func DefaultCompletionCandidates(cmdCtx cli.Context) (*completion.Candidates, er
 
 }
 
-func CompletionCandidates(completionCandidatesFunc func(cli.Context) (*completion.Candidates, error)) FlagOpt {
+func CompletionCandidates(completionCandidatesFunc cli.CompletionCandidates) FlagOpt {
 	return func(flag *cli.Flag) {
 		flag.CompletionCandidates = completionCandidatesFunc
 	}

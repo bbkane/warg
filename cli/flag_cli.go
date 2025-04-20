@@ -4,7 +4,6 @@ import (
 	"log"
 	"sort"
 
-	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/value"
 )
 
@@ -45,7 +44,7 @@ type Flag struct {
 	// CompletionCandidates is a function that returns a list of completion candidates for this flag.
 	// Note that some flags in the cli.Context Flags map may not be set, even if they're required.
 	// TODO: get a comprehensive list of restrictions on the context.
-	CompletionCandidates func(Context) (*completion.Candidates, error)
+	CompletionCandidates CompletionCandidates
 
 	// ConfigPath is the path from the config to the value the flag updates
 	ConfigPath string

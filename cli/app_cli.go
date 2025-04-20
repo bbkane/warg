@@ -221,6 +221,8 @@ func (app *App) Validate() error {
 	return nil
 }
 
+type CompletionCandidates func(Context) (*completion.Candidates, error)
+
 func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, error) {
 	parseOpts := NewParseOpts(opts...)
 
