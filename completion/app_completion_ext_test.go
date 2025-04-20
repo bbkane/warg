@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/completion/internal/testapp"
 	"go.bbkane.com/warg/parseopt"
@@ -197,10 +198,12 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			// set it up like os.Args
 			args := []string{"appName", "--completion-zsh"}
 			args = append(args, tt.args...)
+			// add on the blank space the shell would add for us
 			args = append(args, "")
 
 			actualCandidates, actualErr := app.CompletionCandidates(
 				parseopt.Args(args),
+				parseopt.LookupEnv(cli.LookupMap(nil)),
 			)
 
 			if tt.expectedErr {
