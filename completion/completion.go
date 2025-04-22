@@ -31,7 +31,12 @@ func ZshCompletionsWrite(w io.Writer, c *Candidates) {
 	case Type_ValuesDescriptions:
 		for _, v := range c.Values {
 			fmt.Fprintln(w, v.Name)
-			fmt.Fprintln(w, v.Name+" - "+v.Description)
+			if v.Description != "" {
+				fmt.Fprintln(w, v.Name+" - "+v.Description)
+			} else {
+				fmt.Fprintln(w, v.Name)
+			}
+
 		}
 	default:
 		panic("unexpected completion type: " + string(c.Type))
