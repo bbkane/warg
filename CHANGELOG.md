@@ -39,6 +39,8 @@ List of type changes after working more on parsing:
 - `cli.OverrideStderr` -> `parseopt.Stderr`
 - `cli.OverrideStdout` -> `parseopt.Stdout`
 
+- Make `--help outline` only show sections and commands (not help or flags)
+
 # v0.0.29
 
 ## Added

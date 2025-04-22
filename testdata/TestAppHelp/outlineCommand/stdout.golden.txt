@@ -1,22 +1,11 @@
 # grab those images!
 grabbit
-  # another command
   command2
-  # another command
   command3
-  # do the grabbity grabbity
   grab
-  # Change grabbit's config
   config
-    # Edit the config. A default config will be created if it doesn't exist
     edit
-      # path to editor
-      --editor
-  # another section
   section2
-    # Dummy command to pass validation
     com
-  # another section
   section3
-    # Dummy command to pass validation
     com
