@@ -2,6 +2,7 @@ package command
 
 import (
 	"errors"
+	"fmt"
 
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/flag"
@@ -35,8 +36,7 @@ func New(helpShort string, action wargcore.Action, opts ...CommandOpt) wargcore.
 }
 
 func DefaultCompletionCandidates(cmdCtx wargcore.Context) (*completion.Candidates, error) {
-	// TODO: flag name completion ideas that will actually use the full parse above
-	//  - if a scalar flag has been passed by arg, don't suggest it again (as args override everything else)
+	// FZF (or maybe zsh) auto-sorts by alphabetical order, so no need to get fancy with the following ideas
 	//  - if the flag is required and is not set, suggest it first
 	//  - suggest command flags before global flags
 	//  - let the flags define rank or priority for completion order
@@ -51,9 +51,16 @@ func DefaultCompletionCandidates(cmdCtx wargcore.Context) (*completion.Candidate
 		if isScalar && val.UpdatedBy() == value.UpdatedByFlag {
 			continue
 		}
+		var valStr string
+		// TODO: does it matter if valstring is a large list?
+		if cmdCtx.ParseState.FlagValues[name].UpdatedBy() != value.UpdatedByUnset {
+			valStr = fmt.Sprint(cmdCtx.ParseState.FlagValues[name].Get())
+			valStr = " (" + valStr + ")"
+		}
+
 		candidates.Values = append(candidates.Values, completion.Candidate{
 			Name:        string(name),
-			Description: string(cmdCtx.ParseState.CurrentCommand.Flags[name].HelpShort),
+			Description: string(cmdCtx.ParseState.CurrentCommand.Flags[name].HelpShort) + valStr,
 		})
 	}
 	// global flags
