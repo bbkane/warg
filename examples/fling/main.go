@@ -2,17 +2,17 @@ package main
 
 import (
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
+	"go.bbkane.com/warg/wargcore"
 )
 
-func app() *cli.App {
-	linkUnlinkFlags := cli.FlagMap{
+func app() *wargcore.App {
+	linkUnlinkFlags := wargcore.FlagMap{
 		"--ask": flag.New(
 			"Whether to ask before making changes",
 			// value.StringEnum("true", "false", "dry-run"),

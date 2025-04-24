@@ -7,16 +7,16 @@ import (
 	"testing"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
+	"go.bbkane.com/warg/wargcore"
 )
 
 // A grabbitSection is a simple section to test help
-func grabbitSection() cli.Section {
+func grabbitSection() wargcore.Section {
 
 	rootFooter := `Examples:
 
@@ -94,32 +94,32 @@ func TestAppHelp(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   []string
-		lookup cli.LookupEnv
+		lookup wargcore.LookupEnv
 	}{
 		// toplevel just a toplevel help!
 		{
 			name:   "toplevel",
 			args:   []string{"grabbit", "-h", "outline"},
-			lookup: cli.LookupMap(nil),
+			lookup: wargcore.LookupMap(nil),
 		},
 
 		// allcommands (no command help)
 		{
 			name:   "allcommandsSection",
 			args:   []string{"grabbit", "config", "--help"},
-			lookup: cli.LookupMap(nil),
+			lookup: wargcore.LookupMap(nil),
 		},
 
 		// detailed
 		{
 			name:   "detailedCommand",
 			args:   []string{"grabbit", "config", "edit", "--help"},
-			lookup: cli.LookupMap(map[string]string{"EDITOR": "emacs"}),
+			lookup: wargcore.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
 			name:   "detailedSection",
 			args:   []string{"grabbit", "--help", "detailed"},
-			lookup: cli.LookupMap(nil),
+			lookup: wargcore.LookupMap(nil),
 		},
 
 		// outline
@@ -127,13 +127,13 @@ func TestAppHelp(t *testing.T) {
 			// TODO: make this print global flags!
 			name:   "outlineCommand",
 			args:   []string{"grabbit", "config", "edit", "--help", "outline"},
-			lookup: cli.LookupMap(map[string]string{"EDITOR": "emacs"}),
+			lookup: wargcore.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
 			// TODO: make this print global flags!
 			name:   "outlineSection",
 			args:   []string{"grabbit", "--help", "outline"},
-			lookup: cli.LookupMap(nil),
+			lookup: wargcore.LookupMap(nil),
 		},
 	}
 

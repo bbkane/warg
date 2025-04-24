@@ -6,7 +6,7 @@ import (
 
 	"github.com/mattn/go-isatty"
 	"go.bbkane.com/gocolor"
-	"go.bbkane.com/warg/cli"
+	"go.bbkane.com/warg/wargcore"
 )
 
 // LeftPad pads a string `s` with pad `pad` `plength` times
@@ -23,7 +23,7 @@ func LeftPad(s string, pad string, plength int) string {
 // ConditionallyEnableColor looks for a passed --color flag with an underlying string value. If
 // it exists and is set to "true", or if it exists, is set to "auto",
 // and the passed file is a TTY, an enabled Color is returned.
-func ConditionallyEnableColor(pf cli.PassedFlags, file *os.File) (gocolor.Color, error) {
+func ConditionallyEnableColor(pf wargcore.PassedFlags, file *os.File) (gocolor.Color, error) {
 	// default to trying to use color
 	useColor := "auto"
 	// respect a --color string

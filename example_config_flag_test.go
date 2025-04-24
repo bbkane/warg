@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config/yamlreader"
 	"go.bbkane.com/warg/flag"
@@ -15,9 +14,10 @@ import (
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
+	"go.bbkane.com/warg/wargcore"
 )
 
-func exampleConfigFlagTextAdd(ctx cli.Context) error {
+func exampleConfigFlagTextAdd(ctx wargcore.Context) error {
 	addends := ctx.Flags["--addend"].([]int)
 	sum := 0
 	for _, a := range addends {
@@ -48,7 +48,7 @@ func ExampleConfigFlag() {
 		),
 		warg.ConfigFlag(
 			yamlreader.New,
-			cli.FlagMap{
+			wargcore.FlagMap{
 				"--config": flag.New(
 					"Path to YAML config file",
 					scalar.Path(

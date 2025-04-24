@@ -1,4 +1,4 @@
-package cli
+package wargcore
 
 type CommandHelp func(cur *Command, helpInfo HelpInfo) Action
 type SectionHelp func(cur *Section, helpInfo HelpInfo) Action

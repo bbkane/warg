@@ -5,15 +5,15 @@ import (
 	"os"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
+	"go.bbkane.com/warg/wargcore"
 )
 
-func login(ctx cli.Context) error {
+func login(ctx wargcore.Context) error {
 	url := ctx.Flags["--url"].(string)
 
 	// timeout doesn't have a default value,
@@ -30,7 +30,7 @@ func login(ctx cli.Context) error {
 }
 
 func ExampleNew() {
-	commonFlags := cli.FlagMap{
+	commonFlags := wargcore.FlagMap{
 		"--timeout": flag.New(
 			"Optional timeout. Defaults to no timeout",
 			scalar.Int(),

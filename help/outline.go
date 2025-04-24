@@ -7,11 +7,11 @@ import (
 	"os"
 
 	"go.bbkane.com/gocolor"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/help/common"
+	"go.bbkane.com/warg/wargcore"
 )
 
-func outlineHelper(w io.Writer, color *gocolor.Color, sec cli.Section, indent int) {
+func outlineHelper(w io.Writer, color *gocolor.Color, sec wargcore.Section, indent int) {
 	// commands and command flags
 	for _, comName := range sec.Commands.SortedNames() {
 		fmt.Fprintln(
@@ -32,8 +32,8 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec cli.Section, indent in
 
 }
 
-func OutlineSectionHelp(_ *cli.Section, hi cli.HelpInfo) cli.Action {
-	return func(cmdCtx cli.Context) error {
+func OutlineSectionHelp(_ *wargcore.Section, hi wargcore.HelpInfo) wargcore.Action {
+	return func(cmdCtx wargcore.Context) error {
 		file := cmdCtx.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
@@ -52,6 +52,6 @@ func OutlineSectionHelp(_ *cli.Section, hi cli.HelpInfo) cli.Action {
 	}
 }
 
-func OutlineCommandHelp(cur *cli.Command, helpInfo cli.HelpInfo) cli.Action {
+func OutlineCommandHelp(cur *wargcore.Command, helpInfo wargcore.HelpInfo) wargcore.Action {
 	return OutlineSectionHelp(nil, helpInfo)
 }

@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/completion/internal/testapp"
 	"go.bbkane.com/warg/parseopt"
+	"go.bbkane.com/warg/wargcore"
 )
 
 func TestApp_CompletionCandidates(t *testing.T) {
@@ -203,7 +203,7 @@ func TestApp_CompletionCandidates(t *testing.T) {
 
 			actualCandidates, actualErr := app.CompletionCandidates(
 				parseopt.Args(args),
-				parseopt.LookupEnv(cli.LookupMap(nil)),
+				parseopt.LookupEnv(wargcore.LookupMap(nil)),
 			)
 
 			if tt.expectedErr {

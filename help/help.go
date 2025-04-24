@@ -1,24 +1,24 @@
 package help
 
 import (
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help/allcommands"
 	"go.bbkane.com/warg/help/detailed"
 	"go.bbkane.com/warg/value/scalar"
+	"go.bbkane.com/warg/wargcore"
 )
 
-func DefaultHelpCommandMap() cli.CommandMap {
-	return cli.CommandMap{
-		"default":     cli.HelpToCommand(detailed.DetailedCommandHelp, allcommands.AllCommandsSectionHelp),
-		"detailed":    cli.HelpToCommand(detailed.DetailedCommandHelp, detailed.DetailedSectionHelp),
-		"outline":     cli.HelpToCommand(OutlineCommandHelp, OutlineSectionHelp),
-		"allcommands": cli.HelpToCommand(detailed.DetailedCommandHelp, allcommands.AllCommandsSectionHelp),
+func DefaultHelpCommandMap() wargcore.CommandMap {
+	return wargcore.CommandMap{
+		"default":     wargcore.HelpToCommand(detailed.DetailedCommandHelp, allcommands.AllCommandsSectionHelp),
+		"detailed":    wargcore.HelpToCommand(detailed.DetailedCommandHelp, detailed.DetailedSectionHelp),
+		"outline":     wargcore.HelpToCommand(OutlineCommandHelp, OutlineSectionHelp),
+		"allcommands": wargcore.HelpToCommand(detailed.DetailedCommandHelp, allcommands.AllCommandsSectionHelp),
 	}
 }
 
-func DefaultHelpFlagMap(defaultChoice string, choices []string) cli.FlagMap {
-	return cli.FlagMap{
+func DefaultHelpFlagMap(defaultChoice string, choices []string) wargcore.FlagMap {
+	return wargcore.FlagMap{
 		"--help": flag.New(
 			"Print help",
 			scalar.String(

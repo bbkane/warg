@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
+	"go.bbkane.com/warg/wargcore"
 )
 
 func TestSectionT_BreadthFirst(t *testing.T) {
@@ -16,8 +16,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 	tests := []struct {
 		name          string
 		rootName      string
-		sec           cli.Section
-		expected      []cli.FlatSection
+		sec           wargcore.Section
+		expected      []wargcore.FlatSection
 		expectedPanic bool
 	}{
 		{
@@ -30,7 +30,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					section.NewCommand("c2", "", nil, command.CompletionCandidates(nil)),
 				),
 			),
-			expected: []cli.FlatSection{
+			expected: []wargcore.FlatSection{
 				{
 					Path: []string{"r"},
 					Sec: section.New(
@@ -64,7 +64,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					section.NewCommand("c", "", nil, command.CompletionCandidates(nil)),
 				),
 			),
-			expected: []cli.FlatSection{
+			expected: []wargcore.FlatSection{
 				{
 					Path: []string{"r"},
 					Sec: section.New("",
@@ -123,7 +123,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 					),
 				),
 			),
-			expected: []cli.FlatSection{
+			expected: []wargcore.FlatSection{
 				{
 					Path: []string{"r"},
 					Sec: section.New("",
@@ -191,7 +191,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				return
 			}
 
-			actual := make([]cli.FlatSection, 0, 1)
+			actual := make([]wargcore.FlatSection, 0, 1)
 			it := tt.sec.BreadthFirst([]string{tt.rootName})
 			for it.HasNext() {
 				actual = append(actual, it.Next())

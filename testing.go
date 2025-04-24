@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/parseopt"
+	"go.bbkane.com/warg/wargcore"
 )
 
 type GoldenTestArgs struct {
-	App *cli.App
+	App *wargcore.App
 
 	// UpdateGolden files for captured stderr/stdout
 	UpdateGolden bool
@@ -29,7 +29,7 @@ type GoldenTestArgs struct {
 func GoldenTest(
 	t *testing.T,
 	args GoldenTestArgs,
-	parseOpts ...cli.ParseOpt) {
+	parseOpts ...wargcore.ParseOpt) {
 	stderrTmpFile, err := os.CreateTemp(os.TempDir(), "warg-test-")
 	require.Nil(t, err)
 

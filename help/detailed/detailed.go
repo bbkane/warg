@@ -9,12 +9,12 @@ import (
 	"os"
 
 	"go.bbkane.com/gocolor"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/wargcore"
 )
 
-func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *cli.Flag) {
+func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *wargcore.Flag) {
 	if f.Alias != "" {
 		fmt.Fprintf(
 			w,
@@ -175,8 +175,8 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *cli.Fl
 	fmt.Fprintln(w)
 }
 
-func DetailedCommandHelp(cur *cli.Command, helpInfo cli.HelpInfo) cli.Action {
-	return func(pf cli.Context) error {
+func DetailedCommandHelp(cur *wargcore.Command, helpInfo wargcore.HelpInfo) wargcore.Action {
+	return func(pf wargcore.Context) error {
 		file := pf.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
@@ -232,8 +232,8 @@ func DetailedCommandHelp(cur *cli.Command, helpInfo cli.HelpInfo) cli.Action {
 	}
 }
 
-func DetailedSectionHelp(cur *cli.Section, _ cli.HelpInfo) cli.Action {
-	return func(pf cli.Context) error {
+func DetailedSectionHelp(cur *wargcore.Section, _ wargcore.HelpInfo) wargcore.Action {
+	return func(pf wargcore.Context) error {
 		file := pf.Stdout
 
 		f := bufio.NewWriter(file)

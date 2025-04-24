@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/help/common"
+	"go.bbkane.com/warg/wargcore"
 )
 
-func AllCommandsSectionHelp(cur *cli.Section, helpInfo cli.HelpInfo) cli.Action {
-	return func(cmdCtx cli.Context) error {
+func AllCommandsSectionHelp(cur *wargcore.Section, helpInfo wargcore.HelpInfo) wargcore.Action {
+	return func(cmdCtx wargcore.Context) error {
 		file := cmdCtx.Stdout
 
 		f := bufio.NewWriter(file)

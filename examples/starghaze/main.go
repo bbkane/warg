@@ -4,15 +4,15 @@ import (
 	"time"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
+	"go.bbkane.com/warg/wargcore"
 )
 
-func app() *cli.App {
+func app() *wargcore.App {
 
 	downloadCmd := command.New(
 		"Download star info",
@@ -145,7 +145,7 @@ func app() *cli.App {
 		),
 	)
 
-	sheetFlags := cli.FlagMap{
+	sheetFlags := wargcore.FlagMap{
 		"--sheet-id": flag.New(
 			"ID For the particulare sheet. Viewable from `gid` URL param",
 			scalar.Int(),

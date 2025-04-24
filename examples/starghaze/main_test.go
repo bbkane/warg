@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/parseopt"
+	"go.bbkane.com/warg/wargcore"
 )
 
 func TestApp_Validate(t *testing.T) {
@@ -22,17 +22,17 @@ func TestRunHelp(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   []string
-		lookup cli.LookupEnv
+		lookup wargcore.LookupEnv
 	}{
 		{
 			name:   "starghazeDownloadHelpDetailed",
 			args:   []string{"starghaze", "download", "--help", "detailed"},
-			lookup: cli.LookupMap(nil),
+			lookup: wargcore.LookupMap(nil),
 		},
 		{
 			name:   "starghazeFormatHelpDetailed",
 			args:   []string{"starghaze", "format", "--help", "detailed"},
-			lookup: cli.LookupMap(nil),
+			lookup: wargcore.LookupMap(nil),
 		},
 	}
 

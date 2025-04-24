@@ -4,22 +4,22 @@ import (
 	"fmt"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/help"
 	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/section"
+	"go.bbkane.com/warg/wargcore"
 )
 
-func exampleHelpFlaglogin(_ cli.Context) error {
+func exampleHelpFlaglogin(_ wargcore.Context) error {
 	fmt.Println("Logging in")
 	return nil
 }
 
-func customHelpCmd() cli.Command {
+func customHelpCmd() wargcore.Command {
 	return command.New(
 		"", // this command will be launched by the help flag, so users will never see the help
-		func(ctx cli.Context) error {
+		func(ctx wargcore.Context) error {
 			file := ctx.Stdout
 			fmt.Fprintln(file, "Custom help command output")
 			return nil

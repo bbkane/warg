@@ -4,35 +4,35 @@ import (
 	"context"
 	"os"
 
-	"go.bbkane.com/warg/cli"
+	"go.bbkane.com/warg/wargcore"
 )
 
-func Context(ctx context.Context) cli.ParseOpt {
-	return func(poh *cli.ParseOpts) {
+func Context(ctx context.Context) wargcore.ParseOpt {
+	return func(poh *wargcore.ParseOpts) {
 		poh.Context = ctx
 	}
 }
 
-func Args(args []string) cli.ParseOpt {
-	return func(poh *cli.ParseOpts) {
+func Args(args []string) wargcore.ParseOpt {
+	return func(poh *wargcore.ParseOpts) {
 		poh.Args = args
 	}
 }
 
-func LookupEnv(lookup cli.LookupEnv) cli.ParseOpt {
-	return func(poh *cli.ParseOpts) {
+func LookupEnv(lookup wargcore.LookupEnv) wargcore.ParseOpt {
+	return func(poh *wargcore.ParseOpts) {
 		poh.LookupEnv = lookup
 	}
 }
 
-func Stderr(stderr *os.File) cli.ParseOpt {
-	return func(poh *cli.ParseOpts) {
+func Stderr(stderr *os.File) wargcore.ParseOpt {
+	return func(poh *wargcore.ParseOpts) {
 		poh.Stderr = stderr
 	}
 }
 
-func Stdout(stdout *os.File) cli.ParseOpt {
-	return func(poh *cli.ParseOpts) {
+func Stdout(stdout *os.File) wargcore.ParseOpt {
+	return func(poh *wargcore.ParseOpts) {
 		poh.Stdout = stdout
 	}
 }

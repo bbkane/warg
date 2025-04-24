@@ -4,14 +4,14 @@ import (
 	"fmt"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/cli"
 	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
+	"go.bbkane.com/warg/wargcore"
 )
 
-func app() *cli.App {
+func app() *wargcore.App {
 	app := warg.New(
 		"butler",
 		"v1.0.0",
@@ -37,7 +37,7 @@ func app() *cli.App {
 	return &app
 }
 
-func present(ctx cli.Context) error {
+func present(ctx wargcore.Context) error {
 	// this is a required flag, so we know it exists
 	name := ctx.Flags["--name"].(string)
 	fmt.Fprintf(ctx.Stdout, "May I present to you %s.\n", name)
