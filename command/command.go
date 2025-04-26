@@ -3,6 +3,7 @@ package command
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/flag"
@@ -55,6 +56,7 @@ func DefaultCompletionCandidates(cmdCtx wargcore.Context) (*completion.Candidate
 		// TODO: does it matter if valstring is a large list?
 		if cmdCtx.ParseState.FlagValues[name].UpdatedBy() != value.UpdatedByUnset {
 			valStr = fmt.Sprint(cmdCtx.ParseState.FlagValues[name].Get())
+			valStr = strings.ReplaceAll(valStr, "\n", " ")
 			valStr = " (" + valStr + ")"
 		}
 
