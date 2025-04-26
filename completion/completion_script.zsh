@@ -17,7 +17,7 @@ output=("${(@f)$(${words[1]} --completion-zsh "${(@)words[2,$CURRENT]}")}")
 comp_type="${output[1]}"
 
 # Log type
-echo "TYPE: $comp_type" >> ~/_WARG_COMPLETION_APPNAME_completion.log
+# echo "TYPE: $comp_type" >> ~/_WARG_COMPLETION_APPNAME_completion.log
 
 # Process based on type
 case "$comp_type" in
@@ -56,7 +56,7 @@ case "$comp_type" in
         ;;
 
     *)
-        echo "Unknown completion type: $comp_type" >> ~/_WARG_COMPLETION_APPNAME_completion.log
+        # echo "Unknown completion type: $comp_type" >> ~/_WARG_COMPLETION_APPNAME_completion.log
         return 1
         ;;
 esac
