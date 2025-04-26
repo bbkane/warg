@@ -37,8 +37,8 @@ type App struct {
 // Any errors on an Action will be printed to stderr and os.Exit(1) will be called.
 func (app *App) MustRun(opts ...ParseOpt) {
 	// TODO: make this better? Don't hardcode and use the args from the opts instead of os.Args directly
-	if slices.Equal(os.Args, []string{os.Args[0], "--completion-script-zsh"}) {
-		// app --completion-script-zsh
+	if slices.Equal(os.Args, []string{os.Args[0], "completion", "zsh"}) {
+
 		completion.ZshCompletionScriptWrite(os.Stdout, app.Name)
 	} else if len(os.Args) >= 3 && os.Args[1] == "--completion-zsh" {
 		// app --completion-zsh <args> . Note that <args> must be something, even if it's the empty string

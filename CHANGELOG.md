@@ -50,7 +50,7 @@ List of type changes after working more on parsing:
 Assuming `~/fbin` is on the `zsh` `$fpath`, run:
 
 ```zsh
-$ ./butler "--completion-script-zsh" > ~/fbin/_butler
+$ ./butler "completion zsh" > ~/fbin/_butler
 ```
 
 - Added `scalar.PointerTo` to bind how a scalar updates from flags/interfaces to a pre-existing variable. Still need to do this for dicts and slices

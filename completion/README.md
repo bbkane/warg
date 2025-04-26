@@ -16,7 +16,7 @@ Setup:
 go install ./completion/internal/testappcmd
 cd ~/go/bin  # default $GOBIN
 # install the completion to something on $FPATH
-./testappcmd --completion-script-zsh > ~/fbin/_testappcmd
+./testappcmd completion zsh > ~/fbin/_testappcmd
 # open a new shell to load completions
 ./testappcmd ...  # tab away!!
 ```
