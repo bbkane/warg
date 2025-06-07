@@ -102,6 +102,11 @@ func BuildApp() *wargcore.App {
 					"command2 help",
 					command.DoNothing,
 					command.NewFlag(
+						"--bool",
+						"bool completion is special cased to return true/false",
+						scalar.Bool(),
+					),
+					command.NewFlag(
 						"--flag2",
 						"flag2 help",
 						scalar.String(),

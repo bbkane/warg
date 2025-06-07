@@ -60,6 +60,18 @@ func DefaultCompletionCandidates(cmdCtx wargcore.Context) (*completion.Candidate
 		}
 		return candidates, nil
 	}
+
+	// special case: bools can only be true or false, so let's be helpful and suggest those
+	if _, ok := cmdCtx.ParseState.FlagValues[cmdCtx.ParseState.CurrentFlagName].Get().(bool); ok {
+		return &completion.Candidates{
+			Type: completion.Type_Values,
+			Values: []completion.Candidate{
+				{Name: "true", Description: ""},
+				{Name: "false", Description: ""},
+			},
+		}, nil
+	}
+
 	// default
 	return &completion.Candidates{
 		Type:   completion.Type_DirectoriesFiles,

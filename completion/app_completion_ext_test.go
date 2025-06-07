@@ -128,6 +128,24 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			},
 		},
 		{
+			name:        "cmdFlagBool",
+			args:        []string{"section1", "command2", "--bool"},
+			expectedErr: false,
+			expectedCandidates: &completion.Candidates{
+				Type: completion.Type_Values,
+				Values: []completion.Candidate{
+					{
+						Name:        "true",
+						Description: "",
+					},
+					{
+						Name:        "false",
+						Description: "",
+					},
+				},
+			},
+		},
+		{
 			name:        "cmdFlagCustomCompletionDefault",
 			args:        []string{"section1", "command2", "--flag2"},
 			expectedErr: false,
