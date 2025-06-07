@@ -6,11 +6,24 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.0.33
+
+# v0.0.32
+
+# Added
+
+- Suggest "true"/"false" if the flag type is a bool
+
 # v0.0.31
 
 ## Changed
 
-- Suggest "true"/"false" if the flag type is a bool
+- `zsh` completion script generation changed from `<app> --completion-script-zsh` to `<app> completion zsh` to make Homebrew generation easier
+
+## Fixed
+
+- comment out completion log printing
+- Don't allow newlines in completions
 
 # v0.0.30
 
