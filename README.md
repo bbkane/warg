@@ -3,14 +3,16 @@
 An opinionated CLI framework:
 
 - declarative nested commands
-- Detailed `--help` output (including what a flag is currently set to)
+- detailed, colored  `--help` output (including what a flag is currently set to)
 - update flags from `os.Args`, config files, environment variables, and app defaults
 - extend with new flag types, config file formats, or `--help` output
 - snapshot testing support
 
-# Project Status (2025-01-24)
+# Project Status (2025-06-15)
 
-The "bones" of warg are where I want them, but I have several breaking changes I'd like to try before considering warg stable. None of them will change the basic way warg works, but I'm renaming things, changing signatures, and rearranging packages. See the [CHANGELOG](./CHANGELOG.md) for past breaking changes.
+`warg` is still a work in progress, but the "bones" are where I want them - I don't intend to change the basic way warg works, but I do plan to experiment with a few APIs (make the value and config APIs simpler) and add TUI generation. I think the largest breaking changes are behind me (see the [CHANGELOG](./CHANGELOG.md)). Read [Go Project Notes](https://www.bbkane.com/blog/go-project-notes/) to help understand the tooling.
+
+I'm watching issues; please open one for any questions and especially BEFORE submitting a Pull request.
 
 # Examples
 
@@ -54,7 +56,7 @@ app := warg.New(
 By design, warg apps have the following requirements:
 
 - must contain at least one subcommand. This makes it easy to add further subcommands, such as a `version` subcommand.   It is not possible to design a warg app such that calling `<appname> --flag <value>` does useful work. Instead, `<appname> <command> --flag <value>` must be used.
-- warg does not support positional arguments. Instead, use a required flag: `git clone <url>` would be `git clone --url <url>`. This makes parsing much easier, and I like the simplicity of it.
+- warg does not support positional arguments. Instead, use a required flag: `git clone <url>` would be `git clone --url <url>`. This makes parsing much easier, and I like the simplicity of it, even though it's more to type/tab-complete.
 
 # Alternatives
 
