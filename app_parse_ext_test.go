@@ -454,6 +454,29 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			},
 			expectedErr: false,
 		},
+		{
+			name: "flagWithEmptyValue",
+			rootSection: section.New(
+				"help for test",
+				section.NewCommand(
+					"command",
+					"help for command",
+					command.DoNothing,
+					command.NewFlag(
+						"--flag",
+						"flag help",
+						scalar.String(),
+					),
+				),
+			),
+			args:               []string{"app", "command", "--flag", ""},
+			expectedPassedPath: []string{"command"},
+			expectedPassedFlagValues: wargcore.PassedFlags{
+				"--flag": "",
+				"--help": "default",
+			},
+			expectedErr: false,
+		},
 	}
 
 	for _, tt := range tests {

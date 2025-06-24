@@ -19,7 +19,7 @@ func New(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) wargco
 		EnvVars:               nil,
 		HelpShort:             helpShort,
 		Required:              false,
-		UnsetSentinel:         "",
+		UnsetSentinel:         nil,
 		// Deprecated
 		IsCommandFlag: false,
 		Value:         nil,
@@ -113,6 +113,6 @@ func Required() FlagOpt {
 //	app --flag a --flag b --flag UNSET --flag c --flag d // ends up with []string{"c", "d"}
 func UnsetSentinel(name string) FlagOpt {
 	return func(f *wargcore.Flag) {
-		f.UnsetSentinel = name
+		f.UnsetSentinel = &name
 	}
 }

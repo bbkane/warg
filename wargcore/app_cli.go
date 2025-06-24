@@ -300,11 +300,12 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 		Stdout:     parseOpts.Stdout,
 	}
 
-	if parseState.ExpectingArg == ExpectingArg_FlagNameOrEnd {
+	switch parseState.ExpectingArg {
+	case ExpectingArg_FlagNameOrEnd:
 		return parseState.CurrentCommand.CompletionCandidates(cmdContext)
-	} else if parseState.ExpectingArg == ExpectingArg_FlagValue {
+	case ExpectingArg_FlagValue:
 		return parseState.CurrentFlag.CompletionCandidates(cmdContext)
-	} else {
+	default:
 		return nil, fmt.Errorf("unexpected ParseState: %v", parseState.ExpectingArg)
 	}
 }

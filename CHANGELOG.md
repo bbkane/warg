@@ -8,6 +8,10 @@ below this description) is likely unreleased.
 
 # v0.0.33
 
+## Fixed
+
+Allow `--flag ""` to be passed (this previously unset the flag)
+
 # v0.0.32
 
 # Added

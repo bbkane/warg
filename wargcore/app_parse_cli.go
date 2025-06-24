@@ -206,8 +206,9 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 			pr.ExpectingArg = ExpectingArg_FlagValue
 
 		case ExpectingArg_FlagValue:
-			// TODO: unset the flag if UnsetSentinel is passed. Search though global flags and command flags, reset the value to unset sentinal and store in the parseResult that it was unset so calls to resolveFlags won't set it...
-			if arg == pr.CurrentFlag.UnsetSentinel {
+			// if the flag has an unset sentinel and the user passed it, unset the flag
+			// NOTE: UnsetSentinel must be a pointer to a string, because sometimes the user may pass an empty string
+			if pr.CurrentFlag.UnsetSentinel != nil && arg == *pr.CurrentFlag.UnsetSentinel {
 				pr.FlagValues[pr.CurrentFlagName] = pr.CurrentFlag.EmptyValueConstructor()
 				pr.UnsetFlagNames.Add(pr.CurrentFlagName)
 			} else {

@@ -62,7 +62,7 @@ type Flag struct {
 	Required bool
 
 	// When UnsetSentinal is passed as a flag value, Value is reset and SetBy is set to ""
-	UnsetSentinel string
+	UnsetSentinel *string
 
 	// -- the following are set when parsing and they're all deprecated for my march to immutabality
 

@@ -104,12 +104,12 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *wargco
 			color.Add(color.Bold, "required"),
 		)
 	}
-	if f.UnsetSentinel != "" {
+	if f.UnsetSentinel != nil {
 		fmt.Fprintf(
 			w,
 			"    %s : %s\n",
 			color.Add(color.Bold, "unsetsentinel"),
-			f.UnsetSentinel,
+			*f.UnsetSentinel,
 		)
 	}
 
