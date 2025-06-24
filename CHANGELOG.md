@@ -8,6 +8,10 @@ below this description) is likely unreleased.
 
 # v0.0.33
 
+## Changed
+
+- Renamed `CompletionCandidates` to `CompletionCandidatesFunc`
+
 ## Fixed
 
 Allow `--flag ""` to be passed (this previously unset the flag)

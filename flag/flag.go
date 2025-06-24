@@ -80,7 +80,7 @@ func DefaultCompletionCandidates(cmdCtx wargcore.Context) (*completion.Candidate
 
 }
 
-func CompletionCandidates(completionCandidatesFunc wargcore.CompletionCandidates) FlagOpt {
+func CompletionCandidates(completionCandidatesFunc wargcore.CompletionCandidatesFunc) FlagOpt {
 	return func(flag *wargcore.Flag) {
 		flag.CompletionCandidates = completionCandidatesFunc
 	}

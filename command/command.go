@@ -75,7 +75,7 @@ func DefaultCompletionCandidates(cmdCtx wargcore.Context) (*completion.Candidate
 	return candidates, nil
 }
 
-func CompletionCandidates(completionCandidatesFunc wargcore.CompletionCandidates) CommandOpt {
+func CompletionCandidates(completionCandidatesFunc wargcore.CompletionCandidatesFunc) CommandOpt {
 	return func(flag *wargcore.Command) {
 		flag.CompletionCandidates = completionCandidatesFunc
 	}
