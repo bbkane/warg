@@ -43,7 +43,7 @@ func Addr() TypeInfo[netip.Addr] {
 			case []byte:
 				ip, ok := netip.AddrFromSlice(under)
 				if !ok {
-					return netip.Addr{}, fmt.Errorf("Could not convert %s to netip.Addr", string(under))
+					return netip.Addr{}, fmt.Errorf("could not convert %s to netip.Addr", string(under))
 				}
 				return ip, nil
 			case string:
