@@ -305,6 +305,8 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 		return parseState.CurrentCommand.CompletionCandidates(cmdContext)
 	case ExpectingArg_FlagValue:
 		return parseState.CurrentFlag.CompletionCandidates(cmdContext)
+	case ExpectingArg_SectionOrCommand:
+		panic("unreachable state: ExpectingArg_SectionOrCommand")
 	default:
 		return nil, fmt.Errorf("unexpected ParseState: %v", parseState.ExpectingArg)
 	}

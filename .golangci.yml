@@ -30,14 +30,6 @@ linters:
       - legacy
       - std-error-handling
   settings:
-    exhaustive:
-      # Program elements to check for exhaustiveness.
-      check:
-        - switch
-        - map
-      # Presence of "default" case in switch statements satisfies exhaustiveness,
-      # even if all enum members are not listed.
-      default-signifies-exhaustive: true
     paralleltest:
       ignore-missing-subtests: true
 version: '2'
