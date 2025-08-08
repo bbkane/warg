@@ -143,6 +143,10 @@ func BuildApp() *wargcore.App {
 				scalar.Default("default"),
 			),
 		),
+		warg.SkipAll(),
 	)
+	if err := app.Validate(); err != nil {
+		panic("oopsie test app went bad: " + err.Error())
+	}
 	return &app
 }

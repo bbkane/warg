@@ -69,7 +69,8 @@ func TestApp_Parse(t *testing.T) {
 						),
 					),
 				),
-				warg.SkipValidation(),
+
+				warg.SkipAll(),
 			),
 			args: []string{t.Name(), "test"},
 			lookup: wargcore.LookupMap(
@@ -103,7 +104,8 @@ func TestApp_Parse(t *testing.T) {
 							command.FlagMap(fm),
 						),
 					),
-					warg.SkipValidation(),
+
+					warg.SkipAll(),
 				)
 				return app
 			}(),
@@ -136,7 +138,7 @@ func TestApp_Parse(t *testing.T) {
 						),
 					),
 				),
-				warg.SkipValidation(),
+				warg.SkipAll(),
 			),
 
 			args:                     []string{"app", "present", "-h"},
@@ -486,7 +488,8 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			app := warg.New(
 				"newAppName", "v1.0.0",
 				tt.rootSection,
-				warg.SkipValidation(),
+
+				warg.SkipAll(),
 			)
 
 			err := app.Validate()
@@ -579,7 +582,8 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 						tt.flagDef,
 					),
 				),
-				warg.SkipValidation(),
+
+				warg.SkipAll(),
 			)
 
 			err := app.Validate()
@@ -658,7 +662,8 @@ func TestApp_Parse_config(t *testing.T) {
 						),
 					},
 				),
-				warg.SkipValidation(),
+
+				warg.SkipAll(),
 			),
 			args:               []string{"test", "print", "--config", "passedconfigval"},
 			lookup:             wargcore.LookupMap(nil),
@@ -701,7 +706,7 @@ func TestApp_Parse_config(t *testing.T) {
 						),
 					},
 				),
-				warg.SkipValidation(),
+				warg.SkipAll(),
 			),
 
 			args:               []string{"app", "com"},
@@ -746,7 +751,7 @@ func TestApp_Parse_config(t *testing.T) {
 						),
 					},
 				),
-				warg.SkipValidation(),
+				warg.SkipAll(),
 			),
 
 			args:               []string{"app", "com"},
@@ -792,7 +797,7 @@ func TestApp_Parse_config(t *testing.T) {
 						),
 					},
 				),
-				warg.SkipValidation(),
+				warg.SkipAll(),
 			),
 			args:               []string{"test", "print"},
 			lookup:             wargcore.LookupMap(nil),
@@ -835,7 +840,8 @@ func TestApp_Parse_config(t *testing.T) {
 						),
 					},
 				),
-				warg.SkipValidation(),
+
+				warg.SkipAll(),
 			),
 			args:               []string{"app", "com"},
 			lookup:             wargcore.LookupMap(nil),
@@ -878,7 +884,8 @@ func TestApp_Parse_config(t *testing.T) {
 						),
 					},
 				),
-				warg.SkipValidation(),
+
+				warg.SkipAll(),
 			),
 
 			args:               []string{"app", "com"},
@@ -923,7 +930,8 @@ func TestApp_Parse_config(t *testing.T) {
 						),
 					},
 				),
-				warg.SkipValidation(),
+
+				warg.SkipAll(),
 			),
 
 			args:               []string{"app", "com"},
@@ -985,7 +993,7 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 						command.DoNothing,
 					),
 				),
-				warg.SkipValidation(),
+				warg.SkipAll(),
 				warg.NewGlobalFlag(
 					"--global",
 					"global flag",
@@ -1034,6 +1042,7 @@ func TestCustomVersion(t *testing.T) {
 			"test",
 			section.NewCommand("version", "Print version", command.DoNothing),
 		),
+		warg.SkipVersionCommand(),
 	)
 	err := app.Validate()
 	require.Nil(t, err)
@@ -1053,7 +1062,7 @@ func TestContextContainsValue(t *testing.T) {
 		"v1.0.0",
 		section.New(
 			"test",
-			section.NewCommand("version", "Print version", command.DoNothing),
+			section.NewCommand("dummycommand", "Do nothing", command.DoNothing),
 		),
 	)
 	err := app.Validate()

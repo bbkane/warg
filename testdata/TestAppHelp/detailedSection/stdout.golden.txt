@@ -2,6 +2,7 @@ grab those images!
 
 Sections:
 
+  completion : Print shell completion scripts
   config : Change grabbit's config
   section2 : another section
   section3 : another section

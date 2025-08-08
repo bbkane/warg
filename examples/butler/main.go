@@ -30,9 +30,7 @@ func app() *wargcore.App {
 					flag.Required(),
 				),
 			),
-			section.CommandMap(warg.VersionCommandMap()),
 		),
-		warg.GlobalFlagMap(warg.ColorFlagMap()),
 	)
 	return &app
 }

@@ -6,6 +6,19 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.0.34
+
+## Added
+
+- Added `warg.FindVersion` to calculate the version of the app. Useful if you need the version before starting the app (particularly for setting up OTEL tracing)
+- Added `warg.SkipCompletionCommands` to let folks customize shell completions (currently only `zsh`) or avoid adding them. By default a root level `completion` section will be added. Currently only has `zsh` subcommand.
+- Added `warg.SkipAll` to skip adding the `completion` section, the `--color` global flag, the `version` root command, and validation on start up. This is intended for tests where you just want to assert against a minimal application.
+
+## Changed
+
+- Removed `warg.ColorFlagMap`. The `--color` global flag will be added automatically. Use the new `wargs.SkipGlobalColorFlag` if you don't want this)
+- Removed `warg.VersionCommandMap`. The `version` root command will be added automatically. Use the new `wargs.SkipVersionCommmand` if you don't want this)
+
 # v0.0.33
 
 ## Changed

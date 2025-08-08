@@ -25,22 +25,21 @@ type App struct {
 	HelpFlagName string
 	HelpCommands CommandMap
 
-	GlobalFlags    FlagMap
-	Name           string
-	RootSection    Section
-	SkipValidation bool
-	Version        string
+	GlobalFlags            FlagMap
+	Name                   string
+	RootSection            Section
+	SkipGlobalColorFlag    bool
+	SkipCompletionCommands bool
+	SkipValidation         bool
+	SkipVersionCommand     bool
+	Version                string
 }
 
 // MustRun runs the app.
 // Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
 // Any errors on an Action will be printed to stderr and os.Exit(1) will be called.
 func (app *App) MustRun(opts ...ParseOpt) {
-	// TODO: make this better? Don't hardcode and use the args from the opts instead of os.Args directly
-	if slices.Equal(os.Args, []string{os.Args[0], "completion", "zsh"}) {
-
-		completion.ZshCompletionScriptWrite(os.Stdout, app.Name)
-	} else if len(os.Args) >= 3 && os.Args[1] == "--completion-zsh" {
+	if len(os.Args) >= 3 && os.Args[1] == "--completion-zsh" {
 		// app --completion-zsh <args> . Note that <args> must be something, even if it's the empty string
 
 		candidates, err := app.CompletionCandidates(opts...)

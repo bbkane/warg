@@ -3,6 +3,8 @@ grabbit
   command2
   command3
   grab
+  completion
+    zsh
   config
     edit
   section2

@@ -70,10 +70,8 @@ func app() *wargcore.App {
 				unlink,
 				command.FlagMap(linkUnlinkFlags),
 			),
-			section.CommandMap(warg.VersionCommandMap()),
 			section.Footer("Homepage: https://github.com/bbkane/fling"),
 		),
-		warg.GlobalFlagMap(warg.ColorFlagMap()),
 		warg.SkipValidation(),
 	)
 	return &app

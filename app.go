@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
+	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/wargcore"
@@ -72,6 +73,36 @@ func HelpFlag(helpCommands wargcore.CommandMap, helpFlags wargcore.FlagMap) AppO
 	}
 }
 
+// SkipAll skips adding:
+//   - the default completion commands (<app> completion)
+//   - the default color flag map (<app> --color)
+//   - the default version command map (<app> version)
+//   - the default validation checks
+//
+// This is inteded for tests where you just want to assert against a minimal application
+func SkipAll() AppOpt {
+	return func(a *wargcore.App) {
+		a.SkipCompletionCommands = true
+		a.SkipGlobalColorFlag = true
+		a.SkipVersionCommand = true
+		a.SkipValidation = true
+	}
+}
+
+// SkipCompletionCommands skips adding the default completion commands (<app> completion).
+func SkipCompletionCommands() AppOpt {
+	return func(a *wargcore.App) {
+		a.SkipCompletionCommands = true
+	}
+}
+
+// SkipColorFlag skips adding the default color flag map (<app> --color).
+func SkipGlobalColorFlag() AppOpt {
+	return func(a *wargcore.App) {
+		a.SkipGlobalColorFlag = true
+	}
+}
+
 // SkipValidation skips (most of) the app's internal consistency checks when the app is created.
 // If used, make sure to call app.Validate() in a test!
 func SkipValidation() AppOpt {
@@ -80,7 +111,20 @@ func SkipValidation() AppOpt {
 	}
 }
 
-func debugBuildInfoVersion() string {
+// SkipVersionCommand skips adding the default version command (<app> version).
+func SkipVersionCommand() AppOpt {
+	return func(a *wargcore.App) {
+		a.SkipVersionCommand = true
+	}
+}
+
+// FindVersion returns the version of the app. If the version is already set (eg. via a build flag), it returns that. Otherwise, it tries to read the go module version from the runtime info, or returns "unknown" if that fails.
+func FindVersion(version string) string {
+	// if the version is already set (eg. via a build flag), return it
+	if version != "" {
+		return version
+	}
+
 	// If installed via `go install`, we'll be able to read runtime version info
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
@@ -90,53 +134,21 @@ func debugBuildInfoVersion() string {
 	return info.Main.Version
 }
 
-// ColorFlagMap returns a map with a single "--color" flag that can be used to control color output.
-//
-// Example:
-//
-//	warg.GlobalFlagMap(warg.ColorFlagMap())
-func ColorFlagMap() wargcore.FlagMap {
-	return wargcore.FlagMap{
-		"--color": flag.New(
-			"Use ANSI colors",
-			scalar.String(
-				scalar.Choices("true", "false", "auto"),
-				scalar.Default("auto"),
-			),
-			flag.EnvVars("WARG_COLOR"),
-		),
-	}
-}
-
-// VersioncommandMap returns a map with a single "version" command that prints the app version.
-//
-// Example:
-//
-//	warg.GlobalFlagMap(warg.ColorFlagMap())
-func VersionCommandMap() wargcore.CommandMap {
-	return wargcore.CommandMap{
-		"version": command.New(
-			"Print version",
-			func(ctx wargcore.Context) error {
-				fmt.Fprintln(ctx.Stdout, ctx.App.Version)
-				return nil
-			},
-		),
-	}
-}
-
 // New creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.
 func New(name string, version string, rootSection wargcore.Section, opts ...AppOpt) wargcore.App {
 	app := wargcore.App{
-		Name:            name,
-		RootSection:     rootSection,
-		ConfigFlagName:  "",
-		NewConfigReader: nil,
-		HelpFlagName:    "",
-		HelpCommands:    make(wargcore.CommandMap),
-		SkipValidation:  false,
-		Version:         version,
-		GlobalFlags:     make(wargcore.FlagMap),
+		Name:                   name,
+		RootSection:            rootSection,
+		ConfigFlagName:         "",
+		NewConfigReader:        nil,
+		HelpFlagName:           "",
+		HelpCommands:           make(wargcore.CommandMap),
+		SkipCompletionCommands: false,
+		SkipValidation:         false,
+		SkipGlobalColorFlag:    false,
+		SkipVersionCommand:     false,
+		Version:                version,
+		GlobalFlags:            make(wargcore.FlagMap),
 	}
 	for _, opt := range opts {
 		opt(&app)
@@ -149,8 +161,45 @@ func New(name string, version string, rootSection wargcore.Section, opts ...AppO
 		)(&app)
 	}
 
-	if app.Version == "" {
-		app.Version = debugBuildInfoVersion()
+	app.Version = FindVersion(app.Version)
+
+	if !app.SkipGlobalColorFlag {
+		GlobalFlagMap(wargcore.FlagMap{
+			"--color": flag.New(
+				"Use ANSI colors",
+				scalar.String(
+					scalar.Choices("true", "false", "auto"),
+					scalar.Default("auto"),
+				),
+				flag.EnvVars("WARG_COLOR"),
+			),
+		})(&app)
+	}
+
+	if !app.SkipCompletionCommands {
+		section.NewSection(
+			"completion",
+			"Print shell completion scripts",
+			section.NewCommand(
+				"zsh",
+				"Print zsh completion script",
+				func(ctx wargcore.Context) error {
+					completion.ZshCompletionScriptWrite(ctx.Stdout, app.Name)
+					return nil
+				},
+			),
+		)(&app.RootSection)
+	}
+
+	if !app.SkipVersionCommand {
+		section.NewCommand(
+			"version",
+			"Print version",
+			func(ctx wargcore.Context) error {
+				fmt.Fprintln(ctx.Stdout, ctx.App.Version)
+				return nil
+			},
+		)(&app.RootSection)
 	}
 
 	// validate or not and return

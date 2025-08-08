@@ -22,7 +22,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "leafSection",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New("Help for section"),
+				section.New("Help for section", section.NewSection("leaf", "Is empty but shouldn't be")),
 				warg.SkipValidation(),
 			),
 			expectedErr: true,
