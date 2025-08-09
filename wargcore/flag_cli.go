@@ -41,10 +41,10 @@ type Flag struct {
 	// Alias is an alternative name for a flag, usually shorter :)
 	Alias string
 
-	// CompletionCandidates is a function that returns a list of completion candidates for this flag.
+	// Completions is a function that returns a list of completion candidates for this flag.
 	// Note that some flags in the cli.Context Flags map may not be set, even if they're required.
 	// TODO: get a comprehensive list of restrictions on the context.
-	CompletionCandidates CompletionCandidatesFunc
+	Completions CompletionsFunc
 
 	// ConfigPath is the path from the config to the value the flag updates
 	ConfigPath string

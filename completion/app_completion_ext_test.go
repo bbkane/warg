@@ -10,7 +10,7 @@ import (
 	"go.bbkane.com/warg/wargcore"
 )
 
-func TestApp_CompletionCandidates(t *testing.T) {
+func TestApp_Completions(t *testing.T) {
 	// To try to make this more concise, these tests are gonna share an app...
 	app := testapp.BuildApp()
 
@@ -223,7 +223,7 @@ func TestApp_CompletionCandidates(t *testing.T) {
 			// add on the blank space the shell would add for us
 			args = append(args, "")
 
-			actualCandidates, actualErr := app.CompletionCandidates(
+			actualCandidates, actualErr := app.Completions(
 				parseopt.Args(args),
 				parseopt.LookupEnv(wargcore.LookupMap(nil)),
 			)

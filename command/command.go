@@ -23,12 +23,12 @@ func DoNothing(_ wargcore.Context) error {
 // New builds a Command
 func New(helpShort string, action wargcore.Action, opts ...CommandOpt) wargcore.Command {
 	command := wargcore.Command{
-		HelpShort:            helpShort,
-		Action:               action,
-		CompletionCandidates: DefaultCompletionCandidates,
-		Flags:                make(wargcore.FlagMap),
-		Footer:               "",
-		HelpLong:             "",
+		HelpShort:   helpShort,
+		Action:      action,
+		Completions: DefaultCompletions,
+		Flags:       make(wargcore.FlagMap),
+		Footer:      "",
+		HelpLong:    "",
 	}
 	for _, opt := range opts {
 		opt(&command)
@@ -36,7 +36,7 @@ func New(helpShort string, action wargcore.Action, opts ...CommandOpt) wargcore.
 	return command
 }
 
-func DefaultCompletionCandidates(cmdCtx wargcore.Context) (*completion.Candidates, error) {
+func DefaultCompletions(cmdCtx wargcore.Context) (*completion.Candidates, error) {
 	// FZF (or maybe zsh) auto-sorts by alphabetical order, so no need to get fancy with the following ideas
 	//  - if the flag is required and is not set, suggest it first
 	//  - suggest command flags before global flags
@@ -75,9 +75,9 @@ func DefaultCompletionCandidates(cmdCtx wargcore.Context) (*completion.Candidate
 	return candidates, nil
 }
 
-func CompletionCandidates(completionCandidatesFunc wargcore.CompletionCandidatesFunc) CommandOpt {
+func Completions(CompletionsFunc wargcore.CompletionsFunc) CommandOpt {
 	return func(flag *wargcore.Command) {
-		flag.CompletionCandidates = completionCandidatesFunc
+		flag.Completions = CompletionsFunc
 	}
 }
 

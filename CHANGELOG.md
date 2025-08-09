@@ -10,18 +10,16 @@ below this description) is likely unreleased.
 
 ## Added
 
-
 - Added `warg.FindVersion` to calculate the version of the app. Useful if you need the version before starting the app (particularly for setting up OTEL tracing)
 
-Added new completion convenience functions instead of making folks manually construct a `wargcore.CompletionCandidatesFunc`
+Added new completion convenience functions instead of making folks manually construct a `wargcore.CompletionsFunc` (also see "Changed" section)
 
-- Added `warg.CompletionCandidatesDirectories`
-- Added `warg.CompletionCandidatesDirectoriesFiles`
-- Added `warg.CompletionCandidatesNone`
-- Added `warg.CompletionCandidatesValues`
-- Added `warg.CompletionCandidatesValuesDescriptions`
+- Added `warg.CompletionsDirectories`
+- Added `warg.CompletionsDirectoriesFiles`
+- Added `warg.CompletionsNone`
+- Added `warg.CompletionsValues`
+- Added `warg.CompletionsValuesDescriptions`
 
-TODO: `s/CompletionCandidates/Completions` hopefully today before I release this version
 
 As I've noticed I basically want a `--color` flag, a `version` subcommand, and zsh completions in all of my apps, this version of warg adds them automatically. Use `warg.SkipXxx` if you don't want them or want to write your own customized version.
 
@@ -32,6 +30,17 @@ Full list:
 - Added `warg.SkipGlobalColorFlag` to skip adding the default `--color` flag automatically. Removed `warg.ColorFlagMap`
 - Added `warg.SkipVersionCommmand` to skip adding the version root command automatically. Removed `warg.VersionCommandMap`
 
+## Changed
+
+Changed `s/CompletionCandidates/Completions` for all warg functions
+
+- `command.DefaultCompletionsCandidates` -> `command.DefaultCompletions`
+- `comand.CompletionCandidates` -> `command.Completions`
+- `flag.DefaultCompletionsCandidates` -> `flag.DefaultCompletions`
+- `flag.CompletionCandidates` -> `flag.Completions`
+- `wargcore.App.CompletionCandidates` -> `wargcore.App.Completions`
+- `wargcore.CompletionCandidatesFunc` -> `wargcore.CompletionsFunc`
+
 ## Removed
 
 - Removed `warg.ColorFlagMap` and `warg.VersionCommandMap`. See description in the "Added" section
@@ -40,7 +49,7 @@ Full list:
 
 ## Changed
 
-- Renamed `CompletionCandidates` to `CompletionCandidatesFunc`
+- Renamed `Completions` to `CompletionsFunc`
 
 ## Fixed
 

@@ -42,7 +42,7 @@ func (app *App) MustRun(opts ...ParseOpt) {
 	if len(os.Args) >= 3 && os.Args[1] == "--completion-zsh" {
 		// app --completion-zsh <args> . Note that <args> must be something, even if it's the empty string
 
-		candidates, err := app.CompletionCandidates(opts...)
+		candidates, err := app.Completions(opts...)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -220,10 +220,10 @@ func (app *App) Validate() error {
 	return nil
 }
 
-// CompletionCandidatesFunc is a function that returns completion candidates for a flag. See warg.CompletionCandidates[Type] for convenience functions to make this
-type CompletionCandidatesFunc func(Context) (*completion.Candidates, error)
+// CompletionsFunc is a function that returns completion candidates for a flag. See warg.Completions[Type] for convenience functions to make this
+type CompletionsFunc func(Context) (*completion.Candidates, error)
 
-func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, error) {
+func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 	parseOpts := NewParseOpts(opts...)
 
 	// parseOpts.Args looks like: <exe> --completion-zsh <args>... <partialOrEmptyString>
@@ -302,9 +302,9 @@ func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, er
 
 	switch parseState.ExpectingArg {
 	case ExpectingArg_FlagNameOrEnd:
-		return parseState.CurrentCommand.CompletionCandidates(cmdContext)
+		return parseState.CurrentCommand.Completions(cmdContext)
 	case ExpectingArg_FlagValue:
-		return parseState.CurrentFlag.CompletionCandidates(cmdContext)
+		return parseState.CurrentFlag.Completions(cmdContext)
 	case ExpectingArg_SectionOrCommand:
 		panic("unreachable state: ExpectingArg_SectionOrCommand")
 	default:

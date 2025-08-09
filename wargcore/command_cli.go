@@ -51,10 +51,10 @@ type Command struct {
 	// Action to run when command is invoked
 	Action Action
 
-	// CompletionCandidates is a function that returns a list of completion candidates for this commmand.
+	// Completions is a function that returns a list of completion candidates for this commmand.
 	// Note that some flags in the cli.Context Flags map may not be set, even if they're required.
 	// TODO: get a comprehensive list of restrictions on the context.
-	CompletionCandidates CompletionCandidatesFunc
+	Completions CompletionsFunc
 
 	// Parsed Flags
 	Flags FlagMap

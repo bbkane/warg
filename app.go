@@ -134,28 +134,28 @@ func FindVersion(version string) string {
 	return info.Main.Version
 }
 
-func CompletionCandidatesDirectories(ctx wargcore.Context) (*completion.Candidates, error) {
+func CompletionsDirectories(ctx wargcore.Context) (*completion.Candidates, error) {
 	return &completion.Candidates{
 		Type:   completion.Type_Directories,
 		Values: nil,
 	}, nil
 }
 
-func CompletionCandidatesDirectoriesFiles(ctx wargcore.Context) (*completion.Candidates, error) {
+func CompletionsDirectoriesFiles(ctx wargcore.Context) (*completion.Candidates, error) {
 	return &completion.Candidates{
 		Type:   completion.Type_DirectoriesFiles,
 		Values: nil,
 	}, nil
 }
 
-func CompletionCandidatesNone(ctx wargcore.Context) (*completion.Candidates, error) {
+func CompletionsNone(ctx wargcore.Context) (*completion.Candidates, error) {
 	return &completion.Candidates{
 		Type:   completion.Type_None,
 		Values: nil,
 	}, nil
 }
 
-func CompletionCandidatesValues(values []string) wargcore.CompletionCandidatesFunc {
+func CompletionsValues(values []string) wargcore.CompletionsFunc {
 	var vals []completion.Candidate
 	for _, v := range values {
 		vals = append(vals, completion.Candidate{Name: v, Description: ""})
@@ -169,7 +169,7 @@ func CompletionCandidatesValues(values []string) wargcore.CompletionCandidatesFu
 	}
 }
 
-func CompletionCandidatesValuesDescriptions(values []completion.Candidate) wargcore.CompletionCandidatesFunc {
+func CompletionsValuesDescriptions(values []completion.Candidate) wargcore.CompletionsFunc {
 	return func(ctx wargcore.Context) (*completion.Candidates, error) {
 		return &completion.Candidates{
 			Type:   completion.Type_ValuesDescriptions,
