@@ -14,15 +14,18 @@ Setup:
 ```zsh
 # install the app to $GOBIN
 go install ./completion/internal/testappcmd
+
 cd ~/go/bin  # default $GOBIN
+
 # install the completion to something on $FPATH
 ./testappcmd completion zsh > ~/fbin/_testappcmd
+
 # open a new shell to load completions
 ./testappcmd ...  # tab away!!
+
+# test tab completions
+./testappcmd manual <TAB>
 ```
 
-Run:
+If it's not loading for some reason, remove `~/.zcompdump` and open a new shell to regenerate it.
 
-```zsh
-./testappcmd manual TAB
-```
