@@ -1,6 +1,6 @@
 #compdef WARG_COMPLETION_APPNAME
 
-date >> ~/_WARG_COMPLETION_APPNAME_completion.log
+# date >> ~/_WARG_COMPLETION_APPNAME_completion.log
 
 local -a comp_values=()
 local -a comp_descriptions=()
