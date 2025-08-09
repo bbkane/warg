@@ -36,12 +36,7 @@ func BuildApp() *wargcore.App {
 					"--dirs",
 					"dirs completion",
 					scalar.Path(),
-					flag.CompletionCandidates(func(ctx wargcore.Context) (*completion.Candidates, error) {
-						return &completion.Candidates{
-							Type:   completion.Type_Directories,
-							Values: nil,
-						}, nil
-					}),
+					flag.CompletionCandidates(warg.CompletionCandidatesDirectories),
 				),
 				command.NewFlag(
 					"--dirs-files",
@@ -58,40 +53,22 @@ func BuildApp() *wargcore.App {
 					"--none",
 					"no completion",
 					scalar.String(),
-					flag.CompletionCandidates(func(ctx wargcore.Context) (*completion.Candidates, error) {
-						return &completion.Candidates{
-							Type:   completion.Type_None,
-							Values: nil,
-						}, nil
-					}),
+					flag.CompletionCandidates(warg.CompletionCandidatesNone),
 				),
 				command.NewFlag(
 					"--values",
 					"values completion",
 					scalar.String(),
-					flag.CompletionCandidates(func(ctx wargcore.Context) (*completion.Candidates, error) {
-						return &completion.Candidates{
-							Type: completion.Type_Values,
-							Values: []completion.Candidate{
-								{Name: "alpha", Description: "THIS SHOULDN'T SHOW"},
-								{Name: "beta", Description: "THIS SHOULDN'T SHOW"},
-							},
-						}, nil
-					}),
+					flag.CompletionCandidates(warg.CompletionCandidatesValues([]string{"alpha", "beta"})),
 				),
 				command.NewFlag(
 					"--values-descriptions",
 					"values completion with descriptions",
 					scalar.String(),
-					flag.CompletionCandidates(func(ctx wargcore.Context) (*completion.Candidates, error) {
-						return &completion.Candidates{
-							Type: completion.Type_ValuesDescriptions,
-							Values: []completion.Candidate{
-								{Name: "gamma", Description: "THIS SHOULD SHOW"},
-								{Name: "delta", Description: "THIS SHOULD SHOW"},
-							},
-						}, nil
-					}),
+					flag.CompletionCandidates(warg.CompletionCandidatesValuesDescriptions([]completion.Candidate{
+						{Name: "gamma", Description: "gamma description"},
+						{Name: "delta", Description: "delta description"},
+					})),
 				),
 			),
 			section.NewSection(
@@ -143,10 +120,8 @@ func BuildApp() *wargcore.App {
 				scalar.Default("default"),
 			),
 		),
-		warg.SkipAll(),
+		warg.SkipGlobalColorFlag(),
+		warg.SkipVersionCommand(),
 	)
-	if err := app.Validate(); err != nil {
-		panic("oopsie test app went bad: " + err.Error())
-	}
 	return &app
 }

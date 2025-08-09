@@ -12,3 +12,4 @@ Commands:
   command2 : another command
   command3 : another command
   grab : do the grabbity grabbity
+  version : Print version

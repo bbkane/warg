@@ -44,6 +44,10 @@ func TestApp_CompletionCandidates(t *testing.T) {
 						Description: "commands with flags using all completion types for manual testing",
 					},
 					{
+						Name:        "completion",
+						Description: "Print shell completion scripts",
+					},
+					{
 						Name:        "section1",
 						Description: "section1 help",
 					},

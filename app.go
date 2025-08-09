@@ -134,6 +134,50 @@ func FindVersion(version string) string {
 	return info.Main.Version
 }
 
+func CompletionCandidatesDirectories(ctx wargcore.Context) (*completion.Candidates, error) {
+	return &completion.Candidates{
+		Type:   completion.Type_Directories,
+		Values: nil,
+	}, nil
+}
+
+func CompletionCandidatesDirectoriesFiles(ctx wargcore.Context) (*completion.Candidates, error) {
+	return &completion.Candidates{
+		Type:   completion.Type_DirectoriesFiles,
+		Values: nil,
+	}, nil
+}
+
+func CompletionCandidatesNone(ctx wargcore.Context) (*completion.Candidates, error) {
+	return &completion.Candidates{
+		Type:   completion.Type_None,
+		Values: nil,
+	}, nil
+}
+
+func CompletionCandidatesValues(values []string) wargcore.CompletionCandidatesFunc {
+	var vals []completion.Candidate
+	for _, v := range values {
+		vals = append(vals, completion.Candidate{Name: v, Description: ""})
+	}
+	return func(ctx wargcore.Context) (*completion.Candidates, error) {
+
+		return &completion.Candidates{
+			Type:   completion.Type_Values,
+			Values: vals,
+		}, nil
+	}
+}
+
+func CompletionCandidatesValuesDescriptions(values []completion.Candidate) wargcore.CompletionCandidatesFunc {
+	return func(ctx wargcore.Context) (*completion.Candidates, error) {
+		return &completion.Candidates{
+			Type:   completion.Type_ValuesDescriptions,
+			Values: values,
+		}, nil
+	}
+}
+
 // New creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.
 func New(name string, version string, rootSection wargcore.Section, opts ...AppOpt) wargcore.App {
 	app := wargcore.App{

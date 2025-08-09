@@ -10,14 +10,31 @@ below this description) is likely unreleased.
 
 ## Added
 
+
 - Added `warg.FindVersion` to calculate the version of the app. Useful if you need the version before starting the app (particularly for setting up OTEL tracing)
-- Added `warg.SkipCompletionCommands` to let folks customize shell completions (currently only `zsh`) or avoid adding them. By default a root level `completion` section will be added. Currently only has `zsh` subcommand.
+
+Added new completion convenience functions instead of making folks manually construct a `wargcore.CompletionCandidatesFunc`
+
+- Added `warg.CompletionCandidatesDirectories`
+- Added `warg.CompletionCandidatesDirectoriesFiles`
+- Added `warg.CompletionCandidatesNone`
+- Added `warg.CompletionCandidatesValues`
+- Added `warg.CompletionCandidatesValuesDescriptions`
+
+TODO: `s/CompletionCandidates/Completions` hopefully today before I release this version
+
+As I've noticed I basically want a `--color` flag, a `version` subcommand, and zsh completions in all of my apps, this version of warg adds them automatically. Use `warg.SkipXxx` if you don't want them or want to write your own customized version.
+
+Full list:
+
 - Added `warg.SkipAll` to skip adding the `completion` section, the `--color` global flag, the `version` root command, and validation on start up. This is intended for tests where you just want to assert against a minimal application.
+- Added `warg.SkipCompletionCommands` to let folks customize shell completions (currently only `zsh`) or avoid adding them. By default a root level `completion` section will be added. Currently only has `zsh` subcommand.
+- Added `warg.SkipGlobalColorFlag` to skip adding the default `--color` flag automatically. Removed `warg.ColorFlagMap`
+- Added `warg.SkipVersionCommmand` to skip adding the version root command automatically. Removed `warg.VersionCommandMap`
 
-## Changed
+## Removed
 
-- Removed `warg.ColorFlagMap`. The `--color` global flag will be added automatically. Use the new `wargs.SkipGlobalColorFlag` if you don't want this)
-- Removed `warg.VersionCommandMap`. The `version` root command will be added automatically. Use the new `wargs.SkipVersionCommmand` if you don't want this)
+- Removed `warg.ColorFlagMap` and `warg.VersionCommandMap`. See description in the "Added" section
 
 # v0.0.33
 

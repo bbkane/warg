@@ -220,6 +220,7 @@ func (app *App) Validate() error {
 	return nil
 }
 
+// CompletionCandidatesFunc is a function that returns completion candidates for a flag. See warg.CompletionCandidates[Type] for convenience functions to make this
 type CompletionCandidatesFunc func(Context) (*completion.Candidates, error)
 
 func (a *App) CompletionCandidates(opts ...ParseOpt) (*completion.Candidates, error) {

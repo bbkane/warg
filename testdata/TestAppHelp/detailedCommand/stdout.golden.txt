@@ -12,6 +12,13 @@ Command Flags:
 
 Inherited Section Flags:
 
+  --color : Use ANSI colors
+    type : string
+    choices : [true false auto]
+    default : auto
+    envvars : [WARG_COLOR]
+    currentvalue (set by appdefault) : auto
+
   --help , -h : Print help
     type : string
     choices : [allcommands default detailed outline]
