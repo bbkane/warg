@@ -8,8 +8,8 @@ import (
 	"go.bbkane.com/warg/wargcore"
 )
 
-func DefaultHelpCommandMap() wargcore.CommandMap {
-	return wargcore.CommandMap{
+func DefaultHelpCommandMap() wargcore.CmdMap {
+	return wargcore.CmdMap{
 		"default":     wargcore.HelpToCommand(detailed.DetailedCommandHelp, allcommands.AllCommandsSectionHelp),
 		"detailed":    wargcore.HelpToCommand(detailed.DetailedCommandHelp, detailed.DetailedSectionHelp),
 		"outline":     wargcore.HelpToCommand(OutlineCommandHelp, OutlineSectionHelp),

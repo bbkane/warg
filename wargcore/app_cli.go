@@ -23,7 +23,7 @@ type App struct {
 
 	// Help
 	HelpFlagName string
-	HelpCommands CommandMap
+	HelpCommands CmdMap
 
 	GlobalFlags            FlagMap
 	Name                   string

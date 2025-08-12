@@ -26,14 +26,14 @@ type Context struct {
 // An Action is run as the result of a command
 type Action func(Context) error
 
-// A CommandMap holds Commands and is used by Sections
-type CommandMap map[string]Command
+// A CmdMap holds Commands and is used by Sections
+type CmdMap map[string]Cmd
 
-func (fm CommandMap) Empty() bool {
+func (fm CmdMap) Empty() bool {
 	return len(fm) == 0
 }
 
-func (fm CommandMap) SortedNames() []string {
+func (fm CmdMap) SortedNames() []string {
 	keys := make([]string, 0, len(fm))
 	for k := range fm {
 		keys = append(keys, k)
@@ -44,10 +44,10 @@ func (fm CommandMap) SortedNames() []string {
 	return keys
 }
 
-// A Command will run code for you!
-// The name of a Command should probably be a verb - add , edit, run, ...
-// A Command should not be constructed directly. Use Command / New / ExistingCommand functions
-type Command struct {
+// A Cmd will run code for you!
+// The name of a Cmd should probably be a verb - add , edit, run, ...
+// A Cmd should not be constructed directly. Use Cmd / New / ExistingCommand functions
+type Cmd struct {
 	// Action to run when command is invoked
 	Action Action
 

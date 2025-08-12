@@ -16,7 +16,7 @@ func exampleHelpFlaglogin(_ wargcore.Context) error {
 	return nil
 }
 
-func customHelpCmd() wargcore.Command {
+func customHelpCmd() wargcore.Cmd {
 	return command.New(
 		"", // this command will be launched by the help flag, so users will never see the help
 		func(ctx wargcore.Context) error {

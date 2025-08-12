@@ -56,7 +56,7 @@ func ConfigFlag(reader config.NewReader, flagMap wargcore.FlagMap) AppOpt {
 //   - default value set to one of the choices
 //
 // These properties are checked at runtime with app.Validate().
-func HelpFlag(helpCommands wargcore.CommandMap, helpFlags wargcore.FlagMap) AppOpt {
+func HelpFlag(helpCommands wargcore.CmdMap, helpFlags wargcore.FlagMap) AppOpt {
 	return func(a *wargcore.App) {
 		switch len(helpFlags) {
 		case 0:
@@ -186,7 +186,7 @@ func New(name string, version string, rootSection wargcore.Section, opts ...AppO
 		ConfigFlagName:         "",
 		NewConfigReader:        nil,
 		HelpFlagName:           "",
-		HelpCommands:           make(wargcore.CommandMap),
+		HelpCommands:           make(wargcore.CmdMap),
 		SkipCompletionCommands: false,
 		SkipValidation:         false,
 		SkipGlobalColorFlag:    false,

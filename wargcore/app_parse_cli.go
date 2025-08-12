@@ -105,7 +105,7 @@ type ParseState struct {
 	CurrentSection *Section
 
 	CurrentCommandName string
-	CurrentCommand     *Command
+	CurrentCommand     *Cmd
 
 	CurrentFlagName string
 	CurrentFlag     *Flag
@@ -315,7 +315,7 @@ func resolveFlag2(
 }
 
 // resolveFlags resolves the config flag first, and then uses its values to resolve the rest of the flags.
-func (a *App) resolveFlags(currentCommand *Command, flagValues FlagValueMap, lookupEnv LookupEnv, unsetFlagNames unsetFlagNameSet) error {
+func (a *App) resolveFlags(currentCommand *Cmd, flagValues FlagValueMap, lookupEnv LookupEnv, unsetFlagNames unsetFlagNameSet) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
 	if a.ConfigFlagName != "" {

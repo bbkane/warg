@@ -27,7 +27,7 @@ func (fm SectionMap) SortedNames() []string {
 // Sections should not be be created directly, but with the APIs in [go.bbkane.com/warg/section].
 type Section struct {
 	// Commands holds the Commands under this Section
-	Commands CommandMap
+	Commands CmdMap
 	// Sections holds the Sections under this Section
 	Sections SectionMap
 	// HelpShort is a required one-line descripiton of this section

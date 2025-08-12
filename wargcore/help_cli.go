@@ -1,6 +1,6 @@
 package wargcore
 
-type CommandHelp func(cur *Command, helpInfo HelpInfo) Action
+type CmdHelp func(cur *Cmd, helpInfo HelpInfo) Action
 type SectionHelp func(cur *Section, helpInfo HelpInfo) Action
 
 // HelpInfo lists common information available to a help function
@@ -13,8 +13,8 @@ type HelpInfo struct {
 	RootSection Section
 }
 
-func HelpToCommand(commandHelp CommandHelp, secHelp SectionHelp) Command {
-	return Command{ //nolint:exhaustruct  // This help is never used since this is a generated command
+func HelpToCommand(commandHelp CmdHelp, secHelp SectionHelp) Cmd {
+	return Cmd{ //nolint:exhaustruct  // This help is never used since this is a generated command
 		Action: func(cmdCtx Context) error {
 			// build ftar.AvailableFlags - it's a map of string to flag for the app globals + current command. Don't forget to set each flag.IsCommandFlag and Value for now..
 			// TODO:

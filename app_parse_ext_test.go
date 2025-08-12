@@ -432,7 +432,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 						"section": section.New(
 							"help for section",
 							section.CommandMap(
-								wargcore.CommandMap{
+								wargcore.CmdMap{
 									"command": command.New(
 										"help for command",
 										command.DoNothing,

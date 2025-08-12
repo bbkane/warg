@@ -15,7 +15,7 @@ func New(helpShort string, opts ...SectionOpt) wargcore.Section {
 	section := wargcore.Section{
 		HelpShort: helpShort,
 		Sections:  make(wargcore.SectionMap),
-		Commands:  make(wargcore.CommandMap),
+		Commands:  make(wargcore.CmdMap),
 		HelpLong:  "",
 		Footer:    "",
 	}
@@ -46,7 +46,7 @@ func SectionMap(sections wargcore.SectionMap) SectionOpt {
 }
 
 // Command adds an existing Command as a child of this Section. Panics if a Command with the same name already exists
-func Command(name string, value wargcore.Command) SectionOpt {
+func Command(name string, value wargcore.Cmd) SectionOpt {
 	return func(app *wargcore.Section) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
@@ -57,7 +57,7 @@ func Command(name string, value wargcore.Command) SectionOpt {
 }
 
 // CommandMap adds existing Commands as a child of this Section. Panics if a Command with the same name already exists
-func CommandMap(commands wargcore.CommandMap) SectionOpt {
+func CommandMap(commands wargcore.CmdMap) SectionOpt {
 	return func(app *wargcore.Section) {
 		for name, value := range commands {
 			Command(name, value)(app)

@@ -175,7 +175,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *wargco
 	fmt.Fprintln(w)
 }
 
-func DetailedCommandHelp(cur *wargcore.Command, helpInfo wargcore.HelpInfo) wargcore.Action {
+func DetailedCommandHelp(cur *wargcore.Cmd, helpInfo wargcore.HelpInfo) wargcore.Action {
 	return func(pf wargcore.Context) error {
 		file := pf.Stdout
 		f := bufio.NewWriter(file)

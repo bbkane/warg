@@ -52,6 +52,6 @@ func OutlineSectionHelp(_ *wargcore.Section, hi wargcore.HelpInfo) wargcore.Acti
 	}
 }
 
-func OutlineCommandHelp(cur *wargcore.Command, helpInfo wargcore.HelpInfo) wargcore.Action {
+func OutlineCommandHelp(cur *wargcore.Cmd, helpInfo wargcore.HelpInfo) wargcore.Action {
 	return OutlineSectionHelp(nil, helpInfo)
 }
