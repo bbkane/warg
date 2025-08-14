@@ -1,22 +1,19 @@
-package allcommands
+package warg
 
 import (
 	"bufio"
 	"fmt"
 	"os"
-
-	"go.bbkane.com/warg/help/common"
-	"go.bbkane.com/warg/wargcore"
 )
 
-func AllCommandsSectionHelp(cur *wargcore.Section, helpInfo wargcore.HelpInfo) wargcore.Action {
-	return func(cmdCtx wargcore.Context) error {
+func AllCommandsSectionHelp(cur *Section, helpInfo HelpInfo) Action {
+	return func(cmdCtx Context) error {
 		file := cmdCtx.Stdout
 
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := common.ConditionallyEnableColor(cmdCtx.Flags, file)
+		col, err := ConditionallyEnableColor(cmdCtx.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
@@ -30,7 +27,7 @@ func AllCommandsSectionHelp(cur *wargcore.Section, helpInfo wargcore.HelpInfo) w
 
 		fmt.Fprintln(f)
 
-		fmt.Fprintln(f, common.FmtHeader(&col, "All Commands")+" (use <cmd> -h to see flag details):")
+		fmt.Fprintln(f, FmtHeader(&col, "All Commands")+" (use <cmd> -h to see flag details):")
 		fmt.Fprintln(f)
 
 		path := []string{string(cmdCtx.App.Name)}
@@ -51,16 +48,16 @@ func AllCommandsSectionHelp(cur *wargcore.Section, helpInfo wargcore.HelpInfo) w
 				fmt.Fprintf(f, "  ")
 
 				for _, p := range flatSec.Path {
-					fmt.Fprint(f, common.FmtCommandName(&col, string(p))+" ")
+					fmt.Fprint(f, FmtCommandName(&col, string(p))+" ")
 				}
-				fmt.Fprintln(f, common.FmtCommandName(&col, name))
+				fmt.Fprintln(f, FmtCommandName(&col, name))
 
 				fmt.Fprintln(f)
 			}
 
 		}
 		if cur.Footer != "" {
-			fmt.Fprintln(f, common.FmtHeader(&col, "Footer")+":")
+			fmt.Fprintln(f, FmtHeader(&col, "Footer")+":")
 			fmt.Fprintln(f)
 			fmt.Fprintf(f, "%s\n", cur.Footer)
 		}

@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/parseopt"
-	"go.bbkane.com/warg/wargcore"
 )
 
 func TestApp_Validate(t *testing.T) {
@@ -22,12 +20,12 @@ func TestRunHelp(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   []string
-		lookup wargcore.LookupEnv
+		lookup warg.LookupEnv
 	}{
 		{
 			name:   "linkDetailed",
 			args:   []string{"fling", "link", "--help", "detailed"},
-			lookup: wargcore.LookupMap(nil),
+			lookup: warg.LookupMap(nil),
 		},
 	}
 
@@ -40,8 +38,8 @@ func TestRunHelp(t *testing.T) {
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},
-				parseopt.Args(tt.args),
-				parseopt.LookupEnv(tt.lookup),
+				warg.Args(tt.args),
+				warg.ParseLookupEnv(tt.lookup),
 			)
 		})
 	}

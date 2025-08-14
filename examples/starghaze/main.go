@@ -6,213 +6,212 @@ import (
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/value/scalar"
-	"go.bbkane.com/warg/wargcore"
 )
 
-func app() *wargcore.App {
+func app() *warg.App {
 
-	downloadCmd := wargcore.NewCmd(
+	downloadCmd := warg.NewCmd(
 		"Download star info",
 		githubStarsDownload,
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--include-readmes",
 			"Search for README.md.",
 			scalar.Bool(
 				scalar.Default(false),
 			),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--max-languages",
 			"Max number of languages to query on a repo",
 			scalar.Int(
 				scalar.Default(20),
 			),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--max-repo-topics",
 			"Max number of topics to query on a repo",
 			scalar.Int(
 				scalar.Default(20),
 			),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--after-cursor",
 			"PageInfo EndCursor to start from",
 			scalar.String(),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--max-pages",
 			"Max number of pages to fetch",
 			scalar.Int(
 				scalar.Default(1),
 			),
-			wargcore.Required(),
+			warg.Required(),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--output",
 			"Output filepath. Must not exist",
 			scalar.Path(
 				scalar.Default(path.New("starghaze_download.jsonl")),
 			),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--page-size",
 			"Number of starred repos in page",
 			scalar.Int(
 				scalar.Default(100),
 			),
-			wargcore.Required(),
+			warg.Required(),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--timeout",
 			"Timeout for a run. Use https://pkg.go.dev/time#Duration to build it",
 			scalar.Duration(
 				scalar.Default(time.Minute*10),
 			),
-			wargcore.Required(),
+			warg.Required(),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--token",
 			"Github PAT",
 			scalar.String(),
-			wargcore.EnvVars("STARGHAZE_GITHUB_TOKEN", "GITHUB_TOKEN"),
-			wargcore.Required(),
+			warg.EnvVars("STARGHAZE_GITHUB_TOKEN", "GITHUB_TOKEN"),
+			warg.Required(),
 		),
 	)
 
-	formatCmd := wargcore.NewCmd(
+	formatCmd := warg.NewCmd(
 		"Format downloaded GitHub Stars",
 		format,
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--format",
 			"Output format",
 			scalar.String(
 				scalar.Choices("csv", "jsonl", "sqlite", "zinc"),
 				scalar.Default("csv"),
 			),
-			wargcore.Required(),
+			warg.Required(),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--date-format",
 			"Datetime output format. See https://github.com/lestrrat-go/strftime for details. If not passed, the GitHub default is RFC 3339. Consider using '%b %d, %Y' for csv format",
 			scalar.String(),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--include-readmes",
 			"Search for README.md.",
 			scalar.Bool(
 				scalar.Default(false),
 			),
-			wargcore.Required(),
+			warg.Required(),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--sqlite-dsn",
 			"Sqlite DSN. Usually the file name. Only used for --format sqlite",
 			scalar.String(
 				scalar.Default("starghaze.db"),
 			),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--zinc-index-name",
 			"Only used for --format zinc.",
 			scalar.String(
 				scalar.Default("starghaze"),
 			),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--input",
 			"Input file",
 			scalar.Path(
 				scalar.Default(path.New("starghaze_download.jsonl")),
 			),
-			wargcore.Required(),
+			warg.Required(),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--max-line-size",
 			"Max line size in the file in MB",
 			scalar.Int(
 				scalar.Default(10),
 			),
-			wargcore.Required(),
+			warg.Required(),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--output",
 			"output file. Prints to stdout if not passed",
 			scalar.Path(),
 		),
 	)
 
-	sheetFlags := wargcore.FlagMap{
-		"--sheet-id": wargcore.NewFlag(
+	sheetFlags := warg.FlagMap{
+		"--sheet-id": warg.NewFlag(
 			"ID For the particulare sheet. Viewable from `gid` URL param",
 			scalar.Int(),
-			wargcore.EnvVars("STARGHAZE_SHEET_ID"),
-			wargcore.Required(),
+			warg.EnvVars("STARGHAZE_SHEET_ID"),
+			warg.Required(),
 		),
-		"--spreadsheet-id": wargcore.NewFlag(
+		"--spreadsheet-id": warg.NewFlag(
 			"ID for the whole spreadsheet. Viewable from URL",
 			scalar.String(),
-			wargcore.EnvVars("STARGHAZE_SPREADSHEET_ID"),
-			wargcore.Required(),
+			warg.EnvVars("STARGHAZE_SPREADSHEET_ID"),
+			warg.Required(),
 		),
 	}
 
-	gsheetsSection := wargcore.NewSection(
+	gsheetsSection := warg.NewSection(
 		"Google Sheets commands",
-		wargcore.NewChildCmd(
+		warg.NewChildCmd(
 			"open",
 			"Open spreadsheet in browser",
 			gSheetsOpen,
-			wargcore.ChildFlagMap(sheetFlags),
+			warg.ChildFlagMap(sheetFlags),
 		),
-		wargcore.NewChildCmd(
+		warg.NewChildCmd(
 			"upload",
 			"Upload CSV to Google Sheets. This will overwrite whatever is in the spreadsheet",
 			gSheetsUpload,
-			wargcore.ChildFlagMap(sheetFlags),
-			wargcore.NewChildFlag(
+			warg.ChildFlagMap(sheetFlags),
+			warg.NewChildFlag(
 				"--csv-path",
 				"CSV file to upload",
 				scalar.Path(),
-				wargcore.Required(),
+				warg.Required(),
 			),
-			wargcore.NewChildFlag(
+			warg.NewChildFlag(
 				"--timeout",
 				"Timeout for a run. Use https://pkg.go.dev/time#Duration to build it",
 				scalar.Duration(
 					scalar.Default(time.Minute*10),
 				),
-				wargcore.Required(),
+				warg.Required(),
 			),
 		),
 	)
 
-	searchCmd := wargcore.NewCmd(
+	searchCmd := warg.NewCmd(
 
 		"Full text search SQLite database",
 		search,
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--limit",
 			"Max number of results",
 			scalar.Int(
 				scalar.Default(50),
 			),
-			wargcore.Required(),
+			warg.Required(),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--sqlite-dsn",
 			"Sqlite DSN. Usually the file name.",
 			scalar.String(
 				scalar.Default("starghaze.db"),
 			),
-			wargcore.Required(),
+			warg.Required(),
 		),
-		wargcore.NewChildFlag(
+		warg.NewChildFlag(
 			"--term",
 			"Search for this term",
 			scalar.String(),
-			wargcore.Alias("-t"),
-			wargcore.Required(),
+			warg.Alias("-t"),
+			warg.Required(),
 		),
 
 		// TODO: how many results? limit by date added?
@@ -221,25 +220,25 @@ func app() *wargcore.App {
 	app := warg.New(
 		"starghaze",
 		"v1.0.0",
-		wargcore.NewSection(
+		warg.NewSection(
 			"Save GitHub Starred Repos",
-			wargcore.ChildCmd(
+			warg.ChildCmd(
 				"download",
 				downloadCmd,
 			),
-			wargcore.ChildCmd(
+			warg.ChildCmd(
 				"format",
 				formatCmd,
 			),
-			wargcore.ChildCmd(
+			warg.ChildCmd(
 				"search",
 				searchCmd,
 			),
-			wargcore.ChildSection(
+			warg.ChildSection(
 				"gsheets",
 				gsheetsSection,
 			),
-			wargcore.SectionFooter("Homepage: https://github.com/bbkane/starghaze"),
+			warg.SectionFooter("Homepage: https://github.com/bbkane/starghaze"),
 		),
 		warg.SkipValidation(),
 	)

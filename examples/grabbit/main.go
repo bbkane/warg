@@ -8,10 +8,9 @@ import (
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
-	"go.bbkane.com/warg/wargcore"
 )
 
-func app() *wargcore.App {
+func app() *warg.App {
 	appFooter := `Examples (assuming BASH-like shell):
 
   # Grab from passed flags
@@ -30,135 +29,135 @@ func app() *wargcore.App {
 Homepage: https://github.com/bbkane/grabbit
 `
 
-	logFlags := wargcore.FlagMap{
-		"--log-filename": wargcore.NewFlag(
+	logFlags := warg.FlagMap{
+		"--log-filename": warg.NewFlag(
 			"Log filename",
 			scalar.Path(
 				scalar.Default(path.New("~/.config/grabbit.jsonl")),
 			),
-			wargcore.ConfigPath("lumberjacklogger.filename"),
-			wargcore.Required(),
+			warg.ConfigPath("lumberjacklogger.filename"),
+			warg.Required(),
 		),
-		"--log-maxage": wargcore.NewFlag(
+		"--log-maxage": warg.NewFlag(
 			"Max age before log rotation in days", // TODO: change to duration flag
 			scalar.Int(
 				scalar.Default(30),
 			),
-			wargcore.ConfigPath("lumberjacklogger.maxage"),
-			wargcore.Required(),
+			warg.ConfigPath("lumberjacklogger.maxage"),
+			warg.Required(),
 		),
-		"--log-maxbackups": wargcore.NewFlag(
+		"--log-maxbackups": warg.NewFlag(
 			"Num backups for the log",
 			scalar.Int(
 				scalar.Default(0),
 			),
-			wargcore.ConfigPath("lumberjacklogger.maxbackups"),
-			wargcore.Required(),
+			warg.ConfigPath("lumberjacklogger.maxbackups"),
+			warg.Required(),
 		),
-		"--log-maxsize": wargcore.NewFlag(
+		"--log-maxsize": warg.NewFlag(
 			"Max size of log in megabytes",
 			scalar.Int(
 				scalar.Default(5),
 			),
-			wargcore.ConfigPath("lumberjacklogger.maxsize"),
-			wargcore.Required(),
+			warg.ConfigPath("lumberjacklogger.maxsize"),
+			warg.Required(),
 		),
 	}
 
 	app := warg.New(
 		"grabbit",
 		"v1.0.0",
-		wargcore.NewSection(
+		warg.NewSection(
 			"Get top images from subreddits",
-			wargcore.NewChildCmd(
+			warg.NewChildCmd(
 				"grab",
 				"Grab images. Optionally use `config edit` first to create a config",
 				grab,
-				wargcore.ChildFlagMap(logFlags),
-				wargcore.NewChildFlag(
+				warg.ChildFlagMap(logFlags),
+				warg.NewChildFlag(
 					"--subreddit-name",
 					"Subreddit to grab",
 					slice.String(
 						slice.Default([]string{"earthporn", "wallpapers"}),
 					),
-					wargcore.Alias("-sn"),
-					wargcore.ConfigPath("subreddits[].name"),
-					wargcore.Required(),
+					warg.Alias("-sn"),
+					warg.ConfigPath("subreddits[].name"),
+					warg.Required(),
 				),
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					"--subreddit-destination",
 					"Where to store the subreddit",
 					slice.Path(
 						slice.Default([]path.Path{path.New("."), path.New(".")}),
 					),
-					wargcore.Alias("-sd"),
-					wargcore.ConfigPath("subreddits[].destination"),
-					wargcore.Required(),
+					warg.Alias("-sd"),
+					warg.ConfigPath("subreddits[].destination"),
+					warg.Required(),
 				),
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					"--subreddit-timeframe",
 					"Take the top subreddits from this timeframe",
 					slice.String(
 						slice.Choices("day", "week", "month", "year", "all"),
 						slice.Default([]string{"week", "week"}),
 					),
-					wargcore.Alias("-st"),
-					wargcore.ConfigPath("subreddits[].timeframe"),
-					wargcore.Required(),
+					warg.Alias("-st"),
+					warg.ConfigPath("subreddits[].timeframe"),
+					warg.Required(),
 				),
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					"--subreddit-limit",
 					"Max number of links to try to download",
 					slice.Int(
 						slice.Default([]int{2, 3}),
 					),
-					wargcore.Alias("-sl"),
-					wargcore.ConfigPath("subreddits[].limit"),
-					wargcore.Required(),
+					warg.Alias("-sl"),
+					warg.ConfigPath("subreddits[].limit"),
+					warg.Required(),
 				),
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					"--timeout",
 					"Timeout for a single download",
 					scalar.Duration(
 						scalar.Default(time.Second*30),
 					),
-					wargcore.Alias("-t"),
-					wargcore.Required(),
+					warg.Alias("-t"),
+					warg.Required(),
 				),
 			),
 
-			wargcore.SectionFooter(appFooter),
+			warg.SectionFooter(appFooter),
 
-			wargcore.NewChildSection(
+			warg.NewChildSection(
 				"config",
 				"Config commands",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"edit",
 					"Edit or create configuration file.",
 					editConfig,
-					wargcore.ChildFlagMap(logFlags),
-					wargcore.NewChildFlag(
+					warg.ChildFlagMap(logFlags),
+					warg.NewChildFlag(
 						"--editor",
 						"Path to editor",
 						scalar.String(
 							scalar.Default("vi"),
 						),
-						wargcore.Alias("-e"),
-						wargcore.EnvVars("EDITOR"),
-						wargcore.Required(),
+						warg.Alias("-e"),
+						warg.EnvVars("EDITOR"),
+						warg.Required(),
 					),
 				),
 			),
 		),
 		warg.ConfigFlag(
 			yamlreader.New,
-			wargcore.FlagMap{
-				"--config": wargcore.NewFlag(
+			warg.FlagMap{
+				"--config": warg.NewFlag(
 					"Path to YAML config file",
 					scalar.Path(
 						scalar.Default(path.New("~/.config/grabbit.yaml")),
 					),
-					wargcore.Alias("-c"),
+					warg.Alias("-c"),
 				),
 			},
 		),

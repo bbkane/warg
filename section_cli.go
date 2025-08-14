@@ -1,4 +1,4 @@
-package wargcore
+package warg
 
 import (
 	"sort"

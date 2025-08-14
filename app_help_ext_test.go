@@ -7,13 +7,11 @@ import (
 	"testing"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/value/scalar"
-	"go.bbkane.com/warg/wargcore"
 )
 
 // A grabbitSection is a simple section to test help
-func grabbitSection() wargcore.Section {
+func grabbitSection() warg.Section {
 
 	rootFooter := `Examples:
 
@@ -34,53 +32,53 @@ func grabbitSection() wargcore.Section {
 	grabbit config edit --config-path /path/to/config --editor code
 	`
 
-	sec := wargcore.NewSection(
+	sec := warg.NewSection(
 		"grab those images!",
-		wargcore.NewChildCmd(
+		warg.NewChildCmd(
 			"grab",
 			"do the grabbity grabbity",
-			wargcore.DoNothing,
+			warg.DoNothing,
 		),
-		wargcore.NewChildCmd(
+		warg.NewChildCmd(
 			"command2",
 			"another command",
-			wargcore.DoNothing,
+			warg.DoNothing,
 		),
-		wargcore.NewChildCmd(
+		warg.NewChildCmd(
 			"command3",
 			"another command",
-			wargcore.DoNothing,
+			warg.DoNothing,
 		),
-		wargcore.NewChildSection(
+		warg.NewChildSection(
 			"config",
 			"Change grabbit's config",
-			wargcore.SectionFooter(rootFooter),
-			wargcore.NewChildCmd(
+			warg.SectionFooter(rootFooter),
+			warg.NewChildCmd(
 				"edit",
 				"Edit the config. A default config will be created if it doesn't exist",
-				wargcore.DoNothing,
-				wargcore.CmdFooter(configEditFooter),
-				wargcore.NewChildFlag(
+				warg.DoNothing,
+				warg.CmdFooter(configEditFooter),
+				warg.NewChildFlag(
 					"--editor",
 					"path to editor",
 					scalar.String(
 						scalar.Default("vi"),
 					),
-					wargcore.ConfigPath("editor"),
-					wargcore.EnvVars("EDITOR"),
-					wargcore.Required(),
+					warg.ConfigPath("editor"),
+					warg.EnvVars("EDITOR"),
+					warg.Required(),
 				),
 			),
 		),
-		wargcore.NewChildSection(
+		warg.NewChildSection(
 			"section2",
 			"another section",
-			wargcore.NewChildCmd("com", "Dummy command to pass validation", wargcore.DoNothing),
+			warg.NewChildCmd("com", "Dummy command to pass validation", warg.DoNothing),
 		),
-		wargcore.NewChildSection(
+		warg.NewChildSection(
 			"section3",
 			"another section",
-			wargcore.NewChildCmd("com", "Dummy command to pass validation", wargcore.DoNothing),
+			warg.NewChildCmd("com", "Dummy command to pass validation", warg.DoNothing),
 		),
 	)
 	return sec
@@ -91,32 +89,32 @@ func TestAppHelp(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   []string
-		lookup wargcore.LookupEnv
+		lookup warg.LookupEnv
 	}{
 		// toplevel just a toplevel help!
 		{
 			name:   "toplevel",
 			args:   []string{"grabbit", "-h", "outline"},
-			lookup: wargcore.LookupMap(nil),
+			lookup: warg.LookupMap(nil),
 		},
 
 		// allcommands (no command help)
 		{
 			name:   "allcommandsSection",
 			args:   []string{"grabbit", "config", "--help"},
-			lookup: wargcore.LookupMap(nil),
+			lookup: warg.LookupMap(nil),
 		},
 
 		// detailed
 		{
 			name:   "detailedCommand",
 			args:   []string{"grabbit", "config", "edit", "--help"},
-			lookup: wargcore.LookupMap(map[string]string{"EDITOR": "emacs"}),
+			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
 			name:   "detailedSection",
 			args:   []string{"grabbit", "--help", "detailed"},
-			lookup: wargcore.LookupMap(nil),
+			lookup: warg.LookupMap(nil),
 		},
 
 		// outline
@@ -124,13 +122,13 @@ func TestAppHelp(t *testing.T) {
 			// TODO: make this print global flags!
 			name:   "outlineCommand",
 			args:   []string{"grabbit", "config", "edit", "--help", "outline"},
-			lookup: wargcore.LookupMap(map[string]string{"EDITOR": "emacs"}),
+			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
 			// TODO: make this print global flags!
 			name:   "outlineSection",
 			args:   []string{"grabbit", "--help", "outline"},
-			lookup: wargcore.LookupMap(nil),
+			lookup: warg.LookupMap(nil),
 		},
 	}
 
@@ -149,8 +147,8 @@ func TestAppHelp(t *testing.T) {
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},
-				parseopt.Args(tt.args),
-				parseopt.LookupEnv(tt.lookup),
+				warg.Args(tt.args),
+				warg.ParseLookupEnv(tt.lookup),
 			)
 		})
 	}

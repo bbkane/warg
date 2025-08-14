@@ -5,12 +5,10 @@ import (
 	"os"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/value/scalar"
-	"go.bbkane.com/warg/wargcore"
 )
 
-func login(ctx wargcore.Context) error {
+func login(ctx warg.Context) error {
 	url := ctx.Flags["--url"].(string)
 
 	// timeout doesn't have a default value,
@@ -27,41 +25,41 @@ func login(ctx wargcore.Context) error {
 }
 
 func ExampleNew() {
-	commonFlags := wargcore.FlagMap{
-		"--timeout": wargcore.NewFlag(
+	commonFlags := warg.FlagMap{
+		"--timeout": warg.NewFlag(
 			"Optional timeout. Defaults to no timeout",
 			scalar.Int(),
 		),
-		"--url": wargcore.NewFlag(
+		"--url": warg.NewFlag(
 			"URL of the blog",
 			scalar.String(
 				scalar.Default("https://www.myblog.com"),
 			),
-			wargcore.EnvVars("BLOG_URL"),
+			warg.EnvVars("BLOG_URL"),
 		),
 	}
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		wargcore.NewSection(
+		warg.NewSection(
 			"work with a fictional blog platform",
-			wargcore.NewChildCmd(
+			warg.NewChildCmd(
 				"login",
 				"Login to the platform",
 				login,
-				wargcore.ChildFlagMap(commonFlags),
+				warg.ChildFlagMap(commonFlags),
 			),
-			wargcore.NewChildSection(
+			warg.NewChildSection(
 				"comments",
 				"Deal with comments",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"list",
 					"List all comments",
 					// still prototyping how we want this
 					// command to look,
 					// so use a provided stub action
-					wargcore.DoNothing,
-					wargcore.ChildFlagMap(commonFlags),
+					warg.DoNothing,
+					warg.ChildFlagMap(commonFlags),
 				),
 			),
 		),
@@ -74,7 +72,7 @@ func ExampleNew() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	app.MustRun(parseopt.Args([]string{"blog.exe", "login"}))
+	app.MustRun(warg.Args([]string{"blog.exe", "login"}))
 	// Output:
 	// Logging into https://envvar.com
 }

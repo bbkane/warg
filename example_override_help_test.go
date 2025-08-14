@@ -4,20 +4,17 @@ import (
 	"fmt"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/help"
-	"go.bbkane.com/warg/parseopt"
-	"go.bbkane.com/warg/wargcore"
 )
 
-func exampleHelpFlaglogin(_ wargcore.Context) error {
+func exampleHelpFlaglogin(_ warg.Context) error {
 	fmt.Println("Logging in")
 	return nil
 }
 
-func customHelpCmd() wargcore.Cmd {
-	return wargcore.NewCmd(
+func customHelpCmd() warg.Cmd {
+	return warg.NewCmd(
 		"", // this command will be launched by the help flag, so users will never see the help
-		func(ctx wargcore.Context) error {
+		func(ctx warg.Context) error {
 			file := ctx.Stdout
 			fmt.Fprintln(file, "Custom help command output")
 			return nil
@@ -29,15 +26,15 @@ func ExampleHelpFlag() {
 
 	// create a custom help command map by grabbing the default one
 	// and adding our custom help command
-	helpCommands := help.DefaultHelpCommandMap()
+	helpCommands := warg.DefaultHelpCommandMap()
 	helpCommands["custom"] = customHelpCmd()
 
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		wargcore.NewSection(
+		warg.NewSection(
 			"work with a fictional blog platform",
-			wargcore.NewChildCmd(
+			warg.NewChildCmd(
 				"login",
 				"Login to the platform",
 				exampleHelpFlaglogin,
@@ -49,7 +46,7 @@ func ExampleHelpFlag() {
 		),
 	)
 
-	app.MustRun(parseopt.Args([]string{"blog.exe", "-h", "custom"}))
+	app.MustRun(warg.Args([]string{"blog.exe", "-h", "custom"}))
 	// Output:
 	// Custom help command output
 }

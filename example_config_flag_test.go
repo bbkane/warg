@@ -7,14 +7,12 @@ import (
 
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/config/yamlreader"
-	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
-	"go.bbkane.com/warg/wargcore"
 )
 
-func exampleConfigFlagTextAdd(ctx wargcore.Context) error {
+func exampleConfigFlagTextAdd(ctx warg.Context) error {
 	addends := ctx.Flags["--addend"].([]int)
 	sum := 0
 	for _, a := range addends {
@@ -28,30 +26,30 @@ func ExampleConfigFlag() {
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		wargcore.NewSection(
+		warg.NewSection(
 			"do math",
-			wargcore.NewChildCmd(
+			warg.NewChildCmd(
 				string("add"),
 				"add integers",
 				exampleConfigFlagTextAdd,
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					string("--addend"),
 					"Integer to add. Flag is repeatible",
 					slice.Int(),
-					wargcore.ConfigPath("add.addends"),
-					wargcore.Required(),
+					warg.ConfigPath("add.addends"),
+					warg.Required(),
 				),
 			),
 		),
 		warg.ConfigFlag(
 			yamlreader.New,
-			wargcore.FlagMap{
-				"--config": wargcore.NewFlag(
+			warg.FlagMap{
+				"--config": warg.NewFlag(
 					"Path to YAML config file",
 					scalar.Path(
 						scalar.Default(path.New("~/.config/calc.yaml")),
 					),
-					wargcore.Alias("-c"),
+					warg.Alias("-c"),
 				),
 			},
 		),
@@ -71,7 +69,7 @@ func ExampleConfigFlag() {
 		log.Fatalf("write error: %e", err)
 	}
 	app.MustRun(
-		parseopt.Args([]string{"calc", "add", "-c", "testdata/ExampleConfigFlag/calc.yaml"}),
+		warg.Args([]string{"calc", "add", "-c", "testdata/ExampleConfigFlag/calc.yaml"}),
 	)
 	// Output:
 	// Sum: 6

@@ -4,20 +4,19 @@ import (
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/value/scalar"
-	"go.bbkane.com/warg/wargcore"
 )
 
-func BuildApp() *wargcore.App {
+func BuildApp() *warg.App {
 	app := warg.New(
 		"testappcmd",
 		"v1.0.0",
-		wargcore.NewSection(
+		warg.NewSection(
 			"root section help",
-			wargcore.NewChildCmd(
+			warg.NewChildCmd(
 				"command1",
 				"command1 help",
-				wargcore.DoNothing,
-				wargcore.NewChildFlag(
+				warg.DoNothing,
+				warg.NewChildFlag(
 					"--flag1",
 					"flag1 help",
 					scalar.String(
@@ -25,66 +24,66 @@ func BuildApp() *wargcore.App {
 					),
 				),
 			),
-			wargcore.NewChildCmd(
+			warg.NewChildCmd(
 				"manual",
 				"commands with flags using all completion types for manual testing",
-				wargcore.DoNothing,
-				wargcore.NewChildFlag(
+				warg.DoNothing,
+				warg.NewChildFlag(
 					"--dirs",
 					"dirs completion",
 					scalar.Path(),
-					wargcore.FlagCompletions(warg.CompletionsDirectories),
+					warg.FlagCompletions(warg.CompletionsDirectories),
 				),
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					"--dirs-files",
 					"dirs/files completion",
 					scalar.Path(),
-					wargcore.FlagCompletions(func(ctx wargcore.Context) (*completion.Candidates, error) {
+					warg.FlagCompletions(func(ctx warg.Context) (*completion.Candidates, error) {
 						return &completion.Candidates{
 							Type:   completion.Type_DirectoriesFiles,
 							Values: nil,
 						}, nil
 					}),
 				),
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					"--none",
 					"no completion",
 					scalar.String(),
-					wargcore.FlagCompletions(warg.CompletionsNone),
+					warg.FlagCompletions(warg.CompletionsNone),
 				),
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					"--values",
 					"values completion",
 					scalar.String(),
-					wargcore.FlagCompletions(warg.CompletionsValues([]string{"alpha", "beta"})),
+					warg.FlagCompletions(warg.CompletionsValues([]string{"alpha", "beta"})),
 				),
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					"--values-descriptions",
 					"values completion with descriptions",
 					scalar.String(),
-					wargcore.FlagCompletions(warg.CompletionsValuesDescriptions([]completion.Candidate{
+					warg.FlagCompletions(warg.CompletionsValuesDescriptions([]completion.Candidate{
 						{Name: "gamma", Description: "gamma description"},
 						{Name: "delta", Description: "delta description"},
 					})),
 				),
 			),
-			wargcore.NewChildSection(
+			warg.NewChildSection(
 				"section1",
 				"section1 help",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"command2",
 					"command2 help",
-					wargcore.DoNothing,
-					wargcore.NewChildFlag(
+					warg.DoNothing,
+					warg.NewChildFlag(
 						"--bool",
 						"bool completion is special cased to return true/false",
 						scalar.Bool(),
 					),
-					wargcore.NewChildFlag(
+					warg.NewChildFlag(
 						"--flag2",
 						"flag2 help",
 						scalar.String(),
-						wargcore.FlagCompletions(func(ctx wargcore.Context) (*completion.Candidates, error) {
+						warg.FlagCompletions(func(ctx warg.Context) (*completion.Candidates, error) {
 							if ctx.Flags["--globalFlag"].(string) == "nondefault" {
 								return &completion.Candidates{
 									Type: completion.Type_ValuesDescriptions,

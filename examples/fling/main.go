@@ -5,69 +5,68 @@ import (
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
-	"go.bbkane.com/warg/wargcore"
 )
 
-func app() *wargcore.App {
-	linkUnlinkFlags := wargcore.FlagMap{
-		"--ask": wargcore.NewFlag(
+func app() *warg.App {
+	linkUnlinkFlags := warg.FlagMap{
+		"--ask": warg.NewFlag(
 			"Whether to ask before making changes",
 			// value.StringEnum("true", "false", "dry-run"),
 			scalar.String(
 				scalar.Choices("true", "false", "dry-run"),
 				scalar.Default("true"),
 			),
-			wargcore.Required(),
+			warg.Required(),
 		),
-		"--dotfiles": wargcore.NewFlag(
+		"--dotfiles": warg.NewFlag(
 			"Files/dirs starting with 'dot-' will have links starting with '.'",
 			scalar.Bool(
 				scalar.Default(true),
 			),
-			wargcore.Required(),
+			warg.Required(),
 		),
-		"--ignore": wargcore.NewFlag(
+		"--ignore": warg.NewFlag(
 			"Ignore file/dir if the name (not the whole path) matches passed regex",
 			slice.String(
 				slice.Default([]string{"README.*"}),
 			),
-			wargcore.Alias("-i"),
-			wargcore.UnsetSentinel("UNSET"),
+			warg.Alias("-i"),
+			warg.UnsetSentinel("UNSET"),
 		),
-		"--link-dir": wargcore.NewFlag(
+		"--link-dir": warg.NewFlag(
 			"Symlinks will be created in this directory pointing to files/directories in --src-dir",
 			scalar.Path(
 				scalar.Default(path.New("~")),
 			),
-			wargcore.Alias("-l"),
-			wargcore.Required(),
+			warg.Alias("-l"),
+			warg.Required(),
 		),
-		"--src-dir": wargcore.NewFlag(
+		"--src-dir": warg.NewFlag(
 			"Directory containing files and directories to link to",
 			scalar.Path(),
-			wargcore.Alias("-s"),
-			wargcore.Required(),
+			warg.Alias("-s"),
+			warg.Required(),
 		),
 	}
 
 	app := warg.New(
 		"fling",
 		"v1.0.0",
-		wargcore.NewSection(
+		warg.NewSection(
 			"Link and unlink directory heirarchies ",
-			wargcore.NewChildCmd(
+			warg.NewChildCmd(
 				"link",
 				"Create links",
 				link,
-				wargcore.ChildFlagMap(linkUnlinkFlags),
+				warg.ChildFlagMap(linkUnlinkFlags),
 			),
-			wargcore.NewChildCmd(
+			warg.NewChildCmd(
 				"unlink",
 				"Unlink previously created links",
 				unlink,
-				wargcore.ChildFlagMap(linkUnlinkFlags),
+				warg.ChildFlagMap(linkUnlinkFlags),
 			),
-			wargcore.SectionFooter("Homepage: https://github.com/bbkane/fling"),
+			warg.SectionFooter("Homepage: https://github.com/bbkane/fling"),
 		),
 		warg.SkipValidation(),
 	)

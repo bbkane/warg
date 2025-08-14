@@ -12,12 +12,10 @@ import (
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/config/jsonreader"
 	"go.bbkane.com/warg/config/yamlreader"
-	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/value/dict"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
-	"go.bbkane.com/warg/wargcore"
 
 	"github.com/stretchr/testify/require"
 )
@@ -40,11 +38,11 @@ func TestApp_Parse(t *testing.T) {
 
 	tests := []struct {
 		name                     string
-		app                      wargcore.App
+		app                      warg.App
 		args                     []string
-		lookup                   wargcore.LookupEnv
+		lookup                   warg.LookupEnv
 		expectedPassedPath       []string
-		expectedPassedFlagValues wargcore.PassedFlags
+		expectedPassedFlagValues warg.PassedFlags
 		expectedErr              bool
 	}{
 
@@ -52,17 +50,17 @@ func TestApp_Parse(t *testing.T) {
 			name: "envvar",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				wargcore.NewSection(
+				warg.NewSection(
 					"help for test",
-					wargcore.NewChildCmd(
+					warg.NewChildCmd(
 						"test",
 						"blah",
-						wargcore.DoNothing,
-						wargcore.NewChildFlag(
+						warg.DoNothing,
+						warg.NewChildFlag(
 							"--flag",
 							"help for --flag",
 							scalar.String(),
-							wargcore.EnvVars("notthere", "there", "alsothere"),
+							warg.EnvVars("notthere", "there", "alsothere"),
 						),
 					),
 				),
@@ -70,14 +68,14 @@ func TestApp_Parse(t *testing.T) {
 				warg.SkipAll(),
 			),
 			args: []string{t.Name(), "test"},
-			lookup: wargcore.LookupMap(
+			lookup: warg.LookupMap(
 				map[string]string{
 					"there":     "there",
 					"alsothere": "alsothere",
 				},
 			),
 			expectedPassedPath: []string{"test"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--flag": "there",
 				"--help": "default",
 			},
@@ -85,20 +83,20 @@ func TestApp_Parse(t *testing.T) {
 		},
 		{
 			name: "addCommandFlags",
-			app: func() wargcore.App {
-				fm := wargcore.FlagMap{
-					"--flag1": wargcore.NewFlag("--flag1 value", scalar.String()),
-					"--flag2": wargcore.NewFlag("--flag1 value", scalar.String()),
+			app: func() warg.App {
+				fm := warg.FlagMap{
+					"--flag1": warg.NewFlag("--flag1 value", scalar.String()),
+					"--flag2": warg.NewFlag("--flag1 value", scalar.String()),
 				}
 				app := warg.New(
 					"newAppName", "v1.0.0",
-					wargcore.NewSection(
+					warg.NewSection(
 						"help for section",
-						wargcore.NewChildCmd(
+						warg.NewChildCmd(
 							"test",
 							"help for test",
-							wargcore.DoNothing,
-							wargcore.ChildFlagMap(fm),
+							warg.DoNothing,
+							warg.ChildFlagMap(fm),
 						),
 					),
 
@@ -108,9 +106,9 @@ func TestApp_Parse(t *testing.T) {
 			}(),
 
 			args:                     []string{t.Name(), "test", "--flag1", "val1"},
-			lookup:                   wargcore.LookupMap(nil),
+			lookup:                   warg.LookupMap(nil),
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--flag1": "val1", "--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--flag1": "val1", "--help": "default"},
 			expectedErr:              false,
 		},
 
@@ -119,19 +117,19 @@ func TestApp_Parse(t *testing.T) {
 			name: "invalidFlagsErrorEvenForHelp",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				wargcore.NewSection(
+				warg.NewSection(
 					string("A virtual assistant"),
-					wargcore.NewChildCmd(
+					warg.NewChildCmd(
 						"present",
 						"Formally present a guest (guests are never introduced, always presented).",
-						wargcore.DoNothing,
-						wargcore.NewChildFlag(
+						warg.DoNothing,
+						warg.NewChildFlag(
 							"--name",
 							"Guest to address.",
 							scalar.String(scalar.Choices("bob")),
-							wargcore.Alias("-n"),
-							wargcore.EnvVars("BUTLER_PRESENT_NAME", "USER"),
-							wargcore.Required(),
+							warg.Alias("-n"),
+							warg.EnvVars("BUTLER_PRESENT_NAME", "USER"),
+							warg.Required(),
 						),
 					),
 				),
@@ -139,9 +137,9 @@ func TestApp_Parse(t *testing.T) {
 			),
 
 			args:                     []string{"app", "present", "-h"},
-			lookup:                   wargcore.LookupMap(map[string]string{"USER": "bbkane"}),
+			lookup:                   warg.LookupMap(map[string]string{"USER": "bbkane"}),
 			expectedPassedPath:       []string{"present"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--help": "default"},
 			expectedErr:              true,
 		},
 	}
@@ -152,7 +150,7 @@ func TestApp_Parse(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := tt.app.Parse(parseopt.Args(tt.args), parseopt.LookupEnv(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(warg.Args(tt.args), warg.ParseLookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -175,24 +173,24 @@ func TestApp_Parse(t *testing.T) {
 func TestApp_Parse_rootSection(t *testing.T) {
 	tests := []struct {
 		name                     string
-		rootSection              wargcore.Section
+		rootSection              warg.Section
 		args                     []string
 		expectedPassedPath       []string
-		expectedPassedFlagValues wargcore.PassedFlags
+		expectedPassedFlagValues warg.PassedFlags
 		expectedErr              bool
 	}{
 		{
 			name: "fromMain",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for test",
-				wargcore.NewChildSection(
+				warg.NewChildSection(
 					"cat1",
 					"help for cat1",
-					wargcore.NewChildCmd(
+					warg.NewChildCmd(
 						"com1",
 						"help for com1",
-						wargcore.DoNothing,
-						wargcore.NewChildFlag(
+						warg.DoNothing,
+						warg.NewChildFlag(
 							"--com1f1",
 							"flag help",
 							scalar.Int(
@@ -204,14 +202,14 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			),
 			args:                     []string{"app", "cat1", "com1", "--com1f1", "1"},
 			expectedPassedPath:       []string{"cat1", "com1"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--com1f1": int(1), "--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--com1f1": int(1), "--help": "default"},
 			expectedErr:              false,
 		},
 		{
 			name: "noSection",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for test",
-				wargcore.NewChildCmd("com", "command for validation", wargcore.DoNothing),
+				warg.NewChildCmd("com", "command for validation", warg.DoNothing),
 			),
 
 			args:                     []string{"app"},
@@ -221,13 +219,13 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagDefault",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for test",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"com",
 					"com help",
-					wargcore.DoNothing,
-					wargcore.NewChildFlag(
+					warg.DoNothing,
+					warg.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.String(
@@ -238,18 +236,18 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			),
 			args:                     []string{"test", "com"},
 			expectedPassedPath:       []string{"com"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--flag": "hi", "--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--flag": "hi", "--help": "default"},
 			expectedErr:              false,
 		},
 		{
 			name: "extraFlag",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for test",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"com",
 					"com help",
-					wargcore.DoNothing,
-					wargcore.NewChildFlag(
+					warg.DoNothing,
+					warg.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.String(
@@ -265,75 +263,75 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "requiredFlag",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for test",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"test",
 					"blah",
-					wargcore.DoNothing,
-					wargcore.NewChildFlag(
+					warg.DoNothing,
+					warg.NewChildFlag(
 						"--flag",
 						"help for --flag",
 						scalar.String(),
-						wargcore.Required(),
+						warg.Required(),
 					),
 				),
 			),
 			args:                     []string{t.Name(), "test"},
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: wargcore.PassedFlags{},
+			expectedPassedFlagValues: warg.PassedFlags{},
 			expectedErr:              true,
 		},
 		{
 			name: "flagAlias",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for section",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"test",
 					"help for test",
-					wargcore.DoNothing,
-					wargcore.NewChildFlag(
+					warg.DoNothing,
+					warg.NewChildFlag(
 						"--flag",
 						"help for --flag",
 						scalar.String(),
-						wargcore.Alias("-f"),
+						warg.Alias("-f"),
 					),
 				),
 			),
 			args:                     []string{t.Name(), "test", "-f", "val"},
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--flag": "val", "--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--flag": "val", "--help": "default"},
 			expectedErr:              false,
 		},
 		{
 			name: "flagAliasWithList",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for section",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"test",
 					"help for test",
-					wargcore.DoNothing,
-					wargcore.NewChildFlag(
+					warg.DoNothing,
+					warg.NewChildFlag(
 						"--flag",
 						"help for --flag",
 						slice.String(),
-						wargcore.Alias("-f"),
+						warg.Alias("-f"),
 					),
 				),
 			),
 			args:                     []string{t.Name(), "test", "-f", "1", "--flag", "2", "-f", "3", "--flag", "4"},
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--flag": []string{"1", "2", "3", "4"}, "--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--flag": []string{"1", "2", "3", "4"}, "--help": "default"},
 			expectedErr:              false,
 		},
 		{
 			name: "badHelp",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for section",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"test",
 					"help for test",
-					wargcore.DoNothing,
+					warg.DoNothing,
 				),
 			),
 			args:                     []string{t.Name(), "test", "-h", "badhelpval"},
@@ -343,13 +341,13 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "dictUpdate",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for test",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"com1",
 					"help for com1",
-					wargcore.DoNothing,
-					wargcore.NewChildFlag(
+					warg.DoNothing,
+					warg.NewChildFlag(
 						string("--flag"),
 						"flag help",
 						dict.Bool(),
@@ -359,34 +357,34 @@ func TestApp_Parse_rootSection(t *testing.T) {
 
 			args:                     []string{"app", "com1", "--flag", "true=true", "--flag", "false=false"},
 			expectedPassedPath:       []string{"com1"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--flag": map[string]bool{"true": true, "false": false}, "--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--flag": map[string]bool{"true": true, "false": false}, "--help": "default"},
 			expectedErr:              false,
 		},
 		{
 			name: "passAbsentSection",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for test",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"com",
 					"help for com",
-					wargcore.DoNothing,
+					warg.DoNothing,
 				),
 			),
 
 			args:                     []string{"app", "badSectionName"},
 			expectedPassedPath:       []string{"com1"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--help": "default"},
 			expectedErr:              true,
 		},
 		{
 			name: "scalarFlagPassedTwice",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for test",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"com",
 					"help for com1",
-					wargcore.DoNothing,
-					wargcore.NewChildFlag(
+					warg.DoNothing,
+					warg.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.Int(),
@@ -396,18 +394,18 @@ func TestApp_Parse_rootSection(t *testing.T) {
 
 			args:                     []string{"app", "com", "--flag", "1", "--flag", "2"},
 			expectedPassedPath:       []string{"com"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--flag": int(1), "--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--flag": int(1), "--help": "default"},
 			expectedErr:              true,
 		},
 		{
 			name: "passedFlagBeforeCommand",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for test",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"com",
 					"help for com",
-					wargcore.DoNothing,
-					wargcore.NewChildFlag(
+					warg.DoNothing,
+					warg.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.Int(),
@@ -417,23 +415,23 @@ func TestApp_Parse_rootSection(t *testing.T) {
 
 			args:                     []string{"app", "--flag", "1", "com"},
 			expectedPassedPath:       []string{"com"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--flag": int(1), "--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--flag": int(1), "--help": "default"},
 			expectedErr:              true,
 		},
 		{
 			name: "existingSectionsExistingCommands",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for test",
-				wargcore.ChildSectionMap(
-					wargcore.SectionMap{
-						"section": wargcore.NewSection(
+				warg.ChildSectionMap(
+					warg.SectionMap{
+						"section": warg.NewSection(
 							"help for section",
-							wargcore.ChildCmdMap(
-								wargcore.CmdMap{
-									"command": wargcore.NewCmd(
+							warg.ChildCmdMap(
+								warg.CmdMap{
+									"command": warg.NewCmd(
 										"help for command",
-										wargcore.DoNothing,
-										wargcore.NewChildFlag(
+										warg.DoNothing,
+										warg.NewChildFlag(
 											"--flag",
 											"flag help",
 											scalar.Int(),
@@ -447,7 +445,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			),
 			args:               []string{"app", "section", "command", "--flag", "1"},
 			expectedPassedPath: []string{"section", "command"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--flag": 1,
 				"--help": "default",
 			},
@@ -455,13 +453,13 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagWithEmptyValue",
-			rootSection: wargcore.NewSection(
+			rootSection: warg.NewSection(
 				"help for test",
-				wargcore.NewChildCmd(
+				warg.NewChildCmd(
 					"command",
 					"help for command",
-					wargcore.DoNothing,
-					wargcore.NewChildFlag(
+					warg.DoNothing,
+					warg.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.String(),
@@ -470,7 +468,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			),
 			args:               []string{"app", "command", "--flag", ""},
 			expectedPassedPath: []string{"command"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--flag": "",
 				"--help": "default",
 			},
@@ -492,7 +490,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			err := app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := app.Parse(parseopt.Args(tt.args), parseopt.LookupEnv(wargcore.LookupMap(nil)))
+			actualPR, actualErr := app.Parse(warg.Args(tt.args), warg.ParseLookupEnv(warg.LookupMap(nil)))
 
 			if tt.expectedErr {
 				require.Error(t, actualErr)
@@ -513,51 +511,51 @@ func TestApp_Parse_rootSection(t *testing.T) {
 func TestApp_Parse_unsetSetinel(t *testing.T) {
 	tests := []struct {
 		name                     string
-		flagDef                  wargcore.CommandOpt
+		flagDef                  warg.CommandOpt
 		args                     []string
 		expectedPassedPath       []string
-		expectedPassedFlagValues wargcore.PassedFlags
+		expectedPassedFlagValues warg.PassedFlags
 		expectedErr              bool
 	}{
 		{
 			name: "unsetSentinelScalarSuccess",
-			flagDef: wargcore.NewChildFlag(
+			flagDef: warg.NewChildFlag(
 				"--flag",
 				"help for --flag",
 				scalar.String(scalar.Default("default")),
-				wargcore.UnsetSentinel("UNSET"),
+				warg.UnsetSentinel("UNSET"),
 			),
 			args:               []string{t.Name(), "test", "--flag", "UNSET"},
 			expectedPassedPath: []string{"test"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--help": "default",
 			},
 			expectedErr: false,
 		},
 		{
 			name: "unsetSentinelScalarUpdate",
-			flagDef: wargcore.NewChildFlag(
+			flagDef: warg.NewChildFlag(
 				"--flag",
 				"help for --flag",
 				scalar.String(scalar.Default("default")),
-				wargcore.UnsetSentinel("UNSET"),
+				warg.UnsetSentinel("UNSET"),
 			),
 			args:                     []string{t.Name(), "test", "--flag", "UNSET", "--flag", "setAfter"},
 			expectedPassedPath:       []string{"test"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--flag": "setAfter", "--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--flag": "setAfter", "--help": "default"},
 			expectedErr:              false,
 		},
 		{
 			name: "unsetSentinelSlice",
-			flagDef: wargcore.NewChildFlag(
+			flagDef: warg.NewChildFlag(
 				"--flag",
 				"help for --flag",
 				slice.String(slice.Default([]string{"default"})),
-				wargcore.UnsetSentinel("UNSET"),
+				warg.UnsetSentinel("UNSET"),
 			),
 			args:               []string{t.Name(), "test", "--flag", "a", "--flag", "UNSET", "--flag", "b", "--flag", "c"},
 			expectedPassedPath: []string{"test"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--help": "default",
 				"--flag": []string{"b", "c"},
 			},
@@ -570,12 +568,12 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 
 			app := warg.New(
 				"newAppName", "v1.0.0",
-				wargcore.NewSection(
+				warg.NewSection(
 					"help for test",
-					wargcore.NewChildCmd(
+					warg.NewChildCmd(
 						"test",
 						"help for test",
-						wargcore.DoNothing,
+						warg.DoNothing,
 						tt.flagDef,
 					),
 				),
@@ -586,7 +584,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 			err := app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := app.Parse(parseopt.Args(tt.args), parseopt.LookupEnv(wargcore.LookupMap(nil)))
+			actualPR, actualErr := app.Parse(warg.Args(tt.args), warg.ParseLookupEnv(warg.LookupMap(nil)))
 
 			if tt.expectedErr {
 				require.Error(t, actualErr)
@@ -607,30 +605,30 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 func TestApp_Parse_config(t *testing.T) {
 	tests := []struct {
 		name                     string
-		app                      wargcore.App
+		app                      warg.App
 		args                     []string
-		lookup                   wargcore.LookupEnv
+		lookup                   warg.LookupEnv
 		expectedPassedPath       []string
-		expectedPassedFlagValues wargcore.PassedFlags
+		expectedPassedFlagValues warg.PassedFlags
 		expectedErr              bool
 	}{
 		{
 			name: "configFlag",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				wargcore.NewSection(
+				warg.NewSection(
 					"help for test",
-					wargcore.NewChildCmd(
+					warg.NewChildCmd(
 						"print",
 						"print key value",
-						wargcore.DoNothing,
-						wargcore.NewChildFlag(
+						warg.DoNothing,
+						warg.NewChildFlag(
 							"--key",
 							"a key",
 							scalar.String(
 								scalar.Default("defaultkeyval"),
 							),
-							wargcore.ConfigPath("key"),
+							warg.ConfigPath("key"),
 						),
 					),
 				),
@@ -650,8 +648,8 @@ func TestApp_Parse_config(t *testing.T) {
 
 						return cr, nil
 					},
-					wargcore.FlagMap{
-						"--config": wargcore.NewFlag(
+					warg.FlagMap{
+						"--config": warg.NewFlag(
 							"Path to config file",
 							scalar.Path(
 								scalar.Default(path.New("defaultconfigval")),
@@ -663,9 +661,9 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.SkipAll(),
 			),
 			args:               []string{"test", "print", "--config", "passedconfigval"},
-			lookup:             wargcore.LookupMap(nil),
+			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"print"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--key":    "mapkeyval",
 				"--config": path.New("passedconfigval"),
 				"--help":   "default",
@@ -676,30 +674,30 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "simpleJSONConfig",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				wargcore.NewSection("help for test",
-					wargcore.NewChildCmd(
+				warg.NewSection("help for test",
+					warg.NewChildCmd(
 						"com",
 						"help for com",
-						wargcore.DoNothing,
-						wargcore.NewChildFlag(
+						warg.DoNothing,
+						warg.NewChildFlag(
 							"--val",
 							"flag help",
 							scalar.String(),
-							wargcore.ConfigPath("params.val"),
+							warg.ConfigPath("params.val"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					jsonreader.New,
-					wargcore.FlagMap{
-						"--config": wargcore.NewFlag(
+					warg.FlagMap{
+						"--config": warg.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json"),
 								),
 							),
-							wargcore.Alias("-c"),
+							warg.Alias("-c"),
 						),
 					},
 				),
@@ -707,9 +705,9 @@ func TestApp_Parse_config(t *testing.T) {
 			),
 
 			args:               []string{"app", "com"},
-			lookup:             wargcore.LookupMap(nil),
+			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--config": testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json"),
 				"--val":    "hi",
 				"--help":   "default",
@@ -721,30 +719,30 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "numJSONConfig",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				wargcore.NewSection("help for test",
-					wargcore.NewChildCmd(
+				warg.NewSection("help for test",
+					warg.NewChildCmd(
 						"com",
 						"help for com",
-						wargcore.DoNothing,
-						wargcore.NewChildFlag(
+						warg.DoNothing,
+						warg.NewChildFlag(
 							"--intval",
 							"flag help",
 							scalar.Int(),
-							wargcore.ConfigPath("params.intval"),
+							warg.ConfigPath("params.intval"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					jsonreader.New,
-					wargcore.FlagMap{
-						"--config": wargcore.NewFlag(
+					warg.FlagMap{
+						"--config": warg.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "numJSONConfig", "config.json"),
 								),
 							),
-							wargcore.Alias("-c"),
+							warg.Alias("-c"),
 						),
 					},
 				),
@@ -752,9 +750,9 @@ func TestApp_Parse_config(t *testing.T) {
 			),
 
 			args:               []string{"app", "com"},
-			lookup:             wargcore.LookupMap(nil),
+			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--config": testDataFilePath(t.Name(), "numJSONConfig", "config.json"),
 				// "--floatval": 1.5,
 				"--intval": 1,
@@ -766,40 +764,40 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "configSlice",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				wargcore.NewSection(
+				warg.NewSection(
 					"help for test",
-					wargcore.NewChildCmd(
+					warg.NewChildCmd(
 						"print",
 						"print key value",
-						wargcore.DoNothing,
-						wargcore.NewChildFlag(
+						warg.DoNothing,
+						warg.NewChildFlag(
 							"--subreddits",
 							"the subreddits",
 							slice.String(),
-							wargcore.ConfigPath("subreddits[].name"),
+							warg.ConfigPath("subreddits[].name"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					jsonreader.New,
-					wargcore.FlagMap{
-						"--config": wargcore.NewFlag(
+					warg.FlagMap{
+						"--config": warg.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
 								),
 							),
-							wargcore.Alias("-c"),
+							warg.Alias("-c"),
 						),
 					},
 				),
 				warg.SkipAll(),
 			),
 			args:               []string{"test", "print"},
-			lookup:             wargcore.LookupMap(nil),
+			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"print"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--subreddits": []string{"earthporn", "wallpapers"},
 				"--config":     testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
 				"--help":       "default",
@@ -810,30 +808,30 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "JSONConfigStringSlice",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				wargcore.NewSection("help for test",
-					wargcore.NewChildCmd(
+				warg.NewSection("help for test",
+					warg.NewChildCmd(
 						"com",
 						"help for com",
-						wargcore.DoNothing,
-						wargcore.NewChildFlag(
+						warg.DoNothing,
+						warg.NewChildFlag(
 							"--val",
 							"flag help",
 							slice.String(),
-							wargcore.ConfigPath("val"),
+							warg.ConfigPath("val"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					jsonreader.New,
-					wargcore.FlagMap{
-						"--config": wargcore.NewFlag(
+					warg.FlagMap{
+						"--config": warg.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json"),
 								),
 							),
-							wargcore.Alias("-c"),
+							warg.Alias("-c"),
 						),
 					},
 				),
@@ -841,9 +839,9 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.SkipAll(),
 			),
 			args:               []string{"app", "com"},
-			lookup:             wargcore.LookupMap(nil),
+			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--config": testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json"),
 				"--val":    []string{"from", "config"},
 				"--help":   "default",
@@ -854,30 +852,30 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "YAMLConfigStringSlice",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				wargcore.NewSection("help for test",
-					wargcore.NewChildCmd(
+				warg.NewSection("help for test",
+					warg.NewChildCmd(
 						"com",
 						"help for com",
-						wargcore.DoNothing,
-						wargcore.NewChildFlag(
+						warg.DoNothing,
+						warg.NewChildFlag(
 							"--val",
 							"flag help",
 							slice.String(),
-							wargcore.ConfigPath("val"),
+							warg.ConfigPath("val"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					yamlreader.New,
-					wargcore.FlagMap{
-						"--config": wargcore.NewFlag(
+					warg.FlagMap{
+						"--config": warg.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml"),
 								),
 							),
-							wargcore.Alias("-c"),
+							warg.Alias("-c"),
 						),
 					},
 				),
@@ -886,9 +884,9 @@ func TestApp_Parse_config(t *testing.T) {
 			),
 
 			args:               []string{"app", "com"},
-			lookup:             wargcore.LookupMap(nil),
+			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--config": testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml"),
 				"--val":    []string{"from", "config"},
 				"--help":   "default",
@@ -899,31 +897,31 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "JSONConfigMap",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				wargcore.NewSection(
+				warg.NewSection(
 					"help for test",
-					wargcore.NewChildCmd(
+					warg.NewChildCmd(
 						"com",
 						"help for com",
-						wargcore.DoNothing,
-						wargcore.NewChildFlag(
+						warg.DoNothing,
+						warg.NewChildFlag(
 							"--val",
 							"flag help",
 							dict.Int(),
-							wargcore.ConfigPath("val"),
+							warg.ConfigPath("val"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					jsonreader.New,
-					wargcore.FlagMap{
-						"--config": wargcore.NewFlag(
+					warg.FlagMap{
+						"--config": warg.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "JSONConfigMap", "config.json"),
 								),
 							),
-							wargcore.Alias("-c"),
+							warg.Alias("-c"),
 						),
 					},
 				),
@@ -932,9 +930,9 @@ func TestApp_Parse_config(t *testing.T) {
 			),
 
 			args:               []string{"app", "com"},
-			lookup:             wargcore.LookupMap(nil),
+			lookup:             warg.LookupMap(nil),
 			expectedPassedPath: []string{"com"},
-			expectedPassedFlagValues: wargcore.PassedFlags{
+			expectedPassedFlagValues: warg.PassedFlags{
 				"--config": testDataFilePath(t.Name(), "JSONConfigMap", "config.json"),
 				"--val":    map[string]int{"a": 1},
 				"--help":   "default",
@@ -949,7 +947,7 @@ func TestApp_Parse_config(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := tt.app.Parse(parseopt.Args(tt.args), parseopt.LookupEnv(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(warg.Args(tt.args), warg.ParseLookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -971,23 +969,23 @@ func TestApp_Parse_config(t *testing.T) {
 func TestApp_Parse_GlobalFlag(t *testing.T) {
 	tests := []struct {
 		name                     string
-		app                      wargcore.App
+		app                      warg.App
 		args                     []string
-		lookup                   wargcore.LookupEnv
+		lookup                   warg.LookupEnv
 		expectedPassedPath       []string
-		expectedPassedFlagValues wargcore.PassedFlags
+		expectedPassedFlagValues warg.PassedFlags
 		expectedErr              bool
 	}{
 		{
 			name: "globalFlag",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				wargcore.NewSection(
+				warg.NewSection(
 					"help for test",
-					wargcore.NewChildCmd(
+					warg.NewChildCmd(
 						"com",
 						"help for com",
-						wargcore.DoNothing,
+						warg.DoNothing,
 					),
 				),
 				warg.SkipAll(),
@@ -999,9 +997,9 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 			),
 
 			args:                     []string{"app", "com", "--global", "globalval"},
-			lookup:                   wargcore.LookupMap(nil),
+			lookup:                   warg.LookupMap(nil),
 			expectedPassedPath:       []string{"com"},
-			expectedPassedFlagValues: wargcore.PassedFlags{"--global": "globalval", "--help": "default"},
+			expectedPassedFlagValues: warg.PassedFlags{"--global": "globalval", "--help": "default"},
 			expectedErr:              false,
 		},
 	}
@@ -1012,7 +1010,7 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := tt.app.Parse(parseopt.Args(tt.args), parseopt.LookupEnv(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(warg.Args(tt.args), warg.ParseLookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -1035,9 +1033,9 @@ func TestCustomVersion(t *testing.T) {
 	app := warg.New(
 		"appName",
 		expectedVersion,
-		wargcore.NewSection(
+		warg.NewSection(
 			"test",
-			wargcore.NewChildCmd("version", "Print version", wargcore.DoNothing),
+			warg.NewChildCmd("version", "Print version", warg.DoNothing),
 		),
 		warg.SkipVersionCommand(),
 	)
@@ -1045,8 +1043,8 @@ func TestCustomVersion(t *testing.T) {
 	require.Nil(t, err)
 
 	actualPR, err := app.Parse(
-		parseopt.Args([]string{"appName"}),
-		parseopt.LookupEnv(wargcore.LookupMap(nil)),
+		warg.Args([]string{"appName"}),
+		warg.ParseLookupEnv(warg.LookupMap(nil)),
 	)
 	require.Nil(t, err)
 
@@ -1057,9 +1055,9 @@ func TestContextContainsValue(t *testing.T) {
 	app := warg.New(
 		"appName",
 		"v1.0.0",
-		wargcore.NewSection(
+		warg.NewSection(
 			"test",
-			wargcore.NewChildCmd("dummycommand", "Do nothing", wargcore.DoNothing),
+			warg.NewChildCmd("dummycommand", "Do nothing", warg.DoNothing),
 		),
 	)
 	err := app.Validate()
@@ -1070,9 +1068,9 @@ func TestContextContainsValue(t *testing.T) {
 
 	ctx := context.WithValue(context.Background(), contextKey{}, expectedValue)
 	actualPR, err := app.Parse(
-		parseopt.Args([]string{"appName"}),
-		parseopt.LookupEnv(wargcore.LookupMap(nil)),
-		parseopt.Context(ctx),
+		warg.Args([]string{"appName"}),
+		warg.ParseLookupEnv(warg.LookupMap(nil)),
+		warg.ParseContext(ctx),
 	)
 	require.Nil(t, err)
 
@@ -1086,16 +1084,16 @@ func TestAppFlagToAddr(t *testing.T) {
 	app := warg.New(
 		"appName",
 		"v1.0.0",
-		wargcore.NewSection(
+		warg.NewSection(
 			"test",
-			wargcore.NewChildCmd(
+			warg.NewChildCmd(
 				"command",
 				"Test Command",
-				func(ctx wargcore.Context) error {
+				func(ctx warg.Context) error {
 					require.Equal(expectedFlagVal, flagVal)
 					return nil
 				},
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					"--flag",
 					"Flag for test",
 					scalar.String(
@@ -1108,7 +1106,7 @@ func TestAppFlagToAddr(t *testing.T) {
 	err := app.Validate()
 	require.NoError(err)
 
-	pr, err := app.Parse(parseopt.Args([]string{"appName", "command", "--flag", "flag value"}))
+	pr, err := app.Parse(warg.Args([]string{"appName", "command", "--flag", "flag value"}))
 	require.NoError(err)
 	err = pr.Action(pr.Context)
 	require.NoError(err)

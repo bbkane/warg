@@ -7,18 +7,16 @@ import (
 
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/config/yamlreader"
-	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
-	"go.bbkane.com/warg/wargcore"
 )
 
 // ExampleApp_Parse_flag_value_options shows a couple combinations of flag/value options.
 // It's also possible to use '--help detailed' to see the current value of a flag and what set it.
 func ExampleApp_Parse_flag_value_options() {
 
-	action := func(ctx wargcore.Context) error {
+	action := func(ctx warg.Context) error {
 		// flag marked as Required(), so no need to check for existance
 		scalarVal := ctx.Flags["--scalar-flag"].(string)
 		// flag might not exist in config, so check for existance
@@ -37,43 +35,43 @@ func ExampleApp_Parse_flag_value_options() {
 	app := warg.New(
 		"flag-overrides",
 		"v1.0.0",
-		wargcore.NewSection(
+		warg.NewSection(
 			"demo flag overrides",
-			wargcore.NewChildCmd(
+			warg.NewChildCmd(
 				string("show"),
 				"Show final flag values",
 				action,
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					"--scalar-flag",
 					"Demo scalar flag",
 					scalar.String(
 						scalar.Choices("a", "b"),
 						scalar.Default("a"),
 					),
-					wargcore.ConfigPath("args.scalar-flag"),
-					wargcore.Required(),
+					warg.ConfigPath("args.scalar-flag"),
+					warg.Required(),
 				),
-				wargcore.NewChildFlag(
+				warg.NewChildFlag(
 					"--slice-flag",
 					"Demo slice flag",
 					slice.Int(
 						slice.Choices(1, 2, 3),
 					),
-					wargcore.Alias("-slice"),
-					wargcore.ConfigPath("args.slice-flag"),
-					wargcore.EnvVars("SLICE", "SLICE_ARG"),
+					warg.Alias("-slice"),
+					warg.ConfigPath("args.slice-flag"),
+					warg.EnvVars("SLICE", "SLICE_ARG"),
 				),
 			),
 		),
 		warg.ConfigFlag(
 			yamlreader.New,
-			wargcore.FlagMap{
-				"--config": wargcore.NewFlag(
+			warg.FlagMap{
+				"--config": warg.NewFlag(
 					"Path to YAML config file",
 					scalar.Path(
 						scalar.Default(path.New("~/.config/flag-overrides.yaml")),
 					),
-					wargcore.Alias("-c"),
+					warg.Alias("-c"),
 				),
 			},
 		),
@@ -93,7 +91,7 @@ func ExampleApp_Parse_flag_value_options() {
 		log.Fatalf("write error: %e", err)
 	}
 	app.MustRun(
-		parseopt.Args([]string{"calc", "show", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "--scalar-flag", "b"}),
+		warg.Args([]string{"calc", "show", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "--scalar-flag", "b"}),
 	)
 	// Output:
 	// --scalar-flag: "b"

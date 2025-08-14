@@ -1,4 +1,4 @@
-package detailed
+package warg
 
 import (
 	"bufio"
@@ -9,25 +9,23 @@ import (
 	"os"
 
 	"go.bbkane.com/gocolor"
-	"go.bbkane.com/warg/help/common"
 	"go.bbkane.com/warg/value"
-	"go.bbkane.com/warg/wargcore"
 )
 
-func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *wargcore.Flag) {
+func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) {
 	if f.Alias != "" {
 		fmt.Fprintf(
 			w,
 			"  %s , %s : %s\n",
-			common.FmtFlagName(color, name),
-			common.FmtFlagAlias(color, f.Alias),
+			FmtFlagName(color, name),
+			FmtFlagAlias(color, f.Alias),
 			f.HelpShort,
 		)
 	} else {
 		fmt.Fprintf(
 			w,
 			"  %s : %s\n",
-			common.FmtFlagName(color, name),
+			FmtFlagName(color, name),
 			f.HelpShort,
 		)
 	}
@@ -55,7 +53,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *wargco
 				color.Add(color.Bold, "default"),
 			)
 			def := v.DefaultStringMap()
-			for _, key := range common.SortedKeys(def) {
+			for _, key := range SortedKeys(def) {
 				fmt.Fprintf(
 					w,
 					"      %s : %s\n",
@@ -123,7 +121,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *wargco
 				color.Add(color.Bold, string(f.Value.UpdatedBy())),
 			)
 			m := v.StringMap()
-			for _, key := range common.SortedKeys(m) {
+			for _, key := range SortedKeys(m) {
 				fmt.Fprintf(
 					w,
 					"      %s : %s\n",
@@ -154,7 +152,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *wargco
 					"      %s %s\n",
 					color.Add(
 						color.Bold,
-						common.LeftPad(indexStr, "0", padding)+")",
+						LeftPad(indexStr, "0", padding)+")",
 					),
 					e,
 				)
@@ -175,13 +173,13 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *wargco
 	fmt.Fprintln(w)
 }
 
-func DetailedCommandHelp(cur *wargcore.Cmd, helpInfo wargcore.HelpInfo) wargcore.Action {
-	return func(pf wargcore.Context) error {
+func DetailedCommandHelp(cur *Cmd, helpInfo HelpInfo) Action {
+	return func(pf Context) error {
 		file := pf.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := common.ConditionallyEnableColor(pf.Flags, file)
+		col, err := ConditionallyEnableColor(pf.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
@@ -232,14 +230,14 @@ func DetailedCommandHelp(cur *wargcore.Cmd, helpInfo wargcore.HelpInfo) wargcore
 	}
 }
 
-func DetailedSectionHelp(cur *wargcore.Section, _ wargcore.HelpInfo) wargcore.Action {
-	return func(pf wargcore.Context) error {
+func DetailedSectionHelp(cur *Section, _ HelpInfo) Action {
+	return func(pf Context) error {
 		file := pf.Stdout
 
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := common.ConditionallyEnableColor(pf.Flags, file)
+		col, err := ConditionallyEnableColor(pf.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
@@ -262,7 +260,7 @@ func DetailedSectionHelp(cur *wargcore.Section, _ wargcore.HelpInfo) wargcore.Ac
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					common.FmtSectionName(&col, k),
+					FmtSectionName(&col, k),
 					cur.Sections[k].HelpShort,
 				)
 			}
@@ -279,7 +277,7 @@ func DetailedSectionHelp(cur *wargcore.Section, _ wargcore.HelpInfo) wargcore.Ac
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					common.FmtCommandName(&col, k),
+					FmtCommandName(&col, k),
 					cur.Commands[string(k)].HelpShort,
 				)
 			}

@@ -1,4 +1,4 @@
-package help
+package warg
 
 import (
 	"bufio"
@@ -7,16 +7,14 @@ import (
 	"os"
 
 	"go.bbkane.com/gocolor"
-	"go.bbkane.com/warg/help/common"
-	"go.bbkane.com/warg/wargcore"
 )
 
-func outlineHelper(w io.Writer, color *gocolor.Color, sec wargcore.Section, indent int) {
+func outlineHelper(w io.Writer, color *gocolor.Color, sec Section, indent int) {
 	// commands and command flags
 	for _, comName := range sec.Commands.SortedNames() {
 		fmt.Fprintln(
 			w,
-			common.LeftPad(common.FmtCommandName(color, string(comName)), "  ", indent),
+			LeftPad(FmtCommandName(color, string(comName)), "  ", indent),
 		)
 	}
 
@@ -25,26 +23,26 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec wargcore.Section, inde
 		childSec := sec.Sections[k]
 		fmt.Fprintln(
 			w,
-			common.LeftPad(common.FmtSectionName(color, k), "  ", indent),
+			LeftPad(FmtSectionName(color, k), "  ", indent),
 		)
 		outlineHelper(w, color, childSec, indent+1)
 	}
 
 }
 
-func OutlineSectionHelp(_ *wargcore.Section, hi wargcore.HelpInfo) wargcore.Action {
-	return func(cmdCtx wargcore.Context) error {
+func OutlineSectionHelp(_ *Section, hi HelpInfo) Action {
+	return func(cmdCtx Context) error {
 		file := cmdCtx.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := common.ConditionallyEnableColor(cmdCtx.Flags, file)
+		col, err := ConditionallyEnableColor(cmdCtx.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
 
 		fmt.Fprintln(f, "# "+string(hi.RootSection.HelpShort))
-		fmt.Fprintf(f, "%s\n", common.FmtSectionName(&col, string(cmdCtx.App.Name)))
+		fmt.Fprintf(f, "%s\n", FmtSectionName(&col, string(cmdCtx.App.Name)))
 
 		outlineHelper(f, &col, hi.RootSection, 1)
 
@@ -52,6 +50,6 @@ func OutlineSectionHelp(_ *wargcore.Section, hi wargcore.HelpInfo) wargcore.Acti
 	}
 }
 
-func OutlineCommandHelp(cur *wargcore.Cmd, helpInfo wargcore.HelpInfo) wargcore.Action {
+func OutlineCommandHelp(cur *Cmd, helpInfo HelpInfo) Action {
 	return OutlineSectionHelp(nil, helpInfo)
 }

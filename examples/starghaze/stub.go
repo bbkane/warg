@@ -1,18 +1,18 @@
 package main
 
-import "go.bbkane.com/warg/wargcore"
+import "go.bbkane.com/warg"
 
 //nolint:gochecknoglobals  // stub function for example
-var format = wargcore.DoNothing
+var format = warg.DoNothing
 
 //nolint:gochecknoglobals  // stub function for example
-var gSheetsOpen = wargcore.DoNothing
+var gSheetsOpen = warg.DoNothing
 
 //nolint:gochecknoglobals  // stub function for example
-var gSheetsUpload = wargcore.DoNothing
+var gSheetsUpload = warg.DoNothing
 
 //nolint:gochecknoglobals  // stub function for example
-var githubStarsDownload = wargcore.DoNothing
+var githubStarsDownload = warg.DoNothing
 
 //nolint:gochecknoglobals  // stub function for example
-var search = wargcore.DoNothing
+var search = warg.DoNothing
