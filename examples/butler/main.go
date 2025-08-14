@@ -21,7 +21,7 @@ func app() *wargcore.App {
 				"present",
 				"Formally present a guest (guests are never introduced, always presented).",
 				present,
-				command.NewFlag(
+				command.NewChildFlag(
 					"--name",
 					"Guest to address.",
 					scalar.String(),

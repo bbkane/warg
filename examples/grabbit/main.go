@@ -77,8 +77,8 @@ Homepage: https://github.com/bbkane/grabbit
 				"grab",
 				"Grab images. Optionally use `config edit` first to create a config",
 				grab,
-				command.FlagMap(logFlags),
-				command.NewFlag(
+				command.ChildFlagMap(logFlags),
+				command.NewChildFlag(
 					"--subreddit-name",
 					"Subreddit to grab",
 					slice.String(
@@ -88,7 +88,7 @@ Homepage: https://github.com/bbkane/grabbit
 					flag.ConfigPath("subreddits[].name"),
 					flag.Required(),
 				),
-				command.NewFlag(
+				command.NewChildFlag(
 					"--subreddit-destination",
 					"Where to store the subreddit",
 					slice.Path(
@@ -98,7 +98,7 @@ Homepage: https://github.com/bbkane/grabbit
 					flag.ConfigPath("subreddits[].destination"),
 					flag.Required(),
 				),
-				command.NewFlag(
+				command.NewChildFlag(
 					"--subreddit-timeframe",
 					"Take the top subreddits from this timeframe",
 					slice.String(
@@ -109,7 +109,7 @@ Homepage: https://github.com/bbkane/grabbit
 					flag.ConfigPath("subreddits[].timeframe"),
 					flag.Required(),
 				),
-				command.NewFlag(
+				command.NewChildFlag(
 					"--subreddit-limit",
 					"Max number of links to try to download",
 					slice.Int(
@@ -119,7 +119,7 @@ Homepage: https://github.com/bbkane/grabbit
 					flag.ConfigPath("subreddits[].limit"),
 					flag.Required(),
 				),
-				command.NewFlag(
+				command.NewChildFlag(
 					"--timeout",
 					"Timeout for a single download",
 					scalar.Duration(
@@ -139,8 +139,8 @@ Homepage: https://github.com/bbkane/grabbit
 					"edit",
 					"Edit or create configuration file.",
 					editConfig,
-					command.FlagMap(logFlags),
-					command.NewFlag(
+					command.ChildFlagMap(logFlags),
+					command.NewChildFlag(
 						"--editor",
 						"Path to editor",
 						scalar.String(

@@ -72,7 +72,7 @@ func NewChildSection(name string, helpShort string, opts ...SectionOpt) SectionO
 
 // NewChildCmd creates a new Command as a child of this Section. Panics if a NewChildCmd with the same name already exists
 func NewChildCmd(name string, helpShort string, action wargcore.Action, opts ...command.CommandOpt) SectionOpt {
-	return ChildCmd(name, command.New(helpShort, action, opts...))
+	return ChildCmd(name, command.NewCmd(helpShort, action, opts...))
 }
 
 // SectionFooter adds an optional help string to this Section

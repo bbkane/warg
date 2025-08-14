@@ -20,12 +20,12 @@ func DoNothing(_ wargcore.Context) error {
 	return errors.New("NOTE: replace this command.DoNothing call")
 }
 
-// New builds a Command
-func New(helpShort string, action wargcore.Action, opts ...CommandOpt) wargcore.Cmd {
+// NewCmd builds a Cmd
+func NewCmd(helpShort string, action wargcore.Action, opts ...CommandOpt) wargcore.Cmd {
 	command := wargcore.Cmd{
 		HelpShort:   helpShort,
 		Action:      action,
-		Completions: DefaultCompletions,
+		Completions: DefaultCmdCompletions,
 		Flags:       make(wargcore.FlagMap),
 		Footer:      "",
 		HelpLong:    "",
@@ -36,7 +36,7 @@ func New(helpShort string, action wargcore.Action, opts ...CommandOpt) wargcore.
 	return command
 }
 
-func DefaultCompletions(cmdCtx wargcore.Context) (*completion.Candidates, error) {
+func DefaultCmdCompletions(cmdCtx wargcore.Context) (*completion.Candidates, error) {
 	// FZF (or maybe zsh) auto-sorts by alphabetical order, so no need to get fancy with the following ideas
 	//  - if the flag is required and is not set, suggest it first
 	//  - suggest command flags before global flags
@@ -75,40 +75,40 @@ func DefaultCompletions(cmdCtx wargcore.Context) (*completion.Candidates, error)
 	return candidates, nil
 }
 
-func Completions(CompletionsFunc wargcore.CompletionsFunc) CommandOpt {
+func CmdCompletions(CompletionsFunc wargcore.CompletionsFunc) CommandOpt {
 	return func(flag *wargcore.Cmd) {
 		flag.Completions = CompletionsFunc
 	}
 }
 
-// Flag adds an existing flag to a Command. It panics if a flag with the same name exists
-func Flag(name string, value wargcore.Flag) CommandOpt {
+// ChildFlag adds an existing flag to a Command. It panics if a flag with the same name exists
+func ChildFlag(name string, value wargcore.Flag) CommandOpt {
 	return func(com *wargcore.Cmd) {
 		com.Flags.AddFlag(name, value)
 	}
 }
 
-// FlagMap adds existing flags to a Command. It panics if a flag with the same name exists
-func FlagMap(flagMap wargcore.FlagMap) CommandOpt {
+// ChildFlagMap adds existing flags to a Command. It panics if a flag with the same name exists
+func ChildFlagMap(flagMap wargcore.FlagMap) CommandOpt {
 	return func(com *wargcore.Cmd) {
 		com.Flags.AddFlags(flagMap)
 	}
 }
 
-// NewFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
-func NewFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
-	return Flag(name, flag.New(helpShort, empty, opts...))
+// NewChildFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
+func NewChildFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
+	return ChildFlag(name, flag.New(helpShort, empty, opts...))
 }
 
-// Footer adds an Help string to the command - useful from a help function
-func Footer(footer string) CommandOpt {
+// CmdFooter adds an Help string to the command - useful from a help function
+func CmdFooter(footer string) CommandOpt {
 	return func(cat *wargcore.Cmd) {
 		cat.Footer = footer
 	}
 }
 
-// HelpLong adds an Help string to the command - useful from a help function
-func HelpLong(helpLong string) CommandOpt {
+// CmdHelpLong adds an Help string to the command - useful from a help function
+func CmdHelpLong(helpLong string) CommandOpt {
 	return func(cat *wargcore.Cmd) {
 		cat.HelpLong = helpLong
 	}

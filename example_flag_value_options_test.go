@@ -46,7 +46,7 @@ func ExampleApp_Parse_flag_value_options() {
 				string("show"),
 				"Show final flag values",
 				action,
-				command.NewFlag(
+				command.NewChildFlag(
 					"--scalar-flag",
 					"Demo scalar flag",
 					scalar.String(
@@ -56,7 +56,7 @@ func ExampleApp_Parse_flag_value_options() {
 					flag.ConfigPath("args.scalar-flag"),
 					flag.Required(),
 				),
-				command.NewFlag(
+				command.NewChildFlag(
 					"--slice-flag",
 					"Demo slice flag",
 					slice.Int(

@@ -37,7 +37,7 @@ func ExampleConfigFlag() {
 				string("add"),
 				"add integers",
 				exampleConfigFlagTextAdd,
-				command.NewFlag(
+				command.NewChildFlag(
 					string("--addend"),
 					"Integer to add. Flag is repeatible",
 					slice.Int(),

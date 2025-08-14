@@ -61,7 +61,7 @@ func TestApp_Parse(t *testing.T) {
 						"test",
 						"blah",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--flag",
 							"help for --flag",
 							scalar.String(),
@@ -101,7 +101,7 @@ func TestApp_Parse(t *testing.T) {
 							"test",
 							"help for test",
 							command.DoNothing,
-							command.FlagMap(fm),
+							command.ChildFlagMap(fm),
 						),
 					),
 
@@ -128,7 +128,7 @@ func TestApp_Parse(t *testing.T) {
 						"present",
 						"Formally present a guest (guests are never introduced, always presented).",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--name",
 							"Guest to address.",
 							scalar.String(scalar.Choices("bob")),
@@ -195,7 +195,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 						"com1",
 						"help for com1",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--com1f1",
 							"flag help",
 							scalar.Int(
@@ -230,7 +230,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					"com",
 					"com help",
 					command.DoNothing,
-					command.NewFlag(
+					command.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.String(
@@ -252,7 +252,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					"com",
 					"com help",
 					command.DoNothing,
-					command.NewFlag(
+					command.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.String(
@@ -274,7 +274,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					"test",
 					"blah",
 					command.DoNothing,
-					command.NewFlag(
+					command.NewChildFlag(
 						"--flag",
 						"help for --flag",
 						scalar.String(),
@@ -295,7 +295,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					"test",
 					"help for test",
 					command.DoNothing,
-					command.NewFlag(
+					command.NewChildFlag(
 						"--flag",
 						"help for --flag",
 						scalar.String(),
@@ -316,7 +316,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					"test",
 					"help for test",
 					command.DoNothing,
-					command.NewFlag(
+					command.NewChildFlag(
 						"--flag",
 						"help for --flag",
 						slice.String(),
@@ -352,7 +352,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					"com1",
 					"help for com1",
 					command.DoNothing,
-					command.NewFlag(
+					command.NewChildFlag(
 						string("--flag"),
 						"flag help",
 						dict.Bool(),
@@ -389,7 +389,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					"com",
 					"help for com1",
 					command.DoNothing,
-					command.NewFlag(
+					command.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.Int(),
@@ -410,7 +410,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					"com",
 					"help for com",
 					command.DoNothing,
-					command.NewFlag(
+					command.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.Int(),
@@ -433,10 +433,10 @@ func TestApp_Parse_rootSection(t *testing.T) {
 							"help for section",
 							section.ChildCmdMap(
 								wargcore.CmdMap{
-									"command": command.New(
+									"command": command.NewCmd(
 										"help for command",
 										command.DoNothing,
-										command.NewFlag(
+										command.NewChildFlag(
 											"--flag",
 											"flag help",
 											scalar.Int(),
@@ -464,7 +464,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					"command",
 					"help for command",
 					command.DoNothing,
-					command.NewFlag(
+					command.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.String(),
@@ -524,7 +524,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 	}{
 		{
 			name: "unsetSentinelScalarSuccess",
-			flagDef: command.NewFlag(
+			flagDef: command.NewChildFlag(
 				"--flag",
 				"help for --flag",
 				scalar.String(scalar.Default("default")),
@@ -539,7 +539,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 		},
 		{
 			name: "unsetSentinelScalarUpdate",
-			flagDef: command.NewFlag(
+			flagDef: command.NewChildFlag(
 				"--flag",
 				"help for --flag",
 				scalar.String(scalar.Default("default")),
@@ -552,7 +552,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 		},
 		{
 			name: "unsetSentinelSlice",
-			flagDef: command.NewFlag(
+			flagDef: command.NewChildFlag(
 				"--flag",
 				"help for --flag",
 				slice.String(slice.Default([]string{"default"})),
@@ -627,7 +627,7 @@ func TestApp_Parse_config(t *testing.T) {
 						"print",
 						"print key value",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--key",
 							"a key",
 							scalar.String(
@@ -684,7 +684,7 @@ func TestApp_Parse_config(t *testing.T) {
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--val",
 							"flag help",
 							scalar.String(),
@@ -729,7 +729,7 @@ func TestApp_Parse_config(t *testing.T) {
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--intval",
 							"flag help",
 							scalar.Int(),
@@ -775,7 +775,7 @@ func TestApp_Parse_config(t *testing.T) {
 						"print",
 						"print key value",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--subreddits",
 							"the subreddits",
 							slice.String(),
@@ -818,7 +818,7 @@ func TestApp_Parse_config(t *testing.T) {
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--val",
 							"flag help",
 							slice.String(),
@@ -862,7 +862,7 @@ func TestApp_Parse_config(t *testing.T) {
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--val",
 							"flag help",
 							slice.String(),
@@ -908,7 +908,7 @@ func TestApp_Parse_config(t *testing.T) {
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--val",
 							"flag help",
 							dict.Int(),
@@ -1098,7 +1098,7 @@ func TestAppFlagToAddr(t *testing.T) {
 					require.Equal(expectedFlagVal, flagVal)
 					return nil
 				},
-				command.NewFlag(
+				command.NewChildFlag(
 					"--flag",
 					"Flag for test",
 					scalar.String(

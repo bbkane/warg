@@ -52,7 +52,7 @@ func ExampleNew() {
 				"login",
 				"Login to the platform",
 				login,
-				command.FlagMap(commonFlags),
+				command.ChildFlagMap(commonFlags),
 			),
 			section.NewChildSection(
 				"comments",
@@ -64,7 +64,7 @@ func ExampleNew() {
 					// command to look,
 					// so use a provided stub action
 					command.DoNothing,
-					command.FlagMap(commonFlags),
+					command.ChildFlagMap(commonFlags),
 				),
 			),
 		),

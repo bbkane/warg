@@ -70,7 +70,7 @@ func TestApp_Validate(t *testing.T) {
 						"c",
 						"",
 						command.DoNothing,
-						command.NewFlag("f", "", nil),
+						command.NewChildFlag("f", "", nil),
 					),
 				),
 				warg.SkipValidation(),
@@ -85,7 +85,7 @@ func TestApp_Validate(t *testing.T) {
 						"c",
 						"",
 						command.DoNothing,
-						command.NewFlag("-f", "", scalar.Bool(),
+						command.NewChildFlag("-f", "", scalar.Bool(),
 							flag.Alias("f"),
 						)),
 				),
@@ -99,8 +99,8 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New("newAppName", "v1.0.0",
 				section.NewSection("",
 					section.NewChildCmd("c", "", command.DoNothing,
-						command.NewFlag("-f", "", scalar.Bool()),
-						command.NewFlag("--other", "", scalar.Bool(), flag.Alias("-f")),
+						command.NewChildFlag("-f", "", scalar.Bool()),
+						command.NewChildFlag("--other", "", scalar.Bool(), flag.Alias("-f")),
 					),
 				),
 				warg.SkipValidation(),
@@ -116,7 +116,7 @@ func TestApp_Validate(t *testing.T) {
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--commandflag",
 							"global flag conflict",
 							scalar.String(),
@@ -143,7 +143,7 @@ func TestApp_Validate(t *testing.T) {
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--commandflag",
 							"global flag conflict",
 							scalar.String(),
@@ -169,7 +169,7 @@ func TestApp_Validate(t *testing.T) {
 						"com",
 						"help for com",
 						command.DoNothing,
-						command.NewFlag(
+						command.NewChildFlag(
 							"--global",
 							"global flag conflict",
 							scalar.String(),

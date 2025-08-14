@@ -14,36 +14,36 @@ import (
 
 func app() *wargcore.App {
 
-	downloadCmd := command.New(
+	downloadCmd := command.NewCmd(
 		"Download star info",
 		githubStarsDownload,
-		command.NewFlag(
+		command.NewChildFlag(
 			"--include-readmes",
 			"Search for README.md.",
 			scalar.Bool(
 				scalar.Default(false),
 			),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--max-languages",
 			"Max number of languages to query on a repo",
 			scalar.Int(
 				scalar.Default(20),
 			),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--max-repo-topics",
 			"Max number of topics to query on a repo",
 			scalar.Int(
 				scalar.Default(20),
 			),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--after-cursor",
 			"PageInfo EndCursor to start from",
 			scalar.String(),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--max-pages",
 			"Max number of pages to fetch",
 			scalar.Int(
@@ -51,14 +51,14 @@ func app() *wargcore.App {
 			),
 			flag.Required(),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--output",
 			"Output filepath. Must not exist",
 			scalar.Path(
 				scalar.Default(path.New("starghaze_download.jsonl")),
 			),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--page-size",
 			"Number of starred repos in page",
 			scalar.Int(
@@ -66,7 +66,7 @@ func app() *wargcore.App {
 			),
 			flag.Required(),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--timeout",
 			"Timeout for a run. Use https://pkg.go.dev/time#Duration to build it",
 			scalar.Duration(
@@ -74,7 +74,7 @@ func app() *wargcore.App {
 			),
 			flag.Required(),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--token",
 			"Github PAT",
 			scalar.String(),
@@ -83,10 +83,10 @@ func app() *wargcore.App {
 		),
 	)
 
-	formatCmd := command.New(
+	formatCmd := command.NewCmd(
 		"Format downloaded GitHub Stars",
 		format,
-		command.NewFlag(
+		command.NewChildFlag(
 			"--format",
 			"Output format",
 			scalar.String(
@@ -95,12 +95,12 @@ func app() *wargcore.App {
 			),
 			flag.Required(),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--date-format",
 			"Datetime output format. See https://github.com/lestrrat-go/strftime for details. If not passed, the GitHub default is RFC 3339. Consider using '%b %d, %Y' for csv format",
 			scalar.String(),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--include-readmes",
 			"Search for README.md.",
 			scalar.Bool(
@@ -108,21 +108,21 @@ func app() *wargcore.App {
 			),
 			flag.Required(),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--sqlite-dsn",
 			"Sqlite DSN. Usually the file name. Only used for --format sqlite",
 			scalar.String(
 				scalar.Default("starghaze.db"),
 			),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--zinc-index-name",
 			"Only used for --format zinc.",
 			scalar.String(
 				scalar.Default("starghaze"),
 			),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--input",
 			"Input file",
 			scalar.Path(
@@ -130,7 +130,7 @@ func app() *wargcore.App {
 			),
 			flag.Required(),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--max-line-size",
 			"Max line size in the file in MB",
 			scalar.Int(
@@ -138,7 +138,7 @@ func app() *wargcore.App {
 			),
 			flag.Required(),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--output",
 			"output file. Prints to stdout if not passed",
 			scalar.Path(),
@@ -166,20 +166,20 @@ func app() *wargcore.App {
 			"open",
 			"Open spreadsheet in browser",
 			gSheetsOpen,
-			command.FlagMap(sheetFlags),
+			command.ChildFlagMap(sheetFlags),
 		),
 		section.NewChildCmd(
 			"upload",
 			"Upload CSV to Google Sheets. This will overwrite whatever is in the spreadsheet",
 			gSheetsUpload,
-			command.FlagMap(sheetFlags),
-			command.NewFlag(
+			command.ChildFlagMap(sheetFlags),
+			command.NewChildFlag(
 				"--csv-path",
 				"CSV file to upload",
 				scalar.Path(),
 				flag.Required(),
 			),
-			command.NewFlag(
+			command.NewChildFlag(
 				"--timeout",
 				"Timeout for a run. Use https://pkg.go.dev/time#Duration to build it",
 				scalar.Duration(
@@ -190,11 +190,11 @@ func app() *wargcore.App {
 		),
 	)
 
-	searchCmd := command.New(
+	searchCmd := command.NewCmd(
 
 		"Full text search SQLite database",
 		search,
-		command.NewFlag(
+		command.NewChildFlag(
 			"--limit",
 			"Max number of results",
 			scalar.Int(
@@ -202,7 +202,7 @@ func app() *wargcore.App {
 			),
 			flag.Required(),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--sqlite-dsn",
 			"Sqlite DSN. Usually the file name.",
 			scalar.String(
@@ -210,7 +210,7 @@ func app() *wargcore.App {
 			),
 			flag.Required(),
 		),
-		command.NewFlag(
+		command.NewChildFlag(
 			"--term",
 			"Search for this term",
 			scalar.String(),

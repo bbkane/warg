@@ -20,7 +20,7 @@ func BuildApp() *wargcore.App {
 				"command1",
 				"command1 help",
 				command.DoNothing,
-				command.NewFlag(
+				command.NewChildFlag(
 					"--flag1",
 					"flag1 help",
 					scalar.String(
@@ -32,13 +32,13 @@ func BuildApp() *wargcore.App {
 				"manual",
 				"commands with flags using all completion types for manual testing",
 				command.DoNothing,
-				command.NewFlag(
+				command.NewChildFlag(
 					"--dirs",
 					"dirs completion",
 					scalar.Path(),
 					flag.Completions(warg.CompletionsDirectories),
 				),
-				command.NewFlag(
+				command.NewChildFlag(
 					"--dirs-files",
 					"dirs/files completion",
 					scalar.Path(),
@@ -49,19 +49,19 @@ func BuildApp() *wargcore.App {
 						}, nil
 					}),
 				),
-				command.NewFlag(
+				command.NewChildFlag(
 					"--none",
 					"no completion",
 					scalar.String(),
 					flag.Completions(warg.CompletionsNone),
 				),
-				command.NewFlag(
+				command.NewChildFlag(
 					"--values",
 					"values completion",
 					scalar.String(),
 					flag.Completions(warg.CompletionsValues([]string{"alpha", "beta"})),
 				),
-				command.NewFlag(
+				command.NewChildFlag(
 					"--values-descriptions",
 					"values completion with descriptions",
 					scalar.String(),
@@ -78,12 +78,12 @@ func BuildApp() *wargcore.App {
 					"command2",
 					"command2 help",
 					command.DoNothing,
-					command.NewFlag(
+					command.NewChildFlag(
 						"--bool",
 						"bool completion is special cased to return true/false",
 						scalar.Bool(),
 					),
-					command.NewFlag(
+					command.NewChildFlag(
 						"--flag2",
 						"flag2 help",
 						scalar.String(),

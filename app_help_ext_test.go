@@ -62,8 +62,8 @@ func grabbitSection() wargcore.Section {
 				"edit",
 				"Edit the config. A default config will be created if it doesn't exist",
 				command.DoNothing,
-				command.Footer(configEditFooter),
-				command.NewFlag(
+				command.CmdFooter(configEditFooter),
+				command.NewChildFlag(
 					"--editor",
 					"path to editor",
 					scalar.String(
