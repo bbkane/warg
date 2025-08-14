@@ -5,10 +5,7 @@ import (
 	"os"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/command"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/parseopt"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/wargcore"
 )
@@ -31,40 +28,40 @@ func login(ctx wargcore.Context) error {
 
 func ExampleNew() {
 	commonFlags := wargcore.FlagMap{
-		"--timeout": flag.NewFlag(
+		"--timeout": wargcore.NewFlag(
 			"Optional timeout. Defaults to no timeout",
 			scalar.Int(),
 		),
-		"--url": flag.NewFlag(
+		"--url": wargcore.NewFlag(
 			"URL of the blog",
 			scalar.String(
 				scalar.Default("https://www.myblog.com"),
 			),
-			flag.EnvVars("BLOG_URL"),
+			wargcore.EnvVars("BLOG_URL"),
 		),
 	}
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		section.NewSection(
+		wargcore.NewSection(
 			"work with a fictional blog platform",
-			section.NewChildCmd(
+			wargcore.NewChildCmd(
 				"login",
 				"Login to the platform",
 				login,
-				command.ChildFlagMap(commonFlags),
+				wargcore.ChildFlagMap(commonFlags),
 			),
-			section.NewChildSection(
+			wargcore.NewChildSection(
 				"comments",
 				"Deal with comments",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"list",
 					"List all comments",
 					// still prototyping how we want this
 					// command to look,
 					// so use a provided stub action
-					command.DoNothing,
-					command.ChildFlagMap(commonFlags),
+					wargcore.DoNothing,
+					wargcore.ChildFlagMap(commonFlags),
 				),
 			),
 		),

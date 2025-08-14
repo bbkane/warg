@@ -4,9 +4,6 @@ import (
 	"fmt"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/command"
-	"go.bbkane.com/warg/flag"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/wargcore"
 )
@@ -15,19 +12,19 @@ func app() *wargcore.App {
 	app := warg.New(
 		"butler",
 		"v1.0.0",
-		section.NewSection(
+		wargcore.NewSection(
 			string("A virtual assistant"),
-			section.NewChildCmd(
+			wargcore.NewChildCmd(
 				"present",
 				"Formally present a guest (guests are never introduced, always presented).",
 				present,
-				command.NewChildFlag(
+				wargcore.NewChildFlag(
 					"--name",
 					"Guest to address.",
 					scalar.String(),
-					flag.Alias("-n"),
-					flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),
-					flag.Required(),
+					wargcore.Alias("-n"),
+					wargcore.EnvVars("BUTLER_PRESENT_NAME", "USER"),
+					wargcore.Required(),
 				),
 			),
 		),

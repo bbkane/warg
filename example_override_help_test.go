@@ -4,10 +4,8 @@ import (
 	"fmt"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/help"
 	"go.bbkane.com/warg/parseopt"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/wargcore"
 )
 
@@ -17,7 +15,7 @@ func exampleHelpFlaglogin(_ wargcore.Context) error {
 }
 
 func customHelpCmd() wargcore.Cmd {
-	return command.NewCmd(
+	return wargcore.NewCmd(
 		"", // this command will be launched by the help flag, so users will never see the help
 		func(ctx wargcore.Context) error {
 			file := ctx.Stdout
@@ -37,9 +35,9 @@ func ExampleHelpFlag() {
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		section.NewSection(
+		wargcore.NewSection(
 			"work with a fictional blog platform",
-			section.NewChildCmd(
+			wargcore.NewChildCmd(
 				"login",
 				"Login to the platform",
 				exampleHelpFlaglogin,

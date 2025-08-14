@@ -1,15 +1,14 @@
-package flag_test
+package wargcore_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/wargcore"
 )
 
 func TestFlagMap_SortedNames(t *testing.T) {
-	emptyFlag := flag.NewFlag("", nil)
+	emptyFlag := wargcore.NewFlag("", nil)
 
 	fm := wargcore.FlagMap{
 		"c": emptyFlag,

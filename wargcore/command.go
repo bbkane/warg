@@ -1,4 +1,4 @@
-package command
+package wargcore
 
 import (
 	"errors"
@@ -6,27 +6,25 @@ import (
 	"strings"
 
 	"go.bbkane.com/warg/completion"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/value"
-	"go.bbkane.com/warg/wargcore"
 )
 
 // A CommandOpt customizes a Command
-type CommandOpt func(*wargcore.Cmd)
+type CommandOpt func(*Cmd)
 
 // DoNothing is a command action that simply returns an error.
 // Useful for prototyping
-func DoNothing(_ wargcore.Context) error {
+func DoNothing(_ Context) error {
 	return errors.New("NOTE: replace this command.DoNothing call")
 }
 
 // NewCmd builds a Cmd
-func NewCmd(helpShort string, action wargcore.Action, opts ...CommandOpt) wargcore.Cmd {
-	command := wargcore.Cmd{
+func NewCmd(helpShort string, action Action, opts ...CommandOpt) Cmd {
+	command := Cmd{
 		HelpShort:   helpShort,
 		Action:      action,
 		Completions: DefaultCmdCompletions,
-		Flags:       make(wargcore.FlagMap),
+		Flags:       make(FlagMap),
 		Footer:      "",
 		HelpLong:    "",
 	}
@@ -36,7 +34,7 @@ func NewCmd(helpShort string, action wargcore.Action, opts ...CommandOpt) wargco
 	return command
 }
 
-func DefaultCmdCompletions(cmdCtx wargcore.Context) (*completion.Candidates, error) {
+func DefaultCmdCompletions(cmdCtx Context) (*completion.Candidates, error) {
 	// FZF (or maybe zsh) auto-sorts by alphabetical order, so no need to get fancy with the following ideas
 	//  - if the flag is required and is not set, suggest it first
 	//  - suggest command flags before global flags
@@ -75,41 +73,41 @@ func DefaultCmdCompletions(cmdCtx wargcore.Context) (*completion.Candidates, err
 	return candidates, nil
 }
 
-func CmdCompletions(CompletionsFunc wargcore.CompletionsFunc) CommandOpt {
-	return func(flag *wargcore.Cmd) {
+func CmdCompletions(CompletionsFunc CompletionsFunc) CommandOpt {
+	return func(flag *Cmd) {
 		flag.Completions = CompletionsFunc
 	}
 }
 
 // ChildFlag adds an existing flag to a Command. It panics if a flag with the same name exists
-func ChildFlag(name string, value wargcore.Flag) CommandOpt {
-	return func(com *wargcore.Cmd) {
+func ChildFlag(name string, value Flag) CommandOpt {
+	return func(com *Cmd) {
 		com.Flags.AddFlag(name, value)
 	}
 }
 
 // ChildFlagMap adds existing flags to a Command. It panics if a flag with the same name exists
-func ChildFlagMap(flagMap wargcore.FlagMap) CommandOpt {
-	return func(com *wargcore.Cmd) {
+func ChildFlagMap(flagMap FlagMap) CommandOpt {
+	return func(com *Cmd) {
 		com.Flags.AddFlags(flagMap)
 	}
 }
 
 // NewChildFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
-func NewChildFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
-	return ChildFlag(name, flag.NewFlag(helpShort, empty, opts...))
+func NewChildFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) CommandOpt {
+	return ChildFlag(name, NewFlag(helpShort, empty, opts...))
 }
 
 // CmdFooter adds an Help string to the command - useful from a help function
 func CmdFooter(footer string) CommandOpt {
-	return func(cat *wargcore.Cmd) {
+	return func(cat *Cmd) {
 		cat.Footer = footer
 	}
 }
 
 // CmdHelpLong adds an Help string to the command - useful from a help function
 func CmdHelpLong(helpLong string) CommandOpt {
-	return func(cat *wargcore.Cmd) {
+	return func(cat *Cmd) {
 		cat.HelpLong = helpLong
 	}
 }

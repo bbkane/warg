@@ -9,14 +9,11 @@ import (
 	"testing"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/config/jsonreader"
 	"go.bbkane.com/warg/config/yamlreader"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/path"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/dict"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
@@ -55,17 +52,17 @@ func TestApp_Parse(t *testing.T) {
 			name: "envvar",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.NewSection(
+				wargcore.NewSection(
 					"help for test",
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"test",
 						"blah",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--flag",
 							"help for --flag",
 							scalar.String(),
-							flag.EnvVars("notthere", "there", "alsothere"),
+							wargcore.EnvVars("notthere", "there", "alsothere"),
 						),
 					),
 				),
@@ -90,18 +87,18 @@ func TestApp_Parse(t *testing.T) {
 			name: "addCommandFlags",
 			app: func() wargcore.App {
 				fm := wargcore.FlagMap{
-					"--flag1": flag.NewFlag("--flag1 value", scalar.String()),
-					"--flag2": flag.NewFlag("--flag1 value", scalar.String()),
+					"--flag1": wargcore.NewFlag("--flag1 value", scalar.String()),
+					"--flag2": wargcore.NewFlag("--flag1 value", scalar.String()),
 				}
 				app := warg.New(
 					"newAppName", "v1.0.0",
-					section.NewSection(
+					wargcore.NewSection(
 						"help for section",
-						section.NewChildCmd(
+						wargcore.NewChildCmd(
 							"test",
 							"help for test",
-							command.DoNothing,
-							command.ChildFlagMap(fm),
+							wargcore.DoNothing,
+							wargcore.ChildFlagMap(fm),
 						),
 					),
 
@@ -122,19 +119,19 @@ func TestApp_Parse(t *testing.T) {
 			name: "invalidFlagsErrorEvenForHelp",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.NewSection(
+				wargcore.NewSection(
 					string("A virtual assistant"),
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"present",
 						"Formally present a guest (guests are never introduced, always presented).",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--name",
 							"Guest to address.",
 							scalar.String(scalar.Choices("bob")),
-							flag.Alias("-n"),
-							flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),
-							flag.Required(),
+							wargcore.Alias("-n"),
+							wargcore.EnvVars("BUTLER_PRESENT_NAME", "USER"),
+							wargcore.Required(),
 						),
 					),
 				),
@@ -186,16 +183,16 @@ func TestApp_Parse_rootSection(t *testing.T) {
 	}{
 		{
 			name: "fromMain",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for test",
-				section.NewChildSection(
+				wargcore.NewChildSection(
 					"cat1",
 					"help for cat1",
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"com1",
 						"help for com1",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--com1f1",
 							"flag help",
 							scalar.Int(
@@ -212,9 +209,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "noSection",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for test",
-				section.NewChildCmd("com", "command for validation", command.DoNothing),
+				wargcore.NewChildCmd("com", "command for validation", wargcore.DoNothing),
 			),
 
 			args:                     []string{"app"},
@@ -224,13 +221,13 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagDefault",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for test",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"com",
 					"com help",
-					command.DoNothing,
-					command.NewChildFlag(
+					wargcore.DoNothing,
+					wargcore.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.String(
@@ -246,13 +243,13 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "extraFlag",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for test",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"com",
 					"com help",
-					command.DoNothing,
-					command.NewChildFlag(
+					wargcore.DoNothing,
+					wargcore.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.String(
@@ -268,17 +265,17 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "requiredFlag",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for test",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"test",
 					"blah",
-					command.DoNothing,
-					command.NewChildFlag(
+					wargcore.DoNothing,
+					wargcore.NewChildFlag(
 						"--flag",
 						"help for --flag",
 						scalar.String(),
-						flag.Required(),
+						wargcore.Required(),
 					),
 				),
 			),
@@ -289,17 +286,17 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagAlias",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for section",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"test",
 					"help for test",
-					command.DoNothing,
-					command.NewChildFlag(
+					wargcore.DoNothing,
+					wargcore.NewChildFlag(
 						"--flag",
 						"help for --flag",
 						scalar.String(),
-						flag.Alias("-f"),
+						wargcore.Alias("-f"),
 					),
 				),
 			),
@@ -310,17 +307,17 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagAliasWithList",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for section",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"test",
 					"help for test",
-					command.DoNothing,
-					command.NewChildFlag(
+					wargcore.DoNothing,
+					wargcore.NewChildFlag(
 						"--flag",
 						"help for --flag",
 						slice.String(),
-						flag.Alias("-f"),
+						wargcore.Alias("-f"),
 					),
 				),
 			),
@@ -331,12 +328,12 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "badHelp",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for section",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"test",
 					"help for test",
-					command.DoNothing,
+					wargcore.DoNothing,
 				),
 			),
 			args:                     []string{t.Name(), "test", "-h", "badhelpval"},
@@ -346,13 +343,13 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "dictUpdate",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for test",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"com1",
 					"help for com1",
-					command.DoNothing,
-					command.NewChildFlag(
+					wargcore.DoNothing,
+					wargcore.NewChildFlag(
 						string("--flag"),
 						"flag help",
 						dict.Bool(),
@@ -367,12 +364,12 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "passAbsentSection",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for test",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"com",
 					"help for com",
-					command.DoNothing,
+					wargcore.DoNothing,
 				),
 			),
 
@@ -383,13 +380,13 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "scalarFlagPassedTwice",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for test",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"com",
 					"help for com1",
-					command.DoNothing,
-					command.NewChildFlag(
+					wargcore.DoNothing,
+					wargcore.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.Int(),
@@ -404,13 +401,13 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "passedFlagBeforeCommand",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for test",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"com",
 					"help for com",
-					command.DoNothing,
-					command.NewChildFlag(
+					wargcore.DoNothing,
+					wargcore.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.Int(),
@@ -425,18 +422,18 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "existingSectionsExistingCommands",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for test",
-				section.ChildSectionMap(
+				wargcore.ChildSectionMap(
 					wargcore.SectionMap{
-						"section": section.NewSection(
+						"section": wargcore.NewSection(
 							"help for section",
-							section.ChildCmdMap(
+							wargcore.ChildCmdMap(
 								wargcore.CmdMap{
-									"command": command.NewCmd(
+									"command": wargcore.NewCmd(
 										"help for command",
-										command.DoNothing,
-										command.NewChildFlag(
+										wargcore.DoNothing,
+										wargcore.NewChildFlag(
 											"--flag",
 											"flag help",
 											scalar.Int(),
@@ -458,13 +455,13 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagWithEmptyValue",
-			rootSection: section.NewSection(
+			rootSection: wargcore.NewSection(
 				"help for test",
-				section.NewChildCmd(
+				wargcore.NewChildCmd(
 					"command",
 					"help for command",
-					command.DoNothing,
-					command.NewChildFlag(
+					wargcore.DoNothing,
+					wargcore.NewChildFlag(
 						"--flag",
 						"flag help",
 						scalar.String(),
@@ -516,7 +513,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 func TestApp_Parse_unsetSetinel(t *testing.T) {
 	tests := []struct {
 		name                     string
-		flagDef                  command.CommandOpt
+		flagDef                  wargcore.CommandOpt
 		args                     []string
 		expectedPassedPath       []string
 		expectedPassedFlagValues wargcore.PassedFlags
@@ -524,11 +521,11 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 	}{
 		{
 			name: "unsetSentinelScalarSuccess",
-			flagDef: command.NewChildFlag(
+			flagDef: wargcore.NewChildFlag(
 				"--flag",
 				"help for --flag",
 				scalar.String(scalar.Default("default")),
-				flag.UnsetSentinel("UNSET"),
+				wargcore.UnsetSentinel("UNSET"),
 			),
 			args:               []string{t.Name(), "test", "--flag", "UNSET"},
 			expectedPassedPath: []string{"test"},
@@ -539,11 +536,11 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 		},
 		{
 			name: "unsetSentinelScalarUpdate",
-			flagDef: command.NewChildFlag(
+			flagDef: wargcore.NewChildFlag(
 				"--flag",
 				"help for --flag",
 				scalar.String(scalar.Default("default")),
-				flag.UnsetSentinel("UNSET"),
+				wargcore.UnsetSentinel("UNSET"),
 			),
 			args:                     []string{t.Name(), "test", "--flag", "UNSET", "--flag", "setAfter"},
 			expectedPassedPath:       []string{"test"},
@@ -552,11 +549,11 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 		},
 		{
 			name: "unsetSentinelSlice",
-			flagDef: command.NewChildFlag(
+			flagDef: wargcore.NewChildFlag(
 				"--flag",
 				"help for --flag",
 				slice.String(slice.Default([]string{"default"})),
-				flag.UnsetSentinel("UNSET"),
+				wargcore.UnsetSentinel("UNSET"),
 			),
 			args:               []string{t.Name(), "test", "--flag", "a", "--flag", "UNSET", "--flag", "b", "--flag", "c"},
 			expectedPassedPath: []string{"test"},
@@ -573,12 +570,12 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 
 			app := warg.New(
 				"newAppName", "v1.0.0",
-				section.NewSection(
+				wargcore.NewSection(
 					"help for test",
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"test",
 						"help for test",
-						command.DoNothing,
+						wargcore.DoNothing,
 						tt.flagDef,
 					),
 				),
@@ -621,19 +618,19 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "configFlag",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.NewSection(
+				wargcore.NewSection(
 					"help for test",
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"print",
 						"print key value",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--key",
 							"a key",
 							scalar.String(
 								scalar.Default("defaultkeyval"),
 							),
-							flag.ConfigPath("key"),
+							wargcore.ConfigPath("key"),
 						),
 					),
 				),
@@ -654,7 +651,7 @@ func TestApp_Parse_config(t *testing.T) {
 						return cr, nil
 					},
 					wargcore.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": wargcore.NewFlag(
 							"Path to config file",
 							scalar.Path(
 								scalar.Default(path.New("defaultconfigval")),
@@ -679,30 +676,30 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "simpleJSONConfig",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.NewSection("help for test",
-					section.NewChildCmd(
+				wargcore.NewSection("help for test",
+					wargcore.NewChildCmd(
 						"com",
 						"help for com",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--val",
 							"flag help",
 							scalar.String(),
-							flag.ConfigPath("params.val"),
+							wargcore.ConfigPath("params.val"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					jsonreader.New,
 					wargcore.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": wargcore.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "simpleJSONConfig", "simple_json_config.json"),
 								),
 							),
-							flag.Alias("-c"),
+							wargcore.Alias("-c"),
 						),
 					},
 				),
@@ -724,30 +721,30 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "numJSONConfig",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.NewSection("help for test",
-					section.NewChildCmd(
+				wargcore.NewSection("help for test",
+					wargcore.NewChildCmd(
 						"com",
 						"help for com",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--intval",
 							"flag help",
 							scalar.Int(),
-							flag.ConfigPath("params.intval"),
+							wargcore.ConfigPath("params.intval"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					jsonreader.New,
 					wargcore.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": wargcore.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "numJSONConfig", "config.json"),
 								),
 							),
-							flag.Alias("-c"),
+							wargcore.Alias("-c"),
 						),
 					},
 				),
@@ -769,31 +766,31 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "configSlice",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.NewSection(
+				wargcore.NewSection(
 					"help for test",
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"print",
 						"print key value",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--subreddits",
 							"the subreddits",
 							slice.String(),
-							flag.ConfigPath("subreddits[].name"),
+							wargcore.ConfigPath("subreddits[].name"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					jsonreader.New,
 					wargcore.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": wargcore.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
 								),
 							),
-							flag.Alias("-c"),
+							wargcore.Alias("-c"),
 						),
 					},
 				),
@@ -813,30 +810,30 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "JSONConfigStringSlice",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.NewSection("help for test",
-					section.NewChildCmd(
+				wargcore.NewSection("help for test",
+					wargcore.NewChildCmd(
 						"com",
 						"help for com",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--val",
 							"flag help",
 							slice.String(),
-							flag.ConfigPath("val"),
+							wargcore.ConfigPath("val"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					jsonreader.New,
 					wargcore.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": wargcore.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "JSONConfigStringSlice", "config.json"),
 								),
 							),
-							flag.Alias("-c"),
+							wargcore.Alias("-c"),
 						),
 					},
 				),
@@ -857,30 +854,30 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "YAMLConfigStringSlice",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.NewSection("help for test",
-					section.NewChildCmd(
+				wargcore.NewSection("help for test",
+					wargcore.NewChildCmd(
 						"com",
 						"help for com",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--val",
 							"flag help",
 							slice.String(),
-							flag.ConfigPath("val"),
+							wargcore.ConfigPath("val"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					yamlreader.New,
 					wargcore.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": wargcore.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "YAMLConfigStringSlice", "config.yaml"),
 								),
 							),
-							flag.Alias("-c"),
+							wargcore.Alias("-c"),
 						),
 					},
 				),
@@ -902,31 +899,31 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "JSONConfigMap",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.NewSection(
+				wargcore.NewSection(
 					"help for test",
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"com",
 						"help for com",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--val",
 							"flag help",
 							dict.Int(),
-							flag.ConfigPath("val"),
+							wargcore.ConfigPath("val"),
 						),
 					),
 				),
 				warg.ConfigFlag(
 					jsonreader.New,
 					wargcore.FlagMap{
-						"--config": flag.NewFlag(
+						"--config": wargcore.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
 									testDataFilePath(t.Name(), "JSONConfigMap", "config.json"),
 								),
 							),
-							flag.Alias("-c"),
+							wargcore.Alias("-c"),
 						),
 					},
 				),
@@ -985,12 +982,12 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 			name: "globalFlag",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.NewSection(
+				wargcore.NewSection(
 					"help for test",
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"com",
 						"help for com",
-						command.DoNothing,
+						wargcore.DoNothing,
 					),
 				),
 				warg.SkipAll(),
@@ -1038,9 +1035,9 @@ func TestCustomVersion(t *testing.T) {
 	app := warg.New(
 		"appName",
 		expectedVersion,
-		section.NewSection(
+		wargcore.NewSection(
 			"test",
-			section.NewChildCmd("version", "Print version", command.DoNothing),
+			wargcore.NewChildCmd("version", "Print version", wargcore.DoNothing),
 		),
 		warg.SkipVersionCommand(),
 	)
@@ -1060,9 +1057,9 @@ func TestContextContainsValue(t *testing.T) {
 	app := warg.New(
 		"appName",
 		"v1.0.0",
-		section.NewSection(
+		wargcore.NewSection(
 			"test",
-			section.NewChildCmd("dummycommand", "Do nothing", command.DoNothing),
+			wargcore.NewChildCmd("dummycommand", "Do nothing", wargcore.DoNothing),
 		),
 	)
 	err := app.Validate()
@@ -1089,16 +1086,16 @@ func TestAppFlagToAddr(t *testing.T) {
 	app := warg.New(
 		"appName",
 		"v1.0.0",
-		section.NewSection(
+		wargcore.NewSection(
 			"test",
-			section.NewChildCmd(
+			wargcore.NewChildCmd(
 				"command",
 				"Test Command",
 				func(ctx wargcore.Context) error {
 					require.Equal(expectedFlagVal, flagVal)
 					return nil
 				},
-				command.NewChildFlag(
+				wargcore.NewChildFlag(
 					"--flag",
 					"Flag for test",
 					scalar.String(

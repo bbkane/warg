@@ -5,9 +5,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/command"
-	"go.bbkane.com/warg/flag"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/wargcore"
 )
@@ -22,7 +19,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "leafSection",
 			app: warg.New("newAppName", "v1.0.0",
-				section.NewSection("Help for section", section.NewChildSection("leaf", "Is empty but shouldn't be")),
+				wargcore.NewSection("Help for section", wargcore.NewChildSection("leaf", "Is empty but shouldn't be")),
 				warg.SkipValidation(),
 			),
 			expectedErr: true,
@@ -31,8 +28,8 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "appNameWithDash",
 			app: warg.New("newAppName", "v1.0.0",
-				section.NewSection("",
-					section.NewChildCmd("com", "command for validation", command.DoNothing),
+				wargcore.NewSection("",
+					wargcore.NewChildCmd("com", "command for validation", wargcore.DoNothing),
 				),
 				warg.SkipValidation(),
 			),
@@ -41,9 +38,9 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "sectionNameWithDash",
 			app: warg.New("newAppName", "v1.0.0",
-				section.NewSection("",
-					section.NewChildSection("-name", "",
-						section.NewChildCmd("com", "command for validation", command.DoNothing),
+				wargcore.NewSection("",
+					wargcore.NewChildSection("-name", "",
+						wargcore.NewChildCmd("com", "command for validation", wargcore.DoNothing),
 					),
 				),
 				warg.SkipValidation(),
@@ -53,9 +50,9 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandNameWithDash",
 			app: warg.New("newAppName", "v1.0.0",
-				section.NewSection("",
-					section.NewChildSection("name", "",
-						section.NewChildCmd("-com", "starts with dash", command.DoNothing),
+				wargcore.NewSection("",
+					wargcore.NewChildSection("name", "",
+						wargcore.NewChildCmd("-com", "starts with dash", wargcore.DoNothing),
 					),
 				),
 				warg.SkipValidation(),
@@ -65,12 +62,12 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "flagNameNoDash",
 			app: warg.New("newAppName", "v1.0.0",
-				section.NewSection("",
-					section.NewChildCmd(
+				wargcore.NewSection("",
+					wargcore.NewChildCmd(
 						"c",
 						"",
-						command.DoNothing,
-						command.NewChildFlag("f", "", nil),
+						wargcore.DoNothing,
+						wargcore.NewChildFlag("f", "", nil),
 					),
 				),
 				warg.SkipValidation(),
@@ -80,13 +77,13 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "aliasNameNoDash",
 			app: warg.New("newAppName", "v1.0.0",
-				section.NewSection("",
-					section.NewChildCmd(
+				wargcore.NewSection("",
+					wargcore.NewChildCmd(
 						"c",
 						"",
-						command.DoNothing,
-						command.NewChildFlag("-f", "", scalar.Bool(),
-							flag.Alias("f"),
+						wargcore.DoNothing,
+						wargcore.NewChildFlag("-f", "", scalar.Bool(),
+							wargcore.Alias("f"),
 						)),
 				),
 				warg.SkipValidation(),
@@ -97,10 +94,10 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagAliasCommandFlagNameConflict",
 			app: warg.New("newAppName", "v1.0.0",
-				section.NewSection("",
-					section.NewChildCmd("c", "", command.DoNothing,
-						command.NewChildFlag("-f", "", scalar.Bool()),
-						command.NewChildFlag("--other", "", scalar.Bool(), flag.Alias("-f")),
+				wargcore.NewSection("",
+					wargcore.NewChildCmd("c", "", wargcore.DoNothing,
+						wargcore.NewChildFlag("-f", "", scalar.Bool()),
+						wargcore.NewChildFlag("--other", "", scalar.Bool(), wargcore.Alias("-f")),
 					),
 				),
 				warg.SkipValidation(),
@@ -110,17 +107,17 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagAliasGlobalFlagAliasConflict",
 			app: warg.New("newAppName", "v1.0.0",
-				section.NewSection(
+				wargcore.NewSection(
 					"help for test",
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"com",
 						"help for com",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--commandflag",
 							"global flag conflict",
 							scalar.String(),
-							flag.Alias("--global"),
+							wargcore.Alias("--global"),
 						),
 					),
 				),
@@ -129,7 +126,7 @@ func TestApp_Validate(t *testing.T) {
 					"--globalflag",
 					"global flag",
 					scalar.String(),
-					flag.Alias("--global"),
+					wargcore.Alias("--global"),
 				),
 			),
 			expectedErr: true,
@@ -137,17 +134,17 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagAliasGlobalFlagNameConflict",
 			app: warg.New("newAppName", "v1.0.0",
-				section.NewSection(
+				wargcore.NewSection(
 					"help for test",
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"com",
 						"help for com",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--commandflag",
 							"global flag conflict",
 							scalar.String(),
-							flag.Alias("--global"),
+							wargcore.Alias("--global"),
 						),
 					),
 				),
@@ -163,13 +160,13 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagNameGlobalFlagNameConflict",
 			app: warg.New("newAppName", "v1.0.0",
-				section.NewSection(
+				wargcore.NewSection(
 					"help for test",
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"com",
 						"help for com",
-						command.DoNothing,
-						command.NewChildFlag(
+						wargcore.DoNothing,
+						wargcore.NewChildFlag(
 							"--global",
 							"global flag conflict",
 							scalar.String(),
@@ -188,14 +185,14 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandNameSectionNameConflict",
 			app: warg.New("newAppName", "v1.0.0",
-				section.NewSection(
+				wargcore.NewSection(
 					"help for test",
-					section.NewChildCmd(
+					wargcore.NewChildCmd(
 						"conflict",
 						"help for com",
-						command.DoNothing,
+						wargcore.DoNothing,
 					),
-					section.NewChildSection(
+					wargcore.NewChildSection(
 						"conflict",
 						"help for section",
 					),

@@ -6,9 +6,7 @@ import (
 
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/wargcore"
@@ -32,8 +30,8 @@ func GlobalFlagMap(flagMap wargcore.FlagMap) AppOpt {
 }
 
 // NewGlobalFlag adds a flag to the app. It panics if a flag with the same name exists
-func NewGlobalFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) AppOpt {
-	return GlobalFlag(name, flag.NewFlag(helpShort, empty, opts...))
+func NewGlobalFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...wargcore.FlagOpt) AppOpt {
+	return GlobalFlag(name, wargcore.NewFlag(helpShort, empty, opts...))
 
 }
 
@@ -49,7 +47,7 @@ func ConfigFlag(reader config.NewReader, flagMap wargcore.FlagMap) AppOpt {
 	}
 }
 
-// HelpFlag customizes your help flag. This option is only needed if you're also writing a custom help function. helpFlags be either `nil` to autogenerate or a flag map with one flat that with the followng properties:
+// HelpFlag customizes your help wargcore. This option is only needed if you're also writing a custom help function. helpFlags be either `nil` to autogenerate or a flag map with one flat that with the followng properties:
 //
 //   - scalar string type
 //   - choices that match the names in helpCommands
@@ -209,22 +207,22 @@ func New(name string, version string, rootSection wargcore.Section, opts ...AppO
 
 	if !app.SkipGlobalColorFlag {
 		GlobalFlagMap(wargcore.FlagMap{
-			"--color": flag.NewFlag(
+			"--color": wargcore.NewFlag(
 				"Use ANSI colors",
 				scalar.String(
 					scalar.Choices("true", "false", "auto"),
 					scalar.Default("auto"),
 				),
-				flag.EnvVars("WARG_COLOR"),
+				wargcore.EnvVars("WARG_COLOR"),
 			),
 		})(&app)
 	}
 
 	if !app.SkipCompletionCommands {
-		section.NewChildSection(
+		wargcore.NewChildSection(
 			"completion",
 			"Print shell completion scripts",
-			section.NewChildCmd(
+			wargcore.NewChildCmd(
 				"zsh",
 				"Print zsh completion script",
 				func(ctx wargcore.Context) error {
@@ -236,7 +234,7 @@ func New(name string, version string, rootSection wargcore.Section, opts ...AppO
 	}
 
 	if !app.SkipVersionCommand {
-		section.NewChildCmd(
+		wargcore.NewChildCmd(
 			"version",
 			"Print version",
 			func(ctx wargcore.Context) error {

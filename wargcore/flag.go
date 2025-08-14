@@ -1,17 +1,16 @@
-package flag
+package wargcore
 
 import (
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/value"
-	"go.bbkane.com/warg/wargcore"
 )
 
 // FlagOpt customizes a Flag on creation
-type FlagOpt func(*wargcore.Flag)
+type FlagOpt func(*Flag)
 
 // NewFlag creates a NewFlag with options!
-func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) wargcore.Flag {
-	flag := wargcore.Flag{
+func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) Flag {
+	flag := Flag{
 		Alias:                 "",
 		Completions:           DefaultFlagCompletions,
 		ConfigPath:            "",
@@ -32,19 +31,19 @@ func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) wa
 
 // Alias is an alternative name for a flag, usually shorter :)
 func Alias(alias string) FlagOpt {
-	return func(f *wargcore.Flag) {
+	return func(f *Flag) {
 		f.Alias = alias
 	}
 }
 
 // ConfigPath adds a configpath to a flag
 func ConfigPath(path string) FlagOpt {
-	return func(f *wargcore.Flag) {
+	return func(f *Flag) {
 		f.ConfigPath = path
 	}
 }
 
-func DefaultFlagCompletions(cmdCtx wargcore.Context) (*completion.Candidates, error) {
+func DefaultFlagCompletions(cmdCtx Context) (*completion.Candidates, error) {
 	choices := cmdCtx.ParseState.FlagValues[cmdCtx.ParseState.CurrentFlagName].Choices()
 	if len(choices) > 0 {
 		candidates := &completion.Candidates{
@@ -80,22 +79,22 @@ func DefaultFlagCompletions(cmdCtx wargcore.Context) (*completion.Candidates, er
 
 }
 
-func FlagCompletions(CompletionsFunc wargcore.CompletionsFunc) FlagOpt {
-	return func(flag *wargcore.Flag) {
+func FlagCompletions(CompletionsFunc CompletionsFunc) FlagOpt {
+	return func(flag *Flag) {
 		flag.Completions = CompletionsFunc
 	}
 }
 
 // EnvVars adds a list of environmental variables to search through to update this flag. The first one that exists will be used to update the flag. Further existing envvars will be ignored.
 func EnvVars(name ...string) FlagOpt {
-	return func(f *wargcore.Flag) {
+	return func(f *Flag) {
 		f.EnvVars = name
 	}
 }
 
 // Required means the user MUST fill this flag
 func Required() FlagOpt {
-	return func(f *wargcore.Flag) {
+	return func(f *Flag) {
 		f.Required = true
 	}
 }
@@ -112,7 +111,7 @@ func Required() FlagOpt {
 //
 //	app --flag a --flag b --flag UNSET --flag c --flag d // ends up with []string{"c", "d"}
 func UnsetSentinel(name string) FlagOpt {
-	return func(f *wargcore.Flag) {
+	return func(f *Flag) {
 		f.UnsetSentinel = &name
 	}
 }

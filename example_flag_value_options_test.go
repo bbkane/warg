@@ -6,12 +6,9 @@ import (
 	"os"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config/yamlreader"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/path"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
 	"go.bbkane.com/warg/wargcore"
@@ -40,43 +37,43 @@ func ExampleApp_Parse_flag_value_options() {
 	app := warg.New(
 		"flag-overrides",
 		"v1.0.0",
-		section.NewSection(
+		wargcore.NewSection(
 			"demo flag overrides",
-			section.NewChildCmd(
+			wargcore.NewChildCmd(
 				string("show"),
 				"Show final flag values",
 				action,
-				command.NewChildFlag(
+				wargcore.NewChildFlag(
 					"--scalar-flag",
 					"Demo scalar flag",
 					scalar.String(
 						scalar.Choices("a", "b"),
 						scalar.Default("a"),
 					),
-					flag.ConfigPath("args.scalar-flag"),
-					flag.Required(),
+					wargcore.ConfigPath("args.scalar-flag"),
+					wargcore.Required(),
 				),
-				command.NewChildFlag(
+				wargcore.NewChildFlag(
 					"--slice-flag",
 					"Demo slice flag",
 					slice.Int(
 						slice.Choices(1, 2, 3),
 					),
-					flag.Alias("-slice"),
-					flag.ConfigPath("args.slice-flag"),
-					flag.EnvVars("SLICE", "SLICE_ARG"),
+					wargcore.Alias("-slice"),
+					wargcore.ConfigPath("args.slice-flag"),
+					wargcore.EnvVars("SLICE", "SLICE_ARG"),
 				),
 			),
 		),
 		warg.ConfigFlag(
 			yamlreader.New,
 			wargcore.FlagMap{
-				"--config": flag.NewFlag(
+				"--config": wargcore.NewFlag(
 					"Path to YAML config file",
 					scalar.Path(
 						scalar.Default(path.New("~/.config/flag-overrides.yaml")),
 					),
-					flag.Alias("-c"),
+					wargcore.Alias("-c"),
 				),
 			},
 		),

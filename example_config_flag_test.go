@@ -6,12 +6,9 @@ import (
 	"os"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/command"
 	"go.bbkane.com/warg/config/yamlreader"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/parseopt"
 	"go.bbkane.com/warg/path"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/value/slice"
 	"go.bbkane.com/warg/wargcore"
@@ -31,30 +28,30 @@ func ExampleConfigFlag() {
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		section.NewSection(
+		wargcore.NewSection(
 			"do math",
-			section.NewChildCmd(
+			wargcore.NewChildCmd(
 				string("add"),
 				"add integers",
 				exampleConfigFlagTextAdd,
-				command.NewChildFlag(
+				wargcore.NewChildFlag(
 					string("--addend"),
 					"Integer to add. Flag is repeatible",
 					slice.Int(),
-					flag.ConfigPath("add.addends"),
-					flag.Required(),
+					wargcore.ConfigPath("add.addends"),
+					wargcore.Required(),
 				),
 			),
 		),
 		warg.ConfigFlag(
 			yamlreader.New,
 			wargcore.FlagMap{
-				"--config": flag.NewFlag(
+				"--config": wargcore.NewFlag(
 					"Path to YAML config file",
 					scalar.Path(
 						scalar.Default(path.New("~/.config/calc.yaml")),
 					),
-					flag.Alias("-c"),
+					wargcore.Alias("-c"),
 				),
 			},
 		),

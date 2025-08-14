@@ -7,10 +7,7 @@ import (
 	"testing"
 
 	"go.bbkane.com/warg"
-	"go.bbkane.com/warg/command"
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/parseopt"
-	"go.bbkane.com/warg/section"
 	"go.bbkane.com/warg/value/scalar"
 	"go.bbkane.com/warg/wargcore"
 )
@@ -37,53 +34,53 @@ func grabbitSection() wargcore.Section {
 	grabbit config edit --config-path /path/to/config --editor code
 	`
 
-	sec := section.NewSection(
+	sec := wargcore.NewSection(
 		"grab those images!",
-		section.NewChildCmd(
+		wargcore.NewChildCmd(
 			"grab",
 			"do the grabbity grabbity",
-			command.DoNothing,
+			wargcore.DoNothing,
 		),
-		section.NewChildCmd(
+		wargcore.NewChildCmd(
 			"command2",
 			"another command",
-			command.DoNothing,
+			wargcore.DoNothing,
 		),
-		section.NewChildCmd(
+		wargcore.NewChildCmd(
 			"command3",
 			"another command",
-			command.DoNothing,
+			wargcore.DoNothing,
 		),
-		section.NewChildSection(
+		wargcore.NewChildSection(
 			"config",
 			"Change grabbit's config",
-			section.SectionFooter(rootFooter),
-			section.NewChildCmd(
+			wargcore.SectionFooter(rootFooter),
+			wargcore.NewChildCmd(
 				"edit",
 				"Edit the config. A default config will be created if it doesn't exist",
-				command.DoNothing,
-				command.CmdFooter(configEditFooter),
-				command.NewChildFlag(
+				wargcore.DoNothing,
+				wargcore.CmdFooter(configEditFooter),
+				wargcore.NewChildFlag(
 					"--editor",
 					"path to editor",
 					scalar.String(
 						scalar.Default("vi"),
 					),
-					flag.ConfigPath("editor"),
-					flag.EnvVars("EDITOR"),
-					flag.Required(),
+					wargcore.ConfigPath("editor"),
+					wargcore.EnvVars("EDITOR"),
+					wargcore.Required(),
 				),
 			),
 		),
-		section.NewChildSection(
+		wargcore.NewChildSection(
 			"section2",
 			"another section",
-			section.NewChildCmd("com", "Dummy command to pass validation", command.DoNothing),
+			wargcore.NewChildCmd("com", "Dummy command to pass validation", wargcore.DoNothing),
 		),
-		section.NewChildSection(
+		wargcore.NewChildSection(
 			"section3",
 			"another section",
-			section.NewChildCmd("com", "Dummy command to pass validation", command.DoNothing),
+			wargcore.NewChildCmd("com", "Dummy command to pass validation", wargcore.DoNothing),
 		),
 	)
 	return sec

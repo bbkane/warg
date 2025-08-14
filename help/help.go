@@ -1,7 +1,6 @@
 package help
 
 import (
-	"go.bbkane.com/warg/flag"
 	"go.bbkane.com/warg/help/allcommands"
 	"go.bbkane.com/warg/help/detailed"
 	"go.bbkane.com/warg/value/scalar"
@@ -19,13 +18,13 @@ func DefaultHelpCommandMap() wargcore.CmdMap {
 
 func DefaultHelpFlagMap(defaultChoice string, choices []string) wargcore.FlagMap {
 	return wargcore.FlagMap{
-		"--help": flag.NewFlag(
+		"--help": wargcore.NewFlag(
 			"Print help",
 			scalar.String(
 				scalar.Choices(choices...),
 				scalar.Default(defaultChoice),
 			),
-			flag.Alias("-h"),
+			wargcore.Alias("-h"),
 		),
 	}
 }

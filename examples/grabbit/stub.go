@@ -1,9 +1,9 @@
 package main
 
-import "go.bbkane.com/warg/command"
+import "go.bbkane.com/warg/wargcore"
 
 //nolint:gochecknoglobals  // stub function for example
-var editConfig = command.DoNothing
+var editConfig = wargcore.DoNothing
 
 //nolint:gochecknoglobals  // stub function for example
-var grab = command.DoNothing
+var grab = wargcore.DoNothing
