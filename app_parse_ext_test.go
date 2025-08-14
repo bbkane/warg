@@ -55,9 +55,9 @@ func TestApp_Parse(t *testing.T) {
 			name: "envvar",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.New(
+				section.NewSection(
 					"help for test",
-					section.NewCommand(
+					section.NewChildCmd(
 						"test",
 						"blah",
 						command.DoNothing,
@@ -95,9 +95,9 @@ func TestApp_Parse(t *testing.T) {
 				}
 				app := warg.New(
 					"newAppName", "v1.0.0",
-					section.New(
+					section.NewSection(
 						"help for section",
-						section.NewCommand(
+						section.NewChildCmd(
 							"test",
 							"help for test",
 							command.DoNothing,
@@ -122,9 +122,9 @@ func TestApp_Parse(t *testing.T) {
 			name: "invalidFlagsErrorEvenForHelp",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.New(
+				section.NewSection(
 					string("A virtual assistant"),
-					section.NewCommand(
+					section.NewChildCmd(
 						"present",
 						"Formally present a guest (guests are never introduced, always presented).",
 						command.DoNothing,
@@ -186,12 +186,12 @@ func TestApp_Parse_rootSection(t *testing.T) {
 	}{
 		{
 			name: "fromMain",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for test",
-				section.NewSection(
+				section.NewChildSection(
 					"cat1",
 					"help for cat1",
-					section.NewCommand(
+					section.NewChildCmd(
 						"com1",
 						"help for com1",
 						command.DoNothing,
@@ -212,9 +212,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "noSection",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for test",
-				section.NewCommand("com", "command for validation", command.DoNothing),
+				section.NewChildCmd("com", "command for validation", command.DoNothing),
 			),
 
 			args:                     []string{"app"},
@@ -224,9 +224,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagDefault",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for test",
-				section.NewCommand(
+				section.NewChildCmd(
 					"com",
 					"com help",
 					command.DoNothing,
@@ -246,9 +246,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "extraFlag",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for test",
-				section.NewCommand(
+				section.NewChildCmd(
 					"com",
 					"com help",
 					command.DoNothing,
@@ -268,9 +268,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "requiredFlag",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for test",
-				section.NewCommand(
+				section.NewChildCmd(
 					"test",
 					"blah",
 					command.DoNothing,
@@ -289,9 +289,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagAlias",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for section",
-				section.NewCommand(
+				section.NewChildCmd(
 					"test",
 					"help for test",
 					command.DoNothing,
@@ -310,9 +310,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagAliasWithList",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for section",
-				section.NewCommand(
+				section.NewChildCmd(
 					"test",
 					"help for test",
 					command.DoNothing,
@@ -331,9 +331,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "badHelp",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for section",
-				section.NewCommand(
+				section.NewChildCmd(
 					"test",
 					"help for test",
 					command.DoNothing,
@@ -346,9 +346,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "dictUpdate",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for test",
-				section.NewCommand(
+				section.NewChildCmd(
 					"com1",
 					"help for com1",
 					command.DoNothing,
@@ -367,9 +367,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "passAbsentSection",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for test",
-				section.NewCommand(
+				section.NewChildCmd(
 					"com",
 					"help for com",
 					command.DoNothing,
@@ -383,9 +383,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "scalarFlagPassedTwice",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for test",
-				section.NewCommand(
+				section.NewChildCmd(
 					"com",
 					"help for com1",
 					command.DoNothing,
@@ -404,9 +404,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "passedFlagBeforeCommand",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for test",
-				section.NewCommand(
+				section.NewChildCmd(
 					"com",
 					"help for com",
 					command.DoNothing,
@@ -425,13 +425,13 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "existingSectionsExistingCommands",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for test",
-				section.SectionMap(
+				section.ChildSectionMap(
 					wargcore.SectionMap{
-						"section": section.New(
+						"section": section.NewSection(
 							"help for section",
-							section.CommandMap(
+							section.ChildCmdMap(
 								wargcore.CmdMap{
 									"command": command.New(
 										"help for command",
@@ -458,9 +458,9 @@ func TestApp_Parse_rootSection(t *testing.T) {
 		},
 		{
 			name: "flagWithEmptyValue",
-			rootSection: section.New(
+			rootSection: section.NewSection(
 				"help for test",
-				section.NewCommand(
+				section.NewChildCmd(
 					"command",
 					"help for command",
 					command.DoNothing,
@@ -573,9 +573,9 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 
 			app := warg.New(
 				"newAppName", "v1.0.0",
-				section.New(
+				section.NewSection(
 					"help for test",
-					section.NewCommand(
+					section.NewChildCmd(
 						"test",
 						"help for test",
 						command.DoNothing,
@@ -621,9 +621,9 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "configFlag",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.New(
+				section.NewSection(
 					"help for test",
-					section.NewCommand(
+					section.NewChildCmd(
 						"print",
 						"print key value",
 						command.DoNothing,
@@ -679,8 +679,8 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "simpleJSONConfig",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.New("help for test",
-					section.NewCommand(
+				section.NewSection("help for test",
+					section.NewChildCmd(
 						"com",
 						"help for com",
 						command.DoNothing,
@@ -724,8 +724,8 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "numJSONConfig",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.New("help for test",
-					section.NewCommand(
+				section.NewSection("help for test",
+					section.NewChildCmd(
 						"com",
 						"help for com",
 						command.DoNothing,
@@ -769,9 +769,9 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "configSlice",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.New(
+				section.NewSection(
 					"help for test",
-					section.NewCommand(
+					section.NewChildCmd(
 						"print",
 						"print key value",
 						command.DoNothing,
@@ -813,8 +813,8 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "JSONConfigStringSlice",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.New("help for test",
-					section.NewCommand(
+				section.NewSection("help for test",
+					section.NewChildCmd(
 						"com",
 						"help for com",
 						command.DoNothing,
@@ -857,8 +857,8 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "YAMLConfigStringSlice",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.New("help for test",
-					section.NewCommand(
+				section.NewSection("help for test",
+					section.NewChildCmd(
 						"com",
 						"help for com",
 						command.DoNothing,
@@ -902,9 +902,9 @@ func TestApp_Parse_config(t *testing.T) {
 			name: "JSONConfigMap",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.New(
+				section.NewSection(
 					"help for test",
-					section.NewCommand(
+					section.NewChildCmd(
 						"com",
 						"help for com",
 						command.DoNothing,
@@ -985,9 +985,9 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 			name: "globalFlag",
 			app: warg.New(
 				"newAppName", "v1.0.0",
-				section.New(
+				section.NewSection(
 					"help for test",
-					section.NewCommand(
+					section.NewChildCmd(
 						"com",
 						"help for com",
 						command.DoNothing,
@@ -1038,9 +1038,9 @@ func TestCustomVersion(t *testing.T) {
 	app := warg.New(
 		"appName",
 		expectedVersion,
-		section.New(
+		section.NewSection(
 			"test",
-			section.NewCommand("version", "Print version", command.DoNothing),
+			section.NewChildCmd("version", "Print version", command.DoNothing),
 		),
 		warg.SkipVersionCommand(),
 	)
@@ -1060,9 +1060,9 @@ func TestContextContainsValue(t *testing.T) {
 	app := warg.New(
 		"appName",
 		"v1.0.0",
-		section.New(
+		section.NewSection(
 			"test",
-			section.NewCommand("dummycommand", "Do nothing", command.DoNothing),
+			section.NewChildCmd("dummycommand", "Do nothing", command.DoNothing),
 		),
 	)
 	err := app.Validate()
@@ -1089,9 +1089,9 @@ func TestAppFlagToAddr(t *testing.T) {
 	app := warg.New(
 		"appName",
 		"v1.0.0",
-		section.New(
+		section.NewSection(
 			"test",
-			section.NewCommand(
+			section.NewChildCmd(
 				"command",
 				"Test Command",
 				func(ctx wargcore.Context) error {

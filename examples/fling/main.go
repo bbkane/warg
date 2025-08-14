@@ -56,21 +56,21 @@ func app() *wargcore.App {
 	app := warg.New(
 		"fling",
 		"v1.0.0",
-		section.New(
+		section.NewSection(
 			"Link and unlink directory heirarchies ",
-			section.NewCommand(
+			section.NewChildCmd(
 				"link",
 				"Create links",
 				link,
 				command.FlagMap(linkUnlinkFlags),
 			),
-			section.NewCommand(
+			section.NewChildCmd(
 				"unlink",
 				"Unlink previously created links",
 				unlink,
 				command.FlagMap(linkUnlinkFlags),
 			),
-			section.Footer("Homepage: https://github.com/bbkane/fling"),
+			section.SectionFooter("Homepage: https://github.com/bbkane/fling"),
 		),
 		warg.SkipValidation(),
 	)

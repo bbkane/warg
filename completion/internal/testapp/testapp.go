@@ -14,9 +14,9 @@ func BuildApp() *wargcore.App {
 	app := warg.New(
 		"testappcmd",
 		"v1.0.0",
-		section.New(
+		section.NewSection(
 			"root section help",
-			section.NewCommand(
+			section.NewChildCmd(
 				"command1",
 				"command1 help",
 				command.DoNothing,
@@ -28,7 +28,7 @@ func BuildApp() *wargcore.App {
 					),
 				),
 			),
-			section.NewCommand(
+			section.NewChildCmd(
 				"manual",
 				"commands with flags using all completion types for manual testing",
 				command.DoNothing,
@@ -71,10 +71,10 @@ func BuildApp() *wargcore.App {
 					})),
 				),
 			),
-			section.NewSection(
+			section.NewChildSection(
 				"section1",
 				"section1 help",
-				section.NewCommand(
+				section.NewChildCmd(
 					"command2",
 					"command2 help",
 					command.DoNothing,

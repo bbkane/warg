@@ -15,9 +15,9 @@ func app() *wargcore.App {
 	app := warg.New(
 		"butler",
 		"v1.0.0",
-		section.New(
+		section.NewSection(
 			string("A virtual assistant"),
-			section.NewCommand(
+			section.NewChildCmd(
 				"present",
 				"Formally present a guest (guests are never introduced, always presented).",
 				present,

@@ -37,9 +37,9 @@ func ExampleHelpFlag() {
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		section.New(
+		section.NewSection(
 			"work with a fictional blog platform",
-			section.NewCommand(
+			section.NewChildCmd(
 				"login",
 				"Login to the platform",
 				exampleHelpFlaglogin,

@@ -71,9 +71,9 @@ Homepage: https://github.com/bbkane/grabbit
 	app := warg.New(
 		"grabbit",
 		"v1.0.0",
-		section.New(
+		section.NewSection(
 			"Get top images from subreddits",
-			section.NewCommand(
+			section.NewChildCmd(
 				"grab",
 				"Grab images. Optionally use `config edit` first to create a config",
 				grab,
@@ -130,12 +130,12 @@ Homepage: https://github.com/bbkane/grabbit
 				),
 			),
 
-			section.Footer(appFooter),
+			section.SectionFooter(appFooter),
 
-			section.NewSection(
+			section.NewChildSection(
 				"config",
 				"Config commands",
-				section.NewCommand(
+				section.NewChildCmd(
 					"edit",
 					"Edit or create configuration file.",
 					editConfig,

@@ -160,15 +160,15 @@ func app() *wargcore.App {
 		),
 	}
 
-	gsheetsSection := section.New(
+	gsheetsSection := section.NewSection(
 		"Google Sheets commands",
-		section.NewCommand(
+		section.NewChildCmd(
 			"open",
 			"Open spreadsheet in browser",
 			gSheetsOpen,
 			command.FlagMap(sheetFlags),
 		),
-		section.NewCommand(
+		section.NewChildCmd(
 			"upload",
 			"Upload CSV to Google Sheets. This will overwrite whatever is in the spreadsheet",
 			gSheetsUpload,
@@ -224,25 +224,25 @@ func app() *wargcore.App {
 	app := warg.New(
 		"starghaze",
 		"v1.0.0",
-		section.New(
+		section.NewSection(
 			"Save GitHub Starred Repos",
-			section.Command(
+			section.ChildCmd(
 				"download",
 				downloadCmd,
 			),
-			section.Command(
+			section.ChildCmd(
 				"format",
 				formatCmd,
 			),
-			section.Command(
+			section.ChildCmd(
 				"search",
 				searchCmd,
 			),
-			section.Section(
+			section.ChildSection(
 				"gsheets",
 				gsheetsSection,
 			),
-			section.Footer("Homepage: https://github.com/bbkane/starghaze"),
+			section.SectionFooter("Homepage: https://github.com/bbkane/starghaze"),
 		),
 		warg.SkipValidation(),
 	)

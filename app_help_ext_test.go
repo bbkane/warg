@@ -37,28 +37,28 @@ func grabbitSection() wargcore.Section {
 	grabbit config edit --config-path /path/to/config --editor code
 	`
 
-	sec := section.New(
+	sec := section.NewSection(
 		"grab those images!",
-		section.NewCommand(
+		section.NewChildCmd(
 			"grab",
 			"do the grabbity grabbity",
 			command.DoNothing,
 		),
-		section.NewCommand(
+		section.NewChildCmd(
 			"command2",
 			"another command",
 			command.DoNothing,
 		),
-		section.NewCommand(
+		section.NewChildCmd(
 			"command3",
 			"another command",
 			command.DoNothing,
 		),
-		section.NewSection(
+		section.NewChildSection(
 			"config",
 			"Change grabbit's config",
-			section.Footer(rootFooter),
-			section.NewCommand(
+			section.SectionFooter(rootFooter),
+			section.NewChildCmd(
 				"edit",
 				"Edit the config. A default config will be created if it doesn't exist",
 				command.DoNothing,
@@ -75,15 +75,15 @@ func grabbitSection() wargcore.Section {
 				),
 			),
 		),
-		section.NewSection(
+		section.NewChildSection(
 			"section2",
 			"another section",
-			section.NewCommand("com", "Dummy command to pass validation", command.DoNothing),
+			section.NewChildCmd("com", "Dummy command to pass validation", command.DoNothing),
 		),
-		section.NewSection(
+		section.NewChildSection(
 			"section3",
 			"another section",
-			section.NewCommand("com", "Dummy command to pass validation", command.DoNothing),
+			section.NewChildCmd("com", "Dummy command to pass validation", command.DoNothing),
 		),
 	)
 	return sec

@@ -31,9 +31,9 @@ func ExampleConfigFlag() {
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		section.New(
+		section.NewSection(
 			"do math",
-			section.NewCommand(
+			section.NewChildCmd(
 				string("add"),
 				"add integers",
 				exampleConfigFlagTextAdd,

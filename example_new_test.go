@@ -46,18 +46,18 @@ func ExampleNew() {
 	app := warg.New(
 		"newAppName",
 		"v1.0.0",
-		section.New(
+		section.NewSection(
 			"work with a fictional blog platform",
-			section.NewCommand(
+			section.NewChildCmd(
 				"login",
 				"Login to the platform",
 				login,
 				command.FlagMap(commonFlags),
 			),
-			section.NewSection(
+			section.NewChildSection(
 				"comments",
 				"Deal with comments",
-				section.NewCommand(
+				section.NewChildCmd(
 					"list",
 					"List all comments",
 					// still prototyping how we want this

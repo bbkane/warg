@@ -22,7 +22,7 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "leafSection",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New("Help for section", section.NewSection("leaf", "Is empty but shouldn't be")),
+				section.NewSection("Help for section", section.NewChildSection("leaf", "Is empty but shouldn't be")),
 				warg.SkipValidation(),
 			),
 			expectedErr: true,
@@ -31,8 +31,8 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "appNameWithDash",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New("",
-					section.NewCommand("com", "command for validation", command.DoNothing),
+				section.NewSection("",
+					section.NewChildCmd("com", "command for validation", command.DoNothing),
 				),
 				warg.SkipValidation(),
 			),
@@ -41,9 +41,9 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "sectionNameWithDash",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New("",
-					section.NewSection("-name", "",
-						section.NewCommand("com", "command for validation", command.DoNothing),
+				section.NewSection("",
+					section.NewChildSection("-name", "",
+						section.NewChildCmd("com", "command for validation", command.DoNothing),
 					),
 				),
 				warg.SkipValidation(),
@@ -53,9 +53,9 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandNameWithDash",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New("",
-					section.NewSection("name", "",
-						section.NewCommand("-com", "starts with dash", command.DoNothing),
+				section.NewSection("",
+					section.NewChildSection("name", "",
+						section.NewChildCmd("-com", "starts with dash", command.DoNothing),
 					),
 				),
 				warg.SkipValidation(),
@@ -65,8 +65,8 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "flagNameNoDash",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New("",
-					section.NewCommand(
+				section.NewSection("",
+					section.NewChildCmd(
 						"c",
 						"",
 						command.DoNothing,
@@ -80,8 +80,8 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "aliasNameNoDash",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New("",
-					section.NewCommand(
+				section.NewSection("",
+					section.NewChildCmd(
 						"c",
 						"",
 						command.DoNothing,
@@ -97,8 +97,8 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagAliasCommandFlagNameConflict",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New("",
-					section.NewCommand("c", "", command.DoNothing,
+				section.NewSection("",
+					section.NewChildCmd("c", "", command.DoNothing,
 						command.NewFlag("-f", "", scalar.Bool()),
 						command.NewFlag("--other", "", scalar.Bool(), flag.Alias("-f")),
 					),
@@ -110,9 +110,9 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagAliasGlobalFlagAliasConflict",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New(
+				section.NewSection(
 					"help for test",
-					section.NewCommand(
+					section.NewChildCmd(
 						"com",
 						"help for com",
 						command.DoNothing,
@@ -137,9 +137,9 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagAliasGlobalFlagNameConflict",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New(
+				section.NewSection(
 					"help for test",
-					section.NewCommand(
+					section.NewChildCmd(
 						"com",
 						"help for com",
 						command.DoNothing,
@@ -163,9 +163,9 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandFlagNameGlobalFlagNameConflict",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New(
+				section.NewSection(
 					"help for test",
-					section.NewCommand(
+					section.NewChildCmd(
 						"com",
 						"help for com",
 						command.DoNothing,
@@ -188,14 +188,14 @@ func TestApp_Validate(t *testing.T) {
 		{
 			name: "commandNameSectionNameConflict",
 			app: warg.New("newAppName", "v1.0.0",
-				section.New(
+				section.NewSection(
 					"help for test",
-					section.NewCommand(
+					section.NewChildCmd(
 						"conflict",
 						"help for com",
 						command.DoNothing,
 					),
-					section.NewSection(
+					section.NewChildSection(
 						"conflict",
 						"help for section",
 					),

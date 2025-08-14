@@ -221,10 +221,10 @@ func New(name string, version string, rootSection wargcore.Section, opts ...AppO
 	}
 
 	if !app.SkipCompletionCommands {
-		section.NewSection(
+		section.NewChildSection(
 			"completion",
 			"Print shell completion scripts",
-			section.NewCommand(
+			section.NewChildCmd(
 				"zsh",
 				"Print zsh completion script",
 				func(ctx wargcore.Context) error {
@@ -236,7 +236,7 @@ func New(name string, version string, rootSection wargcore.Section, opts ...AppO
 	}
 
 	if !app.SkipVersionCommand {
-		section.NewCommand(
+		section.NewChildCmd(
 			"version",
 			"Print version",
 			func(ctx wargcore.Context) error {

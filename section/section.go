@@ -10,8 +10,8 @@ import (
 // SectionOpt customizes a Section on creation
 type SectionOpt func(*wargcore.Section)
 
-// New creates a standalone [wargcore.Section]. All section options are in the [go.bbkane.com/warg/section] package
-func New(helpShort string, opts ...SectionOpt) wargcore.Section {
+// NewSection creates a standalone [wargcore.Section]. All section options are in the [go.bbkane.com/warg/section] package
+func NewSection(helpShort string, opts ...SectionOpt) wargcore.Section {
 	section := wargcore.Section{
 		HelpShort: helpShort,
 		Sections:  make(wargcore.SectionMap),
@@ -25,8 +25,8 @@ func New(helpShort string, opts ...SectionOpt) wargcore.Section {
 	return section
 }
 
-// Section adds an existing Section as a child of this Section. Panics if a Section with the same name already exists
-func Section(name string, value wargcore.Section) SectionOpt {
+// ChildSection adds an existing ChildSection as a child of this ChildSection. Panics if a ChildSection with the same name already exists
+func ChildSection(name string, value wargcore.Section) SectionOpt {
 	return func(app *wargcore.Section) {
 		if _, alreadyThere := app.Sections[name]; !alreadyThere {
 			app.Sections[name] = value
@@ -36,17 +36,17 @@ func Section(name string, value wargcore.Section) SectionOpt {
 	}
 }
 
-// SectionMap adds existing Sections as a child of this Section. Panics if a Section with the same name already exists
-func SectionMap(sections wargcore.SectionMap) SectionOpt {
+// ChildSectionMap adds existing Sections as a child of this Section. Panics if a Section with the same name already exists
+func ChildSectionMap(sections wargcore.SectionMap) SectionOpt {
 	return func(app *wargcore.Section) {
 		for name, value := range sections {
-			Section(name, value)(app)
+			ChildSection(name, value)(app)
 		}
 	}
 }
 
-// Command adds an existing Command as a child of this Section. Panics if a Command with the same name already exists
-func Command(name string, value wargcore.Cmd) SectionOpt {
+// ChildCmd adds an existing ChildCmd as a child of this Section. Panics if a ChildCmd with the same name already exists
+func ChildCmd(name string, value wargcore.Cmd) SectionOpt {
 	return func(app *wargcore.Section) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
@@ -56,34 +56,34 @@ func Command(name string, value wargcore.Cmd) SectionOpt {
 	}
 }
 
-// CommandMap adds existing Commands as a child of this Section. Panics if a Command with the same name already exists
-func CommandMap(commands wargcore.CmdMap) SectionOpt {
+// ChildCmdMap adds existing Commands as a child of this Section. Panics if a Command with the same name already exists
+func ChildCmdMap(commands wargcore.CmdMap) SectionOpt {
 	return func(app *wargcore.Section) {
 		for name, value := range commands {
-			Command(name, value)(app)
+			ChildCmd(name, value)(app)
 		}
 	}
 }
 
-// NewSection creates a new Section as a child of this Section. Panics if a NewSection with the same name already exists
-func NewSection(name string, helpShort string, opts ...SectionOpt) SectionOpt {
-	return Section(name, New(helpShort, opts...))
+// NewChildSection creates a new Section as a child of this Section. Panics if a NewChildSection with the same name already exists
+func NewChildSection(name string, helpShort string, opts ...SectionOpt) SectionOpt {
+	return ChildSection(name, NewSection(helpShort, opts...))
 }
 
-// NewCommand creates a new Command as a child of this Section. Panics if a NewCommand with the same name already exists
-func NewCommand(name string, helpShort string, action wargcore.Action, opts ...command.CommandOpt) SectionOpt {
-	return Command(name, command.New(helpShort, action, opts...))
+// NewChildCmd creates a new Command as a child of this Section. Panics if a NewChildCmd with the same name already exists
+func NewChildCmd(name string, helpShort string, action wargcore.Action, opts ...command.CommandOpt) SectionOpt {
+	return ChildCmd(name, command.New(helpShort, action, opts...))
 }
 
-// Footer adds an optional help string to this Section
-func Footer(footer string) SectionOpt {
+// SectionFooter adds an optional help string to this Section
+func SectionFooter(footer string) SectionOpt {
 	return func(cat *wargcore.Section) {
 		cat.Footer = footer
 	}
 }
 
-// HelpLong adds an optional help string to this Section
-func HelpLong(helpLong string) SectionOpt {
+// SectionHelpLong adds an optional help string to this Section
+func SectionHelpLong(helpLong string) SectionOpt {
 	return func(cat *wargcore.Section) {
 		cat.HelpLong = helpLong
 	}

@@ -23,28 +23,28 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "simple",
 			rootName: "r",
-			sec: section.New(
+			sec: section.NewSection(
 				"root section help",
-				section.NewCommand("c1", "", nil, command.Completions(nil)),
-				section.NewSection("s1", "",
-					section.NewCommand("c2", "", nil, command.Completions(nil)),
+				section.NewChildCmd("c1", "", nil, command.Completions(nil)),
+				section.NewChildSection("s1", "",
+					section.NewChildCmd("c2", "", nil, command.Completions(nil)),
 				),
 			),
 			expected: []wargcore.FlatSection{
 				{
 					Path: []string{"r"},
-					Sec: section.New(
+					Sec: section.NewSection(
 						"root section help",
-						section.NewCommand("c1", "", nil, command.Completions(nil)),
-						section.NewSection("s1", "",
-							section.NewCommand("c2", "", nil, command.Completions(nil)),
+						section.NewChildCmd("c1", "", nil, command.Completions(nil)),
+						section.NewChildSection("s1", "",
+							section.NewChildCmd("c2", "", nil, command.Completions(nil)),
 						),
 					),
 				},
 				{
 					Path: []string{"r", "s1"},
-					Sec: section.New(
-						"", section.NewCommand("c2", "", nil, command.Completions(nil)),
+					Sec: section.NewSection(
+						"", section.NewChildCmd("c2", "", nil, command.Completions(nil)),
 					),
 				},
 			},
@@ -53,48 +53,48 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "sortedOrder",
 			rootName: "r",
-			sec: section.New("",
-				section.NewSection("sc", "",
-					section.NewCommand("c", "", nil, command.Completions(nil)),
+			sec: section.NewSection("",
+				section.NewChildSection("sc", "",
+					section.NewChildCmd("c", "", nil, command.Completions(nil)),
 				),
-				section.NewSection("sb", "",
-					section.NewCommand("c", "", nil, command.Completions(nil)),
+				section.NewChildSection("sb", "",
+					section.NewChildCmd("c", "", nil, command.Completions(nil)),
 				),
-				section.NewSection("sa", "",
-					section.NewCommand("c", "", nil, command.Completions(nil)),
+				section.NewChildSection("sa", "",
+					section.NewChildCmd("c", "", nil, command.Completions(nil)),
 				),
 			),
 			expected: []wargcore.FlatSection{
 				{
 					Path: []string{"r"},
-					Sec: section.New("",
-						section.NewSection("sc", "",
-							section.NewCommand("c", "", nil, command.Completions(nil)),
+					Sec: section.NewSection("",
+						section.NewChildSection("sc", "",
+							section.NewChildCmd("c", "", nil, command.Completions(nil)),
 						),
-						section.NewSection("sb", "",
-							section.NewCommand("c", "", nil, command.Completions(nil)),
+						section.NewChildSection("sb", "",
+							section.NewChildCmd("c", "", nil, command.Completions(nil)),
 						),
-						section.NewSection("sa", "",
-							section.NewCommand("c", "", nil, command.Completions(nil)),
+						section.NewChildSection("sa", "",
+							section.NewChildCmd("c", "", nil, command.Completions(nil)),
 						),
 					),
 				},
 				{
 					Path: []string{"r", "sa"},
-					Sec: section.New("",
-						section.NewCommand("c", "", nil, command.Completions(nil)),
+					Sec: section.NewSection("",
+						section.NewChildCmd("c", "", nil, command.Completions(nil)),
 					),
 				},
 				{
 					Path: []string{"r", "sb"},
-					Sec: section.New("",
-						section.NewCommand("c", "", nil, command.Completions(nil)),
+					Sec: section.NewSection("",
+						section.NewChildCmd("c", "", nil, command.Completions(nil)),
 					),
 				},
 				{
 					Path: []string{"r", "sc"},
-					Sec: section.New("",
-						section.NewCommand("c", "", nil, command.Completions(nil)),
+					Sec: section.NewSection("",
+						section.NewChildCmd("c", "", nil, command.Completions(nil)),
 					),
 				},
 			},
@@ -103,9 +103,9 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "dupFlagNamesSeparatePaths",
 			rootName: "r",
-			sec: section.New("",
-				section.NewSection("s1", "",
-					section.NewCommand(
+			sec: section.NewSection("",
+				section.NewChildSection("s1", "",
+					section.NewChildCmd(
 						"c1",
 						"",
 						nil,
@@ -113,8 +113,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 						command.NewFlag("-f1", "", nil, flag.Completions(nil)),
 					),
 				),
-				section.NewSection("s2", "",
-					section.NewCommand(
+				section.NewChildSection("s2", "",
+					section.NewChildCmd(
 						"c1",
 						"",
 						nil,
@@ -126,9 +126,9 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 			expected: []wargcore.FlatSection{
 				{
 					Path: []string{"r"},
-					Sec: section.New("",
-						section.NewSection("s1", "",
-							section.NewCommand(
+					Sec: section.NewSection("",
+						section.NewChildSection("s1", "",
+							section.NewChildCmd(
 								"c1",
 								"",
 								nil,
@@ -136,8 +136,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 								command.NewFlag("-f1", "", nil, flag.Completions(nil)),
 							),
 						),
-						section.NewSection("s2", "",
-							section.NewCommand(
+						section.NewChildSection("s2", "",
+							section.NewChildCmd(
 								"c1",
 								"",
 								nil,
@@ -149,8 +149,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				},
 				{
 					Path: []string{"r", "s1"},
-					Sec: section.New("",
-						section.NewCommand(
+					Sec: section.NewSection("",
+						section.NewChildCmd(
 							"c1",
 							"",
 							nil,
@@ -161,8 +161,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				},
 				{
 					Path: []string{"r", "s2"},
-					Sec: section.New("",
-						section.NewCommand(
+					Sec: section.NewSection("",
+						section.NewChildCmd(
 							"c1",
 							"",
 							nil,
