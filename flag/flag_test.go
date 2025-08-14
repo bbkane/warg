@@ -9,7 +9,7 @@ import (
 )
 
 func TestFlagMap_SortedNames(t *testing.T) {
-	emptyFlag := flag.New("", nil)
+	emptyFlag := flag.NewFlag("", nil)
 
 	fm := wargcore.FlagMap{
 		"c": emptyFlag,

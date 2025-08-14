@@ -90,8 +90,8 @@ func TestApp_Parse(t *testing.T) {
 			name: "addCommandFlags",
 			app: func() wargcore.App {
 				fm := wargcore.FlagMap{
-					"--flag1": flag.New("--flag1 value", scalar.String()),
-					"--flag2": flag.New("--flag1 value", scalar.String()),
+					"--flag1": flag.NewFlag("--flag1 value", scalar.String()),
+					"--flag2": flag.NewFlag("--flag1 value", scalar.String()),
 				}
 				app := warg.New(
 					"newAppName", "v1.0.0",
@@ -654,7 +654,7 @@ func TestApp_Parse_config(t *testing.T) {
 						return cr, nil
 					},
 					wargcore.FlagMap{
-						"--config": flag.New(
+						"--config": flag.NewFlag(
 							"Path to config file",
 							scalar.Path(
 								scalar.Default(path.New("defaultconfigval")),
@@ -695,7 +695,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					jsonreader.New,
 					wargcore.FlagMap{
-						"--config": flag.New(
+						"--config": flag.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
@@ -740,7 +740,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					jsonreader.New,
 					wargcore.FlagMap{
-						"--config": flag.New(
+						"--config": flag.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
@@ -786,7 +786,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					jsonreader.New,
 					wargcore.FlagMap{
-						"--config": flag.New(
+						"--config": flag.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
@@ -829,7 +829,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					jsonreader.New,
 					wargcore.FlagMap{
-						"--config": flag.New(
+						"--config": flag.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
@@ -873,7 +873,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					yamlreader.New,
 					wargcore.FlagMap{
-						"--config": flag.New(
+						"--config": flag.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(
@@ -919,7 +919,7 @@ func TestApp_Parse_config(t *testing.T) {
 				warg.ConfigFlag(
 					jsonreader.New,
 					wargcore.FlagMap{
-						"--config": flag.New(
+						"--config": flag.NewFlag(
 							"path to config",
 							scalar.Path(
 								scalar.Default(

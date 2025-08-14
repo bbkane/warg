@@ -71,7 +71,7 @@ func ExampleApp_Parse_flag_value_options() {
 		warg.ConfigFlag(
 			yamlreader.New,
 			wargcore.FlagMap{
-				"--config": flag.New(
+				"--config": flag.NewFlag(
 					"Path to YAML config file",
 					scalar.Path(
 						scalar.Default(path.New("~/.config/flag-overrides.yaml")),

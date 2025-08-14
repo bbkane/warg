@@ -36,13 +36,13 @@ func BuildApp() *wargcore.App {
 					"--dirs",
 					"dirs completion",
 					scalar.Path(),
-					flag.Completions(warg.CompletionsDirectories),
+					flag.FlagCompletions(warg.CompletionsDirectories),
 				),
 				command.NewChildFlag(
 					"--dirs-files",
 					"dirs/files completion",
 					scalar.Path(),
-					flag.Completions(func(ctx wargcore.Context) (*completion.Candidates, error) {
+					flag.FlagCompletions(func(ctx wargcore.Context) (*completion.Candidates, error) {
 						return &completion.Candidates{
 							Type:   completion.Type_DirectoriesFiles,
 							Values: nil,
@@ -53,19 +53,19 @@ func BuildApp() *wargcore.App {
 					"--none",
 					"no completion",
 					scalar.String(),
-					flag.Completions(warg.CompletionsNone),
+					flag.FlagCompletions(warg.CompletionsNone),
 				),
 				command.NewChildFlag(
 					"--values",
 					"values completion",
 					scalar.String(),
-					flag.Completions(warg.CompletionsValues([]string{"alpha", "beta"})),
+					flag.FlagCompletions(warg.CompletionsValues([]string{"alpha", "beta"})),
 				),
 				command.NewChildFlag(
 					"--values-descriptions",
 					"values completion with descriptions",
 					scalar.String(),
-					flag.Completions(warg.CompletionsValuesDescriptions([]completion.Candidate{
+					flag.FlagCompletions(warg.CompletionsValuesDescriptions([]completion.Candidate{
 						{Name: "gamma", Description: "gamma description"},
 						{Name: "delta", Description: "delta description"},
 					})),
@@ -87,7 +87,7 @@ func BuildApp() *wargcore.App {
 						"--flag2",
 						"flag2 help",
 						scalar.String(),
-						flag.Completions(func(ctx wargcore.Context) (*completion.Candidates, error) {
+						flag.FlagCompletions(func(ctx wargcore.Context) (*completion.Candidates, error) {
 							if ctx.Flags["--globalFlag"].(string) == "nondefault" {
 								return &completion.Candidates{
 									Type: completion.Type_ValuesDescriptions,

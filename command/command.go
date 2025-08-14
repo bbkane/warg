@@ -97,7 +97,7 @@ func ChildFlagMap(flagMap wargcore.FlagMap) CommandOpt {
 
 // NewChildFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
 func NewChildFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) CommandOpt {
-	return ChildFlag(name, flag.New(helpShort, empty, opts...))
+	return ChildFlag(name, flag.NewFlag(helpShort, empty, opts...))
 }
 
 // CmdFooter adds an Help string to the command - useful from a help function

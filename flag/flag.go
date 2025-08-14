@@ -9,11 +9,11 @@ import (
 // FlagOpt customizes a Flag on creation
 type FlagOpt func(*wargcore.Flag)
 
-// New creates a New with options!
-func New(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) wargcore.Flag {
+// NewFlag creates a NewFlag with options!
+func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) wargcore.Flag {
 	flag := wargcore.Flag{
 		Alias:                 "",
-		Completions:           DefaultCompletions,
+		Completions:           DefaultFlagCompletions,
 		ConfigPath:            "",
 		EmptyValueConstructor: empty,
 		EnvVars:               nil,
@@ -44,7 +44,7 @@ func ConfigPath(path string) FlagOpt {
 	}
 }
 
-func DefaultCompletions(cmdCtx wargcore.Context) (*completion.Candidates, error) {
+func DefaultFlagCompletions(cmdCtx wargcore.Context) (*completion.Candidates, error) {
 	choices := cmdCtx.ParseState.FlagValues[cmdCtx.ParseState.CurrentFlagName].Choices()
 	if len(choices) > 0 {
 		candidates := &completion.Candidates{
@@ -80,7 +80,7 @@ func DefaultCompletions(cmdCtx wargcore.Context) (*completion.Candidates, error)
 
 }
 
-func Completions(CompletionsFunc wargcore.CompletionsFunc) FlagOpt {
+func FlagCompletions(CompletionsFunc wargcore.CompletionsFunc) FlagOpt {
 	return func(flag *wargcore.Flag) {
 		flag.Completions = CompletionsFunc
 	}

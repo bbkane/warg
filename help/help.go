@@ -19,7 +19,7 @@ func DefaultHelpCommandMap() wargcore.CmdMap {
 
 func DefaultHelpFlagMap(defaultChoice string, choices []string) wargcore.FlagMap {
 	return wargcore.FlagMap{
-		"--help": flag.New(
+		"--help": flag.NewFlag(
 			"Print help",
 			scalar.String(
 				scalar.Choices(choices...),

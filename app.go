@@ -33,7 +33,7 @@ func GlobalFlagMap(flagMap wargcore.FlagMap) AppOpt {
 
 // NewGlobalFlag adds a flag to the app. It panics if a flag with the same name exists
 func NewGlobalFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...flag.FlagOpt) AppOpt {
-	return GlobalFlag(name, flag.New(helpShort, empty, opts...))
+	return GlobalFlag(name, flag.NewFlag(helpShort, empty, opts...))
 
 }
 
@@ -209,7 +209,7 @@ func New(name string, version string, rootSection wargcore.Section, opts ...AppO
 
 	if !app.SkipGlobalColorFlag {
 		GlobalFlagMap(wargcore.FlagMap{
-			"--color": flag.New(
+			"--color": flag.NewFlag(
 				"Use ANSI colors",
 				scalar.String(
 					scalar.Choices("true", "false", "auto"),

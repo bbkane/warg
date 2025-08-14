@@ -13,7 +13,7 @@ import (
 
 func app() *wargcore.App {
 	linkUnlinkFlags := wargcore.FlagMap{
-		"--ask": flag.New(
+		"--ask": flag.NewFlag(
 			"Whether to ask before making changes",
 			// value.StringEnum("true", "false", "dry-run"),
 			scalar.String(
@@ -22,14 +22,14 @@ func app() *wargcore.App {
 			),
 			flag.Required(),
 		),
-		"--dotfiles": flag.New(
+		"--dotfiles": flag.NewFlag(
 			"Files/dirs starting with 'dot-' will have links starting with '.'",
 			scalar.Bool(
 				scalar.Default(true),
 			),
 			flag.Required(),
 		),
-		"--ignore": flag.New(
+		"--ignore": flag.NewFlag(
 			"Ignore file/dir if the name (not the whole path) matches passed regex",
 			slice.String(
 				slice.Default([]string{"README.*"}),
@@ -37,7 +37,7 @@ func app() *wargcore.App {
 			flag.Alias("-i"),
 			flag.UnsetSentinel("UNSET"),
 		),
-		"--link-dir": flag.New(
+		"--link-dir": flag.NewFlag(
 			"Symlinks will be created in this directory pointing to files/directories in --src-dir",
 			scalar.Path(
 				scalar.Default(path.New("~")),
@@ -45,7 +45,7 @@ func app() *wargcore.App {
 			flag.Alias("-l"),
 			flag.Required(),
 		),
-		"--src-dir": flag.New(
+		"--src-dir": flag.NewFlag(
 			"Directory containing files and directories to link to",
 			scalar.Path(),
 			flag.Alias("-s"),

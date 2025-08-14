@@ -49,7 +49,7 @@ func ExampleConfigFlag() {
 		warg.ConfigFlag(
 			yamlreader.New,
 			wargcore.FlagMap{
-				"--config": flag.New(
+				"--config": flag.NewFlag(
 					"Path to YAML config file",
 					scalar.Path(
 						scalar.Default(path.New("~/.config/calc.yaml")),
