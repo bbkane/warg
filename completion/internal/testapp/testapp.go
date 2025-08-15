@@ -32,7 +32,7 @@ func BuildApp() *warg.App {
 					"--dirs",
 					"dirs completion",
 					scalar.Path(),
-					warg.FlagCompletions(warg.CompletionsDirectories),
+					warg.FlagCompletions(warg.CompletionsDirectories()),
 				),
 				warg.NewCmdFlag(
 					"--dirs-files",
@@ -49,7 +49,7 @@ func BuildApp() *warg.App {
 					"--none",
 					"no completion",
 					scalar.String(),
-					warg.FlagCompletions(warg.CompletionsNone),
+					warg.FlagCompletions(warg.CompletionsNone()),
 				),
 				warg.NewCmdFlag(
 					"--values",

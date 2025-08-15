@@ -135,25 +135,31 @@ func FindVersion(version string) string {
 	return info.Main.Version
 }
 
-func CompletionsDirectories(ctx CmdContext) (*completion.Candidates, error) {
-	return &completion.Candidates{
-		Type:   completion.Type_Directories,
-		Values: nil,
-	}, nil
+func CompletionsDirectories() CompletionsFunc {
+	return func(cc CmdContext) (*completion.Candidates, error) {
+		return &completion.Candidates{
+			Type:   completion.Type_Directories,
+			Values: nil,
+		}, nil
+	}
 }
 
-func CompletionsDirectoriesFiles(ctx CmdContext) (*completion.Candidates, error) {
-	return &completion.Candidates{
-		Type:   completion.Type_DirectoriesFiles,
-		Values: nil,
-	}, nil
+func CompletionsDirectoriesFiles() CompletionsFunc {
+	return func(cc CmdContext) (*completion.Candidates, error) {
+		return &completion.Candidates{
+			Type:   completion.Type_DirectoriesFiles,
+			Values: nil,
+		}, nil
+	}
 }
 
-func CompletionsNone(ctx CmdContext) (*completion.Candidates, error) {
-	return &completion.Candidates{
-		Type:   completion.Type_None,
-		Values: nil,
-	}, nil
+func CompletionsNone() CompletionsFunc {
+	return func(cc CmdContext) (*completion.Candidates, error) {
+		return &completion.Candidates{
+			Type:   completion.Type_None,
+			Values: nil,
+		}, nil
+	}
 }
 
 func CompletionsValues(values []string) CompletionsFunc {

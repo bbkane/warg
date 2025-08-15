@@ -8,33 +8,43 @@ below this description) is likely unreleased.
 
 # v0.0.36
 
+## Changed
+
+Changed the following completions func to return a `CompletionsFunc` instead of implementing it directly. This groups them nicely in the docs and "standardizes" usage with Completion func generators that take args like `CompletionsValues`.
+
+Usage change: `warg.Completions(CompletionsDirectories)` -> `warg.Completions(CompletionsDirectories())`
+
+- `CompletionsDirectoriesFiles`
+- `CompletionsDirectories`
+- `CompletionsNone`
+
 ## Removed
 
 Removed / made private the following API functions
 
 Help functions
 
-- `CmdHelp`
-- `SectionHelp`
-- `Helpinfo`
-- `HelpToCommand`
-- `LeftPad`
-- `FmtHeader`
-- `FmtSectionName`
-- `FmtCommandName`
-- `FmtFlagName`
-- `FmtFlagAlias`
-- `SortedKeys`
 - `AllCommandsSectionHelp`
+- `CmdHelp`
 - `DetailedCommandHelp`
 - `DetailedSectionHelp`
-- `OutlineSectionHelp`
+- `FmtCommandName`
+- `FmtFlagAlias`
+- `FmtFlagName`
+- `FmtHeader`
+- `FmtSectionName`
+- `HelpToCommand`
+- `Helpinfo`
+- `LeftPad`
 - `OutlineCommandHelp`
+- `OutlineSectionHelp`
+- `SectionHelp`
+- `SortedKeys`
 
 Other functions
 
-- `DefaultCmdCompletions`
 - `CmdCompletions`
+- `DefaultCmdCompletions`
 - `DefaultFlagCompletions`
 
 # v0.0.35
