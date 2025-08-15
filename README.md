@@ -65,3 +65,6 @@ By design, warg apps have the following requirements:
 - I haven't tried [ff](https://github.com/peterbourgon/ff), but it looks similar to warg, though maybe less batteries-included
 - I've used the now unmaintained [kingpin](https://github.com/alecthomas/kingpin) fairly successfully.
 
+# Notes
+
+See [Go Project Notes](https://www.bbkane.com/blog/go-project-notes/) for notes on development tooling.
