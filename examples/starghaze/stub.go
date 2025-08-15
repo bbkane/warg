@@ -3,16 +3,16 @@ package main
 import "go.bbkane.com/warg"
 
 //nolint:gochecknoglobals  // stub function for example
-var format = warg.UnimplementedCmd
+var format = warg.Unimplemented()
 
 //nolint:gochecknoglobals  // stub function for example
-var gSheetsOpen = warg.UnimplementedCmd
+var gSheetsOpen = warg.Unimplemented()
 
 //nolint:gochecknoglobals  // stub function for example
-var gSheetsUpload = warg.UnimplementedCmd
+var gSheetsUpload = warg.Unimplemented()
 
 //nolint:gochecknoglobals  // stub function for example
-var githubStarsDownload = warg.UnimplementedCmd
+var githubStarsDownload = warg.Unimplemented()
 
 //nolint:gochecknoglobals  // stub function for example
-var search = warg.UnimplementedCmd
+var search = warg.Unimplemented()

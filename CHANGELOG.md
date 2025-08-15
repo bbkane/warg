@@ -10,13 +10,17 @@ below this description) is likely unreleased.
 
 ## Changed
 
-Changed the following completions func to return a `CompletionsFunc` instead of implementing it directly. This groups them nicely in the docs and "standardizes" usage with Completion func generators that take args like `CompletionsValues`.
+Changed the following completions func to return a `CompletionsFunc` instead of implementing it directly. This groups them nicely in the docs and "standardizes" usage with Completion func generators that take args like `CompletionsValues`. It might be a performance hit, but I haven't noticed?
 
 Usage change: `warg.Completions(CompletionsDirectories)` -> `warg.Completions(CompletionsDirectories())`
 
 - `CompletionsDirectoriesFiles`
 - `CompletionsDirectories`
 - `CompletionsNone`
+
+Similar changes:
+
+- `UnimplementedCmd` -> `Unimplemented()` (it now returns an `Action` instead of implementing one)
 
 ## Removed
 

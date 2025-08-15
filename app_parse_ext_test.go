@@ -55,7 +55,7 @@ func TestApp_Parse(t *testing.T) {
 					warg.NewSubCmd(
 						"test",
 						"blah",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--flag",
 							"help for --flag",
@@ -95,7 +95,7 @@ func TestApp_Parse(t *testing.T) {
 						warg.NewSubCmd(
 							"test",
 							"help for test",
-							warg.UnimplementedCmd,
+							warg.Unimplemented(),
 							warg.CmdFlagMap(fm),
 						),
 					),
@@ -122,7 +122,7 @@ func TestApp_Parse(t *testing.T) {
 					warg.NewSubCmd(
 						"present",
 						"Formally present a guest (guests are never introduced, always presented).",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--name",
 							"Guest to address.",
@@ -189,7 +189,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 					warg.NewSubCmd(
 						"com1",
 						"help for com1",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--com1f1",
 							"flag help",
@@ -209,7 +209,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "noSection",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.NewSubCmd("com", "command for validation", warg.UnimplementedCmd),
+				warg.NewSubCmd("com", "command for validation", warg.Unimplemented()),
 			),
 
 			args:                     []string{"app"},
@@ -224,7 +224,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				warg.NewSubCmd(
 					"com",
 					"com help",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 					warg.NewCmdFlag(
 						"--flag",
 						"flag help",
@@ -246,7 +246,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				warg.NewSubCmd(
 					"com",
 					"com help",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 					warg.NewCmdFlag(
 						"--flag",
 						"flag help",
@@ -268,7 +268,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				warg.NewSubCmd(
 					"test",
 					"blah",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 					warg.NewCmdFlag(
 						"--flag",
 						"help for --flag",
@@ -289,7 +289,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				warg.NewSubCmd(
 					"test",
 					"help for test",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 					warg.NewCmdFlag(
 						"--flag",
 						"help for --flag",
@@ -310,7 +310,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				warg.NewSubCmd(
 					"test",
 					"help for test",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 					warg.NewCmdFlag(
 						"--flag",
 						"help for --flag",
@@ -331,7 +331,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				warg.NewSubCmd(
 					"test",
 					"help for test",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 				),
 			),
 			args:                     []string{t.Name(), "test", "-h", "badhelpval"},
@@ -346,7 +346,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				warg.NewSubCmd(
 					"com1",
 					"help for com1",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 					warg.NewCmdFlag(
 						string("--flag"),
 						"flag help",
@@ -367,7 +367,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				warg.NewSubCmd(
 					"com",
 					"help for com",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 				),
 			),
 
@@ -383,7 +383,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				warg.NewSubCmd(
 					"com",
 					"help for com1",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 					warg.NewCmdFlag(
 						"--flag",
 						"flag help",
@@ -404,7 +404,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				warg.NewSubCmd(
 					"com",
 					"help for com",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 					warg.NewCmdFlag(
 						"--flag",
 						"flag help",
@@ -430,7 +430,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 								warg.CmdMap{
 									"command": warg.NewCmd(
 										"help for command",
-										warg.UnimplementedCmd,
+										warg.Unimplemented(),
 										warg.NewCmdFlag(
 											"--flag",
 											"flag help",
@@ -458,7 +458,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				warg.NewSubCmd(
 					"command",
 					"help for command",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 					warg.NewCmdFlag(
 						"--flag",
 						"flag help",
@@ -573,7 +573,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 					warg.NewSubCmd(
 						"test",
 						"help for test",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						tt.flagDef,
 					),
 				),
@@ -621,7 +621,7 @@ func TestApp_Parse_config(t *testing.T) {
 					warg.NewSubCmd(
 						"print",
 						"print key value",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--key",
 							"a key",
@@ -678,7 +678,7 @@ func TestApp_Parse_config(t *testing.T) {
 					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--val",
 							"flag help",
@@ -723,7 +723,7 @@ func TestApp_Parse_config(t *testing.T) {
 					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--intval",
 							"flag help",
@@ -769,7 +769,7 @@ func TestApp_Parse_config(t *testing.T) {
 					warg.NewSubCmd(
 						"print",
 						"print key value",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--subreddits",
 							"the subreddits",
@@ -812,7 +812,7 @@ func TestApp_Parse_config(t *testing.T) {
 					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--val",
 							"flag help",
@@ -856,7 +856,7 @@ func TestApp_Parse_config(t *testing.T) {
 					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--val",
 							"flag help",
@@ -902,7 +902,7 @@ func TestApp_Parse_config(t *testing.T) {
 					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--val",
 							"flag help",
@@ -985,7 +985,7 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 					),
 				),
 				warg.SkipAll(),
@@ -1035,7 +1035,7 @@ func TestCustomVersion(t *testing.T) {
 		expectedVersion,
 		warg.NewSection(
 			"test",
-			warg.NewSubCmd("version", "Print version", warg.UnimplementedCmd),
+			warg.NewSubCmd("version", "Print version", warg.Unimplemented()),
 		),
 		warg.SkipVersionCommand(),
 	)
@@ -1057,7 +1057,7 @@ func TestContextContainsValue(t *testing.T) {
 		"v1.0.0",
 		warg.NewSection(
 			"test",
-			warg.NewSubCmd("dummycommand", "Do nothing", warg.UnimplementedCmd),
+			warg.NewSubCmd("dummycommand", "Do nothing", warg.Unimplemented()),
 		),
 	)
 	err := app.Validate()

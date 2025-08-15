@@ -28,7 +28,7 @@ func TestApp_Validate(t *testing.T) {
 			name: "appNameWithDash",
 			app: warg.New("newAppName", "v1.0.0",
 				warg.NewSection("",
-					warg.NewSubCmd("com", "command for validation", warg.UnimplementedCmd),
+					warg.NewSubCmd("com", "command for validation", warg.Unimplemented()),
 				),
 				warg.SkipValidation(),
 			),
@@ -39,7 +39,7 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New("newAppName", "v1.0.0",
 				warg.NewSection("",
 					warg.NewSubSection("-name", "",
-						warg.NewSubCmd("com", "command for validation", warg.UnimplementedCmd),
+						warg.NewSubCmd("com", "command for validation", warg.Unimplemented()),
 					),
 				),
 				warg.SkipValidation(),
@@ -51,7 +51,7 @@ func TestApp_Validate(t *testing.T) {
 			app: warg.New("newAppName", "v1.0.0",
 				warg.NewSection("",
 					warg.NewSubSection("name", "",
-						warg.NewSubCmd("-com", "starts with dash", warg.UnimplementedCmd),
+						warg.NewSubCmd("-com", "starts with dash", warg.Unimplemented()),
 					),
 				),
 				warg.SkipValidation(),
@@ -65,7 +65,7 @@ func TestApp_Validate(t *testing.T) {
 					warg.NewSubCmd(
 						"c",
 						"",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag("f", "", nil),
 					),
 				),
@@ -80,7 +80,7 @@ func TestApp_Validate(t *testing.T) {
 					warg.NewSubCmd(
 						"c",
 						"",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag("-f", "", scalar.Bool(),
 							warg.Alias("f"),
 						)),
@@ -94,7 +94,7 @@ func TestApp_Validate(t *testing.T) {
 			name: "commandFlagAliasCommandFlagNameConflict",
 			app: warg.New("newAppName", "v1.0.0",
 				warg.NewSection("",
-					warg.NewSubCmd("c", "", warg.UnimplementedCmd,
+					warg.NewSubCmd("c", "", warg.Unimplemented(),
 						warg.NewCmdFlag("-f", "", scalar.Bool()),
 						warg.NewCmdFlag("--other", "", scalar.Bool(), warg.Alias("-f")),
 					),
@@ -111,7 +111,7 @@ func TestApp_Validate(t *testing.T) {
 					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--commandflag",
 							"global flag conflict",
@@ -138,7 +138,7 @@ func TestApp_Validate(t *testing.T) {
 					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--commandflag",
 							"global flag conflict",
@@ -164,7 +164,7 @@ func TestApp_Validate(t *testing.T) {
 					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 						warg.NewCmdFlag(
 							"--global",
 							"global flag conflict",
@@ -189,7 +189,7 @@ func TestApp_Validate(t *testing.T) {
 					warg.NewSubCmd(
 						"conflict",
 						"help for com",
-						warg.UnimplementedCmd,
+						warg.Unimplemented(),
 					),
 					warg.NewSubSection(
 						"conflict",

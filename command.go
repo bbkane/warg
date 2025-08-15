@@ -12,10 +12,12 @@ import (
 // A CmdOpt customizes a Command
 type CmdOpt func(*Cmd)
 
-// UnimplementedCmd is a command action that simply returns an error.
+// Unimplemented() is an Action that simply returns an error.
 // Useful for prototyping
-func UnimplementedCmd(_ CmdContext) error {
-	return errors.New("TODO: implement this command")
+func Unimplemented() Action {
+	return func(_ CmdContext) error {
+		return errors.New("TODO: implement this command")
+	}
 }
 
 // NewCmd builds a Cmd

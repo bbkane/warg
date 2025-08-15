@@ -37,17 +37,17 @@ func grabbitSection() warg.Section {
 		warg.NewSubCmd(
 			"grab",
 			"do the grabbity grabbity",
-			warg.UnimplementedCmd,
+			warg.Unimplemented(),
 		),
 		warg.NewSubCmd(
 			"command2",
 			"another command",
-			warg.UnimplementedCmd,
+			warg.Unimplemented(),
 		),
 		warg.NewSubCmd(
 			"command3",
 			"another command",
-			warg.UnimplementedCmd,
+			warg.Unimplemented(),
 		),
 		warg.NewSubSection(
 			"config",
@@ -56,7 +56,7 @@ func grabbitSection() warg.Section {
 			warg.NewSubCmd(
 				"edit",
 				"Edit the config. A default config will be created if it doesn't exist",
-				warg.UnimplementedCmd,
+				warg.Unimplemented(),
 				warg.CmdFooter(configEditFooter),
 				warg.NewCmdFlag(
 					"--editor",
@@ -73,12 +73,12 @@ func grabbitSection() warg.Section {
 		warg.NewSubSection(
 			"section2",
 			"another section",
-			warg.NewSubCmd("com", "Dummy command to pass validation", warg.UnimplementedCmd),
+			warg.NewSubCmd("com", "Dummy command to pass validation", warg.Unimplemented()),
 		),
 		warg.NewSubSection(
 			"section3",
 			"another section",
-			warg.NewSubCmd("com", "Dummy command to pass validation", warg.UnimplementedCmd),
+			warg.NewSubCmd("com", "Dummy command to pass validation", warg.Unimplemented()),
 		),
 	)
 	return sec

@@ -58,7 +58,7 @@ func ExampleNew() {
 					// still prototyping how we want this
 					// command to look,
 					// so use a provided stub action
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 					warg.CmdFlagMap(commonFlags),
 				),
 			),

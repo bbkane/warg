@@ -15,7 +15,7 @@ func BuildApp() *warg.App {
 			warg.NewSubCmd(
 				"command1",
 				"command1 help",
-				warg.UnimplementedCmd,
+				warg.Unimplemented(),
 				warg.NewCmdFlag(
 					"--flag1",
 					"flag1 help",
@@ -27,7 +27,7 @@ func BuildApp() *warg.App {
 			warg.NewSubCmd(
 				"manual",
 				"commands with flags using all completion types for manual testing",
-				warg.UnimplementedCmd,
+				warg.Unimplemented(),
 				warg.NewCmdFlag(
 					"--dirs",
 					"dirs completion",
@@ -73,7 +73,7 @@ func BuildApp() *warg.App {
 				warg.NewSubCmd(
 					"command2",
 					"command2 help",
-					warg.UnimplementedCmd,
+					warg.Unimplemented(),
 					warg.NewCmdFlag(
 						"--bool",
 						"bool completion is special cased to return true/false",
