@@ -10,7 +10,7 @@ An opinionated CLI framework:
 
 # Project Status (2025-06-15)
 
-`warg` is still a work in progress, but the "bones" are where I want them - I don't intend to change the basic way warg works, but I do plan to experiment with a few APIs (make the value and config APIs simpler) and add TUI generation. I think the largest breaking changes are behind me (see the [CHANGELOG](./CHANGELOG.md)). Read [Go Project Notes](https://www.bbkane.com/blog/go-project-notes/) to help understand the tooling.
+`warg` is still a work in progress, but the "bones" are where I want them - I don't intend to change the basic way warg works, but I do plan to experiment with a few APIs (make the value and config APIs simpler), and add TUI generation. I think the largest breaking changes are behind me (see the [CHANGELOG](./CHANGELOG.md)). Read [Go Project Notes](https://www.bbkane.com/blog/go-project-notes/) to help understand the tooling.
 
 I'm watching issues; please open one for any questions and especially BEFORE submitting a Pull request.
 
@@ -26,24 +26,22 @@ Simple "butler" example (full source [here](examples/butler/main.go)):
 app := warg.New(
   "butler",
   "v1.0.0",
-  section.New(
+  warg.NewSection(
     string("A virtual assistant"),
-    section.NewCommand(
+    warg.NewSubCmd(
       "present",
       "Formally present a guest (guests are never introduced, always presented).",
       present,
-      command.NewFlag(
+      warg.NewCmdFlag(
         "--name",
         "Guest to address.",
         scalar.String(),
-        flag.Alias("-n"),
-        flag.EnvVars("BUTLER_PRESENT_NAME", "USER"),
-        flag.Required(),
+        warg.Alias("-n"),
+        warg.EnvVars("BUTLER_PRESENT_NAME", "USER"),
+        warg.Required(),
       ),
     ),
-    section.CommandMap(warg.VersionCommandMap()),
   ),
-  warg.GlobalFlagMap(warg.ColorFlagMap()),
 )
 ```
 
@@ -62,7 +60,7 @@ By design, warg apps have the following requirements:
 
 - [cobra](https://github.com/spf13/cobra) is by far the most popular CLI framework for Go.
 - [cli](https://github.com/urfave/cli) is also very popular.
-- I haven't tried [ff](https://github.com/peterbourgon/ff), but it looks similar to warg, though maybe less batteries-included
+- I haven't tried [ff](https://github.com/peterbourgon/ff), but it looks similar to warg, though less batteries-included
 - I've used the now unmaintained [kingpin](https://github.com/alecthomas/kingpin) fairly successfully.
 
 # Notes
