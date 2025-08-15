@@ -14,7 +14,7 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec Section, indent int) {
 	for _, comName := range sec.Commands.SortedNames() {
 		fmt.Fprintln(
 			w,
-			LeftPad(FmtCommandName(color, string(comName)), "  ", indent),
+			leftPad(fmtCommandName(color, string(comName)), "  ", indent),
 		)
 	}
 
@@ -23,14 +23,14 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec Section, indent int) {
 		childSec := sec.Sections[k]
 		fmt.Fprintln(
 			w,
-			LeftPad(FmtSectionName(color, k), "  ", indent),
+			leftPad(fmtSectionName(color, k), "  ", indent),
 		)
 		outlineHelper(w, color, childSec, indent+1)
 	}
 
 }
 
-func OutlineSectionHelp(_ *Section, hi HelpInfo) Action {
+func outlineSectionHelp(_ *Section, hi helpInfo) Action {
 	return func(cmdCtx CmdContext) error {
 		file := cmdCtx.Stdout
 		f := bufio.NewWriter(file)
@@ -42,7 +42,7 @@ func OutlineSectionHelp(_ *Section, hi HelpInfo) Action {
 		}
 
 		fmt.Fprintln(f, "# "+string(hi.RootSection.HelpShort))
-		fmt.Fprintf(f, "%s\n", FmtSectionName(&col, string(cmdCtx.App.Name)))
+		fmt.Fprintf(f, "%s\n", fmtSectionName(&col, string(cmdCtx.App.Name)))
 
 		outlineHelper(f, &col, hi.RootSection, 1)
 
@@ -50,6 +50,6 @@ func OutlineSectionHelp(_ *Section, hi HelpInfo) Action {
 	}
 }
 
-func OutlineCommandHelp(cur *Cmd, helpInfo HelpInfo) Action {
-	return OutlineSectionHelp(nil, helpInfo)
+func outlineCommandHelp(cur *Cmd, helpInfo helpInfo) Action {
+	return outlineSectionHelp(nil, helpInfo)
 }

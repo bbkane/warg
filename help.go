@@ -11,10 +11,10 @@ import (
 
 func DefaultHelpCommandMap() CmdMap {
 	return CmdMap{
-		"default":     HelpToCommand(DetailedCommandHelp, AllCommandsSectionHelp),
-		"detailed":    HelpToCommand(DetailedCommandHelp, DetailedSectionHelp),
-		"outline":     HelpToCommand(OutlineCommandHelp, OutlineSectionHelp),
-		"allcommands": HelpToCommand(DetailedCommandHelp, AllCommandsSectionHelp),
+		"default":     helpToCommand(detailedCommandHelp, allCommandsSectionHelp),
+		"detailed":    helpToCommand(detailedCommandHelp, detailedSectionHelp),
+		"outline":     helpToCommand(outlineCommandHelp, outlineSectionHelp),
+		"allcommands": helpToCommand(detailedCommandHelp, allCommandsSectionHelp),
 	}
 }
 
@@ -31,11 +31,13 @@ func DefaultHelpFlagMap(defaultChoice string, choices []string) FlagMap {
 	}
 }
 
-type CmdHelp func(cur *Cmd, helpInfo HelpInfo) Action
-type SectionHelp func(cur *Section, helpInfo HelpInfo) Action
+// the following are remnants of the old help system, which is used special types for help functions. The new systems just calls commands. I've made these private types and I hope to remove them in the future when I have no higher priorities :D
 
-// HelpInfo lists common information available to a help function
-type HelpInfo struct {
+type cmdHelp func(cur *Cmd, helpInfo helpInfo) Action
+type sectionHelp func(cur *Section, helpInfo helpInfo) Action
+
+// helpInfo lists common information available to a help function
+type helpInfo struct {
 
 	// AvailableFlags for the current section or commmand, including inherted flags from parent sections.
 	// All flags are Resolved if possible (i.e., flag.SetBy != "")
@@ -44,7 +46,8 @@ type HelpInfo struct {
 	RootSection Section
 }
 
-func HelpToCommand(commandHelp CmdHelp, secHelp SectionHelp) Cmd {
+// temporary function to convert the old help system to the new one
+func helpToCommand(commandHelp cmdHelp, secHelp sectionHelp) Cmd {
 	return Cmd{ //nolint:exhaustruct  // This help is never used since this is a generated command
 		Action: func(cmdCtx CmdContext) error {
 			// build ftar.AvailableFlags - it's a map of string to flag for the app globals + current command. Don't forget to set each flag.IsCommandFlag and Value for now..
@@ -65,7 +68,7 @@ func HelpToCommand(commandHelp CmdHelp, secHelp SectionHelp) Cmd {
 				}
 			}
 
-			hi := HelpInfo{
+			hi := helpInfo{
 				AvailableFlags: ftarAllowedFlags,
 				RootSection:    cmdCtx.App.RootSection,
 			}
@@ -80,10 +83,10 @@ func HelpToCommand(commandHelp CmdHelp, secHelp SectionHelp) Cmd {
 
 }
 
-// LeftPad pads a string `s` with pad `pad` `plength` times
+// leftPad pads a string `s` with pad `pad` `plength` times
 //
 // In Python: (pad * plength) + s
-func LeftPad(s string, pad string, plength int) string {
+func leftPad(s string, pad string, plength int) string {
 	// https://stackoverflow.com/a/45456649/2958070
 	for i := 0; i < plength; i++ {
 		s = pad + s
@@ -109,29 +112,29 @@ func ConditionallyEnableColor(pf PassedFlags, file *os.File) (gocolor.Color, err
 
 }
 
-func FmtHeader(col *gocolor.Color, header string) string {
+func fmtHeader(col *gocolor.Color, header string) string {
 	return col.Add(col.Bold+col.Underline, header)
 }
 
-func FmtSectionName(col *gocolor.Color, sectionName string) string {
+func fmtSectionName(col *gocolor.Color, sectionName string) string {
 	return col.Add(col.Bold+col.FgCyan, string(sectionName))
 }
 
-func FmtCommandName(col *gocolor.Color, commandName string) string {
+func fmtCommandName(col *gocolor.Color, commandName string) string {
 	return col.Add(col.Bold+col.FgGreen, string(commandName))
 }
 
-func FmtFlagName(col *gocolor.Color, flagName string) string {
+func fmtFlagName(col *gocolor.Color, flagName string) string {
 	return col.Add(col.Bold+col.FgYellow, string(flagName))
 }
 
-func FmtFlagAlias(col *gocolor.Color, flagAlias string) string {
+func fmtFlagAlias(col *gocolor.Color, flagAlias string) string {
 	return col.Add(col.Bold+col.FgYellow, string(flagAlias))
 }
 
-// SortedKeys returns the keys of the map m in sorted order.
+// sortedKeys returns the keys of the map m in sorted order.
 // copied and modified from https://cs.opensource.google/go/x/exp/+/master:maps/maps.go;l=10;drc=79cabaa25d7518588d46eb676385c8dff49670c3
-func SortedKeys[M ~map[string]V, V any](m M) []string {
+func sortedKeys[M ~map[string]V, V any](m M) []string {
 	r := make([]string, 0, len(m))
 	for k := range m {
 		r = append(r, k)

@@ -6,6 +6,29 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.0.36
+
+## Removed
+
+Removed / made private the following API functions
+
+- `CmdHelp`
+- `SectionHelp`
+- `Helpinfo`
+- `HelpToCommand`
+- `LeftPad`
+- `FmtHeader`
+- `FmtSectionName`
+- `FmtCommandName`
+- `FmtFlagName`
+- `FmtFlagAlias`
+- `SortedKeys`
+- `AllCommandsSectionHelp`
+- `DetailedCommandHelp`
+- `DetailedSectionHelp`
+- `OutlineSectionHelp`
+- `OutlineCommandHelp`
+
 # v0.0.35
 
 ## Changed

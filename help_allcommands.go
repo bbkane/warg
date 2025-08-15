@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func AllCommandsSectionHelp(cur *Section, helpInfo HelpInfo) Action {
+func allCommandsSectionHelp(cur *Section, helpInfo helpInfo) Action {
 	return func(cmdCtx CmdContext) error {
 		file := cmdCtx.Stdout
 
@@ -27,7 +27,7 @@ func AllCommandsSectionHelp(cur *Section, helpInfo HelpInfo) Action {
 
 		fmt.Fprintln(f)
 
-		fmt.Fprintln(f, FmtHeader(&col, "All Commands")+" (use <cmd> -h to see flag details):")
+		fmt.Fprintln(f, fmtHeader(&col, "All Commands")+" (use <cmd> -h to see flag details):")
 		fmt.Fprintln(f)
 
 		path := []string{string(cmdCtx.App.Name)}
@@ -48,16 +48,16 @@ func AllCommandsSectionHelp(cur *Section, helpInfo HelpInfo) Action {
 				fmt.Fprintf(f, "  ")
 
 				for _, p := range flatSec.Path {
-					fmt.Fprint(f, FmtCommandName(&col, string(p))+" ")
+					fmt.Fprint(f, fmtCommandName(&col, string(p))+" ")
 				}
-				fmt.Fprintln(f, FmtCommandName(&col, name))
+				fmt.Fprintln(f, fmtCommandName(&col, name))
 
 				fmt.Fprintln(f)
 			}
 
 		}
 		if cur.Footer != "" {
-			fmt.Fprintln(f, FmtHeader(&col, "Footer")+":")
+			fmt.Fprintln(f, fmtHeader(&col, "Footer")+":")
 			fmt.Fprintln(f)
 			fmt.Fprintf(f, "%s\n", cur.Footer)
 		}

@@ -17,15 +17,15 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 		fmt.Fprintf(
 			w,
 			"  %s , %s : %s\n",
-			FmtFlagName(color, name),
-			FmtFlagAlias(color, f.Alias),
+			fmtFlagName(color, name),
+			fmtFlagAlias(color, f.Alias),
 			f.HelpShort,
 		)
 	} else {
 		fmt.Fprintf(
 			w,
 			"  %s : %s\n",
-			FmtFlagName(color, name),
+			fmtFlagName(color, name),
 			f.HelpShort,
 		)
 	}
@@ -53,7 +53,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 				color.Add(color.Bold, "default"),
 			)
 			def := v.DefaultStringMap()
-			for _, key := range SortedKeys(def) {
+			for _, key := range sortedKeys(def) {
 				fmt.Fprintf(
 					w,
 					"      %s : %s\n",
@@ -121,7 +121,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 				color.Add(color.Bold, string(f.Value.UpdatedBy())),
 			)
 			m := v.StringMap()
-			for _, key := range SortedKeys(m) {
+			for _, key := range sortedKeys(m) {
 				fmt.Fprintf(
 					w,
 					"      %s : %s\n",
@@ -152,7 +152,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 					"      %s %s\n",
 					color.Add(
 						color.Bold,
-						LeftPad(indexStr, "0", padding)+")",
+						leftPad(indexStr, "0", padding)+")",
 					),
 					e,
 				)
@@ -173,7 +173,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 	fmt.Fprintln(w)
 }
 
-func DetailedCommandHelp(cur *Cmd, helpInfo HelpInfo) Action {
+func detailedCommandHelp(cur *Cmd, helpInfo helpInfo) Action {
 	return func(pf CmdContext) error {
 		file := pf.Stdout
 		f := bufio.NewWriter(file)
@@ -230,7 +230,7 @@ func DetailedCommandHelp(cur *Cmd, helpInfo HelpInfo) Action {
 	}
 }
 
-func DetailedSectionHelp(cur *Section, _ HelpInfo) Action {
+func detailedSectionHelp(cur *Section, _ helpInfo) Action {
 	return func(pf CmdContext) error {
 		file := pf.Stdout
 
@@ -260,7 +260,7 @@ func DetailedSectionHelp(cur *Section, _ HelpInfo) Action {
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					FmtSectionName(&col, k),
+					fmtSectionName(&col, k),
 					cur.Sections[k].HelpShort,
 				)
 			}
@@ -277,7 +277,7 @@ func DetailedSectionHelp(cur *Section, _ HelpInfo) Action {
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
-					FmtCommandName(&col, k),
+					fmtCommandName(&col, k),
 					cur.Commands[string(k)].HelpShort,
 				)
 			}
