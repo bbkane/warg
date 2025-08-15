@@ -15,7 +15,7 @@ type FlagOpt func(*Flag)
 func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) Flag {
 	flag := Flag{
 		Alias:                 "",
-		Completions:           DefaultFlagCompletions,
+		Completions:           defaultFlagCompletions,
 		ConfigPath:            "",
 		EmptyValueConstructor: empty,
 		EnvVars:               nil,
@@ -46,7 +46,7 @@ func ConfigPath(path string) FlagOpt {
 	}
 }
 
-func DefaultFlagCompletions(cmdCtx CmdContext) (*completion.Candidates, error) {
+func defaultFlagCompletions(cmdCtx CmdContext) (*completion.Candidates, error) {
 	choices := cmdCtx.ParseState.FlagValues[cmdCtx.ParseState.CurrentFlagName].Choices()
 	if len(choices) > 0 {
 		candidates := &completion.Candidates{

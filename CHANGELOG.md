@@ -12,6 +12,8 @@ below this description) is likely unreleased.
 
 Removed / made private the following API functions
 
+Help functions
+
 - `CmdHelp`
 - `SectionHelp`
 - `Helpinfo`
@@ -28,6 +30,12 @@ Removed / made private the following API functions
 - `DetailedSectionHelp`
 - `OutlineSectionHelp`
 - `OutlineCommandHelp`
+
+Other functions
+
+- `DefaultCmdCompletions`
+- `CmdCompletions`
+- `DefaultFlagCompletions`
 
 # v0.0.35
 
