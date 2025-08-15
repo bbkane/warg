@@ -13,11 +13,11 @@ func app() *warg.App {
 		"v1.0.0",
 		warg.NewSection(
 			string("A virtual assistant"),
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				"present",
 				"Formally present a guest (guests are never introduced, always presented).",
 				present,
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--name",
 					"Guest to address.",
 					scalar.String(),
@@ -31,7 +31,7 @@ func app() *warg.App {
 	return &app
 }
 
-func present(ctx warg.Context) error {
+func present(ctx warg.CmdContext) error {
 	// this is a required flag, so we know it exists
 	name := ctx.Flags["--name"].(string)
 	fmt.Fprintf(ctx.Stdout, "May I present to you %s.\n", name)

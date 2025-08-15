@@ -16,7 +16,7 @@ import (
 // It's also possible to use '--help detailed' to see the current value of a flag and what set it.
 func ExampleApp_Parse_flag_value_options() {
 
-	action := func(ctx warg.Context) error {
+	action := func(ctx warg.CmdContext) error {
 		// flag marked as Required(), so no need to check for existance
 		scalarVal := ctx.Flags["--scalar-flag"].(string)
 		// flag might not exist in config, so check for existance
@@ -37,11 +37,11 @@ func ExampleApp_Parse_flag_value_options() {
 		"v1.0.0",
 		warg.NewSection(
 			"demo flag overrides",
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				string("show"),
 				"Show final flag values",
 				action,
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--scalar-flag",
 					"Demo scalar flag",
 					scalar.String(
@@ -51,7 +51,7 @@ func ExampleApp_Parse_flag_value_options() {
 					warg.ConfigPath("args.scalar-flag"),
 					warg.Required(),
 				),
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--slice-flag",
 					"Demo slice flag",
 					slice.Int(
@@ -91,7 +91,7 @@ func ExampleApp_Parse_flag_value_options() {
 		log.Fatalf("write error: %e", err)
 	}
 	app.MustRun(
-		warg.Args([]string{"calc", "show", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "--scalar-flag", "b"}),
+		warg.ParseWithArgs([]string{"calc", "show", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "--scalar-flag", "b"}),
 	)
 	// Output:
 	// --scalar-flag: "b"

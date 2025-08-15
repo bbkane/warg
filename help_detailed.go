@@ -174,7 +174,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 }
 
 func DetailedCommandHelp(cur *Cmd, helpInfo HelpInfo) Action {
-	return func(pf Context) error {
+	return func(pf CmdContext) error {
 		file := pf.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
@@ -231,7 +231,7 @@ func DetailedCommandHelp(cur *Cmd, helpInfo HelpInfo) Action {
 }
 
 func DetailedSectionHelp(cur *Section, _ HelpInfo) Action {
-	return func(pf Context) error {
+	return func(pf CmdContext) error {
 		file := pf.Stdout
 
 		f := bufio.NewWriter(file)

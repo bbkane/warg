@@ -7,7 +7,7 @@ import (
 )
 
 func AllCommandsSectionHelp(cur *Section, helpInfo HelpInfo) Action {
-	return func(cmdCtx Context) error {
+	return func(cmdCtx CmdContext) error {
 		file := cmdCtx.Stdout
 
 		f := bufio.NewWriter(file)

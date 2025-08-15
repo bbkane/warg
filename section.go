@@ -22,8 +22,8 @@ func NewSection(helpShort string, opts ...SectionOpt) Section {
 	return section
 }
 
-// ChildSection adds an existing ChildSection as a child of this ChildSection. Panics if a ChildSection with the same name already exists
-func ChildSection(name string, value Section) SectionOpt {
+// SubSection adds an existing SubSection as a child of this SubSection. Panics if a SubSection with the same name already exists
+func SubSection(name string, value Section) SectionOpt {
 	return func(app *Section) {
 		if _, alreadyThere := app.Sections[name]; !alreadyThere {
 			app.Sections[name] = value
@@ -33,17 +33,17 @@ func ChildSection(name string, value Section) SectionOpt {
 	}
 }
 
-// ChildSectionMap adds existing Sections as a child of this Section. Panics if a Section with the same name already exists
-func ChildSectionMap(sections SectionMap) SectionOpt {
+// SubSectionMap adds existing Sections as a child of this Section. Panics if a Section with the same name already exists
+func SubSectionMap(sections SectionMap) SectionOpt {
 	return func(app *Section) {
 		for name, value := range sections {
-			ChildSection(name, value)(app)
+			SubSection(name, value)(app)
 		}
 	}
 }
 
-// ChildCmd adds an existing ChildCmd as a child of this Section. Panics if a ChildCmd with the same name already exists
-func ChildCmd(name string, value Cmd) SectionOpt {
+// SubCmd adds an existing SubCmd as a child of this Section. Panics if a SubCmd with the same name already exists
+func SubCmd(name string, value Cmd) SectionOpt {
 	return func(app *Section) {
 		if _, alreadyThere := app.Commands[name]; !alreadyThere {
 			app.Commands[name] = value
@@ -53,23 +53,23 @@ func ChildCmd(name string, value Cmd) SectionOpt {
 	}
 }
 
-// ChildCmdMap adds existing Commands as a child of this Section. Panics if a Command with the same name already exists
-func ChildCmdMap(commands CmdMap) SectionOpt {
+// SubCmdMap adds existing Commands as a child of this Section. Panics if a Command with the same name already exists
+func SubCmdMap(commands CmdMap) SectionOpt {
 	return func(app *Section) {
 		for name, value := range commands {
-			ChildCmd(name, value)(app)
+			SubCmd(name, value)(app)
 		}
 	}
 }
 
-// NewChildSection creates a new Section as a child of this Section. Panics if a NewChildSection with the same name already exists
-func NewChildSection(name string, helpShort string, opts ...SectionOpt) SectionOpt {
-	return ChildSection(name, NewSection(helpShort, opts...))
+// NewSubSection creates a new Section as a child of this Section. Panics if a NewSubSection with the same name already exists
+func NewSubSection(name string, helpShort string, opts ...SectionOpt) SectionOpt {
+	return SubSection(name, NewSection(helpShort, opts...))
 }
 
-// NewChildCmd creates a new Command as a child of this Section. Panics if a NewChildCmd with the same name already exists
-func NewChildCmd(name string, helpShort string, action Action, opts ...CommandOpt) SectionOpt {
-	return ChildCmd(name, NewCmd(helpShort, action, opts...))
+// NewSubCmd creates a new Command as a child of this Section. Panics if a NewSubCmd with the same name already exists
+func NewSubCmd(name string, helpShort string, action Action, opts ...CmdOpt) SectionOpt {
+	return SubCmd(name, NewCmd(helpShort, action, opts...))
 }
 
 // SectionFooter adds an optional help string to this Section

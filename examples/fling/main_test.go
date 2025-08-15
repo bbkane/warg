@@ -38,8 +38,8 @@ func TestRunHelp(t *testing.T) {
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},
-				warg.Args(tt.args),
-				warg.ParseLookupEnv(tt.lookup),
+				warg.ParseWithArgs(tt.args),
+				warg.ParseWithLookupEnv(tt.lookup),
 			)
 		})
 	}

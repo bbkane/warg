@@ -8,7 +8,7 @@ import (
 	"go.bbkane.com/warg/value/scalar"
 )
 
-func login(ctx warg.Context) error {
+func login(ctx warg.CmdContext) error {
 	url := ctx.Flags["--url"].(string)
 
 	// timeout doesn't have a default value,
@@ -43,23 +43,23 @@ func ExampleNew() {
 		"v1.0.0",
 		warg.NewSection(
 			"work with a fictional blog platform",
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				"login",
 				"Login to the platform",
 				login,
-				warg.ChildFlagMap(commonFlags),
+				warg.CmdFlagMap(commonFlags),
 			),
-			warg.NewChildSection(
+			warg.NewSubSection(
 				"comments",
 				"Deal with comments",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"list",
 					"List all comments",
 					// still prototyping how we want this
 					// command to look,
 					// so use a provided stub action
-					warg.DoNothing,
-					warg.ChildFlagMap(commonFlags),
+					warg.UnimplementedCmd,
+					warg.CmdFlagMap(commonFlags),
 				),
 			),
 		),
@@ -72,7 +72,7 @@ func ExampleNew() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	app.MustRun(warg.Args([]string{"blog.exe", "login"}))
+	app.MustRun(warg.ParseWithArgs([]string{"blog.exe", "login"}))
 	// Output:
 	// Logging into https://envvar.com
 }

@@ -54,7 +54,7 @@ func NewParseOpts(opts ...ParseOpt) ParseOpts {
 
 // ParseResult holds the result of parsing the command line.
 type ParseResult struct {
-	Context Context
+	Context CmdContext
 	// Action holds the passed command's action to execute.
 	Action Action
 }
@@ -378,7 +378,7 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 		helpType := parseState.FlagValues[app.HelpFlagName].Get().(string)
 		command := app.HelpCommands[helpType]
 		pr := ParseResult{
-			Context: Context{
+			Context: CmdContext{
 				App:        app,
 				Context:    parseOpts.Context,
 				Flags:      parseState.FlagValues.ToPassedFlags(),
@@ -419,7 +419,7 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 	}
 
 	pr := ParseResult{
-		Context: Context{
+		Context: CmdContext{
 			App:        app,
 			Context:    parseOpts.Context,
 			Flags:      parseState.FlagValues.ToPassedFlags(),

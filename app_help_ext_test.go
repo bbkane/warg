@@ -34,31 +34,31 @@ func grabbitSection() warg.Section {
 
 	sec := warg.NewSection(
 		"grab those images!",
-		warg.NewChildCmd(
+		warg.NewSubCmd(
 			"grab",
 			"do the grabbity grabbity",
-			warg.DoNothing,
+			warg.UnimplementedCmd,
 		),
-		warg.NewChildCmd(
+		warg.NewSubCmd(
 			"command2",
 			"another command",
-			warg.DoNothing,
+			warg.UnimplementedCmd,
 		),
-		warg.NewChildCmd(
+		warg.NewSubCmd(
 			"command3",
 			"another command",
-			warg.DoNothing,
+			warg.UnimplementedCmd,
 		),
-		warg.NewChildSection(
+		warg.NewSubSection(
 			"config",
 			"Change grabbit's config",
 			warg.SectionFooter(rootFooter),
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				"edit",
 				"Edit the config. A default config will be created if it doesn't exist",
-				warg.DoNothing,
+				warg.UnimplementedCmd,
 				warg.CmdFooter(configEditFooter),
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--editor",
 					"path to editor",
 					scalar.String(
@@ -70,15 +70,15 @@ func grabbitSection() warg.Section {
 				),
 			),
 		),
-		warg.NewChildSection(
+		warg.NewSubSection(
 			"section2",
 			"another section",
-			warg.NewChildCmd("com", "Dummy command to pass validation", warg.DoNothing),
+			warg.NewSubCmd("com", "Dummy command to pass validation", warg.UnimplementedCmd),
 		),
-		warg.NewChildSection(
+		warg.NewSubSection(
 			"section3",
 			"another section",
-			warg.NewChildCmd("com", "Dummy command to pass validation", warg.DoNothing),
+			warg.NewSubCmd("com", "Dummy command to pass validation", warg.UnimplementedCmd),
 		),
 	)
 	return sec
@@ -147,8 +147,8 @@ func TestAppHelp(t *testing.T) {
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},
-				warg.Args(tt.args),
-				warg.ParseLookupEnv(tt.lookup),
+				warg.ParseWithArgs(tt.args),
+				warg.ParseWithLookupEnv(tt.lookup),
 			)
 		})
 	}

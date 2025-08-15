@@ -37,8 +37,8 @@ func GoldenTest(
 	err = args.App.Validate()
 	require.Nil(t, err)
 
-	parseOpts = append(parseOpts, Stderr(stderrTmpFile))
-	parseOpts = append(parseOpts, Stdout(stdoutTmpFile))
+	parseOpts = append(parseOpts, ParseWithStderr(stderrTmpFile))
+	parseOpts = append(parseOpts, ParseWithStdout(stdoutTmpFile))
 	pr, parseErr := args.App.Parse(parseOpts...)
 
 	// parseOptHolder := cli.NewParseOptHolder(parseOpts...)

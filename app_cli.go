@@ -221,7 +221,7 @@ func (app *App) Validate() error {
 }
 
 // CompletionsFunc is a function that returns completion candidates for a flag. See warg.Completions[Type] for convenience functions to make this
-type CompletionsFunc func(Context) (*completion.Candidates, error)
+type CompletionsFunc func(CmdContext) (*completion.Candidates, error)
 
 func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 	parseOpts := NewParseOpts(opts...)
@@ -291,7 +291,7 @@ func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unexpected resolveFlags err: %w", err)
 	}
-	cmdContext := Context{
+	cmdContext := CmdContext{
 		App:        a,
 		Context:    parseOpts.Context,
 		Flags:      parseState.FlagValues.ToPassedFlags(),

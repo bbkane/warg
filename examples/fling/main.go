@@ -54,17 +54,17 @@ func app() *warg.App {
 		"v1.0.0",
 		warg.NewSection(
 			"Link and unlink directory heirarchies ",
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				"link",
 				"Create links",
 				link,
-				warg.ChildFlagMap(linkUnlinkFlags),
+				warg.CmdFlagMap(linkUnlinkFlags),
 			),
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				"unlink",
 				"Unlink previously created links",
 				unlink,
-				warg.ChildFlagMap(linkUnlinkFlags),
+				warg.CmdFlagMap(linkUnlinkFlags),
 			),
 			warg.SectionFooter("Homepage: https://github.com/bbkane/fling"),
 		),

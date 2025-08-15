@@ -6,7 +6,7 @@ import (
 	"go.bbkane.com/warg"
 )
 
-func exampleHelpFlaglogin(_ warg.Context) error {
+func exampleHelpFlaglogin(_ warg.CmdContext) error {
 	fmt.Println("Logging in")
 	return nil
 }
@@ -14,7 +14,7 @@ func exampleHelpFlaglogin(_ warg.Context) error {
 func customHelpCmd() warg.Cmd {
 	return warg.NewCmd(
 		"", // this command will be launched by the help flag, so users will never see the help
-		func(ctx warg.Context) error {
+		func(ctx warg.CmdContext) error {
 			file := ctx.Stdout
 			fmt.Fprintln(file, "Custom help command output")
 			return nil
@@ -34,7 +34,7 @@ func ExampleHelpFlag() {
 		"v1.0.0",
 		warg.NewSection(
 			"work with a fictional blog platform",
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				"login",
 				"Login to the platform",
 				exampleHelpFlaglogin,
@@ -46,7 +46,7 @@ func ExampleHelpFlag() {
 		),
 	)
 
-	app.MustRun(warg.Args([]string{"blog.exe", "-h", "custom"}))
+	app.MustRun(warg.ParseWithArgs([]string{"blog.exe", "-h", "custom"}))
 	// Output:
 	// Custom help command output
 }

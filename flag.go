@@ -43,7 +43,7 @@ func ConfigPath(path string) FlagOpt {
 	}
 }
 
-func DefaultFlagCompletions(cmdCtx Context) (*completion.Candidates, error) {
+func DefaultFlagCompletions(cmdCtx CmdContext) (*completion.Candidates, error) {
 	choices := cmdCtx.ParseState.FlagValues[cmdCtx.ParseState.CurrentFlagName].Choices()
 	if len(choices) > 0 {
 		candidates := &completion.Candidates{

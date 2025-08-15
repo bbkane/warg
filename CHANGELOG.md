@@ -6,6 +6,117 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.0.35
+
+## Changed
+
+This version combines the following packages into the `warg` package:
+
+- `wargcore`
+- `section`
+- `command`
+- `flag`
+- `parseopt`
+- All `help/*` packages
+
+To avoid name collisions and because it felt right, the following symbols were renamed (hope I didn't miss any):
+
+<details>
+
+| Old                        | New                          |
+|----------------------------|------------------------------|
+| wargcore.Command           | warg.Cmd                     |
+| wargcore.CommandHelp       | warg.CmdHelp                 |
+| wargcore.CommandMap        | warg.CmdMap                  |
+| wargcore.Context           | warg.CmdContext              |
+| section.New                | warg.NewSection              |
+| section.Command            | warg.SubCmd                  |
+| section.CommandMap         | warg.SubCmdMap               |
+| section.Footer             | warg.SectionFooter           |
+| section.HelpLong           | warg.SectionHelpLong         |
+| section.NewCommand         | warg.NewSubCmd               |
+| section.NewSection         | warg.NewSubSection           |
+| section.Section            | warg.SubSection              |
+| section.SectionMap         | warg.SubSectionMap           |
+| command.DefaultCompletions | warg.DefaultCmdCompletions   |
+| command.DoNothing          | warg.UnimplementedCmd        |
+| command.New                | warg.NewCmd                  |
+| command.CommandOpt         | warg.CmdOpt                  |
+| command.Completions        | warg.CmdCompletions          |
+| command.Flag               | warg.CmdFlag                 |
+| command.FlagMap            | warg.CmdFlagMap              |
+| command.Footer             | warg.CmdFooter               |
+| command.HelpLong           | warg.CmdHelpLong             |
+| command.NewFlag            | warg.NewCmdFlag              |
+| flag.New                   | warg.NewFlag                 |
+| flag.Completions           | warg.FlagCompletions         |
+| parseopt.Args              | warg.ParseWithArgs           |
+| parseopt.Context           | warg.ParseWithContext        |
+| parseopt.LookupEnv         | warg.ParseWithLookupEnv      |
+| parseopt.Stderr            | warg.ParseWithStderr         |
+| parseopt.Stdout            | warg.ParseWithStdout         |
+
+</details>
+
+## Justification
+
+Why do this? First, let me explain some things about the previous architecture of warg:
+
+warg has a few "structural types" that form the basis of any app - `App`, `Command` (now `Cmd`), `Section`, `Flag`. On top of that warg has several instantiations/references of/to these types: `help` functions return `Commands` (and when creating an app (`warg.New`) you need to set the default help function) , `Context` (now `Cmd.Context`)  has references to basically all of these types and is used for tab completion, parsing, and executing commands. So there's a lot of cycles between type references. I would prefer a nice heirachical package structure, so previous versions of warg contorted these packages into the following structure:
+
+```mermaid
+flowchart TD
+warg["warg: top level App opts"]
+help["help: commands"]
+section["section: opts"]
+command["command: opts"]
+flag["flag: opts"]
+cli["wargcore: App,Section,Command,Flag"]
+
+warg --> help
+warg --> section
+warg --> command
+warg --> flag
+warg --> cli
+help --> section
+help --> command
+help --> flag
+help --> cli
+section --> command
+section --> flag
+section --> cli
+command --> flag
+command --> cli
+flag --> cli
+```
+
+The types that reference each other were in the `wargcore` package, and other packages carefully layered on top options to build an app - sometimes with conflicting names - `section.HelpLong` vs `command.HelpLong`.
+
+Unfortunately, structuring the package imports like this has its own drawbacks:
+
+A user has to import like 5 packages to build an app (6 if they want to customize `--help`) and more if they want to use non-scalar flags:
+
+```go
+import (
+	"go.bbkane.com/warg"
+	"go.bbkane.com/warg/command"
+	"go.bbkane.com/warg/flag"
+	"go.bbkane.com/warg/section"
+	"go.bbkane.com/warg/value/scalar"
+	"go.bbkane.com/warg/wargcore"
+)
+```
+
+Not a great user experience - this is just boilerplate and can be hard to discover, autocomplete, or read docs for.
+
+Secondly, these "provide options for `wargcore` types packages" (`flag`, `command`, `section`, `warg`, ect.) couldn't access private variables in the `wargcore` types, so I ended up making basically everything public in `wargcore`.
+
+Combining these into one package, `warg`, fixes these issues, but introduces issues of its own - name conflicts. Hence all the renaming and shortening of names ( `Command` -> `Cmd`).
+
+Fortunately, AI should make migration pretty easy. Just point Copilot at this CHANGELOG table above and ask it to make the changes. That's one reason why I put so much work into the table :sweat_smile:.
+
+Now that most things are in one package, I plan to privatize public APIs my CLIs aren't using, and maybe do some more renames, but I figured I should cut a version first.
+
 # v0.0.34
 
 ## Added

@@ -69,12 +69,12 @@ Homepage: https://github.com/bbkane/grabbit
 		"v1.0.0",
 		warg.NewSection(
 			"Get top images from subreddits",
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				"grab",
 				"Grab images. Optionally use `config edit` first to create a config",
 				grab,
-				warg.ChildFlagMap(logFlags),
-				warg.NewChildFlag(
+				warg.CmdFlagMap(logFlags),
+				warg.NewCmdFlag(
 					"--subreddit-name",
 					"Subreddit to grab",
 					slice.String(
@@ -84,7 +84,7 @@ Homepage: https://github.com/bbkane/grabbit
 					warg.ConfigPath("subreddits[].name"),
 					warg.Required(),
 				),
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--subreddit-destination",
 					"Where to store the subreddit",
 					slice.Path(
@@ -94,7 +94,7 @@ Homepage: https://github.com/bbkane/grabbit
 					warg.ConfigPath("subreddits[].destination"),
 					warg.Required(),
 				),
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--subreddit-timeframe",
 					"Take the top subreddits from this timeframe",
 					slice.String(
@@ -105,7 +105,7 @@ Homepage: https://github.com/bbkane/grabbit
 					warg.ConfigPath("subreddits[].timeframe"),
 					warg.Required(),
 				),
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--subreddit-limit",
 					"Max number of links to try to download",
 					slice.Int(
@@ -115,7 +115,7 @@ Homepage: https://github.com/bbkane/grabbit
 					warg.ConfigPath("subreddits[].limit"),
 					warg.Required(),
 				),
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--timeout",
 					"Timeout for a single download",
 					scalar.Duration(
@@ -128,15 +128,15 @@ Homepage: https://github.com/bbkane/grabbit
 
 			warg.SectionFooter(appFooter),
 
-			warg.NewChildSection(
+			warg.NewSubSection(
 				"config",
 				"Config commands",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"edit",
 					"Edit or create configuration file.",
 					editConfig,
-					warg.ChildFlagMap(logFlags),
-					warg.NewChildFlag(
+					warg.CmdFlagMap(logFlags),
+					warg.NewCmdFlag(
 						"--editor",
 						"Path to editor",
 						scalar.String(

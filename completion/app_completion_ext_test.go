@@ -223,8 +223,8 @@ func TestApp_Completions(t *testing.T) {
 			args = append(args, "")
 
 			actualCandidates, actualErr := app.Completions(
-				warg.Args(args),
-				warg.ParseLookupEnv(warg.LookupMap(nil)),
+				warg.ParseWithArgs(args),
+				warg.ParseWithLookupEnv(warg.LookupMap(nil)),
 			)
 
 			if tt.expectedErr {

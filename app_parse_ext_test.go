@@ -52,11 +52,11 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName", "v1.0.0",
 				warg.NewSection(
 					"help for test",
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"test",
 						"blah",
-						warg.DoNothing,
-						warg.NewChildFlag(
+						warg.UnimplementedCmd,
+						warg.NewCmdFlag(
 							"--flag",
 							"help for --flag",
 							scalar.String(),
@@ -92,11 +92,11 @@ func TestApp_Parse(t *testing.T) {
 					"newAppName", "v1.0.0",
 					warg.NewSection(
 						"help for section",
-						warg.NewChildCmd(
+						warg.NewSubCmd(
 							"test",
 							"help for test",
-							warg.DoNothing,
-							warg.ChildFlagMap(fm),
+							warg.UnimplementedCmd,
+							warg.CmdFlagMap(fm),
 						),
 					),
 
@@ -119,11 +119,11 @@ func TestApp_Parse(t *testing.T) {
 				"newAppName", "v1.0.0",
 				warg.NewSection(
 					string("A virtual assistant"),
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"present",
 						"Formally present a guest (guests are never introduced, always presented).",
-						warg.DoNothing,
-						warg.NewChildFlag(
+						warg.UnimplementedCmd,
+						warg.NewCmdFlag(
 							"--name",
 							"Guest to address.",
 							scalar.String(scalar.Choices("bob")),
@@ -150,7 +150,7 @@ func TestApp_Parse(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := tt.app.Parse(warg.Args(tt.args), warg.ParseLookupEnv(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(warg.ParseWithArgs(tt.args), warg.ParseWithLookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -183,14 +183,14 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "fromMain",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.NewChildSection(
+				warg.NewSubSection(
 					"cat1",
 					"help for cat1",
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"com1",
 						"help for com1",
-						warg.DoNothing,
-						warg.NewChildFlag(
+						warg.UnimplementedCmd,
+						warg.NewCmdFlag(
 							"--com1f1",
 							"flag help",
 							scalar.Int(
@@ -209,7 +209,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "noSection",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.NewChildCmd("com", "command for validation", warg.DoNothing),
+				warg.NewSubCmd("com", "command for validation", warg.UnimplementedCmd),
 			),
 
 			args:                     []string{"app"},
@@ -221,11 +221,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "flagDefault",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"com",
 					"com help",
-					warg.DoNothing,
-					warg.NewChildFlag(
+					warg.UnimplementedCmd,
+					warg.NewCmdFlag(
 						"--flag",
 						"flag help",
 						scalar.String(
@@ -243,11 +243,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "extraFlag",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"com",
 					"com help",
-					warg.DoNothing,
-					warg.NewChildFlag(
+					warg.UnimplementedCmd,
+					warg.NewCmdFlag(
 						"--flag",
 						"flag help",
 						scalar.String(
@@ -265,11 +265,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "requiredFlag",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"test",
 					"blah",
-					warg.DoNothing,
-					warg.NewChildFlag(
+					warg.UnimplementedCmd,
+					warg.NewCmdFlag(
 						"--flag",
 						"help for --flag",
 						scalar.String(),
@@ -286,11 +286,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "flagAlias",
 			rootSection: warg.NewSection(
 				"help for section",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"test",
 					"help for test",
-					warg.DoNothing,
-					warg.NewChildFlag(
+					warg.UnimplementedCmd,
+					warg.NewCmdFlag(
 						"--flag",
 						"help for --flag",
 						scalar.String(),
@@ -307,11 +307,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "flagAliasWithList",
 			rootSection: warg.NewSection(
 				"help for section",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"test",
 					"help for test",
-					warg.DoNothing,
-					warg.NewChildFlag(
+					warg.UnimplementedCmd,
+					warg.NewCmdFlag(
 						"--flag",
 						"help for --flag",
 						slice.String(),
@@ -328,10 +328,10 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "badHelp",
 			rootSection: warg.NewSection(
 				"help for section",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"test",
 					"help for test",
-					warg.DoNothing,
+					warg.UnimplementedCmd,
 				),
 			),
 			args:                     []string{t.Name(), "test", "-h", "badhelpval"},
@@ -343,11 +343,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "dictUpdate",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"com1",
 					"help for com1",
-					warg.DoNothing,
-					warg.NewChildFlag(
+					warg.UnimplementedCmd,
+					warg.NewCmdFlag(
 						string("--flag"),
 						"flag help",
 						dict.Bool(),
@@ -364,10 +364,10 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "passAbsentSection",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"com",
 					"help for com",
-					warg.DoNothing,
+					warg.UnimplementedCmd,
 				),
 			),
 
@@ -380,11 +380,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "scalarFlagPassedTwice",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"com",
 					"help for com1",
-					warg.DoNothing,
-					warg.NewChildFlag(
+					warg.UnimplementedCmd,
+					warg.NewCmdFlag(
 						"--flag",
 						"flag help",
 						scalar.Int(),
@@ -401,11 +401,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "passedFlagBeforeCommand",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"com",
 					"help for com",
-					warg.DoNothing,
-					warg.NewChildFlag(
+					warg.UnimplementedCmd,
+					warg.NewCmdFlag(
 						"--flag",
 						"flag help",
 						scalar.Int(),
@@ -422,16 +422,16 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "existingSectionsExistingCommands",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.ChildSectionMap(
+				warg.SubSectionMap(
 					warg.SectionMap{
 						"section": warg.NewSection(
 							"help for section",
-							warg.ChildCmdMap(
+							warg.SubCmdMap(
 								warg.CmdMap{
 									"command": warg.NewCmd(
 										"help for command",
-										warg.DoNothing,
-										warg.NewChildFlag(
+										warg.UnimplementedCmd,
+										warg.NewCmdFlag(
 											"--flag",
 											"flag help",
 											scalar.Int(),
@@ -455,11 +455,11 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			name: "flagWithEmptyValue",
 			rootSection: warg.NewSection(
 				"help for test",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"command",
 					"help for command",
-					warg.DoNothing,
-					warg.NewChildFlag(
+					warg.UnimplementedCmd,
+					warg.NewCmdFlag(
 						"--flag",
 						"flag help",
 						scalar.String(),
@@ -490,7 +490,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			err := app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := app.Parse(warg.Args(tt.args), warg.ParseLookupEnv(warg.LookupMap(nil)))
+			actualPR, actualErr := app.Parse(warg.ParseWithArgs(tt.args), warg.ParseWithLookupEnv(warg.LookupMap(nil)))
 
 			if tt.expectedErr {
 				require.Error(t, actualErr)
@@ -511,7 +511,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 func TestApp_Parse_unsetSetinel(t *testing.T) {
 	tests := []struct {
 		name                     string
-		flagDef                  warg.CommandOpt
+		flagDef                  warg.CmdOpt
 		args                     []string
 		expectedPassedPath       []string
 		expectedPassedFlagValues warg.PassedFlags
@@ -519,7 +519,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 	}{
 		{
 			name: "unsetSentinelScalarSuccess",
-			flagDef: warg.NewChildFlag(
+			flagDef: warg.NewCmdFlag(
 				"--flag",
 				"help for --flag",
 				scalar.String(scalar.Default("default")),
@@ -534,7 +534,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 		},
 		{
 			name: "unsetSentinelScalarUpdate",
-			flagDef: warg.NewChildFlag(
+			flagDef: warg.NewCmdFlag(
 				"--flag",
 				"help for --flag",
 				scalar.String(scalar.Default("default")),
@@ -547,7 +547,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 		},
 		{
 			name: "unsetSentinelSlice",
-			flagDef: warg.NewChildFlag(
+			flagDef: warg.NewCmdFlag(
 				"--flag",
 				"help for --flag",
 				slice.String(slice.Default([]string{"default"})),
@@ -570,10 +570,10 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 				"newAppName", "v1.0.0",
 				warg.NewSection(
 					"help for test",
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"test",
 						"help for test",
-						warg.DoNothing,
+						warg.UnimplementedCmd,
 						tt.flagDef,
 					),
 				),
@@ -584,7 +584,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 			err := app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := app.Parse(warg.Args(tt.args), warg.ParseLookupEnv(warg.LookupMap(nil)))
+			actualPR, actualErr := app.Parse(warg.ParseWithArgs(tt.args), warg.ParseWithLookupEnv(warg.LookupMap(nil)))
 
 			if tt.expectedErr {
 				require.Error(t, actualErr)
@@ -618,11 +618,11 @@ func TestApp_Parse_config(t *testing.T) {
 				"newAppName", "v1.0.0",
 				warg.NewSection(
 					"help for test",
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"print",
 						"print key value",
-						warg.DoNothing,
-						warg.NewChildFlag(
+						warg.UnimplementedCmd,
+						warg.NewCmdFlag(
 							"--key",
 							"a key",
 							scalar.String(
@@ -675,11 +675,11 @@ func TestApp_Parse_config(t *testing.T) {
 			app: warg.New(
 				"newAppName", "v1.0.0",
 				warg.NewSection("help for test",
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.DoNothing,
-						warg.NewChildFlag(
+						warg.UnimplementedCmd,
+						warg.NewCmdFlag(
 							"--val",
 							"flag help",
 							scalar.String(),
@@ -720,11 +720,11 @@ func TestApp_Parse_config(t *testing.T) {
 			app: warg.New(
 				"newAppName", "v1.0.0",
 				warg.NewSection("help for test",
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.DoNothing,
-						warg.NewChildFlag(
+						warg.UnimplementedCmd,
+						warg.NewCmdFlag(
 							"--intval",
 							"flag help",
 							scalar.Int(),
@@ -766,11 +766,11 @@ func TestApp_Parse_config(t *testing.T) {
 				"newAppName", "v1.0.0",
 				warg.NewSection(
 					"help for test",
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"print",
 						"print key value",
-						warg.DoNothing,
-						warg.NewChildFlag(
+						warg.UnimplementedCmd,
+						warg.NewCmdFlag(
 							"--subreddits",
 							"the subreddits",
 							slice.String(),
@@ -809,11 +809,11 @@ func TestApp_Parse_config(t *testing.T) {
 			app: warg.New(
 				"newAppName", "v1.0.0",
 				warg.NewSection("help for test",
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.DoNothing,
-						warg.NewChildFlag(
+						warg.UnimplementedCmd,
+						warg.NewCmdFlag(
 							"--val",
 							"flag help",
 							slice.String(),
@@ -853,11 +853,11 @@ func TestApp_Parse_config(t *testing.T) {
 			app: warg.New(
 				"newAppName", "v1.0.0",
 				warg.NewSection("help for test",
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.DoNothing,
-						warg.NewChildFlag(
+						warg.UnimplementedCmd,
+						warg.NewCmdFlag(
 							"--val",
 							"flag help",
 							slice.String(),
@@ -899,11 +899,11 @@ func TestApp_Parse_config(t *testing.T) {
 				"newAppName", "v1.0.0",
 				warg.NewSection(
 					"help for test",
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.DoNothing,
-						warg.NewChildFlag(
+						warg.UnimplementedCmd,
+						warg.NewCmdFlag(
 							"--val",
 							"flag help",
 							dict.Int(),
@@ -947,7 +947,7 @@ func TestApp_Parse_config(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := tt.app.Parse(warg.Args(tt.args), warg.ParseLookupEnv(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(warg.ParseWithArgs(tt.args), warg.ParseWithLookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -982,10 +982,10 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 				"newAppName", "v1.0.0",
 				warg.NewSection(
 					"help for test",
-					warg.NewChildCmd(
+					warg.NewSubCmd(
 						"com",
 						"help for com",
-						warg.DoNothing,
+						warg.UnimplementedCmd,
 					),
 				),
 				warg.SkipAll(),
@@ -1010,7 +1010,7 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			actualPR, actualErr := tt.app.Parse(warg.Args(tt.args), warg.ParseLookupEnv(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(warg.ParseWithArgs(tt.args), warg.ParseWithLookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -1035,7 +1035,7 @@ func TestCustomVersion(t *testing.T) {
 		expectedVersion,
 		warg.NewSection(
 			"test",
-			warg.NewChildCmd("version", "Print version", warg.DoNothing),
+			warg.NewSubCmd("version", "Print version", warg.UnimplementedCmd),
 		),
 		warg.SkipVersionCommand(),
 	)
@@ -1043,8 +1043,8 @@ func TestCustomVersion(t *testing.T) {
 	require.Nil(t, err)
 
 	actualPR, err := app.Parse(
-		warg.Args([]string{"appName"}),
-		warg.ParseLookupEnv(warg.LookupMap(nil)),
+		warg.ParseWithArgs([]string{"appName"}),
+		warg.ParseWithLookupEnv(warg.LookupMap(nil)),
 	)
 	require.Nil(t, err)
 
@@ -1057,7 +1057,7 @@ func TestContextContainsValue(t *testing.T) {
 		"v1.0.0",
 		warg.NewSection(
 			"test",
-			warg.NewChildCmd("dummycommand", "Do nothing", warg.DoNothing),
+			warg.NewSubCmd("dummycommand", "Do nothing", warg.UnimplementedCmd),
 		),
 	)
 	err := app.Validate()
@@ -1068,9 +1068,9 @@ func TestContextContainsValue(t *testing.T) {
 
 	ctx := context.WithValue(context.Background(), contextKey{}, expectedValue)
 	actualPR, err := app.Parse(
-		warg.Args([]string{"appName"}),
-		warg.ParseLookupEnv(warg.LookupMap(nil)),
-		warg.ParseContext(ctx),
+		warg.ParseWithArgs([]string{"appName"}),
+		warg.ParseWithLookupEnv(warg.LookupMap(nil)),
+		warg.ParseWithContext(ctx),
 	)
 	require.Nil(t, err)
 
@@ -1086,14 +1086,14 @@ func TestAppFlagToAddr(t *testing.T) {
 		"v1.0.0",
 		warg.NewSection(
 			"test",
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				"command",
 				"Test Command",
-				func(ctx warg.Context) error {
+				func(ctx warg.CmdContext) error {
 					require.Equal(expectedFlagVal, flagVal)
 					return nil
 				},
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--flag",
 					"Flag for test",
 					scalar.String(
@@ -1106,7 +1106,7 @@ func TestAppFlagToAddr(t *testing.T) {
 	err := app.Validate()
 	require.NoError(err)
 
-	pr, err := app.Parse(warg.Args([]string{"appName", "command", "--flag", "flag value"}))
+	pr, err := app.Parse(warg.ParseWithArgs([]string{"appName", "command", "--flag", "flag value"}))
 	require.NoError(err)
 	err = pr.Action(pr.Context)
 	require.NoError(err)

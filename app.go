@@ -130,21 +130,21 @@ func FindVersion(version string) string {
 	return info.Main.Version
 }
 
-func CompletionsDirectories(ctx Context) (*completion.Candidates, error) {
+func CompletionsDirectories(ctx CmdContext) (*completion.Candidates, error) {
 	return &completion.Candidates{
 		Type:   completion.Type_Directories,
 		Values: nil,
 	}, nil
 }
 
-func CompletionsDirectoriesFiles(ctx Context) (*completion.Candidates, error) {
+func CompletionsDirectoriesFiles(ctx CmdContext) (*completion.Candidates, error) {
 	return &completion.Candidates{
 		Type:   completion.Type_DirectoriesFiles,
 		Values: nil,
 	}, nil
 }
 
-func CompletionsNone(ctx Context) (*completion.Candidates, error) {
+func CompletionsNone(ctx CmdContext) (*completion.Candidates, error) {
 	return &completion.Candidates{
 		Type:   completion.Type_None,
 		Values: nil,
@@ -156,7 +156,7 @@ func CompletionsValues(values []string) CompletionsFunc {
 	for _, v := range values {
 		vals = append(vals, completion.Candidate{Name: v, Description: ""})
 	}
-	return func(ctx Context) (*completion.Candidates, error) {
+	return func(ctx CmdContext) (*completion.Candidates, error) {
 
 		return &completion.Candidates{
 			Type:   completion.Type_Values,
@@ -166,7 +166,7 @@ func CompletionsValues(values []string) CompletionsFunc {
 }
 
 func CompletionsValuesDescriptions(values []completion.Candidate) CompletionsFunc {
-	return func(ctx Context) (*completion.Candidates, error) {
+	return func(ctx CmdContext) (*completion.Candidates, error) {
 		return &completion.Candidates{
 			Type:   completion.Type_ValuesDescriptions,
 			Values: values,
@@ -217,13 +217,13 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 	}
 
 	if !app.SkipCompletionCommands {
-		NewChildSection(
+		NewSubSection(
 			"completion",
 			"Print shell completion scripts",
-			NewChildCmd(
+			NewSubCmd(
 				"zsh",
 				"Print zsh completion script",
-				func(ctx Context) error {
+				func(ctx CmdContext) error {
 					completion.ZshCompletionScriptWrite(ctx.Stdout, app.Name)
 					return nil
 				},
@@ -232,10 +232,10 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 	}
 
 	if !app.SkipVersionCommand {
-		NewChildCmd(
+		NewSubCmd(
 			"version",
 			"Print version",
-			func(ctx Context) error {
+			func(ctx CmdContext) error {
 				fmt.Fprintln(ctx.Stdout, ctx.App.Version)
 				return nil
 			},

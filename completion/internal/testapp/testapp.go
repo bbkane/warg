@@ -12,11 +12,11 @@ func BuildApp() *warg.App {
 		"v1.0.0",
 		warg.NewSection(
 			"root section help",
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				"command1",
 				"command1 help",
-				warg.DoNothing,
-				warg.NewChildFlag(
+				warg.UnimplementedCmd,
+				warg.NewCmdFlag(
 					"--flag1",
 					"flag1 help",
 					scalar.String(
@@ -24,40 +24,40 @@ func BuildApp() *warg.App {
 					),
 				),
 			),
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				"manual",
 				"commands with flags using all completion types for manual testing",
-				warg.DoNothing,
-				warg.NewChildFlag(
+				warg.UnimplementedCmd,
+				warg.NewCmdFlag(
 					"--dirs",
 					"dirs completion",
 					scalar.Path(),
 					warg.FlagCompletions(warg.CompletionsDirectories),
 				),
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--dirs-files",
 					"dirs/files completion",
 					scalar.Path(),
-					warg.FlagCompletions(func(ctx warg.Context) (*completion.Candidates, error) {
+					warg.FlagCompletions(func(ctx warg.CmdContext) (*completion.Candidates, error) {
 						return &completion.Candidates{
 							Type:   completion.Type_DirectoriesFiles,
 							Values: nil,
 						}, nil
 					}),
 				),
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--none",
 					"no completion",
 					scalar.String(),
 					warg.FlagCompletions(warg.CompletionsNone),
 				),
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--values",
 					"values completion",
 					scalar.String(),
 					warg.FlagCompletions(warg.CompletionsValues([]string{"alpha", "beta"})),
 				),
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					"--values-descriptions",
 					"values completion with descriptions",
 					scalar.String(),
@@ -67,23 +67,23 @@ func BuildApp() *warg.App {
 					})),
 				),
 			),
-			warg.NewChildSection(
+			warg.NewSubSection(
 				"section1",
 				"section1 help",
-				warg.NewChildCmd(
+				warg.NewSubCmd(
 					"command2",
 					"command2 help",
-					warg.DoNothing,
-					warg.NewChildFlag(
+					warg.UnimplementedCmd,
+					warg.NewCmdFlag(
 						"--bool",
 						"bool completion is special cased to return true/false",
 						scalar.Bool(),
 					),
-					warg.NewChildFlag(
+					warg.NewCmdFlag(
 						"--flag2",
 						"flag2 help",
 						scalar.String(),
-						warg.FlagCompletions(func(ctx warg.Context) (*completion.Candidates, error) {
+						warg.FlagCompletions(func(ctx warg.CmdContext) (*completion.Candidates, error) {
 							if ctx.Flags["--globalFlag"].(string) == "nondefault" {
 								return &completion.Candidates{
 									Type: completion.Type_ValuesDescriptions,

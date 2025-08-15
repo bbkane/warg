@@ -12,7 +12,7 @@ import (
 	"go.bbkane.com/warg/value/slice"
 )
 
-func exampleConfigFlagTextAdd(ctx warg.Context) error {
+func exampleConfigFlagTextAdd(ctx warg.CmdContext) error {
 	addends := ctx.Flags["--addend"].([]int)
 	sum := 0
 	for _, a := range addends {
@@ -28,11 +28,11 @@ func ExampleConfigFlag() {
 		"v1.0.0",
 		warg.NewSection(
 			"do math",
-			warg.NewChildCmd(
+			warg.NewSubCmd(
 				string("add"),
 				"add integers",
 				exampleConfigFlagTextAdd,
-				warg.NewChildFlag(
+				warg.NewCmdFlag(
 					string("--addend"),
 					"Integer to add. Flag is repeatible",
 					slice.Int(),
@@ -69,7 +69,7 @@ func ExampleConfigFlag() {
 		log.Fatalf("write error: %e", err)
 	}
 	app.MustRun(
-		warg.Args([]string{"calc", "add", "-c", "testdata/ExampleConfigFlag/calc.yaml"}),
+		warg.ParseWithArgs([]string{"calc", "add", "-c", "testdata/ExampleConfigFlag/calc.yaml"}),
 	)
 	// Output:
 	// Sum: 6

@@ -31,7 +31,7 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec Section, indent int) {
 }
 
 func OutlineSectionHelp(_ *Section, hi HelpInfo) Action {
-	return func(cmdCtx Context) error {
+	return func(cmdCtx CmdContext) error {
 		file := cmdCtx.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()

@@ -9,17 +9,17 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
-// A CommandOpt customizes a Command
-type CommandOpt func(*Cmd)
+// A CmdOpt customizes a Command
+type CmdOpt func(*Cmd)
 
-// DoNothing is a command action that simply returns an error.
+// UnimplementedCmd is a command action that simply returns an error.
 // Useful for prototyping
-func DoNothing(_ Context) error {
-	return errors.New("NOTE: replace this command.DoNothing call")
+func UnimplementedCmd(_ CmdContext) error {
+	return errors.New("TODO: implement this command")
 }
 
 // NewCmd builds a Cmd
-func NewCmd(helpShort string, action Action, opts ...CommandOpt) Cmd {
+func NewCmd(helpShort string, action Action, opts ...CmdOpt) Cmd {
 	command := Cmd{
 		HelpShort:   helpShort,
 		Action:      action,
@@ -34,7 +34,7 @@ func NewCmd(helpShort string, action Action, opts ...CommandOpt) Cmd {
 	return command
 }
 
-func DefaultCmdCompletions(cmdCtx Context) (*completion.Candidates, error) {
+func DefaultCmdCompletions(cmdCtx CmdContext) (*completion.Candidates, error) {
 	// FZF (or maybe zsh) auto-sorts by alphabetical order, so no need to get fancy with the following ideas
 	//  - if the flag is required and is not set, suggest it first
 	//  - suggest command flags before global flags
@@ -73,40 +73,40 @@ func DefaultCmdCompletions(cmdCtx Context) (*completion.Candidates, error) {
 	return candidates, nil
 }
 
-func CmdCompletions(CompletionsFunc CompletionsFunc) CommandOpt {
+func CmdCompletions(CompletionsFunc CompletionsFunc) CmdOpt {
 	return func(flag *Cmd) {
 		flag.Completions = CompletionsFunc
 	}
 }
 
-// ChildFlag adds an existing flag to a Command. It panics if a flag with the same name exists
-func ChildFlag(name string, value Flag) CommandOpt {
+// CmdFlag adds an existing flag to a Command. It panics if a flag with the same name exists
+func CmdFlag(name string, value Flag) CmdOpt {
 	return func(com *Cmd) {
 		com.Flags.AddFlag(name, value)
 	}
 }
 
-// ChildFlagMap adds existing flags to a Command. It panics if a flag with the same name exists
-func ChildFlagMap(flagMap FlagMap) CommandOpt {
+// CmdFlagMap adds existing flags to a Command. It panics if a flag with the same name exists
+func CmdFlagMap(flagMap FlagMap) CmdOpt {
 	return func(com *Cmd) {
 		com.Flags.AddFlags(flagMap)
 	}
 }
 
-// NewChildFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
-func NewChildFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) CommandOpt {
-	return ChildFlag(name, NewFlag(helpShort, empty, opts...))
+// NewCmdFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
+func NewCmdFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) CmdOpt {
+	return CmdFlag(name, NewFlag(helpShort, empty, opts...))
 }
 
 // CmdFooter adds an Help string to the command - useful from a help function
-func CmdFooter(footer string) CommandOpt {
+func CmdFooter(footer string) CmdOpt {
 	return func(cat *Cmd) {
 		cat.Footer = footer
 	}
 }
 
 // CmdHelpLong adds an Help string to the command - useful from a help function
-func CmdHelpLong(helpLong string) CommandOpt {
+func CmdHelpLong(helpLong string) CmdOpt {
 	return func(cat *Cmd) {
 		cat.HelpLong = helpLong
 	}

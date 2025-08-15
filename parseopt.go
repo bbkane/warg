@@ -5,31 +5,31 @@ import (
 	"os"
 )
 
-func ParseContext(ctx context.Context) ParseOpt {
+func ParseWithContext(ctx context.Context) ParseOpt {
 	return func(poh *ParseOpts) {
 		poh.Context = ctx
 	}
 }
 
-func Args(args []string) ParseOpt {
+func ParseWithArgs(args []string) ParseOpt {
 	return func(poh *ParseOpts) {
 		poh.Args = args
 	}
 }
 
-func ParseLookupEnv(lookup LookupEnv) ParseOpt {
+func ParseWithLookupEnv(lookup LookupEnv) ParseOpt {
 	return func(poh *ParseOpts) {
 		poh.LookupEnv = lookup
 	}
 }
 
-func Stderr(stderr *os.File) ParseOpt {
+func ParseWithStderr(stderr *os.File) ParseOpt {
 	return func(poh *ParseOpts) {
 		poh.Stderr = stderr
 	}
 }
 
-func Stdout(stdout *os.File) ParseOpt {
+func ParseWithStdout(stdout *os.File) ParseOpt {
 	return func(poh *ParseOpts) {
 		poh.Stdout = stdout
 	}

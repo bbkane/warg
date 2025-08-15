@@ -9,8 +9,8 @@ import (
 // PassedFlags holds a map of flag names to flag Values
 type PassedFlags map[string]interface{} // This can just stay a string for the convenience of the user.
 
-// Context holds everything a command needs.
-type Context struct {
+// CmdContext holds everything a command needs.
+type CmdContext struct {
 	App   *App
 	Flags PassedFlags
 
@@ -24,7 +24,7 @@ type Context struct {
 }
 
 // An Action is run as the result of a command
-type Action func(Context) error
+type Action func(CmdContext) error
 
 // A CmdMap holds Commands and is used by Sections
 type CmdMap map[string]Cmd
