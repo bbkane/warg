@@ -71,7 +71,7 @@ func CmdHelpLong(helpLong string) CmdOpt {
 // PassedFlags holds a map of flag names to flag Values
 type PassedFlags map[string]interface{} // This can just stay a string for the convenience of the user.
 
-// CmdContext holds everything a command needs.
+// CmdContext contains all information the app has parsed for the [Cmd] to pass to the [Action].
 type CmdContext struct {
 	App   *App
 	Flags PassedFlags
@@ -88,7 +88,7 @@ type CmdContext struct {
 // An Action is run as the result of a command
 type Action func(CmdContext) error
 
-// A CmdMap holds Commands and is used by Sections
+// A CmdMap contains strings to [Cmd]s.
 type CmdMap map[string]Cmd
 
 func (fm CmdMap) Empty() bool {
@@ -108,7 +108,7 @@ func (fm CmdMap) SortedNames() []string {
 
 // A Cmd will run code for you!
 // The name of a Cmd should probably be a verb - add , edit, run, ...
-// A Cmd should not be constructed directly. Use Cmd / New / ExistingCommand functions
+// A Cmd should not be constructed directly. Use functions like [NewCmd] or [NewSubCmd] instead.
 type Cmd struct {
 	// Action to run when command is invoked
 	Action Action

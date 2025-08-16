@@ -474,6 +474,7 @@ func (app *App) Validate() error {
 // CompletionsFunc is a function that returns completion candidates for a flag. See warg.Completions[Type] for convenience functions to make this
 type CompletionsFunc func(CmdContext) (*completion.Candidates, error)
 
+// Completions returns completion candidates for the app for shell completion. It parses as much as it can.
 func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 	parseOpts := NewParseOpts(opts...)
 
