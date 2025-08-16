@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"go.bbkane.com/warg/config"
-	"go.bbkane.com/warg/config/tokenize"
+	"go.bbkane.com/warg/config/internal/tokenize"
 
 	"gopkg.in/yaml.v2"
 )

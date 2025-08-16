@@ -12,7 +12,7 @@ below this description) is likely unreleased.
 
 Changed the following completions func to return a `CompletionsFunc` instead of implementing it directly. This groups them nicely in the docs and "standardizes" usage with Completion func generators that take args like `CompletionsValues`. It might be a performance hit, but I haven't noticed?
 
-Usage change: `warg.Completions(CompletionsDirectories)` -> `warg.Completions(CompletionsDirectories())`
+Example usage change: `warg.Completions(CompletionsDirectories)` -> `warg.Completions(CompletionsDirectories())`
 
 - `CompletionsDirectoriesFiles`
 - `CompletionsDirectories`
@@ -64,6 +64,8 @@ Other functions
 - `CmdCompletions`
 - `DefaultCmdCompletions`
 - `DefaultFlagCompletions`
+
+The `config/tokenize` package
 
 # v0.0.35
 
