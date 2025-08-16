@@ -60,7 +60,7 @@ func helpToCommand(commandHelp cmdHelp, secHelp sectionHelp) Cmd {
 			}
 
 			// If we're in Parse_ExpectingSectionOrCommand, we haven't received a command
-			if cmdCtx.ParseState.ExpectingArg != ExpectingArg_SectionOrCommand {
+			if cmdCtx.ParseState.ParseArgState != ParseArgState_WantSectionOrCmd {
 				for flagName, fl := range cmdCtx.ParseState.CurrentCommand.Flags {
 					fl.Value = cmdCtx.ParseState.FlagValues[flagName]
 					fl.IsCommandFlag = true

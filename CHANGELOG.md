@@ -22,6 +22,10 @@ Similar changes:
 
 - `UnimplementedCmd` -> `Unimplemented()` (it now returns an `Action` instead of implementing one)
 
+Renames
+
+- `ExpectingArg` -> `ParseArgState`
+
 ## Removed
 
 Removed / made private the following API functions

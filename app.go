@@ -512,7 +512,7 @@ func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 		return res, nil
 	}
 
-	if parseState.ExpectingArg == ExpectingArg_SectionOrCommand {
+	if parseState.ParseArgState == ParseArgState_WantSectionOrCmd {
 		s := parseState.CurrentSection
 		ret := completion.Candidates{
 			Type:   completion.Type_ValuesDescriptions,
@@ -551,15 +551,15 @@ func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 		Stdout:     parseOpts.Stdout,
 	}
 
-	switch parseState.ExpectingArg {
-	case ExpectingArg_FlagNameOrEnd:
+	switch parseState.ParseArgState {
+	case ParseArgState_WantFlagNameOrEnd:
 		return cmdCompletions(cmdContext)
-	case ExpectingArg_FlagValue:
+	case ParseArgState_WantFlagValue:
 		return parseState.CurrentFlag.Completions(cmdContext)
-	case ExpectingArg_SectionOrCommand:
+	case ParseArgState_WantSectionOrCmd:
 		panic("unreachable state: ExpectingArg_SectionOrCommand")
 	default:
-		return nil, fmt.Errorf("unexpected ParseState: %v", parseState.ExpectingArg)
+		return nil, fmt.Errorf("unexpected ParseState: %v", parseState.ParseArgState)
 	}
 }
 

@@ -21,13 +21,13 @@ type ParseOpts struct {
 
 	LookupEnv LookupEnv
 
-	// Stderr will be passed to command.Context for user commands to print to.
+	// Stderr will be passed to [CmdContext] for user commands to print to.
 	// This file is never closed by warg, so if setting to something other than stderr/stdout,
 	// remember to close the file after running the command.
 	// Useful for saving output for tests. Defaults to os.Stderr if not passed
 	Stderr *os.File
 
-	// Stdout will be passed to command.Context for user commands to print to.
+	// Stdout will be passed to [CmdContext] for user commands to print to.
 	// This file is never closed by warg, so if setting to something other than stderr/stdout,
 	// remember to close the file after running the command.
 	// Useful for saving output for tests. Defaults to os.Stdout if not passed
@@ -75,12 +75,13 @@ func (m FlagValueMap) ToPassedFlags() PassedFlags {
 
 // -- ParseState
 
-type ExpectingArg string
+// ParseArgState represents the current "thing" we want from the args. It transitions as we parse each incoming argument and match it to the expected application structure
+type ParseArgState string
 
 const (
-	ExpectingArg_SectionOrCommand ExpectingArg = "ExpectingArg_SectionOrCommand"
-	ExpectingArg_FlagNameOrEnd    ExpectingArg = "ExpectingArg_FlagNameOrEnd"
-	ExpectingArg_FlagValue        ExpectingArg = "ExpectingArg_FlagValue"
+	ParseArgState_WantSectionOrCmd  ParseArgState = "ParseArgState_WantSectionOrCmd"
+	ParseArgState_WantFlagNameOrEnd ParseArgState = "ParseArgState_WantFlagNameOrEnd"
+	ParseArgState_WantFlagValue     ParseArgState = "ParseArgState_WantFlagValue"
 )
 
 // -- unsetFlagNameSet
@@ -112,8 +113,8 @@ type ParseState struct {
 	FlagValues      FlagValueMap
 	UnsetFlagNames  unsetFlagNameSet
 
-	HelpPassed   bool
-	ExpectingArg ExpectingArg
+	HelpPassed    bool
+	ParseArgState ParseArgState
 }
 
 func (a *App) parseArgs(args []string) (ParseState, error) {
@@ -129,8 +130,8 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 		FlagValues:      make(FlagValueMap),
 		UnsetFlagNames:  make(unsetFlagNameSet),
 
-		HelpPassed:   false,
-		ExpectingArg: ExpectingArg_SectionOrCommand,
+		HelpPassed:    false,
+		ParseArgState: ParseArgState_WantSectionOrCmd,
 	}
 
 	aliasToFlagName := make(map[string]string)
@@ -152,7 +153,7 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 		if i >= len(args)-2 &&
 			arg != "" && // just in case there's not help flag alias
 			(arg == a.HelpFlagName || arg == a.GlobalFlags[a.HelpFlagName].Alias) &&
-			pr.ExpectingArg != ExpectingArg_FlagValue {
+			pr.ParseArgState != ParseArgState_WantFlagValue {
 
 			pr.HelpPassed = true
 			// set the value of --help if an arg was passed, otherwise let it resolve with the rest of them...
@@ -166,8 +167,8 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 			return pr, nil
 		}
 
-		switch pr.ExpectingArg {
-		case ExpectingArg_SectionOrCommand:
+		switch pr.ParseArgState {
+		case ParseArgState_WantSectionOrCmd:
 			if childSection, exists := pr.CurrentSection.Sections[string(arg)]; exists {
 				pr.CurrentSection = &childSection
 				pr.SectionPath = append(pr.SectionPath, arg)
@@ -186,12 +187,12 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 					}
 
 				}
-				pr.ExpectingArg = ExpectingArg_FlagNameOrEnd
+				pr.ParseArgState = ParseArgState_WantFlagNameOrEnd
 			} else {
 				return pr, fmt.Errorf("expecting section or command, got %s", arg)
 			}
 
-		case ExpectingArg_FlagNameOrEnd:
+		case ParseArgState_WantFlagNameOrEnd:
 			flagName := string(arg)
 			if actualFlagName, exists := aliasToFlagName[flagName]; exists {
 				flagName = actualFlagName
@@ -203,9 +204,9 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 			}
 			pr.CurrentFlagName = flagName
 			pr.CurrentFlag = fl
-			pr.ExpectingArg = ExpectingArg_FlagValue
+			pr.ParseArgState = ParseArgState_WantFlagValue
 
-		case ExpectingArg_FlagValue:
+		case ParseArgState_WantFlagValue:
 			// if the flag has an unset sentinel and the user passed it, unset the flag
 			// NOTE: UnsetSentinel must be a pointer to a string, because sometimes the user may pass an empty string
 			if pr.CurrentFlag.UnsetSentinel != nil && arg == *pr.CurrentFlag.UnsetSentinel {
@@ -218,10 +219,10 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 				}
 				pr.UnsetFlagNames.Delete(pr.CurrentFlagName)
 			}
-			pr.ExpectingArg = ExpectingArg_FlagNameOrEnd
+			pr.ParseArgState = ParseArgState_WantFlagNameOrEnd
 
 		default:
-			panic("unexpected state: " + pr.ExpectingArg)
+			panic("unexpected state: " + pr.ParseArgState)
 		}
 	}
 	return pr, nil
@@ -369,7 +370,7 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 	}
 
 	// --help means we don't need to do a lot of error checking
-	if parseState.HelpPassed || parseState.ExpectingArg == ExpectingArg_SectionOrCommand {
+	if parseState.HelpPassed || parseState.ParseArgState == ParseArgState_WantSectionOrCmd {
 		err = app.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
 		if err != nil {
 			return nil, err
@@ -392,8 +393,8 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 	}
 
 	// ok, we're running a real command, let's do the error checking
-	if parseState.ExpectingArg != ExpectingArg_FlagNameOrEnd {
-		return nil, fmt.Errorf("unexpected parse state: %s", parseState.ExpectingArg)
+	if parseState.ParseArgState != ParseArgState_WantFlagNameOrEnd {
+		return nil, fmt.Errorf("unexpected parse state: %s", parseState.ParseArgState)
 	}
 
 	err = app.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
