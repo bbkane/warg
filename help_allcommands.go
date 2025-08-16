@@ -39,9 +39,9 @@ func allCommandsSectionHelp(cur *Section, helpInfo helpInfo) Action {
 		for it.HasNext() {
 			flatSec := it.Next()
 
-			for _, name := range flatSec.Sec.Commands.SortedNames() {
+			for _, name := range flatSec.Sec.Cmds.SortedNames() {
 
-				com := flatSec.Sec.Commands[name]
+				com := flatSec.Sec.Cmds[name]
 				fmt.Fprint(f, "  # ")
 				fmt.Fprintln(f, com.HelpShort)
 

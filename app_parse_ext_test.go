@@ -159,8 +159,8 @@ func TestApp_Parse(t *testing.T) {
 				require.Nil(t, actualErr)
 			}
 			actualPath := slices.Clone(actualPR.Context.ParseState.SectionPath)
-			if actualPR.Context.ParseState.CurrentCommandName != "" {
-				actualPath = append(actualPath, actualPR.Context.ParseState.CurrentCommandName)
+			if actualPR.Context.ParseState.CurrentCmdName != "" {
+				actualPath = append(actualPath, actualPR.Context.ParseState.CurrentCmdName)
 			}
 
 			require.Equal(t, tt.expectedPassedPath, actualPath)
@@ -499,8 +499,8 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				require.NoError(t, actualErr)
 			}
 			actualPath := slices.Clone(actualPR.Context.ParseState.SectionPath)
-			if actualPR.Context.ParseState.CurrentCommandName != "" {
-				actualPath = append(actualPath, actualPR.Context.ParseState.CurrentCommandName)
+			if actualPR.Context.ParseState.CurrentCmdName != "" {
+				actualPath = append(actualPath, actualPR.Context.ParseState.CurrentCmdName)
 			}
 			require.Equal(t, tt.expectedPassedPath, actualPath)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
@@ -593,8 +593,8 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 				require.NoError(t, actualErr)
 			}
 			actualPath := slices.Clone(actualPR.Context.ParseState.SectionPath)
-			if actualPR.Context.ParseState.CurrentCommandName != "" {
-				actualPath = append(actualPath, actualPR.Context.ParseState.CurrentCommandName)
+			if actualPR.Context.ParseState.CurrentCmdName != "" {
+				actualPath = append(actualPath, actualPR.Context.ParseState.CurrentCmdName)
 			}
 			require.Equal(t, tt.expectedPassedPath, actualPath)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
@@ -956,8 +956,8 @@ func TestApp_Parse_config(t *testing.T) {
 				require.Nil(t, actualErr)
 			}
 			actualPath := slices.Clone(actualPR.Context.ParseState.SectionPath)
-			if actualPR.Context.ParseState.CurrentCommandName != "" {
-				actualPath = append(actualPath, actualPR.Context.ParseState.CurrentCommandName)
+			if actualPR.Context.ParseState.CurrentCmdName != "" {
+				actualPath = append(actualPath, actualPR.Context.ParseState.CurrentCmdName)
 			}
 			require.Equal(t, tt.expectedPassedPath, actualPath)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
@@ -1019,8 +1019,8 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 				require.Nil(t, actualErr)
 			}
 			actualPath := slices.Clone(actualPR.Context.ParseState.SectionPath)
-			if actualPR.Context.ParseState.CurrentCommandName != "" {
-				actualPath = append(actualPath, actualPR.Context.ParseState.CurrentCommandName)
+			if actualPR.Context.ParseState.CurrentCmdName != "" {
+				actualPath = append(actualPath, actualPR.Context.ParseState.CurrentCmdName)
 			}
 			require.Equal(t, tt.expectedPassedPath, actualPath)
 			require.Equal(t, tt.expectedPassedFlagValues, actualPR.Context.Flags)
@@ -1037,7 +1037,7 @@ func TestCustomVersion(t *testing.T) {
 			"test",
 			warg.NewSubCmd("version", "Print version", warg.Unimplemented()),
 		),
-		warg.SkipVersionCommand(),
+		warg.SkipVersionCmd(),
 	)
 	err := app.Validate()
 	require.Nil(t, err)

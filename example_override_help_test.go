@@ -26,7 +26,7 @@ func ExampleHelpFlag() {
 
 	// create a custom help command map by grabbing the default one
 	// and adding our custom help command
-	helpCommands := warg.DefaultHelpCommandMap()
+	helpCommands := warg.DefaultHelpCmdMap()
 	helpCommands["custom"] = customHelpCmd()
 
 	app := warg.New(

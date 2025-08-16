@@ -11,7 +11,7 @@ import (
 
 func outlineHelper(w io.Writer, color *gocolor.Color, sec Section, indent int) {
 	// commands and command flags
-	for _, comName := range sec.Commands.SortedNames() {
+	for _, comName := range sec.Cmds.SortedNames() {
 		fmt.Fprintln(
 			w,
 			leftPad(fmtCommandName(color, string(comName)), "  ", indent),

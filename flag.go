@@ -22,9 +22,12 @@ func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) Fl
 		HelpShort:             helpShort,
 		Required:              false,
 		UnsetSentinel:         nil,
+
 		// Deprecated
 		IsCommandFlag: false,
-		Value:         nil,
+
+		// Deprecated
+		Value: nil,
 	}
 	for _, opt := range opts {
 		opt(&flag)

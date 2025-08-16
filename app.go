@@ -18,14 +18,14 @@ import (
 // AppOpt let's you customize the app. Most AppOpts panic if incorrectly called
 type AppOpt func(*App)
 
-// GlobalFlag adds an existing flag to a Command. It panics if a flag with the same name exists
+// GlobalFlag adds an existing flag to a [Cmd]. It panics if a flag with the same name exists
 func GlobalFlag(name string, value Flag) AppOpt {
 	return func(com *App) {
 		com.GlobalFlags.AddFlag(name, value)
 	}
 }
 
-// GlobalFlagMap adds existing flags to a Command. It panics if a flag with the same name exists
+// GlobalFlagMap adds existing flags to a [Cmd]. It panics if a flag with the same name exists
 func GlobalFlagMap(flagMap FlagMap) AppOpt {
 	return func(com *App) {
 		com.GlobalFlags.AddFlags(flagMap)
@@ -57,11 +57,11 @@ func ConfigFlag(reader config.NewReader, flagMap FlagMap) AppOpt {
 //   - default value set to one of the choices
 //
 // These properties are checked at runtime with app.Validate().
-func HelpFlag(helpCommands CmdMap, helpFlags FlagMap) AppOpt {
+func HelpFlag(helpCmds CmdMap, helpFlags FlagMap) AppOpt {
 	return func(a *App) {
 		switch len(helpFlags) {
 		case 0:
-			helpFlags = DefaultHelpFlagMap("default", helpCommands.SortedNames())
+			helpFlags = DefaultHelpFlagMap("default", helpCmds.SortedNames())
 		case 1:
 			break
 		default:
@@ -69,7 +69,7 @@ func HelpFlag(helpCommands CmdMap, helpFlags FlagMap) AppOpt {
 		}
 
 		a.HelpFlagName = helpFlags.SortedNames()[0]
-		a.HelpCommands = helpCommands
+		a.HelpCmds = helpCmds
 		a.GlobalFlags.AddFlags(helpFlags)
 	}
 }
@@ -83,17 +83,17 @@ func HelpFlag(helpCommands CmdMap, helpFlags FlagMap) AppOpt {
 // This is inteded for tests where you just want to assert against a minimal application
 func SkipAll() AppOpt {
 	return func(a *App) {
-		a.SkipCompletionCommands = true
+		a.SkipCompletionCmds = true
 		a.SkipGlobalColorFlag = true
-		a.SkipVersionCommand = true
+		a.SkipVersionCmd = true
 		a.SkipValidation = true
 	}
 }
 
-// SkipCompletionCommands skips adding the default completion commands (<app> completion).
-func SkipCompletionCommands() AppOpt {
+// SkipCompletionCmds skips adding the default completion commands (<app> completion).
+func SkipCompletionCmds() AppOpt {
 	return func(a *App) {
-		a.SkipCompletionCommands = true
+		a.SkipCompletionCmds = true
 	}
 }
 
@@ -112,10 +112,10 @@ func SkipValidation() AppOpt {
 	}
 }
 
-// SkipVersionCommand skips adding the default version command (<app> version).
-func SkipVersionCommand() AppOpt {
+// SkipVersionCmd skips adding the default version command (<app> version).
+func SkipVersionCmd() AppOpt {
 	return func(a *App) {
-		a.SkipVersionCommand = true
+		a.SkipVersionCmd = true
 	}
 }
 
@@ -188,18 +188,18 @@ func CompletionsValuesDescriptions(values []completion.Candidate) CompletionsFun
 // New creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.
 func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 	app := App{
-		Name:                   name,
-		RootSection:            rootSection,
-		ConfigFlagName:         "",
-		NewConfigReader:        nil,
-		HelpFlagName:           "",
-		HelpCommands:           make(CmdMap),
-		SkipCompletionCommands: false,
-		SkipValidation:         false,
-		SkipGlobalColorFlag:    false,
-		SkipVersionCommand:     false,
-		Version:                version,
-		GlobalFlags:            make(FlagMap),
+		Name:                name,
+		RootSection:         rootSection,
+		ConfigFlagName:      "",
+		NewConfigReader:     nil,
+		HelpFlagName:        "",
+		HelpCmds:            make(CmdMap),
+		SkipCompletionCmds:  false,
+		SkipValidation:      false,
+		SkipGlobalColorFlag: false,
+		SkipVersionCmd:      false,
+		Version:             version,
+		GlobalFlags:         make(FlagMap),
 	}
 	for _, opt := range opts {
 		opt(&app)
@@ -207,8 +207,8 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 
 	if app.HelpFlagName == "" {
 		HelpFlag(
-			DefaultHelpCommandMap(),
-			DefaultHelpFlagMap("default", DefaultHelpCommandMap().SortedNames()),
+			DefaultHelpCmdMap(),
+			DefaultHelpFlagMap("default", DefaultHelpCmdMap().SortedNames()),
 		)(&app)
 	}
 
@@ -227,7 +227,7 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 		})(&app)
 	}
 
-	if !app.SkipCompletionCommands {
+	if !app.SkipCompletionCmds {
 		NewSubSection(
 			"completion",
 			"Print shell completion scripts",
@@ -242,7 +242,7 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 		)(&app.RootSection)
 	}
 
-	if !app.SkipVersionCommand {
+	if !app.SkipVersionCmd {
 		NewSubCmd(
 			"version",
 			"Print version",
@@ -274,16 +274,16 @@ type App struct {
 
 	// Help
 	HelpFlagName string
-	HelpCommands CmdMap
+	HelpCmds     CmdMap
 
-	GlobalFlags            FlagMap
-	Name                   string
-	RootSection            Section
-	SkipGlobalColorFlag    bool
-	SkipCompletionCommands bool
-	SkipValidation         bool
-	SkipVersionCommand     bool
-	Version                string
+	GlobalFlags         FlagMap
+	Name                string
+	RootSection         Section
+	SkipGlobalColorFlag bool
+	SkipCompletionCmds  bool
+	SkipValidation      bool
+	SkipVersionCmd      bool
+	Version             string
 }
 
 // MustRun runs the app.
@@ -387,8 +387,8 @@ func (app *App) Validate() error {
 	if !helpFlagValEmpty.HasDefault() {
 		return fmt.Errorf("HelpFlagName must have a default value: %v", app.HelpFlagName)
 	}
-	if !slices.Equal(helpFlagValEmpty.Choices(), app.HelpCommands.SortedNames()) {
-		return fmt.Errorf("HelpFlagName choices must match HelpCommands: %v", app.HelpFlagName)
+	if !slices.Equal(helpFlagValEmpty.Choices(), app.HelpCmds.SortedNames()) {
+		return fmt.Errorf("HelpFlagName choices must match HelpCmds: %v", app.HelpFlagName)
 	}
 	if !slices.Contains(helpFlagValEmpty.Choices(), helpFlagValEmpty.DefaultString()) {
 		return fmt.Errorf("HelpFlagName default value (%v) must be in choices (%v): %v", helpFlagValEmpty.DefaultString(), helpFlagValEmpty.Choices(), app.HelpFlagName)
@@ -429,14 +429,14 @@ func (app *App) Validate() error {
 		}
 
 		// Sections must not be leaf nodes
-		if flatSec.Sec.Sections.Empty() && flatSec.Sec.Commands.Empty() {
+		if flatSec.Sec.Sections.Empty() && flatSec.Sec.Cmds.Empty() {
 			return fmt.Errorf("sections must have either child sections or child commands: %#v", secName)
 		}
 
 		{
 			// child section names should not clash with child command names
 			nameCount := make(map[string]int)
-			for name := range flatSec.Sec.Commands {
+			for name := range flatSec.Sec.Cmds {
 				nameCount[string(name)]++
 			}
 			for name := range flatSec.Sec.Sections {
@@ -454,7 +454,7 @@ func (app *App) Validate() error {
 			}
 		}
 
-		for name, com := range flatSec.Sec.Commands {
+		for name, com := range flatSec.Sec.Cmds {
 
 			// Commands must not start wtih "-"
 			if strings.HasPrefix(string(name), "-") {
@@ -503,7 +503,7 @@ func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 			Type:   completion.Type_Values,
 			Values: []completion.Candidate{},
 		}
-		for _, name := range a.HelpCommands.SortedNames() {
+		for _, name := range a.HelpCmds.SortedNames() {
 			res.Values = append(res.Values, completion.Candidate{
 				Name:        string(name),
 				Description: "",
@@ -518,10 +518,10 @@ func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 			Type:   completion.Type_ValuesDescriptions,
 			Values: []completion.Candidate{},
 		}
-		for _, name := range s.Commands.SortedNames() {
+		for _, name := range s.Cmds.SortedNames() {
 			ret.Values = append(ret.Values, completion.Candidate{
 				Name:        string(name),
-				Description: string(s.Commands[name].HelpShort),
+				Description: string(s.Cmds[name].HelpShort),
 			})
 		}
 		for _, name := range s.Sections.SortedNames() {
@@ -538,7 +538,7 @@ func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 	}
 
 	// Finish the parse!
-	err = a.resolveFlags(parseState.CurrentCommand, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
+	err = a.resolveFlags(parseState.CurrentCmd, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected resolveFlags err: %w", err)
 	}
@@ -573,7 +573,7 @@ func cmdCompletions(cmdCtx CmdContext) (*completion.Candidates, error) {
 		Values: []completion.Candidate{},
 	}
 	// command flags
-	for _, name := range cmdCtx.ParseState.CurrentCommand.Flags.SortedNames() {
+	for _, name := range cmdCtx.ParseState.CurrentCmd.Flags.SortedNames() {
 		// scalar flags set by passed arg can't be appended to or overridden, so don't suggest them
 		val, isScalar := cmdCtx.ParseState.FlagValues[name].(value.ScalarValue)
 		if isScalar && val.UpdatedBy() == value.UpdatedByFlag {
@@ -589,7 +589,7 @@ func cmdCompletions(cmdCtx CmdContext) (*completion.Candidates, error) {
 
 		candidates.Values = append(candidates.Values, completion.Candidate{
 			Name:        string(name),
-			Description: string(cmdCtx.ParseState.CurrentCommand.Flags[name].HelpShort) + valStr,
+			Description: string(cmdCtx.ParseState.CurrentCmd.Flags[name].HelpShort) + valStr,
 		})
 	}
 	// global flags

@@ -117,7 +117,7 @@ func BuildApp() *warg.App {
 			),
 		),
 		warg.SkipGlobalColorFlag(),
-		warg.SkipVersionCommand(),
+		warg.SkipVersionCmd(),
 	)
 	return &app
 }

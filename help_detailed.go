@@ -269,16 +269,16 @@ func detailedSectionHelp(cur *Section, _ helpInfo) Action {
 		}
 
 		// Print commands
-		if len(cur.Commands) > 0 {
+		if len(cur.Cmds) > 0 {
 			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Commands")+":")
 			fmt.Fprintln(f)
 
-			for _, k := range cur.Commands.SortedNames() {
+			for _, k := range cur.Cmds.SortedNames() {
 				fmt.Fprintf(
 					f,
 					"  %s : %s\n",
 					fmtCommandName(&col, k),
-					cur.Commands[string(k)].HelpShort,
+					cur.Cmds[string(k)].HelpShort,
 				)
 			}
 		}

@@ -22,9 +22,13 @@ Similar changes:
 
 - `UnimplementedCmd` -> `Unimplemented()` (it now returns an `Action` instead of implementing one)
 
-Renames
+Renames:
 
+- `DefaultHelpCommandMap` -> `DefaultHelpCmdMap`
 - `ExpectingArg` -> `ParseArgState`
+- `Section.Commands` -> `Section.Cmds`
+- `SkipCompletionCommands` -> `SkipCompletionCmds`
+- `SkipVersionCommand` -> `SkipVersionCmd`
 
 ## Removed
 
@@ -61,12 +65,12 @@ Other functions
 
 This version combines the following packages into the `warg` package:
 
-- `wargcore`
-- `section`
+- All `help/*` packages
 - `command`
 - `flag`
 - `parseopt`
-- All `help/*` packages
+- `section`
+- `wargcore`
 
 To avoid name collisions and because it felt right, the following symbols were renamed (hope I didn't miss any):
 
@@ -74,36 +78,36 @@ To avoid name collisions and because it felt right, the following symbols were r
 
 | Old                        | New                          |
 |----------------------------|------------------------------|
-| wargcore.Command           | warg.Cmd                     |
-| wargcore.CommandHelp       | warg.CmdHelp                 |
-| wargcore.CommandMap        | warg.CmdMap                  |
-| wargcore.Context           | warg.CmdContext              |
-| section.New                | warg.NewSection              |
-| section.Command            | warg.SubCmd                  |
-| section.CommandMap         | warg.SubCmdMap               |
-| section.Footer             | warg.SectionFooter           |
-| section.HelpLong           | warg.SectionHelpLong         |
-| section.NewCommand         | warg.NewSubCmd               |
-| section.NewSection         | warg.NewSubSection           |
-| section.Section            | warg.SubSection              |
-| section.SectionMap         | warg.SubSectionMap           |
-| command.DefaultCompletions | warg.DefaultCmdCompletions   |
-| command.DoNothing          | warg.UnimplementedCmd        |
-| command.New                | warg.NewCmd                  |
 | command.CommandOpt         | warg.CmdOpt                  |
 | command.Completions        | warg.CmdCompletions          |
+| command.DefaultCompletions | warg.DefaultCmdCompletions   |
+| command.DoNothing          | warg.UnimplementedCmd        |
 | command.Flag               | warg.CmdFlag                 |
 | command.FlagMap            | warg.CmdFlagMap              |
 | command.Footer             | warg.CmdFooter               |
 | command.HelpLong           | warg.CmdHelpLong             |
+| command.New                | warg.NewCmd                  |
 | command.NewFlag            | warg.NewCmdFlag              |
-| flag.New                   | warg.NewFlag                 |
 | flag.Completions           | warg.FlagCompletions         |
+| flag.New                   | warg.NewFlag                 |
 | parseopt.Args              | warg.ParseWithArgs           |
 | parseopt.Context           | warg.ParseWithContext        |
 | parseopt.LookupEnv         | warg.ParseWithLookupEnv      |
 | parseopt.Stderr            | warg.ParseWithStderr         |
 | parseopt.Stdout            | warg.ParseWithStdout         |
+| section.Command            | warg.SubCmd                  |
+| section.CommandMap         | warg.SubCmdMap               |
+| section.Footer             | warg.SectionFooter           |
+| section.HelpLong           | warg.SectionHelpLong         |
+| section.New                | warg.NewSection              |
+| section.NewCommand         | warg.NewSubCmd               |
+| section.NewSection         | warg.NewSubSection           |
+| section.Section            | warg.SubSection              |
+| section.SectionMap         | warg.SubSectionMap           |
+| wargcore.Command           | warg.Cmd                     |
+| wargcore.CommandHelp       | warg.CmdHelp                 |
+| wargcore.CommandMap        | warg.CmdMap                  |
+| wargcore.Context           | warg.CmdContext              |
 
 </details>
 

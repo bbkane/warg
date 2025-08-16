@@ -9,7 +9,7 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
-// A CmdOpt customizes a Command
+// A CmdOpt customizes a Cmd
 type CmdOpt func(*Cmd)
 
 // Unimplemented() is an Action that simply returns an error.

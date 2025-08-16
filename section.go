@@ -13,7 +13,7 @@ func NewSection(helpShort string, opts ...SectionOpt) Section {
 	section := Section{
 		HelpShort: helpShort,
 		Sections:  make(SectionMap),
-		Commands:  make(CmdMap),
+		Cmds:      make(CmdMap),
 		HelpLong:  "",
 		Footer:    "",
 	}
@@ -46,8 +46,8 @@ func SubSectionMap(sections SectionMap) SectionOpt {
 // SubCmd adds an existing SubCmd as a child of this Section. Panics if a SubCmd with the same name already exists
 func SubCmd(name string, value Cmd) SectionOpt {
 	return func(app *Section) {
-		if _, alreadyThere := app.Commands[name]; !alreadyThere {
-			app.Commands[name] = value
+		if _, alreadyThere := app.Cmds[name]; !alreadyThere {
+			app.Cmds[name] = value
 		} else {
 			log.Panicf("command already exists: %#v\n", name)
 		}
@@ -109,8 +109,8 @@ func (fm SectionMap) SortedNames() []string {
 // They should usually have noun names.
 // Sections should not be be created directly, but with the APIs in [go.bbkane.com/warg/section].
 type Section struct {
-	// Commands holds the Commands under this Section
-	Commands CmdMap
+	// Cmds holds the Cmds under this Section
+	Cmds CmdMap
 	// Sections holds the Sections under this Section
 	Sections SectionMap
 	// HelpShort is a required one-line descripiton of this section

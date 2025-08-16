@@ -9,7 +9,7 @@ import (
 	"go.bbkane.com/warg/value/scalar"
 )
 
-func DefaultHelpCommandMap() CmdMap {
+func DefaultHelpCmdMap() CmdMap {
 	return CmdMap{
 		"default":     helpToCommand(detailedCommandHelp, allCommandsSectionHelp),
 		"detailed":    helpToCommand(detailedCommandHelp, detailedSectionHelp),
@@ -61,7 +61,7 @@ func helpToCommand(commandHelp cmdHelp, secHelp sectionHelp) Cmd {
 
 			// If we're in Parse_ExpectingSectionOrCommand, we haven't received a command
 			if cmdCtx.ParseState.ParseArgState != ParseArgState_WantSectionOrCmd {
-				for flagName, fl := range cmdCtx.ParseState.CurrentCommand.Flags {
+				for flagName, fl := range cmdCtx.ParseState.CurrentCmd.Flags {
 					fl.Value = cmdCtx.ParseState.FlagValues[flagName]
 					fl.IsCommandFlag = true
 					ftarAllowedFlags.AddFlag(flagName, fl)
@@ -72,7 +72,7 @@ func helpToCommand(commandHelp cmdHelp, secHelp sectionHelp) Cmd {
 				AvailableFlags: ftarAllowedFlags,
 				RootSection:    cmdCtx.App.RootSection,
 			}
-			com := cmdCtx.ParseState.CurrentCommand
+			com := cmdCtx.ParseState.CurrentCmd
 			if com != nil {
 				return commandHelp(com, hi)(cmdCtx)
 			} else {
