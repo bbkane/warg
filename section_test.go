@@ -1,11 +1,9 @@
-package warg_test
+package warg
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"go.bbkane.com/warg"
 )
 
 func TestSectionT_BreadthFirst(t *testing.T) {
@@ -14,35 +12,35 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 	tests := []struct {
 		name          string
 		rootName      string
-		sec           warg.Section
-		expected      []warg.FlatSection
+		sec           Section
+		expected      []flatSection
 		expectedPanic bool
 	}{
 		{
 			name:     "simple",
 			rootName: "r",
-			sec: warg.NewSection(
+			sec: NewSection(
 				"root section help",
-				warg.NewSubCmd("c1", "", nil),
-				warg.NewSubSection("s1", "",
-					warg.NewSubCmd("c2", "", nil),
+				NewSubCmd("c1", "", nil),
+				NewSubSection("s1", "",
+					NewSubCmd("c2", "", nil),
 				),
 			),
-			expected: []warg.FlatSection{
+			expected: []flatSection{
 				{
 					Path: []string{"r"},
-					Sec: warg.NewSection(
+					Sec: NewSection(
 						"root section help",
-						warg.NewSubCmd("c1", "", nil),
-						warg.NewSubSection("s1", "",
-							warg.NewSubCmd("c2", "", nil),
+						NewSubCmd("c1", "", nil),
+						NewSubSection("s1", "",
+							NewSubCmd("c2", "", nil),
 						),
 					),
 				},
 				{
 					Path: []string{"r", "s1"},
-					Sec: warg.NewSection(
-						"", warg.NewSubCmd("c2", "", nil),
+					Sec: NewSection(
+						"", NewSubCmd("c2", "", nil),
 					),
 				},
 			},
@@ -51,48 +49,48 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "sortedOrder",
 			rootName: "r",
-			sec: warg.NewSection("",
-				warg.NewSubSection("sc", "",
-					warg.NewSubCmd("c", "", nil),
+			sec: NewSection("",
+				NewSubSection("sc", "",
+					NewSubCmd("c", "", nil),
 				),
-				warg.NewSubSection("sb", "",
-					warg.NewSubCmd("c", "", nil),
+				NewSubSection("sb", "",
+					NewSubCmd("c", "", nil),
 				),
-				warg.NewSubSection("sa", "",
-					warg.NewSubCmd("c", "", nil),
+				NewSubSection("sa", "",
+					NewSubCmd("c", "", nil),
 				),
 			),
-			expected: []warg.FlatSection{
+			expected: []flatSection{
 				{
 					Path: []string{"r"},
-					Sec: warg.NewSection("",
-						warg.NewSubSection("sc", "",
-							warg.NewSubCmd("c", "", nil),
+					Sec: NewSection("",
+						NewSubSection("sc", "",
+							NewSubCmd("c", "", nil),
 						),
-						warg.NewSubSection("sb", "",
-							warg.NewSubCmd("c", "", nil),
+						NewSubSection("sb", "",
+							NewSubCmd("c", "", nil),
 						),
-						warg.NewSubSection("sa", "",
-							warg.NewSubCmd("c", "", nil),
+						NewSubSection("sa", "",
+							NewSubCmd("c", "", nil),
 						),
 					),
 				},
 				{
 					Path: []string{"r", "sa"},
-					Sec: warg.NewSection("",
-						warg.NewSubCmd("c", "", nil),
+					Sec: NewSection("",
+						NewSubCmd("c", "", nil),
 					),
 				},
 				{
 					Path: []string{"r", "sb"},
-					Sec: warg.NewSection("",
-						warg.NewSubCmd("c", "", nil),
+					Sec: NewSection("",
+						NewSubCmd("c", "", nil),
 					),
 				},
 				{
 					Path: []string{"r", "sc"},
-					Sec: warg.NewSection("",
-						warg.NewSubCmd("c", "", nil),
+					Sec: NewSection("",
+						NewSubCmd("c", "", nil),
 					),
 				},
 			},
@@ -101,65 +99,65 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 		{
 			name:     "dupFlagNamesSeparatePaths",
 			rootName: "r",
-			sec: warg.NewSection("",
-				warg.NewSubSection("s1", "",
-					warg.NewSubCmd(
+			sec: NewSection("",
+				NewSubSection("s1", "",
+					NewSubCmd(
 						"c1",
 						"",
 						nil,
-						warg.NewCmdFlag("-f1", "", nil, warg.FlagCompletions(nil)),
+						NewCmdFlag("-f1", "", nil, FlagCompletions(nil)),
 					),
 				),
-				warg.NewSubSection("s2", "",
-					warg.NewSubCmd(
+				NewSubSection("s2", "",
+					NewSubCmd(
 						"c1",
 						"",
 						nil,
-						warg.NewCmdFlag("-f1", "", nil, warg.FlagCompletions(nil)),
+						NewCmdFlag("-f1", "", nil, FlagCompletions(nil)),
 					),
 				),
 			),
-			expected: []warg.FlatSection{
+			expected: []flatSection{
 				{
 					Path: []string{"r"},
-					Sec: warg.NewSection("",
-						warg.NewSubSection("s1", "",
-							warg.NewSubCmd(
+					Sec: NewSection("",
+						NewSubSection("s1", "",
+							NewSubCmd(
 								"c1",
 								"",
 								nil,
-								warg.NewCmdFlag("-f1", "", nil, warg.FlagCompletions(nil)),
+								NewCmdFlag("-f1", "", nil, FlagCompletions(nil)),
 							),
 						),
-						warg.NewSubSection("s2", "",
-							warg.NewSubCmd(
+						NewSubSection("s2", "",
+							NewSubCmd(
 								"c1",
 								"",
 								nil,
-								warg.NewCmdFlag("-f1", "", nil, warg.FlagCompletions(nil)),
+								NewCmdFlag("-f1", "", nil, FlagCompletions(nil)),
 							),
 						),
 					),
 				},
 				{
 					Path: []string{"r", "s1"},
-					Sec: warg.NewSection("",
-						warg.NewSubCmd(
+					Sec: NewSection("",
+						NewSubCmd(
 							"c1",
 							"",
 							nil,
-							warg.NewCmdFlag("-f1", "", nil, warg.FlagCompletions(nil)),
+							NewCmdFlag("-f1", "", nil, FlagCompletions(nil)),
 						),
 					),
 				},
 				{
 					Path: []string{"r", "s2"},
-					Sec: warg.NewSection("",
-						warg.NewSubCmd(
+					Sec: NewSection("",
+						NewSubCmd(
 							"c1",
 							"",
 							nil,
-							warg.NewCmdFlag("-f1", "", nil, warg.FlagCompletions(nil)),
+							NewCmdFlag("-f1", "", nil, FlagCompletions(nil)),
 						),
 					),
 				},
@@ -174,7 +172,7 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				require.Panics(
 					t,
 					func() {
-						it := tt.sec.BreadthFirst([]string{tt.rootName})
+						it := tt.sec.breadthFirst([]string{tt.rootName})
 						for it.HasNext() {
 							it.Next()
 						}
@@ -183,8 +181,8 @@ func TestSectionT_BreadthFirst(t *testing.T) {
 				return
 			}
 
-			actual := make([]warg.FlatSection, 0, 1)
-			it := tt.sec.BreadthFirst([]string{tt.rootName})
+			actual := make([]flatSection, 0, 1)
+			it := tt.sec.breadthFirst([]string{tt.rootName})
 			for it.HasNext() {
 				actual = append(actual, it.Next())
 			}

@@ -35,7 +35,7 @@ func allCommandsSectionHelp(cur *Section, helpInfo helpInfo) Action {
 			path = append(path, string(e))
 		}
 
-		it := cur.BreadthFirst(path)
+		it := cur.breadthFirst(path)
 		for it.HasNext() {
 			flatSec := it.Next()
 

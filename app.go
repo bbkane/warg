@@ -119,7 +119,7 @@ func SkipVersionCmd() AppOpt {
 	}
 }
 
-// FindVersion returns the version of the app. If the version is already set (eg. via a build flag), it returns that. Otherwise, it tries to read the go module version from the runtime info, or returns "unknown" if that fails.
+// FindVersion returns the version of the app. If the version is already set (eg. via a build flag), it returns that. Otherwise, it tries to read the go module version from the runtime info, or returns "unknown" if that fails. This is called automatically when passing an empty string to [New], but can also be used if you need the version independently of the app creation.
 func FindVersion(version string) string {
 	// if the version is already set (eg. via a build flag), return it
 	if version != "" {
@@ -417,7 +417,7 @@ func (app *App) Validate() error {
 	// NOTE: we need to be able to validate before we parse, and we may not know the app name
 	// till after prsing so set the root path to "root"
 	rootPath := []string{string(app.Name)}
-	it := app.RootSection.BreadthFirst(rootPath)
+	it := app.RootSection.breadthFirst(rootPath)
 
 	for it.HasNext() {
 		flatSec := it.Next()

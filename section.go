@@ -121,8 +121,8 @@ type Section struct {
 	Footer string
 }
 
-// FlatSection represents a section and relevant parent information
-type FlatSection struct {
+// flatSection represents a section and relevant parent information
+type flatSection struct {
 
 	// Path to this section
 	Path []string
@@ -134,26 +134,26 @@ type FlatSection struct {
 // Yielded sections should never be modified - they can share references to the same inherited flags
 // SectionIterator's Next() method panics if two sections in the path have flags with the same name.
 // Breadthfirst is used by app.Validate and help.AllCommandCommandHelp/help.AllCommandSectionHelp
-func (sec *Section) BreadthFirst(path []string) SectionIterator {
+func (sec *Section) breadthFirst(path []string) sectionIterator {
 
-	queue := make([]FlatSection, 0, 1)
-	queue = append(queue, FlatSection{
+	queue := make([]flatSection, 0, 1)
+	queue = append(queue, flatSection{
 		Path: path,
 		Sec:  *sec,
 	})
 
-	return SectionIterator{
+	return sectionIterator{
 		queue: queue,
 	}
 }
 
-// SectionIterator is used in BreadthFirst. See BreadthFirst docs
-type SectionIterator struct {
-	queue []FlatSection
+// sectionIterator is used in BreadthFirst. See BreadthFirst docs
+type sectionIterator struct {
+	queue []flatSection
 }
 
 // HasNext is used in BreadthFirst. See BreadthFirst docs
-func (s *SectionIterator) Next() FlatSection {
+func (s *sectionIterator) Next() flatSection {
 	current := s.queue[0]
 	s.queue = s.queue[1:]
 
@@ -165,7 +165,7 @@ func (s *SectionIterator) Next() FlatSection {
 		copy(childPath, current.Path)
 		childPath[len(childPath)-1] = childName
 
-		s.queue = append(s.queue, FlatSection{
+		s.queue = append(s.queue, flatSection{
 			Path: childPath,
 			Sec:  current.Sec.Sections[childName],
 		})
@@ -175,6 +175,6 @@ func (s *SectionIterator) Next() FlatSection {
 }
 
 // HasNext is used in BreadthFirst. See BreadthFirst docs
-func (s *SectionIterator) HasNext() bool {
+func (s *sectionIterator) HasNext() bool {
 	return len(s.queue) > 0
 }

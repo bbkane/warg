@@ -53,6 +53,12 @@ Help functions
 - `SectionHelp`
 - `SortedKeys`
 
+Section iteration (I think I'm the only one using it and it's cluttering the public API):
+
+- `FlatSection`
+- `Section.BreadthFirst`
+- `SectionIterator`
+
 Other functions
 
 - `CmdCompletions`
