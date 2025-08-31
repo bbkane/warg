@@ -27,7 +27,7 @@ app := warg.New(
   "butler",
   "v1.0.0",
   warg.NewSection(
-    string("A virtual assistant"),
+    "A virtual assistant",
     warg.NewSubCmd(
       "present",
       "Formally present a guest (guests are never introduced, always presented).",
