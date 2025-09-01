@@ -30,8 +30,8 @@ func outlineHelper(w io.Writer, color *gocolor.Color, sec Section, indent int) {
 
 }
 
-func outlineSectionHelp(_ *Section, hi helpInfo) Action {
-	return func(cmdCtx CmdContext) error {
+func outlineHelp() Cmd {
+	action := func(cmdCtx CmdContext) error {
 		file := cmdCtx.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
@@ -41,15 +41,12 @@ func outlineSectionHelp(_ *Section, hi helpInfo) Action {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
 
-		fmt.Fprintln(f, "# "+string(hi.RootSection.HelpShort))
+		fmt.Fprintln(f, "# "+string(cmdCtx.App.RootSection.HelpShort))
 		fmt.Fprintf(f, "%s\n", fmtSectionName(&col, string(cmdCtx.App.Name)))
 
-		outlineHelper(f, &col, hi.RootSection, 1)
+		outlineHelper(f, &col, cmdCtx.App.RootSection, 1)
 
 		return nil
 	}
-}
-
-func outlineCommandHelp(cur *Cmd, helpInfo helpInfo) Action {
-	return outlineSectionHelp(nil, helpInfo)
+	return NewCmd("", action)
 }

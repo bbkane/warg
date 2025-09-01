@@ -13,7 +13,7 @@ func DefaultHelpCmdMap() CmdMap {
 	return CmdMap{
 		"default":     helpToCommand(detailedCommandHelp, allCommandsSectionHelp),
 		"detailed":    helpToCommand(detailedCommandHelp, detailedSectionHelp),
-		"outline":     helpToCommand(outlineCommandHelp, outlineSectionHelp),
+		"outline":     outlineHelp(),
 		"allcommands": helpToCommand(detailedCommandHelp, allCommandsSectionHelp),
 	}
 }
