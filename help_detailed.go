@@ -12,7 +12,7 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
-func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) {
+func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag, val value.Value) {
 	if f.Alias != "" {
 		fmt.Fprintf(
 			w,
@@ -33,19 +33,19 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 		w,
 		"    %s : %s\n",
 		color.Add(color.Bold, "type"),
-		f.Value.Description(),
+		val.Description(),
 	)
 
-	if len(f.Value.Choices()) > 0 {
+	if len(val.Choices()) > 0 {
 		fmt.Fprintf(w,
 			"    %s : %s\n",
 			color.Add(color.Bold, "choices"),
-			f.Value.Choices(),
+			val.Choices(),
 		)
 	}
 
-	if f.Value.HasDefault() {
-		switch v := f.Value.(type) {
+	if val.HasDefault() {
+		switch v := val.(type) {
 		case value.DictValue:
 			fmt.Fprintf(
 				w,
@@ -76,7 +76,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 				v.DefaultStringSlice(),
 			)
 		default:
-			panic(fmt.Sprintf("Unexpected type: %#v", f.Value))
+			panic(fmt.Sprintf("Unexpected type: %#v", val))
 		}
 	}
 	if f.ConfigPath != "" {
@@ -111,14 +111,14 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 		)
 	}
 
-	if f.Value.UpdatedBy() != value.UpdatedByUnset {
-		switch v := f.Value.(type) {
+	if val.UpdatedBy() != value.UpdatedByUnset {
+		switch v := val.(type) {
 		case value.DictValue:
 			fmt.Fprintf(
 				w,
 				"    %s (set by %s):\n",
 				color.Add(color.Bold, "currentvalue"),
-				color.Add(color.Bold, string(f.Value.UpdatedBy())),
+				color.Add(color.Bold, string(val.UpdatedBy())),
 			)
 			m := v.StringMap()
 			for _, key := range sortedKeys(m) {
@@ -141,7 +141,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 			fmt.Fprintf(w,
 				"    %s (set by %s) :\n",
 				color.Add(color.Bold, "currentvalue"),
-				color.Add(color.Bold, string(f.Value.UpdatedBy())),
+				color.Add(color.Bold, string(val.UpdatedBy())),
 			)
 
 			for i, e := range v.StringSlice() {
@@ -162,7 +162,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 				w,
 				"    %s (set by %s) : %s\n",
 				color.Add(color.Bold, "currentvalue"),
-				color.Add(color.Bold, string(f.Value.UpdatedBy())),
+				color.Add(color.Bold, string(val.UpdatedBy())),
 				v.String(),
 			)
 		default:
@@ -173,6 +173,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 	fmt.Fprintln(w)
 }
 
+// detailedCmdHelp returns an Action that prints detailed help for the current command (cmdCtx.ParseState.CurrentCmd). It is expected to not be nil.
 func detailedCmdHelp() Action {
 	return func(cmdCtx CmdContext) error {
 		file := cmdCtx.Stdout
@@ -202,18 +203,14 @@ func detailedCmdHelp() Action {
 		{
 			for _, name := range cmdCtx.App.GlobalFlags.SortedNames() {
 				f := cmdCtx.App.GlobalFlags[name]
-				f.Value = cmdCtx.ParseState.FlagValues[name]
-				f.IsCommandFlag = false
-				detailedPrintFlag(&sectionFlagHelp, &col, name, &f)
+				val := cmdCtx.ParseState.FlagValues[name]
+				detailedPrintFlag(&sectionFlagHelp, &col, name, &f, val)
 			}
 
-			if cmdCtx.ParseState.ParseArgState != ParseArgState_WantSectionOrCmd {
-				for _, name := range cmdCtx.ParseState.CurrentCmd.Flags.SortedNames() {
-					f := cmdCtx.ParseState.CurrentCmd.Flags[name]
-					f.Value = cmdCtx.ParseState.FlagValues[name]
-					f.IsCommandFlag = true
-					detailedPrintFlag(&commandFlagHelp, &col, name, &f)
-				}
+			for _, name := range cmdCtx.ParseState.CurrentCmd.Flags.SortedNames() {
+				f := cmdCtx.ParseState.CurrentCmd.Flags[name]
+				val := cmdCtx.ParseState.FlagValues[name]
+				detailedPrintFlag(&commandFlagHelp, &col, name, &f, val)
 			}
 
 			if commandFlagHelp.Len() > 0 {

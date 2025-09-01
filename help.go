@@ -10,12 +10,12 @@ import (
 )
 
 func DefaultHelpCmdMap() CmdMap {
+	allCmdsHelp := NewCmd("", buildHelpAction(detailedCmdHelp(), allCmdsSectionHelp()))
 	return CmdMap{
-		// "default":     buildHelpCmd(detailedCmdHelp(), allCmdsSectionHelp()),
-		"default":     NewCmd("default help", buildHelpAction(detailedCmdHelp(), allCmdsSectionHelp())),
-		"detailed":    buildHelpCmd(detailedCmdHelp(), detailedSectionHelp()),
+		"default":     allCmdsHelp,
+		"detailed":    NewCmd("", buildHelpAction(detailedCmdHelp(), detailedSectionHelp())),
 		"outline":     outlineHelp(),
-		"allcommands": buildHelpCmd(detailedCmdHelp(), allCmdsSectionHelp()),
+		"allcommands": allCmdsHelp,
 	}
 }
 
@@ -40,21 +40,6 @@ func buildHelpAction(cmdAction Action, secAction Action) Action {
 		}
 		return secAction(cmdCtx)
 	}
-}
-
-// buildHelpCmd builds a help command that shows command help if a command is selected, or section help otherwise
-func buildHelpCmd(cmdAction Action, secAction Action) Cmd {
-	return Cmd{ //nolint:exhaustruct  // This help is never used since this is a generated command
-		Action: func(cmdCtx CmdContext) error {
-
-			com := cmdCtx.ParseState.CurrentCmd
-			if com != nil {
-				return cmdAction(cmdCtx)
-			}
-			return secAction(cmdCtx)
-		},
-	}
-
 }
 
 // leftPad pads a string `s` with pad `pad` `plength` times

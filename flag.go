@@ -22,12 +22,6 @@ func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) Fl
 		HelpShort:             helpShort,
 		Required:              false,
 		UnsetSentinel:         nil,
-
-		// Deprecated
-		IsCommandFlag: false,
-
-		// Deprecated
-		Value: nil,
 	}
 	for _, opt := range opts {
 		opt(&flag)
@@ -178,14 +172,4 @@ type Flag struct {
 
 	// When UnsetSentinal is passed as a flag value, Value is reset and SetBy is set to ""
 	UnsetSentinel *string
-
-	// -- the following are set when parsing and they're all deprecated for my march to immutabality
-
-	// IsCommandFlag is set when parsing. Set to true if the flag was attached to a command (as opposed to being inherited from a section)
-	// Deprecated: Check if the name is in command.Flags instead
-	IsCommandFlag bool
-
-	// Value is set when parsing. Use SetBy != "" to determine whether a value was actually passed  instead of being empty
-	// Deprecated: check the value from ParseState.FlagValues
-	Value value.Value
 }
