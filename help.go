@@ -11,10 +11,10 @@ import (
 
 func DefaultHelpCmdMap() CmdMap {
 	return CmdMap{
-		"default":     helpToCommand(detailedCommandHelp, allCommandsSectionHelp),
-		"detailed":    helpToCommand(detailedCommandHelp, detailedSectionHelp),
+		"default":     buildHelpCmd(detailedCmdHelp(), allCmdsSectionHelp()),
+		"detailed":    buildHelpCmd(detailedCmdHelp(), detailedSectionHelp()),
 		"outline":     outlineHelp(),
-		"allcommands": helpToCommand(detailedCommandHelp, allCommandsSectionHelp),
+		"allcommands": buildHelpCmd(detailedCmdHelp(), allCmdsSectionHelp()),
 	}
 }
 
@@ -31,53 +31,16 @@ func DefaultHelpFlagMap(defaultChoice string, choices []string) FlagMap {
 	}
 }
 
-// the following are remnants of the old help system, which is used special types for help functions. The new systems just calls commands. I've made these private types and I hope to remove them in the future when I have no higher priorities :D
-
-type cmdHelp func(cur *Cmd, helpInfo helpInfo) Action
-type sectionHelp func(cur *Section, helpInfo helpInfo) Action
-
-// helpInfo lists common information available to a help function
-type helpInfo struct {
-
-	// AvailableFlags for the current section or commmand, including inherted flags from parent sections.
-	// All flags are Resolved if possible (i.e., flag.SetBy != "")
-	AvailableFlags FlagMap
-	// RootSection of the app. Especially useful for printing all sections and commands
-	RootSection Section
-}
-
-// temporary function to convert the old help system to the new one
-func helpToCommand(commandHelp cmdHelp, secHelp sectionHelp) Cmd {
+// buildHelpCmd builds a help command that shows command help if a command is selected, or section help otherwise
+func buildHelpCmd(cmdAction Action, secAction Action) Cmd {
 	return Cmd{ //nolint:exhaustruct  // This help is never used since this is a generated command
 		Action: func(cmdCtx CmdContext) error {
-			// build ftar.AvailableFlags - it's a map of string to flag for the app globals + current command. Don't forget to set each flag.IsCommandFlag and Value for now..
-			// TODO:
-			ftarAllowedFlags := make(FlagMap)
-			for flagName, fl := range cmdCtx.App.GlobalFlags {
-				fl.Value = cmdCtx.ParseState.FlagValues[flagName]
-				fl.IsCommandFlag = false
-				ftarAllowedFlags.AddFlag(flagName, fl)
-			}
 
-			// If we're in Parse_ExpectingSectionOrCommand, we haven't received a command
-			if cmdCtx.ParseState.ParseArgState != ParseArgState_WantSectionOrCmd {
-				for flagName, fl := range cmdCtx.ParseState.CurrentCmd.Flags {
-					fl.Value = cmdCtx.ParseState.FlagValues[flagName]
-					fl.IsCommandFlag = true
-					ftarAllowedFlags.AddFlag(flagName, fl)
-				}
-			}
-
-			hi := helpInfo{
-				AvailableFlags: ftarAllowedFlags,
-				RootSection:    cmdCtx.App.RootSection,
-			}
 			com := cmdCtx.ParseState.CurrentCmd
 			if com != nil {
-				return commandHelp(com, hi)(cmdCtx)
-			} else {
-				return secHelp(cmdCtx.ParseState.CurrentSection, hi)(cmdCtx)
+				return cmdAction(cmdCtx)
 			}
+			return secAction(cmdCtx)
 		},
 	}
 

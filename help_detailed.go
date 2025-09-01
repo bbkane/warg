@@ -173,16 +173,18 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag) 
 	fmt.Fprintln(w)
 }
 
-func detailedCommandHelp(cur *Cmd, helpInfo helpInfo) Action {
-	return func(pf CmdContext) error {
-		file := pf.Stdout
+func detailedCmdHelp() Action {
+	return func(cmdCtx CmdContext) error {
+		file := cmdCtx.Stdout
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(pf.Flags, file)
+		col, err := ConditionallyEnableColor(cmdCtx.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
+
+		cur := cmdCtx.ParseState.CurrentCmd
 
 		// Print top help section
 		if cur.HelpLong != "" {
@@ -198,13 +200,19 @@ func detailedCommandHelp(cur *Cmd, helpInfo helpInfo) Action {
 		var commandFlagHelp bytes.Buffer
 		var sectionFlagHelp bytes.Buffer
 		{
+			for _, name := range cmdCtx.App.GlobalFlags.SortedNames() {
+				f := cmdCtx.App.GlobalFlags[name]
+				f.Value = cmdCtx.ParseState.FlagValues[name]
+				f.IsCommandFlag = false
+				detailedPrintFlag(&sectionFlagHelp, &col, name, &f)
+			}
 
-			for _, name := range helpInfo.AvailableFlags.SortedNames() {
-				f := helpInfo.AvailableFlags[name]
-				if f.IsCommandFlag {
+			if cmdCtx.ParseState.ParseArgState != ParseArgState_WantSectionOrCmd {
+				for _, name := range cmdCtx.ParseState.CurrentCmd.Flags.SortedNames() {
+					f := cmdCtx.ParseState.CurrentCmd.Flags[name]
+					f.Value = cmdCtx.ParseState.FlagValues[name]
+					f.IsCommandFlag = true
 					detailedPrintFlag(&commandFlagHelp, &col, name, &f)
-				} else {
-					detailedPrintFlag(&sectionFlagHelp, &col, name, &f)
 				}
 			}
 
@@ -230,17 +238,19 @@ func detailedCommandHelp(cur *Cmd, helpInfo helpInfo) Action {
 	}
 }
 
-func detailedSectionHelp(cur *Section, _ helpInfo) Action {
-	return func(pf CmdContext) error {
-		file := pf.Stdout
+func detailedSectionHelp() Action {
+	return func(cmdCtx CmdContext) error {
+		file := cmdCtx.Stdout
 
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(pf.Flags, file)
+		col, err := ConditionallyEnableColor(cmdCtx.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
+
+		cur := cmdCtx.ParseState.CurrentSection
 
 		// Print top help section
 		if cur.HelpLong != "" {

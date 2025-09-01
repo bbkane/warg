@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func allCommandsSectionHelp(cur *Section, helpInfo helpInfo) Action {
+func allCmdsSectionHelp() Action {
 	return func(cmdCtx CmdContext) error {
 		file := cmdCtx.Stdout
 
@@ -17,6 +17,8 @@ func allCommandsSectionHelp(cur *Section, helpInfo helpInfo) Action {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
+
+		cur := cmdCtx.ParseState.CurrentSection
 
 		// Print top help section
 		if cur.HelpLong != "" {
