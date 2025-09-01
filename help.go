@@ -11,7 +11,8 @@ import (
 
 func DefaultHelpCmdMap() CmdMap {
 	return CmdMap{
-		"default":     buildHelpCmd(detailedCmdHelp(), allCmdsSectionHelp()),
+		// "default":     buildHelpCmd(detailedCmdHelp(), allCmdsSectionHelp()),
+		"default":     NewCmd("default help", buildHelpAction(detailedCmdHelp(), allCmdsSectionHelp())),
 		"detailed":    buildHelpCmd(detailedCmdHelp(), detailedSectionHelp()),
 		"outline":     outlineHelp(),
 		"allcommands": buildHelpCmd(detailedCmdHelp(), allCmdsSectionHelp()),
@@ -28,6 +29,16 @@ func DefaultHelpFlagMap(defaultChoice string, choices []string) FlagMap {
 			),
 			Alias("-h"),
 		),
+	}
+}
+
+func buildHelpAction(cmdAction Action, secAction Action) Action {
+	return func(cmdCtx CmdContext) error {
+		com := cmdCtx.ParseState.CurrentCmd
+		if com != nil {
+			return cmdAction(cmdCtx)
+		}
+		return secAction(cmdCtx)
 	}
 }
 
