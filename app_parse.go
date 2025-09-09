@@ -7,6 +7,7 @@ import (
 
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/path"
+	"go.bbkane.com/warg/set"
 	"go.bbkane.com/warg/value"
 )
 
@@ -90,32 +91,6 @@ const (
 	ParseArgState_WantFlagValue     ParseArgState = "ParseArgState_WantFlagValue"
 )
 
-// Set is a generic set implementation using a map[T]struct{} as the backing store.
-type Set[T comparable] struct {
-	data map[T]struct{}
-}
-
-// NewSet creates and returns a new empty set. Sets use maps, so this type is not "copy by value".
-func NewSet[T comparable]() Set[T] {
-	return Set[T]{data: make(map[T]struct{})}
-}
-
-// Add inserts an element into the set.
-func (s *Set[T]) Add(value T) {
-	s.data[value] = struct{}{}
-}
-
-// Delete removes an element from the set.
-func (s *Set[T]) Delete(value T) {
-	delete(s.data, value)
-}
-
-// Contains checks if the set contains an element.
-func (s *Set[T]) Contains(value T) bool {
-	_, exists := s.data[value]
-	return exists
-}
-
 // ParseState holds the current state of parsing the command line arguments, as well as fully resolving all flag values (including from config/env/defaults).
 //
 // See ParseArgState for which fields are valid:
@@ -136,7 +111,7 @@ type ParseState struct {
 
 	// FlagValues holds all flag values, including global and command flags, keyed by flag name. It is always non-nil, and is filled with empty values for global flags at the start of parsing, and for command flags when a command is selected (state != [ParseArgState_WantSectionOrCmd]). These flags are updated with non-empty values as flags are resolved.
 	FlagValues     ValueMap
-	UnsetFlagNames Set[string]
+	UnsetFlagNames set.Set[string]
 
 	HelpPassed bool
 }
@@ -155,7 +130,7 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 		CurrentFlagName: "",
 		CurrentFlag:     nil,
 		FlagValues:      make(ValueMap),
-		UnsetFlagNames:  NewSet[string](),
+		UnsetFlagNames:  set.New[string](),
 
 		HelpPassed: false,
 	}
@@ -269,7 +244,7 @@ func resolveFlag2(
 	flagValues ValueMap, // this gets updated - all other params are readonly
 	configReader config.Reader,
 	lookupEnv LookupEnv,
-	unsetFlagNames Set[string],
+	unsetFlagNames set.Set[string],
 ) error {
 
 	// don't update if its been explicitly unset or already set
@@ -341,7 +316,7 @@ func resolveFlag2(
 }
 
 // resolveFlags resolves the config flag first, and then uses its values to resolve the rest of the flags.
-func (a *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv LookupEnv, unsetFlagNames Set[string]) error {
+func (a *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv LookupEnv, unsetFlagNames set.Set[string]) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
 	if a.ConfigFlagName != "" {

@@ -8,9 +8,13 @@ below this description) is likely unreleased.
 
 # v0.0.37
 
+## Added
+
+- Added `go.bbkane.com/warg/set` package with a basic set implementation
+
 ## Changed
 
-- Updated `ParseState` to use `Set[string]` instead of the private `unsetFlagNameSet`
+- Updated `ParseState` to use `set.Set[string]` instead of the private `unsetFlagNameSet`
 - Renamed `FlagValueMap` to `ValueMap` and added `IsSet` method
 
 # v0.0.36

@@ -1112,14 +1112,3 @@ func TestAppFlagToAddr(t *testing.T) {
 	require.NoError(err)
 	require.Equal(expectedFlagVal, flagVal)
 }
-
-func TestSet(t *testing.T) {
-	require := require.New(t)
-	s := warg.NewSet[string]()
-
-	require.False(s.Contains("a"))
-	s.Add("a")
-	require.True(s.Contains("a"))
-	s.Delete("a")
-	require.False(s.Contains("a"))
-}
