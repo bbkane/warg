@@ -16,6 +16,7 @@ func DefaultHelpCmdMap() CmdMap {
 		"detailed":    NewCmd("", buildHelpAction(detailedCmdHelp(), detailedSectionHelp())),
 		"outline":     outlineHelp(),
 		"allcommands": allCmdsHelp,
+		"tui":         tuiHelp(),
 	}
 }
 

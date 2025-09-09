@@ -184,19 +184,11 @@ func TestApp_Completions(t *testing.T) {
 				Type: completion.Type_Values,
 				Values: []completion.Candidate{
 					{
-						Name:        "allcommands",
-						Description: "",
-					},
-					{
 						Name:        "default",
 						Description: "",
 					},
 					{
 						Name:        "detailed",
-						Description: "",
-					},
-					{
-						Name:        "outline",
 						Description: "",
 					},
 				},

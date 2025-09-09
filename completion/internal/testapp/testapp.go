@@ -118,6 +118,13 @@ func BuildApp() *warg.App {
 		),
 		warg.SkipGlobalColorFlag(),
 		warg.SkipVersionCmd(),
+		warg.HelpFlag(
+			warg.CmdMap{
+				"default":  warg.NewCmd("", warg.Unimplemented()),
+				"detailed": warg.NewCmd("", warg.Unimplemented()),
+			},
+			warg.DefaultHelpFlagMap("default", []string{"default", "detailed"}),
+		),
 	)
 	return &app
 }
