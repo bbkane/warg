@@ -61,9 +61,10 @@ type ParseResult struct {
 
 // -- FlagValueMap
 
-type FlagValueMap map[string]value.Value
+// ValueMap holds flag values. If produced as part of [ParseState], it will be fully resolved (i.e., config/env/defaults applied if possible).
+type ValueMap map[string]value.Value
 
-func (m FlagValueMap) ToPassedFlags() PassedFlags {
+func (m ValueMap) ToPassedFlags() PassedFlags {
 	pf := make(PassedFlags)
 	for name, v := range m {
 		if v.UpdatedBy() != value.UpdatedByUnset {
@@ -71,6 +72,11 @@ func (m FlagValueMap) ToPassedFlags() PassedFlags {
 		}
 	}
 	return pf
+}
+
+// IsSet returns true if the flag with the given name has been set to a non-empty value (i.e., not its empty constructor value). Assumes the flag exists in the map.
+func (m ValueMap) IsSet(flagName string) bool {
+	return m[flagName].UpdatedBy() != value.UpdatedByUnset
 }
 
 // -- ParseState
@@ -84,24 +90,41 @@ const (
 	ParseArgState_WantFlagValue     ParseArgState = "ParseArgState_WantFlagValue"
 )
 
-// -- unsetFlagNameSet
-
-type unsetFlagNameSet map[string]struct{}
-
-func (u unsetFlagNameSet) Add(name string) {
-	u[name] = struct{}{}
+// Set is a generic set implementation using a map[T]struct{} as the backing store.
+type Set[T comparable] struct {
+	data map[T]struct{}
 }
 
-func (u unsetFlagNameSet) Delete(name string) {
-	delete(u, name)
+// NewSet creates and returns a new empty set. Sets use maps, so this type is not "copy by value".
+func NewSet[T comparable]() Set[T] {
+	return Set[T]{data: make(map[T]struct{})}
 }
 
-func (u unsetFlagNameSet) Contains(name string) bool {
-	_, exists := u[name]
+// Add inserts an element into the set.
+func (s *Set[T]) Add(value T) {
+	s.data[value] = struct{}{}
+}
+
+// Delete removes an element from the set.
+func (s *Set[T]) Delete(value T) {
+	delete(s.data, value)
+}
+
+// Contains checks if the set contains an element.
+func (s *Set[T]) Contains(value T) bool {
+	_, exists := s.data[value]
 	return exists
 }
 
+// ParseState holds the current state of parsing the command line arguments, as well as fully resolving all flag values (including from config/env/defaults).
+//
+// See ParseArgState for which fields are valid:
+//
+//   - [ParseArgState_WantSectionOrCmd]: only CurrentSection, SectionPath are valid
+//   - [ParseArgState_WantFlagNameOrEnd], [ParseArgState_WantFlagValue]: all fields valid!
 type ParseState struct {
+	ParseArgState ParseArgState
+
 	SectionPath    []string
 	CurrentSection *Section
 
@@ -110,15 +133,19 @@ type ParseState struct {
 
 	CurrentFlagName string
 	CurrentFlag     *Flag
-	FlagValues      FlagValueMap
-	UnsetFlagNames  unsetFlagNameSet
 
-	HelpPassed    bool
-	ParseArgState ParseArgState
+	// FlagValues holds all flag values, including global and command flags, keyed by flag name. It is always non-nil, and is filled with empty values for global flags at the start of parsing, and for command flags when a command is selected (state != [ParseArgState_WantSectionOrCmd]). These flags are updated with non-empty values as flags are resolved.
+	FlagValues     ValueMap
+	UnsetFlagNames Set[string]
+
+	HelpPassed bool
 }
 
+// parseArgs parses the args into a ParseState. It does not resolve flag values from config/env/defaults, just from the command line. It should always be followed by a call to before returning from a public API so callers see fully resolved values.
 func (a *App) parseArgs(args []string) (ParseState, error) {
 	pr := ParseState{
+		ParseArgState: ParseArgState_WantSectionOrCmd,
+
 		SectionPath:    nil,
 		CurrentSection: &a.RootSection,
 
@@ -127,11 +154,10 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 
 		CurrentFlagName: "",
 		CurrentFlag:     nil,
-		FlagValues:      make(FlagValueMap),
-		UnsetFlagNames:  make(unsetFlagNameSet),
+		FlagValues:      make(ValueMap),
+		UnsetFlagNames:  NewSet[string](),
 
-		HelpPassed:    false,
-		ParseArgState: ParseArgState_WantSectionOrCmd,
+		HelpPassed: false,
 	}
 
 	aliasToFlagName := make(map[string]string)
@@ -240,10 +266,10 @@ func findFlag(flagName string, globalFlags FlagMap, currentCommandFlags FlagMap)
 func resolveFlag2(
 	flagName string,
 	fl Flag,
-	flagValues FlagValueMap, // this gets updated - all other params are readonly
+	flagValues ValueMap, // this gets updated - all other params are readonly
 	configReader config.Reader,
 	lookupEnv LookupEnv,
-	unsetFlagNames unsetFlagNameSet,
+	unsetFlagNames Set[string],
 ) error {
 
 	// don't update if its been explicitly unset or already set
@@ -315,7 +341,7 @@ func resolveFlag2(
 }
 
 // resolveFlags resolves the config flag first, and then uses its values to resolve the rest of the flags.
-func (a *App) resolveFlags(currentCmd *Cmd, flagValues FlagValueMap, lookupEnv LookupEnv, unsetFlagNames unsetFlagNameSet) error {
+func (a *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv LookupEnv, unsetFlagNames Set[string]) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
 	if a.ConfigFlagName != "" {
@@ -403,13 +429,13 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 
 	missingRequiredFlags := []string{}
 	for flagName, flag := range app.GlobalFlags {
-		if flag.Required && parseState.FlagValues[flagName].UpdatedBy() == value.UpdatedByUnset {
+		if flag.Required && !parseState.FlagValues.IsSet(flagName) {
 			missingRequiredFlags = append(missingRequiredFlags, string(flagName))
 		}
 	}
 
 	for flagName, flag := range parseState.CurrentCmd.Flags {
-		if flag.Required && parseState.FlagValues[flagName].UpdatedBy() == value.UpdatedByUnset {
+		if flag.Required && !parseState.FlagValues.IsSet(flagName) {
 			missingRequiredFlags = append(missingRequiredFlags, string(flagName))
 		}
 	}

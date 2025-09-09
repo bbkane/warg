@@ -6,6 +6,13 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.0.37
+
+## Changed
+
+- Updated `ParseState` to use `Set[string]` instead of the private `unsetFlagNameSet`
+- Renamed `FlagValueMap` to `ValueMap` and added `IsSet` method
+
 # v0.0.36
 
 ## Changed
