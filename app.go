@@ -544,12 +544,13 @@ func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 		return nil, fmt.Errorf("unexpected resolveFlags err: %w", err)
 	}
 	cmdContext := CmdContext{
-		App:        a,
-		Context:    parseOpts.Context,
-		Flags:      parseState.FlagValues.ToPassedFlags(),
-		ParseState: &parseState,
-		Stderr:     parseOpts.Stderr,
-		Stdout:     parseOpts.Stdout,
+		App:           a,
+		Context:       parseOpts.Context,
+		Flags:         parseState.FlagValues.ToPassedFlags(),
+		ForwardedArgs: parseState.CurrentCmdForwardedArgs, // should always be nil during completions as completions occur at the end
+		ParseState:    &parseState,
+		Stderr:        parseOpts.Stderr,
+		Stdout:        parseOpts.Stdout,
 	}
 
 	switch parseState.ParseArgState {

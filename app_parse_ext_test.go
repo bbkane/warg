@@ -171,14 +171,30 @@ func TestApp_Parse(t *testing.T) {
 
 // TestApp_Parse_rootSection tests the Parse method, when only a root section is needed (i.e., no special app opts, names, versions, or LookupMaps
 func TestApp_Parse_rootSection(t *testing.T) {
+	//exhaustruct:ignore  // in tests I like to only set what I don't expect
 	tests := []struct {
 		name                     string
 		rootSection              warg.Section
 		args                     []string
 		expectedPassedPath       []string
 		expectedPassedFlagValues warg.PassedFlags
+		expectedForwardedArgs    []string
 		expectedErr              bool
 	}{
+		{
+			name: "minimal",
+			rootSection: warg.NewSection(
+				"help for test",
+				warg.NewSubCmd(
+					"com",
+					"com help",
+					warg.Unimplemented(),
+				),
+			),
+			args:                     []string{"test", "com"},
+			expectedPassedPath:       []string{"com"},
+			expectedPassedFlagValues: warg.PassedFlags{"--help": "default"},
+		},
 		{
 			name: "fromMain",
 			rootSection: warg.NewSection(
@@ -203,7 +219,6 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			args:                     []string{"app", "cat1", "com1", "--com1f1", "1"},
 			expectedPassedPath:       []string{"cat1", "com1"},
 			expectedPassedFlagValues: warg.PassedFlags{"--com1f1": int(1), "--help": "default"},
-			expectedErr:              false,
 		},
 		{
 			name: "noSection",
@@ -215,7 +230,6 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			args:                     []string{"app"},
 			expectedPassedPath:       nil,
 			expectedPassedFlagValues: map[string]interface{}{"--help": "default"},
-			expectedErr:              false,
 		},
 		{
 			name: "flagDefault",
@@ -237,7 +251,6 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			args:                     []string{"test", "com"},
 			expectedPassedPath:       []string{"com"},
 			expectedPassedFlagValues: warg.PassedFlags{"--flag": "hi", "--help": "default"},
-			expectedErr:              false,
 		},
 		{
 			name: "extraFlag",
@@ -301,7 +314,6 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			args:                     []string{t.Name(), "test", "-f", "val"},
 			expectedPassedPath:       []string{"test"},
 			expectedPassedFlagValues: warg.PassedFlags{"--flag": "val", "--help": "default"},
-			expectedErr:              false,
 		},
 		{
 			name: "flagAliasWithList",
@@ -358,7 +370,6 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			args:                     []string{"app", "com1", "--flag", "true=true", "--flag", "false=false"},
 			expectedPassedPath:       []string{"com1"},
 			expectedPassedFlagValues: warg.PassedFlags{"--flag": map[string]bool{"true": true, "false": false}, "--help": "default"},
-			expectedErr:              false,
 		},
 		{
 			name: "passAbsentSection",
@@ -449,7 +460,6 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				"--flag": 1,
 				"--help": "default",
 			},
-			expectedErr: false,
 		},
 		{
 			name: "flagWithEmptyValue",
@@ -472,7 +482,54 @@ func TestApp_Parse_rootSection(t *testing.T) {
 				"--flag": "",
 				"--help": "default",
 			},
-			expectedErr: false,
+		},
+		{
+			name: "allowForwardedArgs",
+			rootSection: warg.NewSection(
+				"help for test",
+				warg.NewSubCmd(
+					"com",
+					"com help",
+					warg.Unimplemented(),
+					warg.AllowForwardedArgs(),
+				),
+			),
+			args:                     []string{"test", "com", "--", "arg1", "arg2"},
+			expectedPassedPath:       []string{"com"},
+			expectedPassedFlagValues: warg.PassedFlags{"--help": "default"},
+			expectedForwardedArgs:    []string{"arg1", "arg2"},
+			expectedErr:              false,
+		},
+		{
+			name: "forwardedArgsButNoPassedArgs",
+			rootSection: warg.NewSection(
+				"help for test",
+				warg.NewSubCmd(
+					"com",
+					"com help",
+					warg.Unimplemented(),
+					warg.AllowForwardedArgs(),
+				),
+			),
+			args:                     []string{"test", "com", "--"},
+			expectedPassedPath:       []string{"com"},
+			expectedPassedFlagValues: warg.PassedFlags{"--help": "default"},
+			expectedErr:              true,
+		},
+		{
+			name: "forwardedArgsNotAllowedButPassedAnyway",
+			rootSection: warg.NewSection(
+				"help for test",
+				warg.NewSubCmd(
+					"com",
+					"com help",
+					warg.Unimplemented(),
+				),
+			),
+			args:                     []string{"test", "com", "--", "arg1", "arg2"},
+			expectedPassedPath:       []string{"com"},
+			expectedPassedFlagValues: warg.PassedFlags{"--help": "default"},
+			expectedErr:              true,
 		},
 	}
 

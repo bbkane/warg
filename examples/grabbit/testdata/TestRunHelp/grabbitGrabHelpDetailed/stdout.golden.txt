@@ -73,7 +73,7 @@ Command Flags:
     required : true
     currentvalue (set by appdefault) : 30s
 
-Inherited Section Flags:
+Global Flags:
 
   --color : Use ANSI colors
     type : string

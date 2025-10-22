@@ -23,11 +23,12 @@ func Unimplemented() Action {
 // NewCmd builds a Cmd
 func NewCmd(helpShort string, action Action, opts ...CmdOpt) Cmd {
 	command := Cmd{
-		HelpShort: helpShort,
-		Action:    action,
-		Flags:     make(FlagMap),
-		Footer:    "",
-		HelpLong:  "",
+		HelpShort:          helpShort,
+		Action:             action,
+		Flags:              make(FlagMap),
+		AllowForwardedArgs: false,
+		Footer:             "",
+		HelpLong:           "",
 	}
 	for _, opt := range opts {
 		opt(&command)
@@ -68,13 +69,25 @@ func CmdHelpLong(helpLong string) CmdOpt {
 	}
 }
 
+// Allow forwarded args for a command. Useful for commands that wrap other commands.
+//
+// Example app:
+//
+//	enventory exec --env prod -- go run .
+func AllowForwardedArgs() CmdOpt {
+	return func(cmd *Cmd) {
+		cmd.AllowForwardedArgs = true
+	}
+}
+
 // PassedFlags holds a map of flag names to flag Values
 type PassedFlags map[string]interface{} // This can just stay a string for the convenience of the user.
 
 // CmdContext contains all information the app has parsed for the [Cmd] to pass to the [Action].
 type CmdContext struct {
-	App   *App
-	Flags PassedFlags
+	App           *App
+	Flags         PassedFlags
+	ForwardedArgs []string
 
 	ParseState *ParseState
 
@@ -115,6 +128,10 @@ type Cmd struct {
 
 	// Parsed Flags
 	Flags FlagMap
+
+	// AllowForwardedArgs indicates whether or not extra args are allowed after flags and following `--`.
+	// These args will be accessible in CmdContext.ForwardedArgs.
+	AllowForwardedArgs bool
 
 	// Footer is yet another optional longer description.
 	Footer string

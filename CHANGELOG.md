@@ -8,10 +8,18 @@ below this description) is likely unreleased.
 
 # v0.0.37
 
+## Added
+
+- Added `warg.AllowForwardedArgs` to allow apps to forward args to the `Cmd`. Useful to create apps that wrap other CLI tools
+
 ## Changed
 
 - Updated `ParseState` to use `Set[string]` instead of the private `unsetFlagNameSet`
 - Renamed `FlagValueMap` to `ValueMap` and added `IsSet` method
+
+## Fixed
+
+- Updated detailed help to use "Global Flags" as a header instead of "Inherited Section Flags"
 
 # v0.0.36
 

@@ -10,7 +10,7 @@ Command Flags:
     required : true
     currentvalue (set by envvar) : emacs
 
-Inherited Section Flags:
+Global Flags:
 
   --color : Use ANSI colors
     type : string

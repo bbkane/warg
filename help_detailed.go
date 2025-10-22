@@ -219,10 +219,15 @@ func detailedCmdHelp() Action {
 				_, _ = commandFlagHelp.WriteTo(f)
 			}
 			if sectionFlagHelp.Len() > 0 {
-				fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Inherited Section Flags")+":")
+				fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Global Flags")+":")
 				fmt.Fprintln(f)
 				_, _ = sectionFlagHelp.WriteTo(f)
 			}
+		}
+		if cur.AllowForwardedArgs {
+			fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Forwarded Arguments")+":")
+			fmt.Fprintln(f)
+			fmt.Fprintln(f, "  This command accepts forwarded arguments after a `--` separator.")
 		}
 		if cur.Footer != "" {
 			fmt.Fprintln(f)

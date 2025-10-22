@@ -7,7 +7,7 @@ Command Flags:
     envvars : [BUTLER_PRESENT_NAME USER]
     required : true
 
-Inherited Section Flags:
+Global Flags:
 
   --color : Use ANSI colors
     type : string
@@ -22,3 +22,10 @@ Inherited Section Flags:
     default : default
     currentvalue (set by passedflag) : detailed
 
+Forwarded Arguments:
+
+  This command accepts forwarded arguments after a `--` separator.
+
+Footer:
+
+Treat butler well, and he will serve you faithfully.
