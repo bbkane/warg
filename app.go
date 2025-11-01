@@ -8,6 +8,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/mattn/go-shellwords"
+	"github.com/reeflective/readline"
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/path"
@@ -252,6 +254,13 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 			},
 		)(&app.RootSection)
 	}
+
+	// TODO: skip option instead of unconditionally adding REPL command
+	NewSubCmd(
+		"repl",
+		"Start a REPL to interactively run commands",
+		replCmdAction,
+	)(&app.RootSection)
 
 	// validate or not and return
 	if app.SkipValidation {
@@ -612,4 +621,56 @@ func cmdCompletions(cmdCtx CmdContext) (*completion.Candidates, error) {
 	}
 
 	return candidates, nil
+}
+
+func replCmdAction(cmdCtx CmdContext) error {
+	rl := readline.NewShell()
+	err := rl.Config.Set("menu-complete-display-prefix", true)
+	if err != nil {
+		return fmt.Errorf("could not set readline config: %w", err)
+	}
+	rl.Prompt.Primary(func() string {
+		return cmdCtx.App.Name + " >>> "
+	})
+	rl.Completer = func(line []rune, cursor int) readline.Completions {
+
+		// don't care about stuff after the cursor. TODO: is this off by one for the cursor?
+		truncatedLine := line[cursor]
+		lineStr := string(truncatedLine)
+		words, err := shellwords.Parse(lineStr)
+		if err != nil {
+			err = fmt.Errorf("could not parse args for commpletion: args: %v, %w", words, err)
+			fmt.Fprintln(cmdCtx.Stderr, err)
+			os.Exit(1)
+		}
+
+		// readline.Complete
+
+		// fmt.Printf("Completing for line: %q at cursor position %d\n", string(line), cursor)
+		// completions := readline.CompleteValuesDescribed("hi", "Hi loooooooooonnnnnnggggg description", "there", "there description")
+		// completions.Usage("Use tab to complete")
+		// return completions
+	}
+	for {
+		line, err := rl.Readline()
+		if err != nil {
+			return fmt.Errorf("could not read line: %w", err)
+		}
+		words, err := shellwords.Parse(line)
+		if err != nil {
+			fmt.Fprintf(cmdCtx.Stderr, "could not parse line: %v\n", err)
+			continue
+		}
+		words = append([]string{cmdCtx.App.Name}, words...)
+		pr, err := cmdCtx.App.Parse(ParseWithArgs(words))
+		if err != nil {
+			fmt.Fprintf(cmdCtx.Stderr, "could not parse args: %v\n", err)
+			continue
+		}
+		err = pr.Action(pr.Context)
+		if err != nil {
+			fmt.Fprintf(cmdCtx.Stderr, "error running command: %v\n", err)
+			continue
+		}
+	}
 }

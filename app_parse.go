@@ -381,6 +381,7 @@ func (a *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv Looku
 	return nil
 }
 
+// Parse parses command line arguments, environment variables, and configuration files to produce a [ParseResult]. expects ParseOpts.Args to be like os.Args (i.e., first arg is app name). It returns an error if parsing fails or required flags are missing.
 func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 
 	parseOpts := NewParseOpts(opts...)
