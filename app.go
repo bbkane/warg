@@ -602,5 +602,14 @@ func cmdCompletions(cmdCtx CmdContext) (*completion.Candidates, error) {
 			Description: string(cmdCtx.App.GlobalFlags[name].HelpShort),
 		})
 	}
+
+	// AllowForwardedArgs
+	if cmdCtx.ParseState.CurrentCmd.AllowForwardedArgs {
+		candidates.Values = append(candidates.Values, completion.Candidate{
+			Name:        "--",
+			Description: "Indicates the end of flag parsing and the beginning of forwarded args",
+		})
+	}
+
 	return candidates, nil
 }

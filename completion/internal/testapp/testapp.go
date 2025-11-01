@@ -107,6 +107,12 @@ func BuildApp() *warg.App {
 						}),
 					),
 				),
+				warg.NewSubCmd(
+					"command3",
+					"command with AllowForwardedArgs enabled",
+					warg.Unimplemented(),
+					warg.AllowForwardedArgs(),
+				),
 			),
 		),
 		warg.NewGlobalFlag(

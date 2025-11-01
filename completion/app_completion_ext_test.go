@@ -75,9 +75,26 @@ func TestApp_Completions(t *testing.T) {
 						Description: "command2 help",
 					},
 					{
+						Name:        "command3",
+						Description: "command with AllowForwardedArgs enabled",
+					},
+					{
 						Name:        "--help",
 						Description: "Print help",
 					},
+				},
+			},
+		},
+		{
+			name:        "cmdWithAllowForwardedArgs",
+			args:        []string{"section1", "command3"},
+			expectedErr: false,
+			expectedCandidates: &completion.Candidates{
+				Type: completion.Type_ValuesDescriptions,
+				Values: []completion.Candidate{
+					{Name: "--globalFlag", Description: "globalFlag help"},
+					{Name: "--help", Description: "Print help"},
+					{Name: "--", Description: "Indicates the end of flag parsing and the beginning of forwarded args"},
 				},
 			},
 		},

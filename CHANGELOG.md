@@ -6,11 +6,21 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
-# v0.0.37
+# v0.0.38
 
 ## Added
 
 - Added `CmdContext.Stdin` since I already have `stderr` and `stdout`
+- Added `set.AddAll`
+
+## Fixed
+
+- Suggest completion `--` if `AllowForwardedArgs` is enabled for a command
+
+# v0.0.37
+
+## Added
+
 - Added `go.bbkane.com/warg/set` package with a basic set implementation
 - Added `warg.AllowForwardedArgs` to allow apps to forward args to the `Cmd`. Useful to create apps that wrap other CLI tools
 
