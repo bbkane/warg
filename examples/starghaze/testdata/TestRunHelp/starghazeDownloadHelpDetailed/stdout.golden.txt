@@ -48,7 +48,7 @@ Command Flags:
     envvars : [STARGHAZE_GITHUB_TOKEN GITHUB_TOKEN]
     required : true
 
-Inherited Section Flags:
+Global Flags:
 
   --color : Use ANSI colors
     type : string

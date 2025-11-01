@@ -11,11 +11,16 @@ below this description) is likely unreleased.
 ## Added
 
 - Added `go.bbkane.com/warg/set` package with a basic set implementation
+- Added `warg.AllowForwardedArgs` to allow apps to forward args to the `Cmd`. Useful to create apps that wrap other CLI tools
 
 ## Changed
 
 - Updated `ParseState` to use `set.Set[string]` instead of the private `unsetFlagNameSet`
 - Renamed `FlagValueMap` to `ValueMap` and added `IsSet` method
+
+## Fixed
+
+- Updated detailed help to use "Global Flags" as a header instead of "Inherited Section Flags"
 
 # v0.0.36
 

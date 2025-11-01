@@ -2,6 +2,7 @@ package warg
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -103,8 +104,9 @@ type ParseState struct {
 	SectionPath    []string
 	CurrentSection *Section
 
-	CurrentCmdName string
-	CurrentCmd     *Cmd
+	CurrentCmdName          string
+	CurrentCmd              *Cmd
+	CurrentCmdForwardedArgs []string
 
 	CurrentFlagName string
 	CurrentFlag     *Flag
@@ -124,8 +126,9 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 		SectionPath:    nil,
 		CurrentSection: &a.RootSection,
 
-		CurrentCmdName: "",
-		CurrentCmd:     nil,
+		CurrentCmdName:          "",
+		CurrentCmd:              nil,
+		CurrentCmdForwardedArgs: nil,
 
 		CurrentFlagName: "",
 		CurrentFlag:     nil,
@@ -194,7 +197,18 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 			}
 
 		case ParseArgState_WantFlagNameOrEnd:
-			flagName := string(arg)
+			flagName := arg
+
+			// check if we need to handle forwarded args
+			if flagName == "--" && pr.CurrentCmd.AllowForwardedArgs {
+				if i >= len(args)-1 {
+					return pr, errors.New("expecting forwarded args after --")
+				}
+				// all remaining args are forwarded args
+				pr.CurrentCmdForwardedArgs = append(pr.CurrentCmdForwardedArgs, args[i+1:]...)
+				return pr, nil
+			}
+
 			if actualFlagName, exists := aliasToFlagName[flagName]; exists {
 				flagName = actualFlagName
 			}
@@ -380,12 +394,13 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 		command := app.HelpCmds[helpType]
 		pr := ParseResult{
 			Context: CmdContext{
-				App:        app,
-				Context:    parseOpts.Context,
-				Flags:      parseState.FlagValues.ToPassedFlags(),
-				ParseState: &parseState,
-				Stderr:     parseOpts.Stderr,
-				Stdout:     parseOpts.Stdout,
+				App:           app,
+				Context:       parseOpts.Context,
+				Flags:         parseState.FlagValues.ToPassedFlags(),
+				ForwardedArgs: parseState.CurrentCmdForwardedArgs,
+				ParseState:    &parseState,
+				Stderr:        parseOpts.Stderr,
+				Stdout:        parseOpts.Stdout,
 			},
 			Action: command.Action,
 		}
@@ -421,12 +436,13 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 
 	pr := ParseResult{
 		Context: CmdContext{
-			App:        app,
-			Context:    parseOpts.Context,
-			Flags:      parseState.FlagValues.ToPassedFlags(),
-			ParseState: &parseState,
-			Stderr:     parseOpts.Stderr,
-			Stdout:     parseOpts.Stdout,
+			App:           app,
+			Context:       parseOpts.Context,
+			Flags:         parseState.FlagValues.ToPassedFlags(),
+			ForwardedArgs: parseState.CurrentCmdForwardedArgs,
+			ParseState:    &parseState,
+			Stderr:        parseOpts.Stderr,
+			Stdout:        parseOpts.Stdout,
 		},
 		Action: parseState.CurrentCmd.Action,
 	}
