@@ -15,6 +15,12 @@ func (s *Set[T]) Add(value T) {
 	s.data[value] = struct{}{}
 }
 
+func (s *Set[T]) AddAll(values ...T) {
+	for _, v := range values {
+		s.Add(v)
+	}
+}
+
 // Delete removes an element from the set.
 func (s *Set[T]) Delete(value T) {
 	delete(s.data, value)

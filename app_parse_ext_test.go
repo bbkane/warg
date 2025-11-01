@@ -3,7 +3,9 @@ package warg_test
 // external tests - import warg like it's an external package
 
 import (
+	"bufio"
 	"context"
+	"os"
 	"path/filepath"
 	"slices"
 	"testing"
@@ -1168,4 +1170,37 @@ func TestAppFlagToAddr(t *testing.T) {
 	err = pr.Action(pr.Context)
 	require.NoError(err)
 	require.Equal(expectedFlagVal, flagVal)
+}
+
+func TestCmdContextStdin(t *testing.T) {
+	require := require.New(t)
+	app := warg.New(
+		"appName",
+		"v1.0.0",
+		warg.NewSection(
+			"test",
+			warg.NewSubCmd("command", "Do nothing", func(cmdCtx warg.CmdContext) error {
+				reader := bufio.NewReader(cmdCtx.Stdin)
+				line, err := reader.ReadString('\n')
+				require.NoError(err)
+				require.Equal("first line\n", line)
+				return nil
+			}),
+		),
+	)
+	err := app.Validate()
+	require.Nil(err)
+
+	stdinFilePath := filepath.Join("testdata", t.Name(), "stdin.txt")
+	stdinFile, err := os.Open(stdinFilePath)
+	require.NoError(err)
+	defer stdinFile.Close()
+
+	pr, err := app.Parse(
+		warg.ParseWithArgs([]string{"appName", "command"}),
+		warg.ParseWithStdin(stdinFile),
+	)
+	require.NoError(err)
+	err = pr.Action(pr.Context)
+	require.NoError(err)
 }

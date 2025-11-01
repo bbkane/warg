@@ -95,6 +95,7 @@ type CmdContext struct {
 	Context context.Context
 
 	Stderr *os.File
+	Stdin  *os.File
 	Stdout *os.File
 }
 

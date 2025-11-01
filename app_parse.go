@@ -29,6 +29,12 @@ type ParseOpts struct {
 	// Useful for saving output for tests. Defaults to os.Stderr if not passed
 	Stderr *os.File
 
+	// Stdin will be passed to [CmdContext] for user commands to read from.
+	// This file is never closed by warg, so if setting to something other than stdin/stdout,
+	// remember to close the file after running the command.
+	// Useful for saving input for tests. Defaults to os.Stdin if not passed
+	Stdin *os.File
+
 	// Stdout will be passed to [CmdContext] for user commands to print to.
 	// This file is never closed by warg, so if setting to something other than stderr/stdout,
 	// remember to close the file after running the command.
@@ -44,6 +50,7 @@ func NewParseOpts(opts ...ParseOpt) ParseOpts {
 		Args:      os.Args,
 		LookupEnv: os.LookupEnv,
 		Stderr:    os.Stderr,
+		Stdin:     os.Stdin,
 		Stdout:    os.Stdout,
 	}
 
@@ -252,7 +259,7 @@ func findFlag(flagName string, globalFlags FlagMap, currentCommandFlags FlagMap)
 	return nil
 }
 
-func resolveFlag2(
+func resolveFlag(
 	flagName string,
 	fl Flag,
 	flagValues ValueMap, // this gets updated - all other params are readonly
@@ -334,7 +341,7 @@ func (a *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv Looku
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
 	if a.ConfigFlagName != "" {
-		err := resolveFlag2(
+		err := resolveFlag(
 			a.ConfigFlagName, a.GlobalFlags[a.ConfigFlagName], flagValues, nil, lookupEnv, unsetFlagNames)
 		if err != nil {
 			return fmt.Errorf("resolveFlag error for flag %s: %w", a.ConfigFlagName, err)
@@ -355,7 +362,7 @@ func (a *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv Looku
 
 	// resolve app global flags
 	for flagName, fl := range a.GlobalFlags {
-		err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
+		err := resolveFlag(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
 		if err != nil {
 			return fmt.Errorf("resolveFlag error for global flag %s: %w", flagName, err)
 		}
@@ -364,7 +371,7 @@ func (a *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv Looku
 	// resolve current command flags
 	if currentCmd != nil { // can be nil in the case of --help
 		for flagName, fl := range currentCmd.Flags {
-			err := resolveFlag2(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
+			err := resolveFlag(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
 			if err != nil {
 				return fmt.Errorf("resolveFlag error for command flag %s: %w", flagName, err)
 			}
@@ -400,6 +407,7 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 				ForwardedArgs: parseState.CurrentCmdForwardedArgs,
 				ParseState:    &parseState,
 				Stderr:        parseOpts.Stderr,
+				Stdin:         parseOpts.Stdin,
 				Stdout:        parseOpts.Stdout,
 			},
 			Action: command.Action,
@@ -442,6 +450,7 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 			ForwardedArgs: parseState.CurrentCmdForwardedArgs,
 			ParseState:    &parseState,
 			Stderr:        parseOpts.Stderr,
+			Stdin:         parseOpts.Stdin,
 			Stdout:        parseOpts.Stdout,
 		},
 		Action: parseState.CurrentCmd.Action,

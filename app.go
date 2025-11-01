@@ -550,6 +550,7 @@ func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 		ForwardedArgs: parseState.CurrentCmdForwardedArgs, // should always be nil during completions as completions occur at the end
 		ParseState:    &parseState,
 		Stderr:        parseOpts.Stderr,
+		Stdin:         parseOpts.Stdin,
 		Stdout:        parseOpts.Stdout,
 	}
 

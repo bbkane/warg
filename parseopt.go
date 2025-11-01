@@ -29,6 +29,12 @@ func ParseWithStderr(stderr *os.File) ParseOpt {
 	}
 }
 
+func ParseWithStdin(stdin *os.File) ParseOpt {
+	return func(poh *ParseOpts) {
+		poh.Stdin = stdin
+	}
+}
+
 func ParseWithStdout(stdout *os.File) ParseOpt {
 	return func(poh *ParseOpts) {
 		poh.Stdout = stdout
