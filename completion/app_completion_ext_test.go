@@ -42,10 +42,12 @@ func TestApp_Completions(t *testing.T) {
 						Name:        "manual",
 						Description: "commands with flags using all completion types for manual testing",
 					},
+					{Name: "repl", Description: "Start a REPL to interactively run commands"},
 					{
 						Name:        "completion",
 						Description: "Print shell completion scripts",
 					},
+
 					{
 						Name:        "section1",
 						Description: "section1 help",

@@ -87,8 +87,9 @@ func SkipAll() AppOpt {
 	return func(a *App) {
 		a.SkipCompletionCmds = true
 		a.SkipGlobalColorFlag = true
-		a.SkipVersionCmd = true
+		a.SkipREPLCmd = true
 		a.SkipValidation = true
+		a.SkipVersionCmd = true
 	}
 }
 
@@ -118,6 +119,13 @@ func SkipValidation() AppOpt {
 func SkipVersionCmd() AppOpt {
 	return func(a *App) {
 		a.SkipVersionCmd = true
+	}
+}
+
+// SkipREPLCmd skips adding the default REPL command (<app> repl). NOTE: this command is not as polished as the rest of warg. I hope to improve it over time.
+func SkipREPLCmd() AppOpt {
+	return func(a *App) {
+		a.SkipREPLCmd = true
 	}
 }
 
@@ -197,8 +205,9 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 		HelpFlagName:        "",
 		HelpCmds:            make(CmdMap),
 		SkipCompletionCmds:  false,
-		SkipValidation:      false,
 		SkipGlobalColorFlag: false,
+		SkipREPLCmd:         false,
+		SkipValidation:      false,
 		SkipVersionCmd:      false,
 		Version:             version,
 		GlobalFlags:         make(FlagMap),
@@ -255,12 +264,13 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 		)(&app.RootSection)
 	}
 
-	// TODO: skip option instead of unconditionally adding REPL command
-	NewSubCmd(
-		"repl",
-		"Start a REPL to interactively run commands",
-		replCmdAction,
-	)(&app.RootSection)
+	if !app.SkipREPLCmd {
+		NewSubCmd(
+			"repl",
+			"Start a REPL to interactively run commands",
+			replCmdAction,
+		)(&app.RootSection)
+	}
 
 	// validate or not and return
 	if app.SkipValidation {
@@ -292,6 +302,7 @@ type App struct {
 	SkipCompletionCmds  bool
 	SkipValidation      bool
 	SkipVersionCmd      bool
+	SkipREPLCmd         bool
 	Version             string
 }
 
@@ -623,6 +634,23 @@ func cmdCompletions(cmdCtx CmdContext) (*completion.Candidates, error) {
 	return candidates, nil
 }
 
+// Examples to get an intution of this:
+//
+// butler >>> hi
+// line: 2, cursor: 2
+// hi
+// --^
+func debugCompleter(line []rune, cursor int) readline.Completions {
+	spaces := make([]rune, cursor+1)
+	for i := 0; i < cursor+1; i++ {
+		spaces[i] = '-'
+	}
+	spaces[cursor] = '^'
+	stats := fmt.Sprintf("line: %d, cursor: %d", len(line), cursor)
+	msg := strings.Join([]string{stats, string(line), string(spaces)}, "\n")
+	return readline.CompleteMessage(msg)
+}
+
 func replCmdAction(cmdCtx CmdContext) error {
 	rl := readline.NewShell()
 	err := rl.Config.Set("menu-complete-display-prefix", true)
@@ -632,25 +660,64 @@ func replCmdAction(cmdCtx CmdContext) error {
 	rl.Prompt.Primary(func() string {
 		return cmdCtx.App.Name + " >>> "
 	})
+
 	rl.Completer = func(line []rune, cursor int) readline.Completions {
 
 		// don't care about stuff after the cursor. TODO: is this off by one for the cursor?
-		truncatedLine := line[cursor]
+		truncatedLine := line[:cursor]
+
+		// need to match what the shell does when completing
+		if len(truncatedLine) == 0 || truncatedLine[len(truncatedLine)-1] == ' ' {
+			truncatedLine = append(truncatedLine, '\'')
+			truncatedLine = append(truncatedLine, '\'')
+		}
 		lineStr := string(truncatedLine)
 		words, err := shellwords.Parse(lineStr)
 		if err != nil {
-			err = fmt.Errorf("could not parse args for commpletion: args: %v, %w", words, err)
+			err = fmt.Errorf("could not parse args for completion: args: %v, %w", words, err)
 			fmt.Fprintln(cmdCtx.Stderr, err)
 			os.Exit(1)
 		}
 
-		// readline.Complete
+		// match what app.Completions expects -- TODO: need to refactor this?
+		words = append([]string{cmdCtx.App.Name, "--completion-zsh"}, words...)
+		// TODO: should I copy parseOpts from cmdCtx?
+		candidates, err := cmdCtx.App.Completions(
+			ParseWithArgs(words),
+		)
+		if err != nil {
+			err = fmt.Errorf("could not get completions: args: %v, %w", words, err)
+			fmt.Fprintln(cmdCtx.Stderr, err)
+			os.Exit(1)
+		}
 
-		// fmt.Printf("Completing for line: %q at cursor position %d\n", string(line), cursor)
-		// completions := readline.CompleteValuesDescribed("hi", "Hi loooooooooonnnnnnggggg description", "there", "there description")
-		// completions.Usage("Use tab to complete")
-		// return completions
+		//nolint:exhaustive  // the default handles the cases we don't support yet
+		switch candidates.Type {
+		case completion.Type_ValuesDescriptions:
+			vals := make([]string, 0, len(candidates.Values)*2)
+			for _, c := range candidates.Values {
+				vals = append(vals, c.Name)
+				vals = append(vals, c.Description)
+			}
+			return readline.CompleteValuesDescribed(vals...)
+
+		case completion.Type_Values:
+			vals := make([]string, 0, len(candidates.Values))
+			for _, c := range candidates.Values {
+				vals = append(vals, c.Name)
+			}
+			return readline.CompleteValues(vals...)
+
+		default:
+			return readline.CompleteMessage("TODO: support type: " + string(candidates.Type))
+		}
+
 	}
+
+	// fmt.Printf("Completing for line: %q at cursor position %d\n", string(line), cursor)
+	// completions := readline.CompleteValuesDescribed("hi", "Hi loooooooooonnnnnnggggg description", "there", "there description")
+	// completions.Usage("Use tab to complete")
+	// return completions
 	for {
 		line, err := rl.Readline()
 		if err != nil {

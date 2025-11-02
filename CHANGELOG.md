@@ -12,6 +12,7 @@ below this description) is likely unreleased.
 
 - Added `CmdContext.Stdin` since I already have `stderr` and `stdout`
 - Added `set.AddAll`
+- Added `repl` subcommand for folks who aren't diligent enough or can't be bothered to set up `zsh` completion. This command has rough edges and I anticipate adding more features in the future.
 
 ## Fixed
 

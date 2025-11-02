@@ -12,4 +12,5 @@ Commands:
   command2 : another command
   command3 : another command
   grab : do the grabbity grabbity
+  repl : Start a REPL to interactively run commands
   version : Print version

@@ -3,6 +3,7 @@ grabbit
   command2
   command3
   grab
+  repl
   version
   completion
     zsh
