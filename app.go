@@ -640,16 +640,16 @@ func cmdCompletions(cmdCtx CmdContext) (*completion.Candidates, error) {
 // line: 2, cursor: 2
 // hi
 // --^
-func debugCompleter(line []rune, cursor int) readline.Completions {
-	spaces := make([]rune, cursor+1)
-	for i := 0; i < cursor+1; i++ {
-		spaces[i] = '-'
-	}
-	spaces[cursor] = '^'
-	stats := fmt.Sprintf("line: %d, cursor: %d", len(line), cursor)
-	msg := strings.Join([]string{stats, string(line), string(spaces)}, "\n")
-	return readline.CompleteMessage(msg)
-}
+// func debugCompleter(line []rune, cursor int) readline.Completions {
+// 	spaces := make([]rune, cursor+1)
+// 	for i := 0; i < cursor+1; i++ {
+// 		spaces[i] = '-'
+// 	}
+// 	spaces[cursor] = '^'
+// 	stats := fmt.Sprintf("line: %d, cursor: %d", len(line), cursor)
+// 	msg := strings.Join([]string{stats, string(line), string(spaces)}, "\n")
+// 	return readline.CompleteMessage(msg)
+// }
 
 func replCmdAction(cmdCtx CmdContext) error {
 	rl := readline.NewShell()

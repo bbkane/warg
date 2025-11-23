@@ -69,7 +69,7 @@ func TestDict_ReplaceFromInterface(t *testing.T) {
 }
 
 func TestDict_Update(t *testing.T) {
-	constructor := dict.New(contained.Addr())
+	constructor := dict.New(contained.NetIPAddr())
 	v := constructor()
 	dictVal := v.(value.DictValue)
 

@@ -60,3 +60,8 @@ func (p Path) MustExpand() string {
 	}
 	return expanded
 }
+
+// Equals returns true if the saved strings are equal. It does not attempt to expand paths
+func (p Path) Equals(other Path) bool {
+	return p.path == other.path
+}

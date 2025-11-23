@@ -6,6 +6,19 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.0.39
+
+## Added
+
+- `TypeInfo.ValidateNonNilFuncs`- call this in a test to ensure all fields are initialized
+- `contained.FromZero` and `contained.Equals` - helper functions to construct `TypeInfo`s
+
+## Changed
+
+- Allow values to be of type `any` instead of type `comparable`. NOTE: This REQUIRES anyone implementing `contained.TypeInfo` to assign a function to the new `Equals` field
+- Renamed `TypeInfo.Empty` to `TypeInfo.FromZero` to be consistent with the other `TypeInfo` constructors
+- Renamed  `contained.Addr` to `contained.NetIPAddr` (to differentiate from `net.Addr`)
+
 # v0.0.38
 
 ## Added

@@ -7,7 +7,7 @@ import (
 	"go.bbkane.com/warg/value/contained"
 )
 
-type sliceValue[T comparable] struct {
+type sliceValue[T any] struct {
 	choices     []T
 	defaultVals []T
 	hasDefault  bool
@@ -16,9 +16,9 @@ type sliceValue[T comparable] struct {
 	updatedBy   value.UpdatedBy
 }
 
-type SliceOpt[T comparable] func(*sliceValue[T])
+type SliceOpt[T any] func(*sliceValue[T])
 
-func New[T comparable](hc contained.TypeInfo[T], opts ...SliceOpt[T]) value.EmptyConstructor {
+func New[T any](hc contained.TypeInfo[T], opts ...SliceOpt[T]) value.EmptyConstructor {
 	return func() value.Value {
 		sv := sliceValue[T]{
 			choices:     []T{},
@@ -35,14 +35,14 @@ func New[T comparable](hc contained.TypeInfo[T], opts ...SliceOpt[T]) value.Empt
 	}
 }
 
-func Choices[T comparable](choices ...T) SliceOpt[T] {
+func Choices[T any](choices ...T) SliceOpt[T] {
 	return func(v *sliceValue[T]) {
 		v.choices = choices
 	}
 
 }
 
-func Default[T comparable](def []T) SliceOpt[T] {
+func Default[T any](def []T) SliceOpt[T] {
 	return func(cf *sliceValue[T]) {
 		cf.defaultVals = def
 		cf.hasDefault = true
@@ -106,21 +106,8 @@ func (v *sliceValue[_]) StringSlice() []string {
 	return ret
 }
 
-func withinChoices[T comparable](val T, choices []T) bool {
-	// User didn't constrain choices
-	if len(choices) == 0 {
-		return true
-	}
-	for _, choice := range choices {
-		if val == choice {
-			return true
-		}
-	}
-	return false
-}
-
 func (v *sliceValue[T]) update(val T) error {
-	if !withinChoices(val, v.choices) {
+	if !contained.WithinChoices(val, v.choices, v.inner.Equals) {
 		return value.ErrInvalidChoice[T]{Choices: v.choices}
 	}
 	v.vals = append(v.vals, val)

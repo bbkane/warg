@@ -7,7 +7,7 @@ import (
 	"go.bbkane.com/warg/value/contained"
 )
 
-type scalarValue[T comparable] struct {
+type scalarValue[T any] struct {
 	choices    []T
 	defaultVal *T
 	inner      contained.TypeInfo[T]
@@ -15,13 +15,13 @@ type scalarValue[T comparable] struct {
 	updatedBy  value.UpdatedBy
 }
 
-type ScalarOpt[T comparable] func(*scalarValue[T])
+type ScalarOpt[T any] func(*scalarValue[T])
 
-func newScalarValue[T comparable](
+func newScalarValue[T any](
 	inner contained.TypeInfo[T],
 	opts ...ScalarOpt[T],
 ) scalarValue[T] {
-	empty := inner.Empty()
+	empty := inner.FromZero()
 	sv := scalarValue[T]{
 		choices:    []T{},
 		defaultVal: nil,
@@ -35,7 +35,7 @@ func newScalarValue[T comparable](
 	return sv
 }
 
-func New[T comparable](hc contained.TypeInfo[T], opts ...ScalarOpt[T]) value.EmptyConstructor {
+func New[T any](hc contained.TypeInfo[T], opts ...ScalarOpt[T]) value.EmptyConstructor {
 	return func() value.Value {
 		s := newScalarValue(
 			hc,
@@ -45,19 +45,19 @@ func New[T comparable](hc contained.TypeInfo[T], opts ...ScalarOpt[T]) value.Emp
 	}
 }
 
-func PointerTo[T comparable](addr *T) ScalarOpt[T] {
+func PointerTo[T any](addr *T) ScalarOpt[T] {
 	return func(v *scalarValue[T]) {
 		v.val = addr
 	}
 }
 
-func Choices[T comparable](choices ...T) ScalarOpt[T] {
+func Choices[T any](choices ...T) ScalarOpt[T] {
 	return func(v *scalarValue[T]) {
 		v.choices = choices
 	}
 }
 
-func Default[T comparable](def T) ScalarOpt[T] {
+func Default[T any](def T) ScalarOpt[T] {
 	return func(v *scalarValue[T]) {
 		v.defaultVal = &def
 	}
@@ -108,19 +108,6 @@ func (v *scalarValue[_]) String() string {
 	return fmt.Sprint(*v.val)
 }
 
-func withinChoices[T comparable](val T, choices []T) bool {
-	// User didn't constrain choices
-	if len(choices) == 0 {
-		return true
-	}
-	for _, choice := range choices {
-		if val == choice {
-			return true
-		}
-	}
-	return false
-}
-
 func (v *scalarValue[T]) Update(s string, u value.UpdatedBy) error {
 	if v.updatedBy != value.UpdatedByUnset {
 		return value.ErrUpdatedMoreThanOnce[T]{CurrentValue: *v.val, UpdatedBy: v.updatedBy}
@@ -129,7 +116,7 @@ func (v *scalarValue[T]) Update(s string, u value.UpdatedBy) error {
 	if err != nil {
 		return err
 	}
-	if !withinChoices(val, v.choices) {
+	if !contained.WithinChoices(val, v.choices, v.inner.Equals) {
 		return value.ErrInvalidChoice[T]{Choices: v.choices}
 	}
 	*v.val = val

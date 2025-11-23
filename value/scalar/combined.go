@@ -10,7 +10,7 @@ import (
 )
 
 func Addr(opts ...ScalarOpt[netip.Addr]) value.EmptyConstructor {
-	return New(contained.Addr(), opts...)
+	return New(contained.NetIPAddr(), opts...)
 }
 
 func AddrPort(opts ...ScalarOpt[netip.AddrPort]) value.EmptyConstructor {

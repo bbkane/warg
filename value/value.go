@@ -89,7 +89,7 @@ type DictValue interface {
 // Useful to create new values as well as initialize them
 type EmptyConstructor func() Value
 
-type ErrInvalidChoice[T comparable] struct {
+type ErrInvalidChoice[T any] struct {
 	Choices []T
 }
 
@@ -98,7 +98,7 @@ func (e ErrInvalidChoice[T]) Error() string {
 }
 
 // ErrUpdatedMoreThanOnce is returned when a value is updated more than once. Only applicable to Scalar Values
-type ErrUpdatedMoreThanOnce[T comparable] struct {
+type ErrUpdatedMoreThanOnce[T any] struct {
 	CurrentValue T
 	UpdatedBy    UpdatedBy
 }

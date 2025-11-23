@@ -14,28 +14,72 @@ import (
 
 var ErrIncompatibleInterface = errors.New("could not decode interface into Value")
 
-// identity simply returns the thing passed and nil
-func identity[T comparable](t T) (T, error) {
-	return t, nil
+// FromZero returns the zero value for type T. Useful for contstructing [TypeInfo] instances.
+func FromZero[T any]() T {
+	var zero T
+	return zero
 }
 
-type TypeInfo[T comparable] struct {
+// Equals returns true if a and b are equal. CUseful for contstructing [TypeInfo] instances.
+func Equals[T comparable](a, b T) bool {
+	return a == b
+}
+
+type TypeInfo[T any] struct {
 	Description string
 
 	FromIFace func(iFace interface{}) (T, error)
 
 	FromString func(string) (T, error)
 
-	// Initalized to the Empty value, but used for updating stuff in the container type
-	Empty func() T
+	// FromZero returns an initial value for type T. This is used as the intial value for contained types and updated from there. Most types will want to use the [Zero] helper function here.
+	FromZero func() T
+
+	// Equals returns true if a and b are equal. Comparable types will want to use the [Equals] helper function here.
+	Equals func(a, b T) bool
 }
 
-func Addr() TypeInfo[netip.Addr] {
+// ValidateNonNilFuncs returns an error if any of the function fields are nil. Used to validate TypeInfo instances in tests
+func (ti TypeInfo[T]) ValidateNonNilFuncs() error {
+	var errs []error
+	if ti.FromIFace == nil {
+		errs = append(errs, fmt.Errorf("FromIFace is nil"))
+	}
+	if ti.FromString == nil {
+		errs = append(errs, fmt.Errorf("FromString is nil"))
+	}
+	if ti.FromZero == nil {
+		errs = append(errs, fmt.Errorf("FromZero is nil"))
+	}
+	if ti.Equals == nil {
+		errs = append(errs, fmt.Errorf("Equals is nil"))
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("nil fields: %w", errors.Join(errs...))
+	}
+
+	return nil
+}
+
+// WithinChoices returns true if val is within choices according to equals function. Used to update values when passed as strings from flags
+func WithinChoices[T any](val T, choices []T, equals func(a, b T) bool) bool {
+	// User didn't constrain choices
+	if len(choices) == 0 {
+		return true
+	}
+	for _, choice := range choices {
+		if equals(val, choice) {
+			return true
+		}
+	}
+	return false
+}
+
+func NetIPAddr() TypeInfo[netip.Addr] {
 	return TypeInfo[netip.Addr]{
 		Description: "IP address",
-		Empty: func() netip.Addr {
-			return netip.Addr{}
-		},
+		FromZero:    FromZero[netip.Addr],
 		FromIFace: func(iFace interface{}) (netip.Addr, error) {
 			switch under := iFace.(type) {
 			case netip.Addr:
@@ -54,15 +98,14 @@ func Addr() TypeInfo[netip.Addr] {
 		},
 
 		FromString: netip.ParseAddr,
+		Equals:     Equals[netip.Addr],
 	}
 }
 
 func AddrPort() TypeInfo[netip.AddrPort] {
 	return TypeInfo[netip.AddrPort]{
 		Description: "IP and Port number separated by a colon: ip:port ",
-		Empty: func() netip.AddrPort {
-			return netip.AddrPort{}
-		},
+		FromZero:    FromZero[netip.AddrPort],
 		FromIFace: func(iFace interface{}) (netip.AddrPort, error) {
 			switch under := iFace.(type) {
 			case netip.AddrPort:
@@ -74,13 +117,14 @@ func AddrPort() TypeInfo[netip.AddrPort] {
 			}
 		},
 		FromString: netip.ParseAddrPort,
+		Equals:     Equals[netip.AddrPort],
 	}
 }
 
 func Bool() TypeInfo[bool] {
 	return TypeInfo[bool]{
 		Description: "bool",
-		Empty:       func() bool { return false },
+		FromZero:    FromZero[bool],
 		FromIFace: func(iFace interface{}) (bool, error) {
 			under, ok := iFace.(bool)
 			if !ok {
@@ -98,6 +142,7 @@ func Bool() TypeInfo[bool] {
 				return false, fmt.Errorf("expected \"true\" or \"false\", got %s", s)
 			}
 		},
+		Equals: Equals[bool],
 	}
 }
 
@@ -112,10 +157,7 @@ func durationFromString(s string) (time.Duration, error) {
 func Duration() TypeInfo[time.Duration] {
 	return TypeInfo[time.Duration]{
 		Description: "duration",
-		Empty: func() time.Duration {
-			var t time.Duration = 0
-			return t
-		},
+		FromZero:    FromZero[time.Duration],
 		FromIFace: func(iFace interface{}) (time.Duration, error) {
 			under, ok := iFace.(string)
 			if !ok {
@@ -124,6 +166,7 @@ func Duration() TypeInfo[time.Duration] {
 			return durationFromString(under)
 		},
 		FromString: durationFromString,
+		Equals:     Equals[time.Duration],
 	}
 }
 
@@ -149,14 +192,15 @@ func Int() TypeInfo[int] {
 			}
 		},
 		FromString: intFromString,
-		Empty:      func() int { return 0 },
+		FromZero:   FromZero[int],
+		Equals:     Equals[int],
 	}
 }
 
 func Path() TypeInfo[path.Path] {
 	return TypeInfo[path.Path]{
 		Description: "path",
-		Empty:       func() path.Path { return path.New("") },
+		FromZero:    func() path.Path { return path.New("") },
 		FromIFace: func(iFace interface{}) (path.Path, error) {
 			under, ok := iFace.(string)
 			if !ok {
@@ -165,6 +209,7 @@ func Path() TypeInfo[path.Path] {
 			return path.New(under), nil
 		},
 		FromString: func(s string) (path.Path, error) { return path.New(s), nil },
+		Equals:     func(a, b path.Path) bool { return a.Equals(b) },
 	}
 }
 
@@ -186,7 +231,7 @@ func runeFromString(s string) (rune, error) {
 func Rune() TypeInfo[rune] {
 	return TypeInfo[rune]{
 		Description: "rune",
-		Empty:       func() rune { return emptyRune },
+		FromZero:    func() rune { return emptyRune },
 		FromIFace: func(iFace interface{}) (rune, error) {
 			switch under := iFace.(type) {
 			case rune:
@@ -198,13 +243,14 @@ func Rune() TypeInfo[rune] {
 			}
 		},
 		FromString: runeFromString,
+		Equals:     Equals[rune],
 	}
 }
 
 func String() TypeInfo[string] {
 	return TypeInfo[string]{
 		Description: "string",
-		Empty:       func() string { return "" },
+		FromZero:    FromZero[string],
 		FromIFace: func(iFace interface{}) (string, error) {
 			under, ok := iFace.(string)
 			if !ok {
@@ -212,6 +258,7 @@ func String() TypeInfo[string] {
 			}
 			return under, nil
 		},
-		FromString: identity[string],
+		FromString: func(s string) (string, error) { return s, nil },
+		Equals:     Equals[string],
 	}
 }

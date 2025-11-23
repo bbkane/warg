@@ -8,7 +8,7 @@ import (
 	"go.bbkane.com/warg/value/contained"
 )
 
-type dictValue[T comparable] struct {
+type dictValue[T any] struct {
 	choices     []T
 	defaultVals map[string]T
 	hasDefault  bool
@@ -17,9 +17,9 @@ type dictValue[T comparable] struct {
 	updatedBy   value.UpdatedBy
 }
 
-type DictOpt[T comparable] func(*dictValue[T])
+type DictOpt[T any] func(*dictValue[T])
 
-func New[T comparable](inner contained.TypeInfo[T], opts ...DictOpt[T]) value.EmptyConstructor {
+func New[T any](inner contained.TypeInfo[T], opts ...DictOpt[T]) value.EmptyConstructor {
 	return func() value.Value {
 		dv := dictValue[T]{
 			choices:     []T{},
@@ -36,13 +36,13 @@ func New[T comparable](inner contained.TypeInfo[T], opts ...DictOpt[T]) value.Em
 	}
 }
 
-func Choices[T comparable](choices ...T) DictOpt[T] {
+func Choices[T any](choices ...T) DictOpt[T] {
 	return func(v *dictValue[T]) {
 		v.choices = choices
 	}
 }
 
-func Default[T comparable](def map[string]T) DictOpt[T] {
+func Default[T any](def map[string]T) DictOpt[T] {
 	return func(cf *dictValue[T]) {
 		cf.defaultVals = def
 		cf.hasDefault = true
@@ -105,21 +105,8 @@ func (v *dictValue[_]) StringMap() map[string]string {
 	return ret
 }
 
-func withinChoices[T comparable](val T, choices []T) bool {
-	// User didn't constrain choices
-	if len(choices) == 0 {
-		return true
-	}
-	for _, choice := range choices {
-		if val == choice {
-			return true
-		}
-	}
-	return false
-}
-
 func (v *dictValue[T]) update(key string, val T) error {
-	if !withinChoices(val, v.choices) {
+	if !contained.WithinChoices(val, v.choices, v.inner.Equals) {
 		return value.ErrInvalidChoice[T]{Choices: v.choices}
 	}
 	v.vals[key] = val
