@@ -12,12 +12,15 @@ below this description) is likely unreleased.
 
 - `TypeInfo.ValidateNonNilFuncs`- call this in a test to ensure all fields are initialized
 - `contained.FromZero` and `contained.Equals` - helper functions to construct `TypeInfo`s
+- `metadata` package for simple key/value parse metadata (and I intend to expand that to full app metadata when I implement TUI generation). This replaces the usage of `context.Context` since we don't need context cancelation or child contexts.
 
 ## Changed
 
 - Allow values to be of type `any` instead of type `comparable`. NOTE: This REQUIRES anyone implementing `contained.TypeInfo` to assign a function to the new `Equals` field
 - Renamed `TypeInfo.Empty` to `TypeInfo.FromZero` to be consistent with the other `TypeInfo` constructors
 - Renamed  `contained.Addr` to `contained.NetIPAddr` (to differentiate from `net.Addr`)
+- `CmdContext.Context` replaced with `CmdContext.ParseMetadata`
+- `ParseWithContext()` replaced with `ParseWithMetadata()`
 
 # v0.0.38
 

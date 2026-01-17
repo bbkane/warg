@@ -1,13 +1,14 @@
 package warg
 
 import (
-	"context"
 	"os"
+
+	"go.bbkane.com/warg/metadata"
 )
 
-func ParseWithContext(ctx context.Context) ParseOpt {
+func ParseWithMetadata(md metadata.Metadata) ParseOpt {
 	return func(poh *ParseOpts) {
-		poh.Context = ctx
+		poh.ParseMetadata = md
 	}
 }
 

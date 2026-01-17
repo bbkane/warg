@@ -1,12 +1,12 @@
 package warg
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"os"
 
 	"go.bbkane.com/warg/config"
+	"go.bbkane.com/warg/metadata"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/set"
 	"go.bbkane.com/warg/value"
@@ -18,8 +18,8 @@ import (
 type ParseOpts struct {
 	Args []string
 
-	// Context for unstructured data. Useful for setting up mocks for tests (i.e., pass in in memory database and use it if it's here in the context)
-	Context context.Context
+	// ParseMetadata for unstructured data. Useful for setting up mocks for tests (i.e., pass in in memory database and use it if it's here in the context)
+	ParseMetadata metadata.Metadata
 
 	LookupEnv LookupEnv
 
@@ -46,12 +46,12 @@ type ParseOpt func(*ParseOpts)
 
 func NewParseOpts(opts ...ParseOpt) ParseOpts {
 	parseOptHolder := ParseOpts{
-		Context:   context.Background(),
-		Args:      os.Args,
-		LookupEnv: os.LookupEnv,
-		Stderr:    os.Stderr,
-		Stdin:     os.Stdin,
-		Stdout:    os.Stdout,
+		ParseMetadata: metadata.Empty(),
+		Args:          os.Args,
+		LookupEnv:     os.LookupEnv,
+		Stderr:        os.Stderr,
+		Stdin:         os.Stdin,
+		Stdout:        os.Stdout,
 	}
 
 	for _, opt := range opts {
@@ -403,7 +403,7 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 		pr := ParseResult{
 			Context: CmdContext{
 				App:           app,
-				Context:       parseOpts.Context,
+				ParseMetadata: parseOpts.ParseMetadata,
 				Flags:         parseState.FlagValues.ToPassedFlags(),
 				ForwardedArgs: parseState.CurrentCmdForwardedArgs,
 				ParseState:    &parseState,
@@ -446,7 +446,7 @@ func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
 	pr := ParseResult{
 		Context: CmdContext{
 			App:           app,
-			Context:       parseOpts.Context,
+			ParseMetadata: parseOpts.ParseMetadata,
 			Flags:         parseState.FlagValues.ToPassedFlags(),
 			ForwardedArgs: parseState.CurrentCmdForwardedArgs,
 			ParseState:    &parseState,

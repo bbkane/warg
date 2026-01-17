@@ -4,7 +4,6 @@ package warg_test
 
 import (
 	"bufio"
-	"context"
 	"os"
 	"path/filepath"
 	"slices"
@@ -14,6 +13,7 @@ import (
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/config/jsonreader"
 	"go.bbkane.com/warg/config/yamlreader"
+	"go.bbkane.com/warg/metadata"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/value/dict"
 	"go.bbkane.com/warg/value/scalar"
@@ -1125,15 +1125,15 @@ func TestContextContainsValue(t *testing.T) {
 	type contextKey struct{}
 	expectedValue := "value"
 
-	ctx := context.WithValue(context.Background(), contextKey{}, expectedValue)
+	md := metadata.New(contextKey{}, expectedValue)
 	actualPR, err := app.Parse(
 		warg.ParseWithArgs([]string{"appName"}),
 		warg.ParseWithLookupEnv(warg.LookupMap(nil)),
-		warg.ParseWithContext(ctx),
+		warg.ParseWithMetadata(md),
 	)
 	require.Nil(t, err)
 
-	require.Equal(t, expectedValue, actualPR.Context.Context.Value(contextKey{}).(string))
+	require.Equal(t, expectedValue, actualPR.Context.ParseMetadata.MustGet(contextKey{}).(string))
 }
 
 func TestAppFlagToAddr(t *testing.T) {

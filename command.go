@@ -1,11 +1,11 @@
 package warg
 
 import (
-	"context"
 	"errors"
 	"os"
 	"sort"
 
+	"go.bbkane.com/warg/metadata"
 	"go.bbkane.com/warg/value"
 )
 
@@ -91,8 +91,8 @@ type CmdContext struct {
 
 	ParseState *ParseState
 
-	// Context to smuggle user-defined state (i.e., not flags) into an Action. I use this for mocks when testing
-	Context context.Context
+	// ParseMetadata to smuggle user-defined state (i.e., not flags) into an Action. I use this for mocks when testing
+	ParseMetadata metadata.Metadata
 
 	Stderr *os.File
 	Stdin  *os.File

@@ -565,7 +565,7 @@ func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 	}
 	cmdContext := CmdContext{
 		App:           a,
-		Context:       parseOpts.Context,
+		ParseMetadata:      parseOpts.ParseMetadata,
 		Flags:         parseState.FlagValues.ToPassedFlags(),
 		ForwardedArgs: parseState.CurrentCmdForwardedArgs, // should always be nil during completions as completions occur at the end
 		ParseState:    &parseState,
