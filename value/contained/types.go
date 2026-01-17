@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/netip"
 	"strconv"
 	"time"
@@ -185,6 +186,17 @@ func Int() TypeInfo[int] {
 			switch under := iFace.(type) {
 			case int:
 				return under, nil
+			// go-yaml may decode all numbers as int64 or uint64
+			case int64:
+				if under > math.MaxInt || under < math.MinInt {
+					return 0, fmt.Errorf("int64 value %d out of range for int", under)
+				}
+				return int(under), nil
+			case uint64:
+				if under > math.MaxInt {
+					return 0, fmt.Errorf("uint64 value %d out of range for int", under)
+				}
+				return int(under), nil
 			case json.Number:
 				return intFromString(string(under))
 			default:

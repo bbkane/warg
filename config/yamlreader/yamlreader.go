@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/goccy/go-yaml"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/config/internal/tokenize"
-
-	"gopkg.in/yaml.v2"
 )
 
-// YAML can have keys of non-string types
-type configMap map[interface{}]interface{}
+// go-yaml uses string keys by default
+type configMap = map[string]interface{}
 
 type yamlConfigReader struct {
 	data configMap
@@ -28,7 +27,9 @@ func New(filePath string) (config.Reader, error) {
 		return cr, nil
 	}
 
-	err = yaml.UnmarshalStrict(content, &cr.data)
+	// from what I can tell, go-yaml automatically uses map[string]interface{} for maps
+	// I tried adding an integer key to the test YAML file, and it did not blow up
+	err = yaml.UnmarshalWithOptions(content, &cr.data, yaml.Strict())
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +71,8 @@ func (cr *yamlConfigReader) Search(path string) (*config.SearchResult, error) {
 				cm, ok := e.(configMap)
 				if !ok {
 					return nil, fmt.Errorf(
-						"expecting ConfigMap: \n  actual type %T\n  actual value: %#v\n  path: %v\n  token: %v",
-						current, current, path, token,
+						"expecting map[string]interface{}: \n  actual type %T\n  actual value: %#v\n  path: %v\n  token: %v",
+						e, e, path, token,
 					)
 				}
 				val, exists := cm[finalToken.Text]
@@ -99,7 +100,7 @@ func (cr *yamlConfigReader) Search(path string) (*config.SearchResult, error) {
 
 			if !ok {
 				return nil, fmt.Errorf(
-					"expecting ConfigMap: \n  actual type %T\n  actual value: %#v\n  path: %v\n  token: %v",
+					"expecting map[string]interface{}: \n  actual type %T\n  actual value: %#v\n  path: %v\n  token: %v",
 					current, current, path, token,
 				)
 			}
@@ -114,15 +115,7 @@ func (cr *yamlConfigReader) Search(path string) (*config.SearchResult, error) {
 	}
 
 	if currentConfigMap, ok := current.(configMap); ok {
-		newMap := make(map[string]interface{})
-		for k, v := range currentConfigMap {
-			kStr, ok := k.(string)
-			if !ok {
-				return nil, fmt.Errorf("YAML map parse failure. Expected string, got %T: %v", k, k)
-			}
-			newMap[kStr] = v
-		}
-		current = newMap
+		current = currentConfigMap
 	}
 	return &config.SearchResult{IFace: current, IsAggregated: false}, nil
 }

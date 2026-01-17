@@ -9,3 +9,5 @@ subreddits:
     name: earthporn
   - limit: 5
     name: wallpapers
+uint64_key: 42
+int64_key_negative: -42

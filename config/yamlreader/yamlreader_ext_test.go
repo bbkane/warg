@@ -30,6 +30,28 @@ func TestSearch(t *testing.T) {
 			expectedSearchErr: false,
 		},
 		{
+			name:                "uint64_key",
+			filePath:            "testdata/TestSearch.yaml",
+			searchPath:          "uint64_key",
+			expectedCreationErr: false,
+			expectedSearchResult: &config.SearchResult{
+				IFace:        uint64(42),
+				IsAggregated: false,
+			},
+			expectedSearchErr: false,
+		},
+		{
+			name:                "int64_key_negative",
+			filePath:            "testdata/TestSearch.yaml",
+			searchPath:          "int64_key_negative",
+			expectedCreationErr: false,
+			expectedSearchResult: &config.SearchResult{
+				IFace:        int64(-42),
+				IsAggregated: false,
+			},
+			expectedSearchErr: false,
+		},
+		{
 			name:                 "nil_map",
 			filePath:             "non-existant",
 			searchPath:           "non-existant",
@@ -43,7 +65,7 @@ func TestSearch(t *testing.T) {
 			searchPath:          "key1.key2",
 			expectedCreationErr: false,
 			expectedSearchResult: &config.SearchResult{
-				IFace:        1,
+				IFace:        uint64(1),
 				IsAggregated: false,
 			},
 			expectedSearchErr: false,
@@ -65,7 +87,7 @@ func TestSearch(t *testing.T) {
 			searchPath:          "map_val",
 			expectedCreationErr: false,
 			expectedSearchResult: &config.SearchResult{
-				IFace:        map[string]interface{}{"a": 1},
+				IFace:        map[string]interface{}{"a": uint64(1)},
 				IsAggregated: false,
 			},
 			expectedSearchErr: false,
