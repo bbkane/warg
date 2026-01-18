@@ -1,4 +1,5 @@
 ---
+int64_key_negative: -42
 key: value
 key1:
   key2: 1
@@ -10,4 +11,3 @@ subreddits:
   - limit: 5
     name: wallpapers
 uint64_key: 42
-int64_key_negative: -42

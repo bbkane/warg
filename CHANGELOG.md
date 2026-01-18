@@ -21,6 +21,10 @@ below this description) is likely unreleased.
 - Renamed  `contained.Addr` to `contained.NetIPAddr` (to differentiate from `net.Addr`)
 - `CmdContext.Context` replaced with `CmdContext.ParseMetadata`
 - `ParseWithContext()` replaced with `ParseWithMetadata()`
+- Updated YAML parser to https://github.com/goccy/go-yaml . Ideally this would
+  be an invisible change, but it parses numbers differently than the old YAML
+  parser (to int64, uint64, and float64). I had to adjust contained.Int to be
+  aware of these and custom TypeInfos might also need adjustment
 
 # v0.0.38
 

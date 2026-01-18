@@ -40,7 +40,7 @@ func NewGlobalFlag(name string, helpShort string, empty value.EmptyConstructor, 
 
 }
 
-// ConfigFlag adds a flag that will be used to read a config file. If the passed flagMap is nil, DefaultConfigFlagMap will be used. The flag will be added to the app's global flags. When parsed, the config flag will be parsed before other flags, any config file found will be read, and any values found will be used to update other flags. This allows users to override flag defaults with values from a config file.
+// ConfigFlag adds a global flag that will be used to read a config file. the flagMap must contain exactly one flag. When parsed, the config flag will be parsed before other flags, any config file found will be read, and any values found will be used to update other flags. This allows users to override flag defaults with values from a config file.
 func ConfigFlag(reader config.NewReader, flagMap FlagMap) AppOpt {
 	return func(app *App) {
 		if len(flagMap) != 1 {
@@ -565,7 +565,7 @@ func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
 	}
 	cmdContext := CmdContext{
 		App:           a,
-		ParseMetadata:      parseOpts.ParseMetadata,
+		ParseMetadata: parseOpts.ParseMetadata,
 		Flags:         parseState.FlagValues.ToPassedFlags(),
 		ForwardedArgs: parseState.CurrentCmdForwardedArgs, // should always be nil during completions as completions occur at the end
 		ParseState:    &parseState,
