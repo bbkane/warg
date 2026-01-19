@@ -4,10 +4,6 @@ package config
 type SearchResult struct {
 	// IFace holds the value if found
 	IFace interface{}
-	// IsAggregated indicates whether the value was stitched together from child config elements
-	// For example, consider a config with the following content: {"subreddits": [{"name": "earthporn"}, {"name": "wallpapers"}]}
-	// We can get all the names with a path like "subreddits[].name". These results are aggregated into a list, and IsAggregated will be set to true
-	IsAggregated bool
 }
 
 // Reader searches with a path to try to get a config value.

@@ -280,35 +280,17 @@ func resolveFlag(
 			return err
 		}
 		if fpr != nil {
-			if !fpr.IsAggregated {
-				err := flagValues[flagName].ReplaceFromInterface(fpr.IFace, value.UpdatedByConfig)
-				if err != nil {
-					return fmt.Errorf(
-						"could not replace container type value:\nval:\n%#v\nreplacement:\n%#v\nerr: %w",
-						flagValues[flagName],
-						fpr.IFace,
-						err,
-					)
-				}
-				return nil
-			} else {
-				v, ok := flagValues[flagName].(value.SliceValue)
-				if !ok {
-					return fmt.Errorf("could not update scalar value with aggregated value from config: name: %v, configPath: %v", flagName, fl.ConfigPath)
-				}
-				under, ok := fpr.IFace.([]interface{})
-				if !ok {
-					return fmt.Errorf("expected []interface{}, got: %#v", under)
-				}
-				for _, e := range under {
-					err := v.AppendFromInterface(e, value.UpdatedByConfig)
-					if err != nil {
-						return fmt.Errorf("could not update container type value: err: %w", err)
-					}
-				}
-				flagValues[flagName] = v
-				return nil
+			err := flagValues[flagName].ReplaceFromInterface(fpr.IFace, value.UpdatedByConfig)
+			if err != nil {
+				return fmt.Errorf(
+					"could not replace container type value:\nval:\n%#v\nreplacement:\n%#v\nerr: %w",
+					flagValues[flagName],
+					fpr.IFace,
+					err,
+				)
 			}
+			return nil
+
 		}
 	}
 

@@ -25,8 +25,7 @@ func TestSearch(t *testing.T) {
 			searchPath:          "key",
 			expectedCreationErr: false,
 			expectedSearchResult: &config.SearchResult{
-				IFace:        "value",
-				IsAggregated: false,
+				IFace: "value",
 			},
 			expectedSearchErr: false,
 		},
@@ -44,19 +43,7 @@ func TestSearch(t *testing.T) {
 			searchPath:          "key1.key2",
 			expectedCreationErr: false,
 			expectedSearchResult: &config.SearchResult{
-				IFace:        json.Number("1"),
-				IsAggregated: false,
-			},
-			expectedSearchErr: false,
-		},
-		{
-			name:                "in_array",
-			filePath:            "testdata/TestSearch.json",
-			searchPath:          "subreddits[].name",
-			expectedCreationErr: false,
-			expectedSearchResult: &config.SearchResult{
-				IFace:        []interface{}([]interface{}{"earthporn", "wallpapers"}),
-				IsAggregated: true,
+				IFace: json.Number("1"),
 			},
 			expectedSearchErr: false,
 		},
@@ -66,8 +53,7 @@ func TestSearch(t *testing.T) {
 			searchPath:          "map_val",
 			expectedCreationErr: false,
 			expectedSearchResult: &config.SearchResult{
-				IFace:        map[string]interface{}{"a": json.Number("1")},
-				IsAggregated: false,
+				IFace: map[string]interface{}{"a": json.Number("1")},
 			},
 			expectedSearchErr: false,
 		},

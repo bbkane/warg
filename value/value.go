@@ -66,13 +66,6 @@ type SliceValue interface {
 
 	// StringSlice returns a []string ready to be printed for slice values and nil for others
 	StringSlice() []string
-
-	// AppendFromInterface updates a container type Value from an interface (useful for configs)
-	// Note that AppendFromInterface must be called with the "contained" type for container type Values
-	// For example, the StringSlice.AppendFromInterface
-	// must be called with a string, not a []string
-	// It returns ErrIncompatibleInterface if the interface can't be decoded
-	AppendFromInterface(interface{}, UpdatedBy) error
 }
 
 type DictValue interface {

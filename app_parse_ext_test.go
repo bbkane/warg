@@ -697,8 +697,7 @@ func TestApp_Parse_config(t *testing.T) {
 							if path == "key" {
 
 								return &config.SearchResult{
-									IFace:        "mapkeyval",
-									IsAggregated: false,
+									IFace: "mapkeyval",
 								}, nil
 							}
 
@@ -816,50 +815,6 @@ func TestApp_Parse_config(t *testing.T) {
 				// "--floatval": 1.5,
 				"--intval": 1,
 				"--help":   "default",
-			},
-			expectedErr: false,
-		},
-		{
-			name: "configSlice",
-			app: warg.New(
-				"newAppName", "v1.0.0",
-				warg.NewSection(
-					"help for test",
-					warg.NewSubCmd(
-						"print",
-						"print key value",
-						warg.Unimplemented(),
-						warg.NewCmdFlag(
-							"--subreddits",
-							"the subreddits",
-							slice.String(),
-							warg.ConfigPath("subreddits[].name"),
-						),
-					),
-				),
-				warg.ConfigFlag(
-					jsonreader.New,
-					warg.FlagMap{
-						"--config": warg.NewFlag(
-							"path to config",
-							scalar.Path(
-								scalar.Default(
-									testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
-								),
-							),
-							warg.Alias("-c"),
-						),
-					},
-				),
-				warg.SkipAll(),
-			),
-			args:               []string{"test", "print"},
-			lookup:             warg.LookupMap(nil),
-			expectedPassedPath: []string{"print"},
-			expectedPassedFlagValues: warg.PassedFlags{
-				"--subreddits": []string{"earthporn", "wallpapers"},
-				"--config":     testDataFilePath(t.Name(), "configSlice", "config_slice.json"),
-				"--help":       "default",
 			},
 			expectedErr: false,
 		},

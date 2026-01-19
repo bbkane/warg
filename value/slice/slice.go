@@ -138,16 +138,3 @@ func (v *sliceValue[_]) ReplaceFromDefault(u value.UpdatedBy) error {
 	}
 	return nil
 }
-
-func (v *sliceValue[_]) AppendFromInterface(iFace interface{}, u value.UpdatedBy) error {
-	val, err := v.inner.FromIFace(iFace)
-	if err != nil {
-		return err
-	}
-	err = v.update(val)
-	if err != nil {
-		return err
-	}
-	v.updatedBy = u
-	return nil
-}

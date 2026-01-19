@@ -6,6 +6,12 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.40.0
+
+# Removed
+
+- Removed "aggregated" config searching - a `ConfigPath("path[].value"` would previously aggregate all values at for the objects "value" key in the "path" list. This was cool, but I only used it for `grabbit`. Instead I made `grabbit` have a custom contained.TypeInfo that deserializes from flags like this `--subreddit-info wallpapers,week,10` and from a dict in the config like this: `{"name": "wallpapers", "timeframe": week", "count": 10}` I think I prefer that to accumulating each bit into a slice and requiring assumbling the pieces into objects in the app code. Nevertheless I'm cutting a version for this change so I can easily find it in case I want to revert it
+
 # v0.0.39
 
 ## Added

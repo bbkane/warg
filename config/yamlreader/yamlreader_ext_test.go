@@ -24,8 +24,7 @@ func TestSearch(t *testing.T) {
 			searchPath:          "key",
 			expectedCreationErr: false,
 			expectedSearchResult: &config.SearchResult{
-				IFace:        "value",
-				IsAggregated: false,
+				IFace: "value",
 			},
 			expectedSearchErr: false,
 		},
@@ -35,8 +34,7 @@ func TestSearch(t *testing.T) {
 			searchPath:          "uint64_key",
 			expectedCreationErr: false,
 			expectedSearchResult: &config.SearchResult{
-				IFace:        uint64(42),
-				IsAggregated: false,
+				IFace: uint64(42),
 			},
 			expectedSearchErr: false,
 		},
@@ -46,8 +44,7 @@ func TestSearch(t *testing.T) {
 			searchPath:          "int64_key_negative",
 			expectedCreationErr: false,
 			expectedSearchResult: &config.SearchResult{
-				IFace:        int64(-42),
-				IsAggregated: false,
+				IFace: int64(-42),
 			},
 			expectedSearchErr: false,
 		},
@@ -65,19 +62,7 @@ func TestSearch(t *testing.T) {
 			searchPath:          "key1.key2",
 			expectedCreationErr: false,
 			expectedSearchResult: &config.SearchResult{
-				IFace:        uint64(1),
-				IsAggregated: false,
-			},
-			expectedSearchErr: false,
-		},
-		{
-			name:                "in_array",
-			filePath:            "testdata/TestSearch.yaml",
-			searchPath:          "subreddits[].name",
-			expectedCreationErr: false,
-			expectedSearchResult: &config.SearchResult{
-				IFace:        []interface{}([]interface{}{"earthporn", "wallpapers"}),
-				IsAggregated: true,
+				IFace: uint64(1),
 			},
 			expectedSearchErr: false,
 		},
@@ -87,8 +72,7 @@ func TestSearch(t *testing.T) {
 			searchPath:          "map_val",
 			expectedCreationErr: false,
 			expectedSearchResult: &config.SearchResult{
-				IFace:        map[string]interface{}{"a": uint64(1)},
-				IsAggregated: false,
+				IFace: map[string]interface{}{"a": uint64(1)},
 			},
 			expectedSearchErr: false,
 		},
