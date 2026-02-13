@@ -24,13 +24,14 @@ func TestRunHelp(t *testing.T) {
 	}{
 		{
 			name:   "grabbitGrabHelpDetailed",
-			args:   []string{"grabbit", "grab", "--config", "NOTTHERE", "--help", "detailed"},
+			args:   []string{"grab", "--config", "NOTTHERE", "--help", "detailed"},
 			lookup: warg.LookupMap(nil),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			args := append([]string{"grabbit"}, tt.args...)
 			warg.GoldenTest(
 				t,
 				warg.GoldenTestArgs{
@@ -38,7 +39,7 @@ func TestRunHelp(t *testing.T) {
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},
-				warg.ParseWithArgs(tt.args),
+				warg.ParseWithArgs(args),
 				warg.ParseWithLookupEnv(tt.lookup),
 			)
 		})

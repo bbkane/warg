@@ -94,26 +94,26 @@ func TestAppHelp(t *testing.T) {
 		// toplevel just a toplevel help!
 		{
 			name:   "toplevel",
-			args:   []string{"grabbit", "-h", "outline"},
+			args:   []string{"-h", "outline"},
 			lookup: warg.LookupMap(nil),
 		},
 
 		// allcommands (no command help)
 		{
 			name:   "allcommandsSection",
-			args:   []string{"grabbit", "config", "--help"},
+			args:   []string{"config", "--help"},
 			lookup: warg.LookupMap(nil),
 		},
 
 		// detailed
 		{
 			name:   "detailedCommand",
-			args:   []string{"grabbit", "config", "edit", "--help"},
+			args:   []string{"config", "edit", "--help"},
 			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
 			name:   "detailedSection",
-			args:   []string{"grabbit", "--help", "detailed"},
+			args:   []string{"--help", "detailed"},
 			lookup: warg.LookupMap(nil),
 		},
 
@@ -121,13 +121,13 @@ func TestAppHelp(t *testing.T) {
 		{
 			// TODO: make this print global flags!
 			name:   "outlineCommand",
-			args:   []string{"grabbit", "config", "edit", "--help", "outline"},
+			args:   []string{"config", "edit", "--help", "outline"},
 			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
 		},
 		{
 			// TODO: make this print global flags!
 			name:   "outlineSection",
-			args:   []string{"grabbit", "--help", "outline"},
+			args:   []string{"--help", "outline"},
 			lookup: warg.LookupMap(nil),
 		},
 	}
@@ -140,6 +140,7 @@ func TestAppHelp(t *testing.T) {
 				grabbitSection(),
 				warg.SkipValidation(),
 			)
+			args := append([]string{"grabbit"}, tt.args...)
 			warg.GoldenTest(
 				t,
 				warg.GoldenTestArgs{
@@ -147,7 +148,7 @@ func TestAppHelp(t *testing.T) {
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
 				},
-				warg.ParseWithArgs(tt.args),
+				warg.ParseWithArgs(args),
 				warg.ParseWithLookupEnv(tt.lookup),
 			)
 		})
