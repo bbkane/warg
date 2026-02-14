@@ -306,6 +306,20 @@ type App struct {
 	Version             string
 }
 
+func (app *App) Run(args []string, opts ...ParseOpt) {
+	pr, err := app.Parse(args, opts...)
+	if err != nil {
+		// https://unix.stackexchange.com/a/254747
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(64)
+	}
+	err = pr.Action(pr.Context)
+	if err != nil {
+		fmt.Fprintln(pr.Context.Stderr, err)
+		os.Exit(1)
+	}
+}
+
 // MustRun runs the app.
 // Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
 // Any errors on an Action will be printed to stderr and os.Exit(1) will be called.
@@ -313,7 +327,12 @@ func (app *App) MustRun(opts ...ParseOpt) {
 	if len(os.Args) >= 3 && os.Args[1] == "--completion-zsh" {
 		// app --completion-zsh <args> . Note that <args> must be something, even if it's the empty string
 
-		candidates, err := app.Completions(opts...)
+		// parseOpts.Args looks like: <exe> --completion-zsh <args>... <partialOrEmptyString>
+		// the partial or empty string is passed to us from the completion script. Empty if the user just typed space and pressed tab, partial if the user pressed tab after typing part of something. zsh will filter that for us
+		// so we need to remove the first two args and the last arg
+		args := os.Args[2 : len(os.Args)-1]
+
+		candidates, err := app.Completions(args, opts...)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -321,17 +340,7 @@ func (app *App) MustRun(opts ...ParseOpt) {
 		completion.ZshCompletionsWrite(os.Stdout, candidates)
 
 	} else {
-		pr, err := app.Parse(opts...)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			// https://unix.stackexchange.com/a/254747/185953
-			os.Exit(64)
-		}
-		err = pr.Action(pr.Context)
-		if err != nil {
-			fmt.Fprintln(pr.Context.Stderr, err)
-			os.Exit(1)
-		}
+		app.Run(os.Args[1:], opts...)
 	}
 }
 
@@ -495,13 +504,8 @@ func (app *App) Validate() error {
 type CompletionsFunc func(CmdContext) (*completion.Candidates, error)
 
 // Completions returns completion candidates for the app for shell completion. It parses as much as it can.
-func (a *App) Completions(opts ...ParseOpt) (*completion.Candidates, error) {
+func (a *App) Completions(args []string, opts ...ParseOpt) (*completion.Candidates, error) {
 	parseOpts := NewParseOpts(opts...)
-
-	// parseOpts.Args looks like: <exe> --completion-zsh <args>... <partialOrEmptyString>
-	// the partial or empty string is passed to us from the completion script. Empty if the user just typed space and pressed tab, partial if the user pressed tab after typing part of something. zsh will filter that for us
-	// so we need to remove the first two args and the last arg
-	args := parseOpts.Args[2 : len(parseOpts.Args)-1]
 
 	// I could to a full parse here, but that would be slower and more prone to failure than just parsing the args - we don't need a lot of info to complete section/command names
 	parseState, err := a.parseArgs(args)
@@ -666,11 +670,6 @@ func replCmdAction(cmdCtx CmdContext) error {
 		// don't care about stuff after the cursor. TODO: is this off by one for the cursor?
 		truncatedLine := line[:cursor]
 
-		// need to match what the shell does when completing
-		if len(truncatedLine) == 0 || truncatedLine[len(truncatedLine)-1] == ' ' {
-			truncatedLine = append(truncatedLine, '\'')
-			truncatedLine = append(truncatedLine, '\'')
-		}
 		lineStr := string(truncatedLine)
 		words, err := shellwords.Parse(lineStr)
 		if err != nil {
@@ -679,11 +678,9 @@ func replCmdAction(cmdCtx CmdContext) error {
 			os.Exit(1)
 		}
 
-		// match what app.Completions expects -- TODO: need to refactor this?
-		words = append([]string{cmdCtx.App.Name, "--completion-zsh"}, words...)
 		// TODO: should I copy parseOpts from cmdCtx?
 		candidates, err := cmdCtx.App.Completions(
-			ParseWithArgs(words),
+			words,
 		)
 		if err != nil {
 			err = fmt.Errorf("could not get completions: args: %v, %w", words, err)
@@ -728,8 +725,7 @@ func replCmdAction(cmdCtx CmdContext) error {
 			fmt.Fprintf(cmdCtx.Stderr, "could not parse line: %v\n", err)
 			continue
 		}
-		words = append([]string{cmdCtx.App.Name}, words...)
-		pr, err := cmdCtx.App.Parse(ParseWithArgs(words))
+		pr, err := cmdCtx.App.Parse(words)
 		if err != nil {
 			fmt.Fprintf(cmdCtx.Stderr, "could not parse args: %v\n", err)
 			continue

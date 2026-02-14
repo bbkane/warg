@@ -16,7 +16,7 @@ import (
 
 // ParseOpts allows overriding the default inputs to the Parse function. Useful for tests. Create it using the [go.bbkane.com/warg/parseopt] package.
 type ParseOpts struct {
-	Args []string
+	// Args []string
 
 	// ParseMetadata for unstructured data. Useful for setting up mocks for tests (i.e., pass in in memory database and use it if it's here in the context)
 	ParseMetadata metadata.Metadata
@@ -47,7 +47,6 @@ type ParseOpt func(*ParseOpts)
 func NewParseOpts(opts ...ParseOpt) ParseOpts {
 	parseOptHolder := ParseOpts{
 		ParseMetadata: metadata.Empty(),
-		Args:          os.Args,
 		LookupEnv:     os.LookupEnv,
 		Stderr:        os.Stderr,
 		Stdin:         os.Stdin,
@@ -364,11 +363,11 @@ func (a *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv Looku
 }
 
 // Parse parses command line arguments, environment variables, and configuration files to produce a [ParseResult]. expects ParseOpts.Args to be like os.Args (i.e., first arg is app name). It returns an error if parsing fails or required flags are missing.
-func (app *App) Parse(opts ...ParseOpt) (*ParseResult, error) {
+func (app *App) Parse(args []string, opts ...ParseOpt) (*ParseResult, error) {
 
 	parseOpts := NewParseOpts(opts...)
 
-	parseState, err := app.parseArgs(parseOpts.Args[1:]) // TODO: make callers do [:1]
+	parseState, err := app.parseArgs(args)
 	if err != nil {
 		return nil, fmt.Errorf("Parse args error: %w", err)
 	}

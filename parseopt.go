@@ -12,11 +12,11 @@ func ParseWithMetadata(md metadata.Metadata) ParseOpt {
 	}
 }
 
-func ParseWithArgs(args []string) ParseOpt {
-	return func(poh *ParseOpts) {
-		poh.Args = args
-	}
-}
+// func ParseWithArgs(args []string) ParseOpt {
+// 	return func(poh *ParseOpts) {
+// 		poh.Args = args
+// 	}
+// }
 
 func ParseWithLookupEnv(lookup LookupEnv) ParseOpt {
 	return func(poh *ParseOpts) {

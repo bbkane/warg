@@ -152,8 +152,7 @@ func TestApp_Parse(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			args := append([]string{"app"}, tt.args...)
-			actualPR, actualErr := tt.app.Parse(warg.ParseWithArgs(args), warg.ParseWithLookupEnv(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(tt.args, warg.ParseWithLookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -550,8 +549,7 @@ func TestApp_Parse_rootSection(t *testing.T) {
 			err := app.Validate()
 			require.Nil(t, err)
 
-			args := append([]string{"app"}, tt.args...)
-			actualPR, actualErr := app.Parse(warg.ParseWithArgs(args), warg.ParseWithLookupEnv(warg.LookupMap(nil)))
+			actualPR, actualErr := app.Parse(tt.args, warg.ParseWithLookupEnv(warg.LookupMap(nil)))
 
 			if tt.expectedErr {
 				require.Error(t, actualErr)
@@ -645,8 +643,7 @@ func TestApp_Parse_unsetSetinel(t *testing.T) {
 			err := app.Validate()
 			require.Nil(t, err)
 
-			args := append([]string{"app"}, tt.args...)
-			actualPR, actualErr := app.Parse(warg.ParseWithArgs(args), warg.ParseWithLookupEnv(warg.LookupMap(nil)))
+			actualPR, actualErr := app.Parse(tt.args, warg.ParseWithLookupEnv(warg.LookupMap(nil)))
 
 			if tt.expectedErr {
 				require.Error(t, actualErr)
@@ -964,8 +961,7 @@ func TestApp_Parse_config(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			args := append([]string{"app"}, tt.args...)
-			actualPR, actualErr := tt.app.Parse(warg.ParseWithArgs(args), warg.ParseWithLookupEnv(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(tt.args, warg.ParseWithLookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -1028,8 +1024,7 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 			err := tt.app.Validate()
 			require.Nil(t, err)
 
-			args := append([]string{"app"}, tt.args...)
-			actualPR, actualErr := tt.app.Parse(warg.ParseWithArgs(args), warg.ParseWithLookupEnv(tt.lookup))
+			actualPR, actualErr := tt.app.Parse(tt.args, warg.ParseWithLookupEnv(tt.lookup))
 
 			if tt.expectedErr {
 				require.NotNil(t, actualErr)
@@ -1062,7 +1057,7 @@ func TestCustomVersion(t *testing.T) {
 	require.Nil(t, err)
 
 	actualPR, err := app.Parse(
-		warg.ParseWithArgs([]string{"appName"}),
+		[]string{},
 		warg.ParseWithLookupEnv(warg.LookupMap(nil)),
 	)
 	require.Nil(t, err)
@@ -1087,7 +1082,7 @@ func TestContextContainsValue(t *testing.T) {
 
 	md := metadata.New(contextKey{}, expectedValue)
 	actualPR, err := app.Parse(
-		warg.ParseWithArgs([]string{"appName"}),
+		[]string{},
 		warg.ParseWithLookupEnv(warg.LookupMap(nil)),
 		warg.ParseWithMetadata(md),
 	)
@@ -1125,7 +1120,7 @@ func TestAppFlagToAddr(t *testing.T) {
 	err := app.Validate()
 	require.NoError(err)
 
-	pr, err := app.Parse(warg.ParseWithArgs([]string{"appName", "command", "--flag", "flag value"}))
+	pr, err := app.Parse([]string{"command", "--flag", "flag value"})
 	require.NoError(err)
 	err = pr.Action(pr.Context)
 	require.NoError(err)
@@ -1157,7 +1152,7 @@ func TestCmdContextStdin(t *testing.T) {
 	defer stdinFile.Close()
 
 	pr, err := app.Parse(
-		warg.ParseWithArgs([]string{"appName", "command"}),
+		[]string{"command"},
 		warg.ParseWithStdin(stdinFile),
 	)
 	require.NoError(err)

@@ -140,15 +140,15 @@ func TestAppHelp(t *testing.T) {
 				grabbitSection(),
 				warg.SkipValidation(),
 			)
-			args := append([]string{"grabbit"}, tt.args...)
 			warg.GoldenTest(
 				t,
 				warg.GoldenTestArgs{
 					App:             &app,
 					UpdateGolden:    updateGolden,
 					ExpectActionErr: false,
+					Args:            tt.args,
 				},
-				warg.ParseWithArgs(args),
+
 				warg.ParseWithLookupEnv(tt.lookup),
 			)
 		})

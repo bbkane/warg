@@ -235,14 +235,8 @@ func TestApp_Completions(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
 
-			// set it up like os.Args
-			args := []string{"appName", "--completion-zsh"}
-			args = append(args, tt.args...)
-			// add on the blank space the shell would add for us
-			args = append(args, "")
-
 			actualCandidates, actualErr := app.Completions(
-				warg.ParseWithArgs(args),
+				tt.args,
 				warg.ParseWithLookupEnv(warg.LookupMap(nil)),
 			)
 

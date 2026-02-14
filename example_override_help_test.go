@@ -46,7 +46,7 @@ func ExampleHelpFlag() {
 		),
 	)
 
-	app.MustRun(warg.ParseWithArgs([]string{"blog.exe", "-h", "custom"}))
+	app.Run([]string{"-h", "custom"})
 	// Output:
 	// Custom help command output
 }

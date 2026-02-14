@@ -6,9 +6,19 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.41.0
+
+## Added
+
+- `Run` which takes `args []string` because I use that in examples and I don't want `MustRun` to take mandatory arguments. For now, `Run` does error handling with `fmt.Fprintln` and `os.Exit`, but I plan to get more sophisticated with warg's errors - the top level should handle basic errors like I'm doing, but should also handle richer errors with pretty-printing (colors and term-width aware) and setting exit codes.
+
+## Changed
+
+- `Parse` and `Completions` now take `args []string` as the first argument representing the strings the user passed (starting with secion/comamand and ending with flag values). Previously they expected something that looked like `os.Args` and had to trim that down to what they actually wanted (and `os.Args` is different for each of them so the trimming was also different). This trimming is now done in one place: `MustRun`.
+
 # v0.40.0
 
-# Removed
+## Removed
 
 - Removed "aggregated" config searching - a `ConfigPath("path[].value"` would previously aggregate all values at for the objects "value" key in the "path" list. This was cool, but I only used it for `grabbit`. Instead I made `grabbit` have a custom contained.TypeInfo that deserializes from flags like this `--subreddit-info wallpapers,week,10` and from a dict in the config like this: `{"name": "wallpapers", "timeframe": week", "count": 10}` I think I prefer that to accumulating each bit into a slice and requiring assumbling the pieces into objects in the app code. Nevertheless I'm cutting a version for this change so I can easily find it in case I want to revert it
 

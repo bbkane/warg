@@ -17,6 +17,8 @@ type GoldenTestArgs struct {
 
 	// Whether the action should return an error
 	ExpectActionErr bool
+
+	Args []string
 }
 
 // GoldenTest runs the app and and captures stdout and stderr into files.
@@ -39,7 +41,7 @@ func GoldenTest(
 
 	parseOpts = append(parseOpts, ParseWithStderr(stderrTmpFile))
 	parseOpts = append(parseOpts, ParseWithStdout(stdoutTmpFile))
-	pr, parseErr := args.App.Parse(parseOpts...)
+	pr, parseErr := args.App.Parse(args.Args, parseOpts...)
 
 	// parseOptHolder := cli.NewParseOptHolder(parseOpts...)
 	// parseopt.OverrideStderr(stderrTmpFile)(&parseOptHolder)

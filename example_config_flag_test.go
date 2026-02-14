@@ -68,8 +68,8 @@ func ExampleConfigFlag() {
 	if err != nil {
 		log.Fatalf("write error: %e", err)
 	}
-	app.MustRun(
-		warg.ParseWithArgs([]string{"calc", "add", "-c", "testdata/ExampleConfigFlag/calc.yaml"}),
+	app.Run(
+		[]string{"add", "-c", "testdata/ExampleConfigFlag/calc.yaml"},
 	)
 	// Output:
 	// Sum: 6
