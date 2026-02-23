@@ -10,11 +10,15 @@ below this description) is likely unreleased.
 
 ## Added
 
-- `Run` which takes `args []string` because I use that in examples and I don't want `MustRun` to take mandatory arguments. For now, `Run` does error handling with `fmt.Fprintln` and `os.Exit`, but I plan to get more sophisticated with warg's errors - the top level should handle basic errors like I'm doing, but should also handle richer errors with pretty-printing (colors and term-width aware) and setting exit codes.
+- `Run` which takes `args []string` because I use `args` in example tests and I don't want `MustRun` to take mandatory arguments. For now, `Run` does error handling with `fmt.Fprintln` and `os.Exit`, but I plan to get more sophisticated with warg's errors - the top level should handle basic errors like I'm doing, but should also handle richer errors with pretty-printing (colors and term-width aware) and setting exit codes. I'm not completely happy with having the two APIs, will probably refine this further...
 
 ## Changed
 
 - `Parse` and `Completions` now take `args []string` as the first argument representing the strings the user passed (starting with secion/comamand and ending with flag values). Previously they expected something that looked like `os.Args` and had to trim that down to what they actually wanted (and `os.Args` is different for each of them so the trimming was also different). This trimming is now done in one place: `MustRun`.
+
+## Fixed
+
+- `repl` subcommand does much more graceful error handling (it used to `os.Exit(1)`, now it prints a message and continues the repl).
 
 # v0.40.0
 
