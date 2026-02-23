@@ -68,7 +68,7 @@ func ExampleConfigFlag() {
 	if err != nil {
 		log.Fatalf("write error: %e", err)
 	}
-	app.Run(
+	app.MustRunWithArgs(
 		[]string{"add", "-c", "testdata/ExampleConfigFlag/calc.yaml"},
 	)
 	// Output:

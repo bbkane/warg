@@ -125,12 +125,12 @@ type ParseState struct {
 }
 
 // parseArgs parses the args into a ParseState. It does not resolve flag values from config/env/defaults, just from the command line. It should always be followed by a call to before returning from a public API so callers see fully resolved values.
-func (a *App) parseArgs(args []string) (ParseState, error) {
+func (app *App) parseArgs(args []string) (ParseState, error) {
 	pr := ParseState{
 		ParseArgState: ParseArgState_WantSectionOrCmd,
 
 		SectionPath:    nil,
-		CurrentSection: &a.RootSection,
+		CurrentSection: &app.RootSection,
 
 		CurrentCmdName:          "",
 		CurrentCmd:              nil,
@@ -145,15 +145,15 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 	}
 
 	aliasToFlagName := make(map[string]string)
-	for flagName, fl := range a.GlobalFlags {
+	for flagName, fl := range app.GlobalFlags {
 		if fl.Alias != "" {
 			aliasToFlagName[string(fl.Alias)] = flagName
 		}
 	}
 
 	// fill the FlagValues map with empty values from the app
-	for flagName := range a.GlobalFlags {
-		val := a.GlobalFlags[flagName].EmptyValueConstructor()
+	for flagName := range app.GlobalFlags {
+		val := app.GlobalFlags[flagName].EmptyValueConstructor()
 		pr.FlagValues[flagName] = val
 	}
 
@@ -162,13 +162,13 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 		// --help <helptype> or --help must be the last thing passed and can appear at any state we aren't expecting a flag value
 		if i >= len(args)-2 &&
 			arg != "" && // just in case there's not help flag alias
-			(arg == a.HelpFlagName || arg == a.GlobalFlags[a.HelpFlagName].Alias) &&
+			(arg == app.HelpFlagName || arg == app.GlobalFlags[app.HelpFlagName].Alias) &&
 			pr.ParseArgState != ParseArgState_WantFlagValue {
 
 			pr.HelpPassed = true
 			// set the value of --help if an arg was passed, otherwise let it resolve with the rest of them...
 			if i == len(args)-2 {
-				err := pr.FlagValues[a.HelpFlagName].Update(args[i+1], value.UpdatedByFlag)
+				err := pr.FlagValues[app.HelpFlagName].Update(args[i+1], value.UpdatedByFlag)
 				if err != nil {
 					return pr, fmt.Errorf("error updating help flag: %w", err)
 				}
@@ -218,7 +218,7 @@ func (a *App) parseArgs(args []string) (ParseState, error) {
 			if actualFlagName, exists := aliasToFlagName[flagName]; exists {
 				flagName = actualFlagName
 			}
-			fl := findFlag(flagName, a.GlobalFlags, pr.CurrentCmd.Flags)
+			fl := findFlag(flagName, app.GlobalFlags, pr.CurrentCmd.Flags)
 			if fl == nil {
 				return pr, fmt.Errorf("expecting flag name, got %s", arg)
 			}
@@ -318,22 +318,22 @@ func resolveFlag(
 }
 
 // resolveFlags resolves the config flag first, and then uses its values to resolve the rest of the flags.
-func (a *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv LookupEnv, unsetFlagNames set.Set[string]) error {
+func (app *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv LookupEnv, unsetFlagNames set.Set[string]) error {
 	// resolve config flag first and try to get a reader
 	var configReader config.Reader
-	if a.ConfigFlagName != "" {
+	if app.ConfigFlagName != "" {
 		err := resolveFlag(
-			a.ConfigFlagName, a.GlobalFlags[a.ConfigFlagName], flagValues, nil, lookupEnv, unsetFlagNames)
+			app.ConfigFlagName, app.GlobalFlags[app.ConfigFlagName], flagValues, nil, lookupEnv, unsetFlagNames)
 		if err != nil {
-			return fmt.Errorf("resolveFlag error for flag %s: %w", a.ConfigFlagName, err)
+			return fmt.Errorf("resolveFlag error for flag %s: %w", app.ConfigFlagName, err)
 		}
-		if flagValues[a.ConfigFlagName].UpdatedBy() != value.UpdatedByUnset {
-			configPath := flagValues[a.ConfigFlagName].Get().(path.Path)
+		if flagValues[app.ConfigFlagName].UpdatedBy() != value.UpdatedByUnset {
+			configPath := flagValues[app.ConfigFlagName].Get().(path.Path)
 			configPathStr, err := configPath.Expand()
 			if err != nil {
 				return fmt.Errorf("error expanding config path ( %s ) : %w", configPath, err)
 			}
-			configReader, err = a.NewConfigReader(configPathStr)
+			configReader, err = app.NewConfigReader(configPathStr)
 			if err != nil {
 				return fmt.Errorf("error reading config path ( %s ) : %w", configPath, err)
 			}
@@ -342,7 +342,7 @@ func (a *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv Looku
 	}
 
 	// resolve app global flags
-	for flagName, fl := range a.GlobalFlags {
+	for flagName, fl := range app.GlobalFlags {
 		err := resolveFlag(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
 		if err != nil {
 			return fmt.Errorf("resolveFlag error for global flag %s: %w", flagName, err)

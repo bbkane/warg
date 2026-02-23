@@ -307,7 +307,8 @@ type App struct {
 	Version             string
 }
 
-func (app *App) Run(args []string, opts ...ParseOpt) {
+// MustrunWithArgs runs the app with a provided list of args. Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called. Any errors on an Action will be printed to stderr and os.Exit(1) will be called. This is intended to be run in example tests
+func (app *App) MustRunWithArgs(args []string, opts ...ParseOpt) {
 	pr, err := app.Parse(args, opts...)
 	if err != nil {
 		// https://unix.stackexchange.com/a/254747
@@ -321,7 +322,7 @@ func (app *App) Run(args []string, opts ...ParseOpt) {
 	}
 }
 
-// MustRun runs the app.
+// MustRun reads os.Args and runs the app or produces zsh completions.
 // Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
 // Any errors on an Action will be printed to stderr and os.Exit(1) will be called.
 func (app *App) MustRun(opts ...ParseOpt) {
@@ -333,7 +334,7 @@ func (app *App) MustRun(opts ...ParseOpt) {
 		// so we need to remove the first two args and the last arg leaving <args>...
 		args := os.Args[2 : len(os.Args)-1]
 
-		candidates, err := app.Completions(args, opts...)
+		candidates, err := app.Complete(args, opts...)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -341,7 +342,7 @@ func (app *App) MustRun(opts ...ParseOpt) {
 		completion.ZshCompletionsWrite(os.Stdout, candidates)
 
 	} else {
-		app.Run(os.Args[1:], opts...)
+		app.MustRunWithArgs(os.Args[1:], opts...)
 	}
 }
 
@@ -504,12 +505,12 @@ func (app *App) Validate() error {
 // CompletionsFunc is a function that returns completion candidates for a flag. See warg.Completions[Type] for convenience functions to make this
 type CompletionsFunc func(CmdContext) (*completion.Candidates, error)
 
-// Completions generates completions from a list of args, by looking at the app structure starting at the root section. Args must start with a section, command in root section or a global flag and must not end with a partial string
-func (a *App) Completions(args []string, opts ...ParseOpt) (*completion.Candidates, error) {
+// Complete generates completions from a list of args, by looking at the app structure starting at the root section. Args must start with a section, command in root section or a global flag and must not end with a partial string
+func (app *App) Complete(args []string, opts ...ParseOpt) (*completion.Candidates, error) {
 	parseOpts := NewParseOpts(opts...)
 
 	// I could to a full parse here, but that would be slower and more prone to failure than just parsing the args - we don't need a lot of info to complete section/command names
-	parseState, err := a.parseArgs(args)
+	parseState, err := app.parseArgs(args)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected parseArgs err: %w", err)
 	}
@@ -517,7 +518,7 @@ func (a *App) Completions(args []string, opts ...ParseOpt) (*completion.Candidat
 	// special case if help is passed
 	if parseState.HelpPassed {
 		// if the value of the flag has been passed, don't suggest anything
-		if parseState.FlagValues[a.HelpFlagName].UpdatedBy() == value.UpdatedByFlag {
+		if parseState.FlagValues[app.HelpFlagName].UpdatedBy() == value.UpdatedByFlag {
 			return &completion.Candidates{
 				Type:   completion.Type_None,
 				Values: nil,
@@ -529,7 +530,7 @@ func (a *App) Completions(args []string, opts ...ParseOpt) (*completion.Candidat
 			Type:   completion.Type_Values,
 			Values: []completion.Candidate{},
 		}
-		for _, name := range a.HelpCmds.SortedNames() {
+		for _, name := range app.HelpCmds.SortedNames() {
 			res.Values = append(res.Values, completion.Candidate{
 				Name:        string(name),
 				Description: "",
@@ -557,19 +558,19 @@ func (a *App) Completions(args []string, opts ...ParseOpt) (*completion.Candidat
 			})
 		}
 		ret.Values = append(ret.Values, completion.Candidate{
-			Name:        a.HelpFlagName,
-			Description: a.GlobalFlags[a.HelpFlagName].HelpShort,
+			Name:        app.HelpFlagName,
+			Description: app.GlobalFlags[app.HelpFlagName].HelpShort,
 		})
 		return &ret, nil
 	}
 
 	// Finish the parse!
-	err = a.resolveFlags(parseState.CurrentCmd, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
+	err = app.resolveFlags(parseState.CurrentCmd, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected resolveFlags err: %w", err)
 	}
 	cmdContext := CmdContext{
-		App:           a,
+		App:           app,
 		ParseMetadata: parseOpts.ParseMetadata,
 		Flags:         parseState.FlagValues.ToPassedFlags(),
 		ForwardedArgs: parseState.CurrentCmdForwardedArgs, // should always be nil during completions as completions occur at the end
@@ -687,7 +688,7 @@ func replCmdAction(cmdCtx CmdContext) error {
 		// fmt.Fprintf(os.Stderr, "words: %#v\n", words)
 
 		// TODO: should I copy parseOpts from cmdCtx?
-		candidates, err := cmdCtx.App.Completions(
+		candidates, err := cmdCtx.App.Complete(
 			words,
 		)
 		if err != nil {

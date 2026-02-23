@@ -72,7 +72,7 @@ func ExampleNew() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	app.Run([]string{"login"})
+	app.MustRunWithArgs([]string{"login"})
 	// Output:
 	// Logging into https://envvar.com
 }

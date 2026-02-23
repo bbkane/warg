@@ -90,7 +90,7 @@ func ExampleApp_Parse_flag_value_options() {
 	if err != nil {
 		log.Fatalf("write error: %e", err)
 	}
-	app.Run(
+	app.MustRunWithArgs(
 		[]string{"show", "-c", "testdata/ExampleFlagValueOptions/config.yaml", "--scalar-flag", "b"},
 	)
 	// Output:

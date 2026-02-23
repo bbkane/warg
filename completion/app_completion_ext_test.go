@@ -235,7 +235,7 @@ func TestApp_Completions(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
 
-			actualCandidates, actualErr := app.Completions(
+			actualCandidates, actualErr := app.Complete(
 				tt.args,
 				warg.ParseWithLookupEnv(warg.LookupMap(nil)),
 			)

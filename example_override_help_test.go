@@ -46,7 +46,7 @@ func ExampleHelpFlag() {
 		),
 	)
 
-	app.Run([]string{"-h", "custom"})
+	app.MustRunWithArgs([]string{"-h", "custom"})
 	// Output:
 	// Custom help command output
 }
