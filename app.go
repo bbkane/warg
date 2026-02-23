@@ -3,6 +3,7 @@ package warg
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"runtime/debug"
 	"slices"
@@ -329,7 +330,7 @@ func (app *App) MustRun(opts ...ParseOpt) {
 
 		// parseOpts.Args looks like: <exe> --completion-zsh <args>... <partialOrEmptyString>
 		// the partial or empty string is passed to us from the completion script. Empty if the user just typed space and pressed tab, partial if the user pressed tab after typing part of something. zsh will filter that for us
-		// so we need to remove the first two args and the last arg
+		// so we need to remove the first two args and the last arg leaving <args>...
 		args := os.Args[2 : len(os.Args)-1]
 
 		candidates, err := app.Completions(args, opts...)
@@ -667,16 +668,23 @@ func replCmdAction(cmdCtx CmdContext) error {
 
 	rl.Completer = func(line []rune, cursor int) readline.Completions {
 
-		// don't care about stuff after the cursor. TODO: is this off by one for the cursor?
+		// don't care about stuff after the cursor.
 		truncatedLine := line[:cursor]
 
 		lineStr := string(truncatedLine)
+		// fmt.Fprintf(os.Stderr, "lineStr: %s\n", lineStr)
+
 		words, err := shellwords.Parse(lineStr)
 		if err != nil {
 			err = fmt.Errorf("could not parse args for completion: args: %v, %w", words, err)
-			fmt.Fprintln(cmdCtx.Stderr, err)
-			os.Exit(1)
+			return readline.CompleteMessage(err.Error())
 		}
+
+		// Completions are accepted with " ", so if we don't end in " ", it's a partial word. We can't handle partial words, so chop it off
+		if len(lineStr) != 0 && !strings.HasSuffix(lineStr, " ") {
+			words = words[:len(words)-1]
+		}
+		// fmt.Fprintf(os.Stderr, "words: %#v\n", words)
 
 		// TODO: should I copy parseOpts from cmdCtx?
 		candidates, err := cmdCtx.App.Completions(
@@ -684,8 +692,7 @@ func replCmdAction(cmdCtx CmdContext) error {
 		)
 		if err != nil {
 			err = fmt.Errorf("could not get completions: args: %v, %w", words, err)
-			fmt.Fprintln(cmdCtx.Stderr, err)
-			os.Exit(1)
+			return readline.CompleteMessage(err.Error())
 		}
 
 		//nolint:exhaustive  // the default handles the cases we don't support yet
@@ -717,6 +724,10 @@ func replCmdAction(cmdCtx CmdContext) error {
 	// return completions
 	for {
 		line, err := rl.Readline()
+		switch err {
+		case readline.ErrInterrupt, io.EOF:
+			return nil
+		}
 		if err != nil {
 			return fmt.Errorf("could not read line: %w", err)
 		}
