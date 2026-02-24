@@ -14,8 +14,9 @@ below this description) is likely unreleased.
 
 ## Changed
 
-- Renamed `Completions` to `Complete` to match the case of the other methods
-- `Parse`, `Complete`, `MustRunWithArgs` now take `args []string` as the first argument representing the strings the user passed (starting with secion/comamand and ending with flag values). Previously they expected something that looked like `os.Args` and each to trim that down to what they actually wanted (and `os.Args` is different for each of them so the trimming was also different). This trimming is now centralized in `MustRun`.
+- Renamed `App.Completions` to `App.Complete` to match the case of the other methods
+- `App.Parse`, `App.Complete`, `App.MustRunWithArgs` now take `args []string` as the first argument representing the strings the user passed (starting with secion/comamand and ending with flag values). Previously they expected something that looked like `os.Args` and each to trim that down to what they actually wanted (and `os.Args` is different for each of them so the trimming was also different). This trimming is now centralized in `App.MustRun`.
+- `App.Complete` now takes a partiallyTypedArg. We don't actually use it partiallyTypedArg right now, but hopefully one day! At least the API is correct.
 
 ## Fixed
 

@@ -237,6 +237,7 @@ func TestApp_Completions(t *testing.T) {
 
 			actualCandidates, actualErr := app.Complete(
 				tt.args,
+				"",
 				warg.ParseWithLookupEnv(warg.LookupMap(nil)),
 			)
 

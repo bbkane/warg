@@ -333,8 +333,9 @@ func (app *App) MustRun(opts ...ParseOpt) {
 		// the partial or empty string is passed to us from the completion script. Empty if the user just typed space and pressed tab, partial if the user pressed tab after typing part of something. zsh will filter that for us
 		// so we need to remove the first two args and the last arg leaving <args>...
 		args := os.Args[2 : len(os.Args)-1]
+		partiallyTypedArg := os.Args[len(os.Args)-1]
 
-		candidates, err := app.Complete(args, opts...)
+		candidates, err := app.Complete(args, partiallyTypedArg, opts...)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -505,8 +506,8 @@ func (app *App) Validate() error {
 // CompletionsFunc is a function that returns completion candidates for a flag. See warg.Completions[Type] for convenience functions to make this
 type CompletionsFunc func(CmdContext) (*completion.Candidates, error)
 
-// Complete generates completions from a list of args, by looking at the app structure starting at the root section. Args must start with a section, command in root section or a global flag and must not end with a partial string
-func (app *App) Complete(args []string, opts ...ParseOpt) (*completion.Candidates, error) {
+// Complete generates completions from a list of args, by looking at the app structure starting at the root section. Args must start with a section, command in root section or a global flag. Pass a partial or empty string for partiallyTypedArg - it's not currently used
+func (app *App) Complete(args []string, partiallyTypedArg string, opts ...ParseOpt) (*completion.Candidates, error) {
 	parseOpts := NewParseOpts(opts...)
 
 	// I could to a full parse here, but that would be slower and more prone to failure than just parsing the args - we don't need a lot of info to complete section/command names
@@ -681,16 +682,16 @@ func replCmdAction(cmdCtx CmdContext) error {
 			return readline.CompleteMessage(err.Error())
 		}
 
-		// Completions are accepted with " ", so if we don't end in " ", it's a partial word. We can't handle partial words, so chop it off
+		// Completions are accepted with " ", so if we don't end in " ", it's a partial word.
+		var partiallyTypedArg string
 		if len(lineStr) != 0 && !strings.HasSuffix(lineStr, " ") {
 			words = words[:len(words)-1]
+			partiallyTypedArg = words[len(words)-1]
 		}
 		// fmt.Fprintf(os.Stderr, "words: %#v\n", words)
 
 		// TODO: should I copy parseOpts from cmdCtx?
-		candidates, err := cmdCtx.App.Complete(
-			words,
-		)
+		candidates, err := cmdCtx.App.Complete(words, partiallyTypedArg)
 		if err != nil {
 			err = fmt.Errorf("could not get completions: args: %v, %w", words, err)
 			return readline.CompleteMessage(err.Error())
