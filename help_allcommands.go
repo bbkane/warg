@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	"go.bbkane.com/warg/styles"
 )
 
 func allCmdsSectionHelp() Action {
@@ -13,24 +15,26 @@ func allCmdsSectionHelp() Action {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(cmdCtx.Flags, file)
+		s, err := conditionallyEnableStyle(cmdCtx.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
+
+		p := styles.NewPrinter(file)
 
 		cur := cmdCtx.ParseState.CurrentSection
 
 		// Print top help section
 		if cur.HelpLong != "" {
-			fmt.Fprintf(f, "%s\n", cur.HelpLong)
+			p.Println(cur.HelpLong)
 		} else {
-			fmt.Fprintf(f, "%s\n", cur.HelpShort)
+			p.Println(cur.HelpShort)
 		}
 
-		fmt.Fprintln(f)
+		p.Println()
 
-		fmt.Fprintln(f, fmtHeader(&col, "All Commands")+" (use <cmd> -h to see flag details):")
-		fmt.Fprintln(f)
+		p.Println(s.Header("All Commands") + " (use <cmd> -h to see flag details):")
+		p.Println()
 
 		path := []string{string(cmdCtx.App.Name)}
 		for _, e := range cmdCtx.ParseState.SectionPath {
@@ -44,24 +48,23 @@ func allCmdsSectionHelp() Action {
 			for _, name := range flatSec.Sec.Cmds.SortedNames() {
 
 				com := flatSec.Sec.Cmds[name]
-				fmt.Fprint(f, "  # ")
-				fmt.Fprintln(f, com.HelpShort)
+				p.Print("  # ")
+				p.Println(com.HelpShort)
 
-				fmt.Fprintf(f, "  ")
-
-				for _, p := range flatSec.Path {
-					fmt.Fprint(f, fmtCommandName(&col, string(p))+" ")
+				p.Print("  ")
+				for _, path := range flatSec.Path {
+					p.Print(s.CommandName(string(path)) + " ")
 				}
-				fmt.Fprintln(f, fmtCommandName(&col, name))
+				p.Println(s.CommandName(name))
 
-				fmt.Fprintln(f)
+				p.Println()
 			}
 
 		}
 		if cur.Footer != "" {
-			fmt.Fprintln(f, fmtHeader(&col, "Footer")+":")
-			fmt.Fprintln(f)
-			fmt.Fprintf(f, "%s\n", cur.Footer)
+			p.Println(s.Header("Footer") + ":")
+			p.Println()
+			p.Println(cur.Footer)
 		}
 
 		return nil

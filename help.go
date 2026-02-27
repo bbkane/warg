@@ -6,6 +6,7 @@ import (
 
 	"github.com/mattn/go-isatty"
 	"go.bbkane.com/gocolor"
+	"go.bbkane.com/warg/styles"
 	"go.bbkane.com/warg/value/scalar"
 )
 
@@ -54,6 +55,7 @@ func leftPad(s string, pad string, plength int) string {
 }
 
 // ConditionallyEnableColor looks for a passed --color flag with an underlying string value. If
+// ConditionallyEnableColor2 looks for a passed --color flag with an underlying string value. If
 // it exists and is set to "true", or if it exists, is set to "auto",
 // and the passed file is a TTY, an enabled Color is returned.
 func ConditionallyEnableColor(pf PassedFlags, file *os.File) (gocolor.Color, error) {
@@ -68,27 +70,29 @@ func ConditionallyEnableColor(pf PassedFlags, file *os.File) (gocolor.Color, err
 
 	startEnabled := useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd()))
 	return gocolor.Prepare(startEnabled)
-
 }
 
-func fmtHeader(col *gocolor.Color, header string) string {
-	return col.Add(col.Bold+col.Underline, header)
-}
-
-func fmtSectionName(col *gocolor.Color, sectionName string) string {
-	return col.Add(col.Bold+col.FgCyan, string(sectionName))
-}
-
-func fmtCommandName(col *gocolor.Color, commandName string) string {
-	return col.Add(col.Bold+col.FgGreen, string(commandName))
-}
-
-func fmtFlagName(col *gocolor.Color, flagName string) string {
-	return col.Add(col.Bold+col.FgYellow, string(flagName))
-}
-
-func fmtFlagAlias(col *gocolor.Color, flagAlias string) string {
-	return col.Add(col.Bold+col.FgYellow, string(flagAlias))
+// conditionallyEnableStyle looks for a passed --color flag with an underlying string value. If
+// it exists and is set to "true", or if it exists, is set to "auto",
+// and the passed file is a TTY, an enabled Styles is returned.
+func conditionallyEnableStyle(pf PassedFlags, file *os.File) (styles.Styles, error) {
+	// default to trying to use color
+	useColor := "auto"
+	// respect a --color string
+	if useColorI, exists := pf["--color"]; exists {
+		if useColorUnder, isStr := useColorI.(string); isStr {
+			useColor = useColorUnder
+		}
+	}
+	startEnabled := useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd()))
+	if !startEnabled {
+		return styles.NewEmptyStyles(), nil
+	}
+	err := gocolor.EnableConsole()
+	if err != nil {
+		return styles.NewEmptyStyles(), err
+	}
+	return styles.NewEnabledStyles(), nil
 }
 
 // sortedKeys returns the keys of the map m in sorted order.

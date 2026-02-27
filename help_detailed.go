@@ -4,42 +4,38 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"io"
 	"math"
 	"os"
 
-	"go.bbkane.com/gocolor"
+	"go.bbkane.com/warg/styles"
 	"go.bbkane.com/warg/value"
 )
 
-func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag, val value.Value) {
+func detailedPrintFlag(p *styles.Printer, s *styles.Styles, name string, f *Flag, val value.Value) {
 	if f.Alias != "" {
-		fmt.Fprintf(
-			w,
+		p.Printf(
 			"  %s , %s : %s\n",
-			fmtFlagName(color, name),
-			fmtFlagAlias(color, f.Alias),
+			s.FlagName(name),
+			s.FlagAlias(f.Alias),
 			f.HelpShort,
 		)
 	} else {
-		fmt.Fprintf(
-			w,
+		p.Printf(
 			"  %s : %s\n",
-			fmtFlagName(color, name),
+			s.FlagName(name),
 			f.HelpShort,
 		)
 	}
-	fmt.Fprintf(
-		w,
+	p.Printf(
 		"    %s : %s\n",
-		color.Add(color.Bold, "type"),
+		s.Label("type"),
 		val.Description(),
 	)
 
 	if len(val.Choices()) > 0 {
-		fmt.Fprintf(w,
+		p.Printf(
 			"    %s : %s\n",
-			color.Add(color.Bold, "choices"),
+			s.Label("choices"),
 			val.Choices(),
 		)
 	}
@@ -47,32 +43,28 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag, 
 	if val.HasDefault() {
 		switch v := val.(type) {
 		case value.DictValue:
-			fmt.Fprintf(
-				w,
+			p.Printf(
 				"    %s\n",
-				color.Add(color.Bold, "default"),
+				s.Label("default"),
 			)
 			def := v.DefaultStringMap()
 			for _, key := range sortedKeys(def) {
-				fmt.Fprintf(
-					w,
+				p.Printf(
 					"      %s : %s\n",
-					color.Add(color.Bold, key),
+					s.Label(key),
 					def[key],
 				)
 			}
 		case value.ScalarValue:
-			fmt.Fprintf(
-				w,
+			p.Printf(
 				"    %s : %s\n",
-				color.Add(color.Bold, "default"),
+				s.Label("default"),
 				v.DefaultString(),
 			)
 		case value.SliceValue:
-			fmt.Fprintf(
-				w,
+			p.Printf(
 				"    %s : %s\n",
-				color.Add(color.Bold, "default"),
+				s.Label("default"),
 				v.DefaultStringSlice(),
 			)
 		default:
@@ -80,33 +72,31 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag, 
 		}
 	}
 	if f.ConfigPath != "" {
-		fmt.Fprintf(
-			w,
+		p.Printf(
 			"    %s : %s\n",
-			color.Add(color.Bold, "configpath"),
+			s.Label("configpath"),
 			f.ConfigPath,
 		)
 	}
 	if len(f.EnvVars) > 0 {
-		fmt.Fprintf(w,
+		p.Printf(
 			"    %s : %s\n",
-			color.Add(color.Bold, "envvars"),
+			s.Label("envvars"),
 			f.EnvVars,
 		)
 	}
 
 	// TODO: it would be nice if this were red when the value isn't set
 	if f.Required {
-		fmt.Fprintf(w,
+		p.Printf(
 			"    %s : true\n",
-			color.Add(color.Bold, "required"),
+			s.Label("required"),
 		)
 	}
 	if f.UnsetSentinel != nil {
-		fmt.Fprintf(
-			w,
+		p.Printf(
 			"    %s : %s\n",
-			color.Add(color.Bold, "unsetsentinel"),
+			s.Label("unsetsentinel"),
 			*f.UnsetSentinel,
 		)
 	}
@@ -114,18 +104,16 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag, 
 	if val.UpdatedBy() != value.UpdatedByUnset {
 		switch v := val.(type) {
 		case value.DictValue:
-			fmt.Fprintf(
-				w,
+			p.Printf(
 				"    %s (set by %s):\n",
-				color.Add(color.Bold, "currentvalue"),
-				color.Add(color.Bold, string(val.UpdatedBy())),
+				s.Label("currentvalue"),
+				s.Label(string(val.UpdatedBy())),
 			)
 			m := v.StringMap()
 			for _, key := range sortedKeys(m) {
-				fmt.Fprintf(
-					w,
+				p.Printf(
 					"      %s : %s\n",
-					color.Add(color.Bold, key),
+					s.Label(key),
 					m[key],
 				)
 			}
@@ -138,31 +126,26 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag, 
 			//  100 - 999 : 2
 			maxPadding := int(math.Ceil(math.Log10(float64(sliceLen)))) + 1
 
-			fmt.Fprintf(w,
+			p.Printf(
 				"    %s (set by %s) :\n",
-				color.Add(color.Bold, "currentvalue"),
-				color.Add(color.Bold, string(val.UpdatedBy())),
+				s.Label("currentvalue"),
+				s.Label(string(val.UpdatedBy())),
 			)
 
 			for i, e := range v.StringSlice() {
 				indexStr := fmt.Sprint(i)
 				padding := maxPadding - len(indexStr)
-				fmt.Fprintf(
-					w,
+				p.Printf(
 					"      %s %s\n",
-					color.Add(
-						color.Bold,
-						leftPad(indexStr, "0", padding)+")",
-					),
+					s.Label(leftPad(indexStr, "0", padding)+")"),
 					e,
 				)
 			}
 		case value.ScalarValue:
-			fmt.Fprintf(
-				w,
+			p.Printf(
 				"    %s (set by %s) : %s\n",
-				color.Add(color.Bold, "currentvalue"),
-				color.Add(color.Bold, string(val.UpdatedBy())),
+				s.Label("currentvalue"),
+				s.Label(string(val.UpdatedBy())),
 				v.String(),
 			)
 		default:
@@ -170,7 +153,7 @@ func detailedPrintFlag(w io.Writer, color *gocolor.Color, name string, f *Flag, 
 		}
 	}
 
-	fmt.Fprintln(w)
+	p.Println()
 }
 
 // detailedCmdHelp returns an Action that prints detailed help for the current command (cmdCtx.ParseState.CurrentCmd). It is expected to not be nil.
@@ -180,21 +163,23 @@ func detailedCmdHelp() Action {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(cmdCtx.Flags, file)
+		s, err := conditionallyEnableStyle(cmdCtx.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
+
+		p := styles.NewPrinter(f)
 
 		cur := cmdCtx.ParseState.CurrentCmd
 
 		// Print top help section
 		if cur.HelpLong != "" {
-			fmt.Fprintf(f, "%s\n", cur.HelpLong)
+			p.Println(cur.HelpLong)
 		} else {
-			fmt.Fprintf(f, "%s\n", cur.HelpShort)
+			p.Println(cur.HelpShort)
 		}
 
-		fmt.Fprintln(f)
+		p.Println()
 
 		// compute sections for command flags and inherited flags,
 		// then print their headers and them if they're not empty
@@ -204,36 +189,36 @@ func detailedCmdHelp() Action {
 			for _, name := range cmdCtx.App.GlobalFlags.SortedNames() {
 				f := cmdCtx.App.GlobalFlags[name]
 				val := cmdCtx.ParseState.FlagValues[name]
-				detailedPrintFlag(&sectionFlagHelp, &col, name, &f, val)
+				detailedPrintFlag(styles.NewPrinter(&sectionFlagHelp), &s, name, &f, val)
 			}
 
 			for _, name := range cmdCtx.ParseState.CurrentCmd.Flags.SortedNames() {
 				f := cmdCtx.ParseState.CurrentCmd.Flags[name]
 				val := cmdCtx.ParseState.FlagValues[name]
-				detailedPrintFlag(&commandFlagHelp, &col, name, &f, val)
+				detailedPrintFlag(styles.NewPrinter(&commandFlagHelp), &s, name, &f, val)
 			}
 
 			if commandFlagHelp.Len() > 0 {
-				fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Command Flags")+":")
-				fmt.Fprintln(f)
+				p.Println(s.Header("Command Flags") + ":")
+				p.Println()
 				_, _ = commandFlagHelp.WriteTo(f)
 			}
 			if sectionFlagHelp.Len() > 0 {
-				fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Global Flags")+":")
-				fmt.Fprintln(f)
+				p.Println(s.Header("Global Flags") + ":")
+				p.Println()
 				_, _ = sectionFlagHelp.WriteTo(f)
 			}
 		}
 		if cur.AllowForwardedArgs {
-			fmt.Fprintln(f, col.Add(col.Bold+col.Underline, "Forwarded Arguments")+":")
-			fmt.Fprintln(f)
-			fmt.Fprintln(f, "  This command accepts forwarded arguments after a `--` separator.")
+			p.Println(s.Header("Forwarded Arguments") + ":")
+			p.Println()
+			p.Println("  This command accepts forwarded arguments after a `--` separator.")
 		}
 		if cur.Footer != "" {
-			fmt.Fprintln(f)
-			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Footer")+":")
-			fmt.Fprintln(f)
-			fmt.Fprintf(f, "%s\n", cur.Footer)
+			p.Println()
+			p.Println(s.Header("Footer") + ":")
+			p.Println()
+			p.Println(cur.Footer)
 		}
 		return nil
 
@@ -247,59 +232,59 @@ func detailedSectionHelp() Action {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(cmdCtx.Flags, file)
+		s, err := conditionallyEnableStyle(cmdCtx.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
+
+		p := styles.NewPrinter(f)
 
 		cur := cmdCtx.ParseState.CurrentSection
 
 		// Print top help section
 		if cur.HelpLong != "" {
-			fmt.Fprintf(f, "%s\n", cur.HelpLong)
+			p.Println(cur.HelpLong)
 		} else {
-			fmt.Fprintf(f, "%s\n", cur.HelpShort)
+			p.Println(cur.HelpShort)
 		}
 
-		fmt.Fprintln(f)
+		p.Println()
 
 		// Print sections
 		if len(cur.Sections) > 0 {
-			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Sections")+":")
-			fmt.Fprintln(f)
+			p.Println(s.Header("Sections") + ":")
+			p.Println()
 
 			for _, k := range cur.Sections.SortedNames() {
-				fmt.Fprintf(
-					f,
+				p.Printf(
 					"  %s : %s\n",
-					fmtSectionName(&col, k),
+					s.SectionName(k),
 					cur.Sections[k].HelpShort,
 				)
 			}
 
-			fmt.Fprintln(f)
+			p.Println()
 		}
 
 		// Print commands
 		if len(cur.Cmds) > 0 {
-			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Commands")+":")
-			fmt.Fprintln(f)
+			p.Println(s.Header("Commands") + ":")
+			p.Println()
 
 			for _, k := range cur.Cmds.SortedNames() {
-				fmt.Fprintf(
-					f,
+				p.Printf(
 					"  %s : %s\n",
-					fmtCommandName(&col, k),
+					s.CommandName(k),
 					cur.Cmds[string(k)].HelpShort,
 				)
 			}
 		}
 
 		if cur.Footer != "" {
-			fmt.Fprintln(f)
-			fmt.Fprintln(f, col.Add(col.Underline+col.Bold, "Footer")+":")
-			fmt.Fprintln(f)
-			fmt.Fprintf(f, "%s\n", cur.Footer)
+			p.Println()
+			p.Println(s.Header("Footer") + ":")
+			p.Println()
+			p.Println(cur.Footer)
 		}
 		return nil
 	}

@@ -11,6 +11,7 @@ below this description) is likely unreleased.
 ## Added
 
 - `MustRunWithArgs` - intended for example tests and takes `args []string` as an alternative to `MustRunWithArgs`
+- `styles` package with `Styles` struct for customizing warg output colors and `Printer` as a small wrapper around `io.Writer` and the `fmt.FPrintXXX` functions (I use them a lot in the help functions)
 
 ## Changed
 

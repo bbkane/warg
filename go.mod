@@ -9,7 +9,7 @@ require (
 	github.com/reeflective/readline v1.1.4
 	github.com/stretchr/testify v1.11.1
 	github.com/xhit/go-str2duration/v2 v2.1.0
-	go.bbkane.com/gocolor v0.0.6
+	go.bbkane.com/gocolor v0.0.7
 )
 
 require (

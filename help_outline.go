@@ -3,29 +3,26 @@ package warg
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 
-	"go.bbkane.com/gocolor"
+	"go.bbkane.com/warg/styles"
 )
 
-func outlineHelper(w io.Writer, color *gocolor.Color, sec Section, indent int) {
+func outlineHelper(p *styles.Printer, s *styles.Styles, sec Section, indent int) {
 	// commands and command flags
 	for _, comName := range sec.Cmds.SortedNames() {
-		fmt.Fprintln(
-			w,
-			leftPad(fmtCommandName(color, string(comName)), "  ", indent),
+		p.Println(
+			leftPad(s.CommandName(string(comName)), "  ", indent),
 		)
 	}
 
 	// sections
 	for _, k := range sec.Sections.SortedNames() {
 		childSec := sec.Sections[k]
-		fmt.Fprintln(
-			w,
-			leftPad(fmtSectionName(color, k), "  ", indent),
+		p.Println(
+			leftPad(s.SectionName(k), "  ", indent),
 		)
-		outlineHelper(w, color, childSec, indent+1)
+		outlineHelper(p, s, childSec, indent+1)
 	}
 
 }
@@ -36,15 +33,17 @@ func outlineHelp() Cmd {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		col, err := ConditionallyEnableColor(cmdCtx.Flags, file)
+		s, err := conditionallyEnableStyle(cmdCtx.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}
 
-		fmt.Fprintln(f, "# "+string(cmdCtx.App.RootSection.HelpShort))
-		fmt.Fprintf(f, "%s\n", fmtSectionName(&col, string(cmdCtx.App.Name)))
+		p := styles.NewPrinter(f)
 
-		outlineHelper(f, &col, cmdCtx.App.RootSection, 1)
+		p.Println("# " + string(cmdCtx.App.RootSection.HelpShort))
+		p.Println(s.SectionName(string(cmdCtx.App.Name)))
+
+		outlineHelper(p, &s, cmdCtx.App.RootSection, 1)
 
 		return nil
 	}
