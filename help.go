@@ -54,11 +54,11 @@ func leftPad(s string, pad string, plength int) string {
 	return s
 }
 
-// ConditionallyEnableColor looks for a passed --color flag with an underlying string value. If
+// ColorEnabled looks for a passed --color flag with an underlying string value. If
 // ConditionallyEnableColor2 looks for a passed --color flag with an underlying string value. If
 // it exists and is set to "true", or if it exists, is set to "auto",
 // and the passed file is a TTY, an enabled Color is returned.
-func ConditionallyEnableColor(pf PassedFlags, file *os.File) (gocolor.Color, error) {
+func ColorEnabled(pf PassedFlags, file *os.File) bool {
 	// default to trying to use color
 	useColor := "auto"
 	// respect a --color string
@@ -69,22 +69,14 @@ func ConditionallyEnableColor(pf PassedFlags, file *os.File) (gocolor.Color, err
 	}
 
 	startEnabled := useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd()))
-	return gocolor.Prepare(startEnabled)
+	return startEnabled
 }
 
 // conditionallyEnableStyle looks for a passed --color flag with an underlying string value. If
 // it exists and is set to "true", or if it exists, is set to "auto",
 // and the passed file is a TTY, an enabled Styles is returned.
 func conditionallyEnableStyle(pf PassedFlags, file *os.File) (styles.Styles, error) {
-	// default to trying to use color
-	useColor := "auto"
-	// respect a --color string
-	if useColorI, exists := pf["--color"]; exists {
-		if useColorUnder, isStr := useColorI.(string); isStr {
-			useColor = useColorUnder
-		}
-	}
-	startEnabled := useColor == "true" || (useColor == "auto" && isatty.IsTerminal(file.Fd()))
+	startEnabled := ColorEnabled(pf, file)
 	if !startEnabled {
 		return styles.NewEmptyStyles(), nil
 	}
