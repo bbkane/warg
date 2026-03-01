@@ -686,7 +686,8 @@ func replCmdAction(cmdCtx CmdContext) error {
 		var partiallyTypedArg string
 		if len(lineStr) != 0 && !strings.HasSuffix(lineStr, " ") {
 			words = words[:len(words)-1]
-			partiallyTypedArg = words[len(words)-1]
+			// TODO: this makes it panic. I need to extract this line, cursor -> args, partiallyTypedArg logic into a separate function and test it. For now, just don't don't try to get the partiallyTypedArg
+			// partiallyTypedArg = words[len(words)-1]
 		}
 		// fmt.Fprintf(os.Stderr, "words: %#v\n", words)
 
