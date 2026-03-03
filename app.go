@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime/debug"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/mattn/go-shellwords"
@@ -15,6 +16,7 @@ import (
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/path"
 	"go.bbkane.com/warg/value"
+	"go.bbkane.com/warg/value/contained"
 	"go.bbkane.com/warg/value/scalar"
 )
 
@@ -80,6 +82,7 @@ func HelpFlag(helpCmds CmdMap, helpFlags FlagMap) AppOpt {
 // SkipAll skips adding:
 //   - the default completion commands (<app> completion)
 //   - the default color flag map (<app> --color)
+//   - the default terminal width flag (<app> --term-width)
 //   - the default version command map (<app> version)
 //   - the default validation checks
 //
@@ -88,6 +91,7 @@ func SkipAll() AppOpt {
 	return func(a *App) {
 		a.SkipCompletionCmds = true
 		a.SkipGlobalColorFlag = true
+		a.SkipGlobalTermWidthFlag = true
 		a.SkipREPLCmd = true
 		a.SkipValidation = true
 		a.SkipVersionCmd = true
@@ -105,6 +109,13 @@ func SkipCompletionCmds() AppOpt {
 func SkipGlobalColorFlag() AppOpt {
 	return func(a *App) {
 		a.SkipGlobalColorFlag = true
+	}
+}
+
+// SkipGlobalTermWidthFlag skips adding the default terminal width flag (<app> --term-width).
+func SkipGlobalTermWidthFlag() AppOpt {
+	return func(a *App) {
+		a.SkipGlobalTermWidthFlag = true
 	}
 }
 
@@ -199,19 +210,20 @@ func CompletionsValuesDescriptions(values []completion.Candidate) CompletionsFun
 // New creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.
 func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 	app := App{
-		Name:                name,
-		RootSection:         rootSection,
-		ConfigFlagName:      "",
-		NewConfigReader:     nil,
-		HelpFlagName:        "",
-		HelpCmds:            make(CmdMap),
-		SkipCompletionCmds:  false,
-		SkipGlobalColorFlag: false,
-		SkipREPLCmd:         false,
-		SkipValidation:      false,
-		SkipVersionCmd:      false,
-		Version:             version,
-		GlobalFlags:         make(FlagMap),
+		Name:                    name,
+		RootSection:             rootSection,
+		ConfigFlagName:          "",
+		NewConfigReader:         nil,
+		HelpFlagName:            "",
+		HelpCmds:                make(CmdMap),
+		SkipCompletionCmds:      false,
+		SkipGlobalColorFlag:     false,
+		SkipGlobalTermWidthFlag: false,
+		SkipREPLCmd:             false,
+		SkipValidation:          false,
+		SkipVersionCmd:          false,
+		Version:                 version,
+		GlobalFlags:             make(FlagMap),
 	}
 	for _, opt := range opts {
 		opt(&app)
@@ -235,6 +247,32 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 					scalar.Default("auto"),
 				),
 				EnvVars("WARG_COLOR"),
+			),
+		})(&app)
+	}
+
+	if !app.SkipGlobalTermWidthFlag {
+		GlobalFlagMap(FlagMap{
+			"--term-width": NewFlag(
+				"Terminal width. Should be a positive integer, \"auto\", or \"infinite\". If \"auto\" the app will attempt to detect terminal width and fall back to 120 if detection fails",
+				scalar.New(
+					contained.TypeInfo[string]{
+						Description: "string",
+						FromIFace: func(iFace interface{}) (string, error) {
+							s, ok := iFace.(string)
+							if !ok {
+								return "", contained.ErrIncompatibleInterface
+							}
+							return parseTermWidth(s)
+						},
+						FromString: parseTermWidth,
+						FromZero:   contained.FromZero[string],
+						Equals:     contained.Equals[string],
+					},
+					scalar.Default("auto"),
+				),
+				EnvVars("WARG_TERM_WIDTH"),
+				FlagCompletions(CompletionsValues([]string{"auto", "infinite"})),
 			),
 		})(&app)
 	}
@@ -296,15 +334,32 @@ type App struct {
 	HelpFlagName string
 	HelpCmds     CmdMap
 
-	GlobalFlags         FlagMap
-	Name                string
-	RootSection         Section
-	SkipGlobalColorFlag bool
-	SkipCompletionCmds  bool
-	SkipValidation      bool
-	SkipVersionCmd      bool
-	SkipREPLCmd         bool
-	Version             string
+	GlobalFlags             FlagMap
+	Name                    string
+	RootSection             Section
+	SkipGlobalColorFlag     bool
+	SkipGlobalTermWidthFlag bool
+	SkipCompletionCmds      bool
+	SkipValidation          bool
+	SkipVersionCmd          bool
+	SkipREPLCmd             bool
+	Version                 string
+}
+
+func parseTermWidth(s string) (string, error) {
+	if s == "auto" || s == "infinite" {
+		return s, nil
+	}
+
+	parsed, err := strconv.Atoi(s)
+	if err != nil {
+		return "", fmt.Errorf("expected a positive integer, \"infinite\", or \"auto\", got %q", s)
+	}
+	if parsed <= 0 {
+		return "", fmt.Errorf("expected a positive integer, \"infinite\", or \"auto\", got %q", s)
+	}
+
+	return s, nil
 }
 
 // MustrunWithArgs runs the app with a provided list of args. Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called. Any errors on an Action will be printed to stderr and os.Exit(1) will be called. This is intended to be run in example tests

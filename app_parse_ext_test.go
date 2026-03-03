@@ -1041,6 +1041,68 @@ func TestApp_Parse_GlobalFlag(t *testing.T) {
 		})
 	}
 }
+
+func TestGlobalTermWidthFlag(t *testing.T) {
+	tests := []struct {
+		name        string
+		args        []string
+		expectedErr bool
+		expectedVal string
+	}{
+		{name: "default", args: []string{"command"}, expectedErr: false, expectedVal: "auto"},
+		{name: "auto", args: []string{"command", "--term-width", "auto"}, expectedErr: false, expectedVal: "auto"},
+		{name: "infinite", args: []string{"command", "--term-width", "infinite"}, expectedErr: false, expectedVal: "infinite"},
+		{name: "positiveInteger", args: []string{"command", "--term-width", "120"}, expectedErr: false, expectedVal: "120"},
+		{name: "zeroRejected", args: []string{"command", "--term-width", "0"}, expectedErr: true, expectedVal: ""},
+		{name: "negativeRejected", args: []string{"command", "--term-width", "-1"}, expectedErr: true, expectedVal: ""},
+		{name: "nonIntegerRejected", args: []string{"command", "--term-width", "wide"}, expectedErr: true, expectedVal: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			app := warg.New(
+				"appName",
+				"v1.0.0",
+				warg.NewSection(
+					"test",
+					warg.NewSubCmd("command", "Do nothing", warg.Unimplemented()),
+				),
+				warg.SkipVersionCmd(),
+			)
+
+			actualPR, err := app.Parse(tt.args, warg.ParseWithLookupEnv(warg.LookupMap(nil)))
+			if tt.expectedErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, tt.expectedVal, actualPR.Context.Flags["--term-width"])
+		})
+	}
+}
+
+func TestSkipGlobalTermWidthFlag(t *testing.T) {
+	app := warg.New(
+		"appName",
+		"v1.0.0",
+		warg.NewSection(
+			"test",
+			warg.NewSubCmd("command", "Do nothing", warg.Unimplemented()),
+		),
+		warg.SkipVersionCmd(),
+		warg.SkipGlobalTermWidthFlag(),
+	)
+
+	pr, err := app.Parse([]string{"command"}, warg.ParseWithLookupEnv(warg.LookupMap(nil)))
+	require.NoError(t, err)
+	_, exists := pr.Context.Flags["--term-width"]
+	require.False(t, exists)
+
+	_, err = app.Parse([]string{"command", "--term-width", "100"}, warg.ParseWithLookupEnv(warg.LookupMap(nil)))
+	require.Error(t, err)
+}
+
 func TestCustomVersion(t *testing.T) {
 	expectedVersion := "customversion"
 

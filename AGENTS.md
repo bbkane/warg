@@ -95,6 +95,7 @@ app := warg.New(
 - `warg.SkipAll()` - Skip all auto-added features (for tests)
 - `warg.SkipCompletionCmds()` - Skip completion commands
 - `warg.SkipGlobalColorFlag()` - Skip `--color` flag
+- `warg.SkipGlobalTermWidthFlag()` - Skip `--term-width` flag
 - `warg.SkipVersionCmd()` - Skip `version` command
 - `warg.SkipValidation()` - Skip startup validation
 

@@ -47,3 +47,9 @@ Global Flags:
     default : default
     currentvalue (set by passedflag) : detailed
 
+  --term-width : Terminal width. Should be a positive integer, "auto", or "infinite". If "auto" the app will attempt to detect terminal width and fall back to 120 if detection fails
+    type : string
+    default : auto
+    envvars : [WARG_TERM_WIDTH]
+    currentvalue (set by appdefault) : auto
+

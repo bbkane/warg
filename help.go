@@ -72,6 +72,21 @@ func ColorEnabled(pf PassedFlags, file *os.File) bool {
 	return startEnabled
 }
 
+// look for a passed --term-width flag with an underlying string value. If it set to "auto", the app will attempt to detect terminal width and fall back to 120 if detection fails. If it is set to "infinite", 0 is returned. If it can be parsed as a positive integer, that value is returned. If it doesn't exist or there is an error, 0 is returned. O should be interpreted as infinite width.
+func TermWidth(pf PassedFlags) int {
+	termWidth := 0
+	termWidthI, exists := pf["--term-width"]
+	if !exists {
+		return 0
+	}
+	termWidthStr := termWidthI.(string)
+	if termWidthStr == "infinite" {
+		return 0
+	}
+	// TODO: do the rest of this
+	return termWidth
+}
+
 // conditionallyEnableStyle looks for a passed --color flag with an underlying string value. If
 // it exists and is set to "true", or if it exists, is set to "auto",
 // and the passed file is a TTY, an enabled Styles is returned.
