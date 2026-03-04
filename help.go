@@ -3,11 +3,13 @@ package warg
 import (
 	"os"
 	"sort"
+	"strconv"
 
 	"github.com/mattn/go-isatty"
 	"go.bbkane.com/gocolor"
 	"go.bbkane.com/warg/styles"
 	"go.bbkane.com/warg/value/scalar"
+	"golang.org/x/term"
 )
 
 func DefaultHelpCmdMap() CmdMap {
@@ -72,19 +74,38 @@ func ColorEnabled(pf PassedFlags, file *os.File) bool {
 	return startEnabled
 }
 
-// look for a passed --term-width flag with an underlying string value. If it set to "auto", the app will attempt to detect terminal width and fall back to 120 if detection fails. If it is set to "infinite", 0 is returned. If it can be parsed as a positive integer, that value is returned. If it doesn't exist or there is an error, 0 is returned. O should be interpreted as infinite width.
-func TermWidth(pf PassedFlags) int {
-	termWidth := 0
+// look for a passed --term-width flag with an underlying string value.
+//   - if --term-width doesn't exist, or it's set to "infinite", return 0 (indicating infinite width)
+//   - if it's set to "auto", attempt to detect terminal width and return it, falling back to 0 if detection fails
+//   - if it's set to a positive integer, return that integer
+//   - if it's set to an invalid value (e.g. negative integer, non-integer string), return 0
+func TermWidth(file *os.File, pf PassedFlags) int {
 	termWidthI, exists := pf["--term-width"]
 	if !exists {
 		return 0
 	}
-	termWidthStr := termWidthI.(string)
-	if termWidthStr == "infinite" {
+	switch termWidthI.(string) {
+	case "infinite":
 		return 0
+	case "auto":
+		fd := int(file.Fd())
+		if !term.IsTerminal(fd) {
+			return 0
+		}
+		termWidth, _, err := term.GetSize(fd)
+		if err == nil {
+			return 0
+		}
+		return termWidth
+	default:
+		// try to parse as positive integer
+		var err error
+		termWidth, err := strconv.Atoi(termWidthI.(string))
+		if err != nil || termWidth < 1 {
+			return 0
+		}
+		return termWidth
 	}
-	// TODO: do the rest of this
-	return termWidth
 }
 
 // conditionallyEnableStyle looks for a passed --color flag with an underlying string value. If
