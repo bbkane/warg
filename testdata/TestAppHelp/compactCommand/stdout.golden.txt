@@ -1,0 +1,22 @@
+Usage:
+  grabbit config edit [flags]
+
+Edit the config. A default config will be created if it doesn't exist
+
+Flags:
+      --editor string   path to editor (default "vi") (required) [env: EDITOR] [config: editor]
+
+Global Flags:
+      --color string        Use ANSI colors (default "auto") [env: WARG_COLOR]
+  -h, --help string         Print help (default "default")
+      --term-width string   Terminal width. Should be a positive integer, "auto", or "infinite". If "auto" the app will attempt to detect terminal width and fall back to 120 if detection fails (default "auto") [env: WARG_TERM_WIDTH]
+
+Footer:
+Examples:
+
+	# Use defaults
+	grabbit config edit
+
+	# Override defaults
+	grabbit config edit --config-path /path/to/config --editor code
+	

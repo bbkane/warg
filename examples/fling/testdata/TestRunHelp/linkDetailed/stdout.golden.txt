@@ -43,7 +43,7 @@ Global Flags:
 
   --help , -h : Print help
     type : string
-    choices : [allcommands default detailed outline]
+    choices : [allcommands compact default detailed outline]
     default : default
     currentvalue (set by passedflag) : detailed
 

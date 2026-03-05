@@ -130,6 +130,28 @@ func TestAppHelp(t *testing.T) {
 			args:   []string{"--help", "outline"},
 			lookup: warg.LookupMap(nil),
 		},
+
+		// compact
+		{
+			name:   "compactCommand",
+			args:   []string{"config", "edit", "--help", "compact"},
+			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
+		},
+		{
+			name:   "compactSection",
+			args:   []string{"--help", "compact"},
+			lookup: warg.LookupMap(nil),
+		},
+		{
+			name:   "compactCommandTermWidth120",
+			args:   []string{"config", "edit", "--term-width", "120", "--help", "compact"},
+			lookup: warg.LookupMap(map[string]string{"EDITOR": "emacs"}),
+		},
+		{
+			name:   "compactSectionTermWidth120",
+			args:   []string{"--help", "compact"},
+			lookup: warg.LookupMap(map[string]string{"WARG_TERM_WIDTH": "120"}),
+		},
 	}
 
 	for _, tt := range tests {

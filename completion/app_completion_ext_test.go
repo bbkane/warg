@@ -207,6 +207,10 @@ func TestApp_Completions(t *testing.T) {
 						Description: "",
 					},
 					{
+						Name:        "compact",
+						Description: "",
+					},
+					{
 						Name:        "default",
 						Description: "",
 					},
