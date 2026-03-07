@@ -94,7 +94,7 @@ func TermWidth(file *os.File, pf PassedFlags) int {
 			return 0
 		}
 		termWidth, _, err := term.GetSize(fd)
-		if err == nil {
+		if err != nil {
 			return 0
 		}
 		return termWidth
