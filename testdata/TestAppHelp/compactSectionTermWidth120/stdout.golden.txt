@@ -17,10 +17,11 @@ Additional Commands:
   section3     another section
 
 Global Flags:
-      --color string        Use ANSI colors (default "auto") [env: WARG_COLOR]
-  -h, --help string         Print help (default "default")
+      --color string        Use ANSI colors [default: "auto"] [env: WARG_COLOR] [setby: appdefault] [current: "auto"]
+  -h, --help string         Print help [default: "default"] [setby: passedflag] [current: "compact"]
       --term-width string   Terminal width. Should be a positive integer, "auto", or "infinite". If "auto" the app will
                             attempt to detect terminal width and fall back to 120 if
-                            detection fails (default "auto") [env: WARG_TERM_WIDTH]
+                            detection fails [default: "auto"] [env: WARG_TERM_WIDTH] [setby:
+                            envvar] [current: "120"]
 
 Use "grabbit [command] --help" for more information about a command.

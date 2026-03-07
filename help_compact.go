@@ -41,17 +41,17 @@ func compactBuildFlagLine(s *styles.Styles, name string, f *Flag, val value.Valu
 	if val.HasDefault() {
 		switch v := val.(type) {
 		case value.ScalarValue:
-			fmt.Fprintf(&right, " (default %q)", v.DefaultString())
+			fmt.Fprintf(&right, " [default: %q]", v.DefaultString())
 		case value.SliceValue:
-			fmt.Fprintf(&right, " (default %v)", v.DefaultStringSlice())
+			fmt.Fprintf(&right, " [default: %v]", v.DefaultStringSlice())
 		case value.DictValue:
-			fmt.Fprintf(&right, " (default %v)", v.DefaultStringMap())
+			fmt.Fprintf(&right, " [default: %v]", v.DefaultStringMap())
 		}
 	}
 
 	// Add required marker
 	if f.Required {
-		right.WriteString(" (required)")
+		right.WriteString(" [required]")
 	}
 
 	// Add env vars
@@ -62,6 +62,17 @@ func compactBuildFlagLine(s *styles.Styles, name string, f *Flag, val value.Valu
 	// Add config path
 	if f.ConfigPath != "" {
 		fmt.Fprintf(&right, " [config: %s]", f.ConfigPath)
+	}
+	if val.UpdatedBy() != value.UpdatedByUnset {
+		fmt.Fprintf(&right, " [setby: %s]", string(val.UpdatedBy()))
+		switch v := val.(type) {
+		case value.ScalarValue:
+			fmt.Fprintf(&right, " [current: %q]", v.String())
+		case value.SliceValue:
+			fmt.Fprintf(&right, " [current: %v]", v.StringSlice())
+		case value.DictValue:
+			fmt.Fprintf(&right, " [current: %v]", v.StringMap())
+		}
 	}
 
 	return compactFlagLine{
