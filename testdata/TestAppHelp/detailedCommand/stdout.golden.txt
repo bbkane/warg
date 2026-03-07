@@ -1,39 +1,17 @@
+Usage:
+  grabbit config edit [flags]
+
 Edit the config. A default config will be created if it doesn't exist
 
-Command Flags:
-
-  --editor : path to editor
-    type : string
-    default : vi
-    configpath : editor
-    envvars : [EDITOR]
-    required : true
-    currentvalue (set by envvar) : emacs
+Flags:
+      --editor string   path to editor [default: "vi"] [required] [env: EDITOR] [config: editor] [setby: envvar] [current: "emacs"]
 
 Global Flags:
-
-  --color : Use ANSI colors
-    type : string
-    choices : [true false auto]
-    default : auto
-    envvars : [WARG_COLOR]
-    currentvalue (set by appdefault) : auto
-
-  --help , -h : Print help
-    type : string
-    choices : [allcommands compact default detailed outline]
-    default : default
-    currentvalue (set by appdefault) : default
-
-  --term-width : Terminal width. Should be a positive integer, "auto", or "infinite". If "auto" the app will attempt to detect terminal width and fall back to 120 if detection fails
-    type : string
-    default : auto
-    envvars : [WARG_TERM_WIDTH]
-    currentvalue (set by appdefault) : auto
-
+      --color string        Use ANSI colors [default: "auto"] [env: WARG_COLOR] [setby: appdefault] [current: "auto"]
+  -h, --help string         Print help [default: "default"] [setby: appdefault] [current: "default"]
+      --term-width string   Terminal width. Should be a positive integer, "auto", or "infinite". If "auto" the app will attempt to detect terminal width and fall back to 120 if detection fails [default: "auto"] [env: WARG_TERM_WIDTH] [setby: appdefault] [current: "auto"]
 
 Footer:
-
 Examples:
 
 	# Use defaults

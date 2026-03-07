@@ -13,6 +13,7 @@ below this description) is likely unreleased.
 - `MustRunWithArgs` - intended for example tests and takes `args []string` as an alternative to `MustRunWithArgs`
 - `styles` package with `Styles` struct for customizing warg output colors and `Printer` as a small wrapper around `io.Writer` and the `fmt.FPrintXXX` functions (I use them a lot in the help functions)
 - `--term-width` flag added by default, along with `SkipGlobalTermWidthFlag()` to avoid adding it, and `TermWidth()` to pull it from the flag with smart defaults ("auto", "infinite", an integer)
+- `--help compact` and made it the default for when running a command
 
 ## Changed
 
