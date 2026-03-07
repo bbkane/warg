@@ -11,9 +11,8 @@ Global Flags:
       --color string        Use ANSI colors [default: "auto"] [env: WARG_COLOR] [setby: appdefault] [current: "auto"]
   -h, --help string         Print help [default: "default"] [setby: passedflag] [current: "compact"]
       --term-width string   Terminal width. Should be a positive integer, "auto", or "infinite". If "auto" the app will
-                            attempt to detect terminal width and fall back to 120 if
-                            detection fails [default: "auto"] [env: WARG_TERM_WIDTH] [setby:
-                            passedflag] [current: "120"]
+                            attempt to detect terminal width and fall back to 120 if detection fails [default: "auto"]
+                            [env: WARG_TERM_WIDTH] [setby: passedflag] [current: "120"]
 
 Footer:
 Examples:

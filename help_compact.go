@@ -130,7 +130,7 @@ func compactWrapText(text string, indent int, maxWidth int) string {
 			result.WriteString("\n")
 			result.WriteString(indentStr)
 			result.WriteString(word)
-			lineLen = indent + wordLen
+			lineLen = wordLen
 		} else {
 			result.WriteString(" ")
 			result.WriteString(word)
