@@ -18,6 +18,33 @@ func ZshCompletionScriptWrite(w io.Writer, appName string) {
 	}
 }
 
+//go:embed completion_script.bash
+var BashCompletionScript []byte
+
+func BashCompletionScriptWrite(w io.Writer, appName string) {
+	script := bytes.ReplaceAll(BashCompletionScript, []byte("WARG_COMPLETION_APPNAME"), []byte(appName))
+	_, err := w.Write(script)
+	if err != nil {
+		panic("unexpected CompletionScriptBash err " + err.Error())
+	}
+}
+
+func BashCompletionsWrite(w io.Writer, c *Candidates) {
+	fmt.Fprintln(w, c.Type)
+	switch c.Type {
+	case Type_Directories, Type_DirectoriesFiles, Type_None:
+		// nothing else needed
+		return
+	case Type_Values, Type_ValuesDescriptions:
+		// bash doesn't support descriptions, so just output names for both types
+		for _, v := range c.Values {
+			fmt.Fprintln(w, v.Name)
+		}
+	default:
+		panic("unexpected completion type: " + string(c.Type))
+	}
+}
+
 func ZshCompletionsWrite(w io.Writer, c *Candidates) {
 	fmt.Fprintln(w, c.Type)
 	switch c.Type {

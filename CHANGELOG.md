@@ -6,7 +6,13 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
-# v0.41.0
+# v0.0.42
+
+## Added
+
+- Bash completion! It doesn't work with `COMPLETION_TYPE_DIRECTORIES`, but seems to work with everything else.
+
+# v0.0.41
 
 ## Added
 
@@ -37,7 +43,7 @@ col, err := gocolor.Prepare(colorEnabled)
 - Slice flags are now prefixed with `[]` in detailed help. So, `--mylist` would have type `[]string`
 - Fix the ordering of commands in `allcommands` help
 
-# v0.40.0
+# v0.0.40
 
 ## Removed
 

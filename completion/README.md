@@ -3,9 +3,9 @@
 There are two "parts" of completion:
 
  - the selection parts - tested in `app_completion_ext_test.go`
- - the zsh integration parts - tested manually.
+ - the zsh/bash integration parts - tested manually.
 
- ## `zsh` Integration Tests
+ ## `zsh` Manual E2E Tests
 
 ChatGPT offers ways to unit test zsh completion, and there's a few examples on StackOverflow, but I'll just manually test for now till I feel up to trying to automate it.
 
@@ -28,4 +28,24 @@ cd ~/go/bin  # default $GOBIN
 ```
 
 If it's not loading for some reason, remove `~/.zcompdump` and open a new shell to regenerate it.
+
+## `bash` Manual E2E Tests
+
+Setup:
+
+```bash
+# install the app to $GOBIN
+go install ./completion/internal/testappcmd
+
+# not my default shell, so switch to it
+bash
+
+cd ~/go/bin  # default $GOBIN
+
+# source the completion script in your shell
+source <(./testappcmd completion bash)
+
+# test tab completions
+./testappcmd manual <TAB>
+```
 

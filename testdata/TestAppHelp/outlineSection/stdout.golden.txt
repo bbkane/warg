@@ -6,6 +6,7 @@ grabbit
   repl
   version
   completion
+    bash
     zsh
   config
     edit

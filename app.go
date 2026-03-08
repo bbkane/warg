@@ -282,6 +282,14 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 			"completion",
 			"Print shell completion scripts",
 			NewSubCmd(
+				"bash",
+				"Print bash completion script",
+				func(ctx CmdContext) error {
+					completion.BashCompletionScriptWrite(ctx.Stdout, app.Name)
+					return nil
+				},
+			),
+			NewSubCmd(
 				"zsh",
 				"Print zsh completion script",
 				func(ctx CmdContext) error {
@@ -377,11 +385,27 @@ func (app *App) MustRunWithArgs(args []string, opts ...ParseOpt) {
 	}
 }
 
-// MustRun reads os.Args and runs the app or produces zsh completions.
+// MustRun reads os.Args and runs the app or produces shell completions.
 // Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
 // Any errors on an Action will be printed to stderr and os.Exit(1) will be called.
 func (app *App) MustRun(opts ...ParseOpt) {
-	if len(os.Args) >= 3 && os.Args[1] == "--completion-zsh" {
+	if len(os.Args) >= 3 && os.Args[1] == "--completion-bash" {
+		// app --completion-bash <args> . Note that <args> must be something, even if it's the empty string
+
+		// parseOpts.Args looks like: <exe> --completion-bash <args>... <partialOrEmptyString>
+		// the partial or empty string is passed to us from the completion script. Empty if the user just typed space and pressed tab, partial if the user pressed tab after typing part of something. bash will filter that for us via compgen
+		// so we need to remove the first two args and the last arg leaving <args>...
+		args := os.Args[2 : len(os.Args)-1]
+		partiallyTypedArg := os.Args[len(os.Args)-1]
+
+		candidates, err := app.Complete(args, partiallyTypedArg, opts...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		completion.BashCompletionsWrite(os.Stdout, candidates)
+
+	} else if len(os.Args) >= 3 && os.Args[1] == "--completion-zsh" {
 		// app --completion-zsh <args> . Note that <args> must be something, even if it's the empty string
 
 		// parseOpts.Args looks like: <exe> --completion-zsh <args>... <partialOrEmptyString>
