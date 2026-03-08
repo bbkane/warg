@@ -29,6 +29,41 @@ func BashCompletionScriptWrite(w io.Writer, appName string) {
 	}
 }
 
+//go:embed completion_script.fish
+var FishCompletionScript []byte
+
+func FishCompletionScriptWrite(w io.Writer, appName string) {
+	script := bytes.ReplaceAll(FishCompletionScript, []byte("WARG_COMPLETION_APPNAME"), []byte(appName))
+	_, err := w.Write(script)
+	if err != nil {
+		panic("unexpected CompletionScriptFish err " + err.Error())
+	}
+}
+
+func FishCompletionsWrite(w io.Writer, c *Candidates) {
+	fmt.Fprintln(w, c.Type)
+	switch c.Type {
+	case Type_Directories, Type_DirectoriesFiles, Type_None:
+		// nothing else needed
+		return
+	case Type_Values:
+		for _, v := range c.Values {
+			fmt.Fprintln(w, v.Name)
+		}
+	case Type_ValuesDescriptions:
+		// fish uses tab-separated name\tdescription format
+		for _, v := range c.Values {
+			if v.Description != "" {
+				fmt.Fprintf(w, "%s\t%s\n", v.Name, v.Description)
+			} else {
+				fmt.Fprintln(w, v.Name)
+			}
+		}
+	default:
+		panic("unexpected completion type: " + string(c.Type))
+	}
+}
+
 func BashCompletionsWrite(w io.Writer, c *Candidates) {
 	fmt.Fprintln(w, c.Type)
 	switch c.Type {

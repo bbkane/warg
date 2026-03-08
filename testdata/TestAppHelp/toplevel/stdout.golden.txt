@@ -7,6 +7,7 @@ grabbit
   version
   completion
     bash
+    fish
     zsh
   config
     edit

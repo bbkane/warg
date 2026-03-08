@@ -11,6 +11,7 @@ below this description) is likely unreleased.
 ## Added
 
 - Bash completion! It doesn't work with `COMPLETION_TYPE_DIRECTORIES`, but seems to work with everything else.
+- Fish completion! It ALSO doesn't work with `COMPLETION_TYPE_DIRECTORIES`, but seems to work with everything else.
 
 # v0.0.41
 
@@ -44,6 +45,15 @@ col, err := gocolor.Prepare(colorEnabled)
 - Fix the ordering of commands in `allcommands` help
 
 # v0.0.40
+
+NOTE: I accidentally released this as `v0.40.0`. Had to fix with:
+
+```bash
+git tag -d v0.40.0
+git push origin v0.0.40 :v0.40.0
+```
+
+I think I also need to retract the version for callers?
 
 ## Removed
 

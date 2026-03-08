@@ -297,6 +297,14 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 					return nil
 				},
 			),
+			NewSubCmd(
+				"fish",
+				"Print fish completion script",
+				func(ctx CmdContext) error {
+					completion.FishCompletionScriptWrite(ctx.Stdout, app.Name)
+					return nil
+				},
+			),
 		)(&app.RootSection)
 	}
 
@@ -420,6 +428,22 @@ func (app *App) MustRun(opts ...ParseOpt) {
 			os.Exit(1)
 		}
 		completion.ZshCompletionsWrite(os.Stdout, candidates)
+
+	} else if len(os.Args) >= 3 && os.Args[1] == "--completion-fish" {
+		// app --completion-fish <args> . Note that <args> must be something, even if it's the empty string
+
+		// parseOpts.Args looks like: <exe> --completion-fish <args>... <partialOrEmptyString>
+		// the partial or empty string is passed to us from the completion script. Empty if the user just typed space and pressed tab, partial if the user pressed tab after typing part of something. fish will filter that for us
+		// so we need to remove the first two args and the last arg leaving <args>...
+		args := os.Args[2 : len(os.Args)-1]
+		partiallyTypedArg := os.Args[len(os.Args)-1]
+
+		candidates, err := app.Complete(args, partiallyTypedArg, opts...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		completion.FishCompletionsWrite(os.Stdout, candidates)
 
 	} else {
 		app.MustRunWithArgs(os.Args[1:], opts...)
