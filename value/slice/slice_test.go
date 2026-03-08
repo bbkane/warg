@@ -9,6 +9,12 @@ import (
 	"go.bbkane.com/warg/value/slice"
 )
 
+func TestDescription(t *testing.T) {
+	constructor := slice.New(contained.String())
+	v := constructor()
+	require.Equal(t, "[]string", v.Description())
+}
+
 func TestDefaultAndChoices(t *testing.T) {
 	typeInfo := contained.Int()
 	typeInfo.Description = "Defaults to the perfect number 7"

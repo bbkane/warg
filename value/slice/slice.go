@@ -67,7 +67,7 @@ func (v *sliceValue[_]) DefaultStringSlice() []string {
 }
 
 func (v *sliceValue[_]) Description() string {
-	return v.inner.Description
+	return "[]" + v.inner.Description
 }
 
 func (v *sliceValue[_]) Get() interface{} {

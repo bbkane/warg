@@ -16,7 +16,7 @@ Command Flags:
     currentvalue (set by appdefault) : true
 
   --ignore , -i : Ignore file/dir if the name (not the whole path) matches passed regex
-    type : string
+    type : []string
     default : [README.*]
     unsetsentinel : UNSET
     currentvalue (set by appdefault) :
