@@ -2,6 +2,8 @@ module go.bbkane.com/warg
 
 go 1.23.6
 
+retract v0.40.0  // should have been 0.0.40
+
 require (
 	github.com/goccy/go-yaml v1.19.2
 	github.com/mattn/go-isatty v0.0.20
