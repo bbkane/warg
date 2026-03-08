@@ -34,6 +34,8 @@ col, err := gocolor.Prepare(colorEnabled)
 ## Fixed
 
 - `repl` subcommand does much more graceful error handling (it used to `os.Exit(1)`, now it prints a message and continues the repl).
+- Slice flags are now prefixed with `[]` in detailed help. So, `--mylist` would have type `[]string`
+- Fix the ordering of commands in `allcommands` help
 
 # v0.40.0
 
