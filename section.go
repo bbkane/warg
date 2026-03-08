@@ -147,6 +147,19 @@ func (sec *Section) breadthFirst(path []string) sectionIterator {
 	}
 }
 
+// depthFirstSections returns all sections in depth-first pre-order: the current section first,
+// then each child section (sorted alphabetically) and its descendants recursively.
+// This ensures a section's own commands appear before its siblings' commands in help output.
+// See https://github.com/bbkane/warg/issues/74
+func depthFirstSections(sec Section, path []string) []flatSection {
+	result := []flatSection{{Path: path, Sec: sec}}
+	for _, childName := range sec.Sections.SortedNames() {
+		childPath := append(append([]string(nil), path...), childName)
+		result = append(result, depthFirstSections(sec.Sections[childName], childPath)...)
+	}
+	return result
+}
+
 // sectionIterator is used in BreadthFirst. See BreadthFirst docs
 type sectionIterator struct {
 	queue []flatSection

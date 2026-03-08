@@ -41,9 +41,7 @@ func allCmdsSectionHelp() Action {
 			path = append(path, string(e))
 		}
 
-		it := cur.breadthFirst(path)
-		for it.HasNext() {
-			flatSec := it.Next()
+		for _, flatSec := range depthFirstSections(*cur, path) {
 
 			for _, name := range flatSec.Sec.Cmds.SortedNames() {
 

@@ -1,0 +1,19 @@
+Manage environmental secrets
+
+All Commands (use <cmd> -h to see flag details):
+
+  # Print version
+  namedenv print-version
+
+  # Create an environment
+  namedenv env create
+
+  # Update an environment
+  namedenv env update
+
+  # Print export script
+  namedenv env print-script export
+
+  # Create a keyring entry
+  namedenv keyring create
+
