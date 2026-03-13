@@ -1,10 +1,9 @@
-package main
+package colerr
 
 import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 
 	"go.bbkane.com/warg/styles"
 )
@@ -45,17 +44,4 @@ func NewWrappedf(err error, format string, args ...any) Wrapped {
 		err: err,
 		msg: fmt.Sprintf(format, args...),
 	}
-}
-
-func main() {
-	s := styles.NewEnabledStyles()
-
-	fmt.Println("# just one one err")
-	Stacktrace(os.Stderr, s, errors.New("this is an error"))
-
-	fmt.Println("# wrapped fmt.Errorf")
-	Stacktrace(os.Stderr, s, fmt.Errorf("this is a wrapped error: %w", errors.New("this is the inner error")))
-
-	fmt.Println("# wrapped custom error")
-	Stacktrace(os.Stderr, s, NewWrapped(errors.New("wrapped err"), "wrapper msg"))
 }

@@ -1,0 +1,3 @@
+this is a wrapped error: this is the inner error
+
+this is the inner error
