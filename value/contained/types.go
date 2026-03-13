@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/xhit/go-str2duration/v2"
+	"go.bbkane.com/warg/colerr"
 	"go.bbkane.com/warg/path"
 )
 
@@ -57,7 +58,7 @@ func (ti TypeInfo[T]) ValidateNonNilFuncs() error {
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("nil fields: %w", errors.Join(errs...))
+		return colerr.NewWrapped(errors.Join(errs...), "nil fields")
 	}
 
 	return nil
@@ -88,7 +89,7 @@ func NetIPAddr() TypeInfo[netip.Addr] {
 			case []byte:
 				ip, ok := netip.AddrFromSlice(under)
 				if !ok {
-					return netip.Addr{}, fmt.Errorf("could not convert %s to netip.Addr", string(under))
+					return netip.Addr{}, colerr.NewWrappedf(nil, "could not convert %s to netip.Addr", string(under))
 				}
 				return ip, nil
 			case string:
@@ -140,7 +141,7 @@ func Bool() TypeInfo[bool] {
 			case "false":
 				return false, nil
 			default:
-				return false, fmt.Errorf("expected \"true\" or \"false\", got %s", s)
+				return false, colerr.NewWrappedf(nil, "expected \"true\" or \"false\", got %s", s)
 			}
 		},
 		Equals: Equals[bool],
@@ -189,12 +190,12 @@ func Int() TypeInfo[int] {
 			// go-yaml may decode all numbers as int64 or uint64
 			case int64:
 				if under > math.MaxInt || under < math.MinInt {
-					return 0, fmt.Errorf("int64 value %d out of range for int", under)
+					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for int", fmt.Sprintf("%d", under))
 				}
 				return int(under), nil
 			case uint64:
 				if under > math.MaxInt {
-					return 0, fmt.Errorf("uint64 value %d out of range for int", under)
+					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for int", fmt.Sprintf("%d", under))
 				}
 				return int(under), nil
 			case json.Number:

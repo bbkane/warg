@@ -3,6 +3,8 @@ package tokenize
 import (
 	"fmt"
 	"strings"
+
+	"go.bbkane.com/warg/colerr"
 )
 
 // TODO: make these their own type
@@ -24,7 +26,7 @@ func Tokenize(path string) ([]Token, error) {
 	for i, el := range pathElements {
 		if strings.HasSuffix(el, "[]") {
 			if i != lenPathElemennts-2 {
-				return nil, fmt.Errorf("[] is only allowed as an element before the last element: path: %#v", path)
+				return nil, colerr.NewWrappedf(nil, "[] is only allowed as an element before the last element: path: %s", fmt.Sprintf("%#v", path))
 			}
 			tokens = append(tokens, Token{Text: el[:len(el)-2], Type: TokenTypeKey})
 			tokens = append(tokens, Token{Text: "[]", Type: TokenTypeSlice})

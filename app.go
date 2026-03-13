@@ -16,6 +16,7 @@ import (
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/path"
+	"go.bbkane.com/warg/styles"
 	"go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/contained"
 	"go.bbkane.com/warg/value/scalar"
@@ -370,10 +371,10 @@ func parseTermWidth(s string) (string, error) {
 
 	parsed, err := strconv.Atoi(s)
 	if err != nil {
-		return "", fmt.Errorf("expected a positive integer, \"infinite\", or \"auto\", got %q", s)
+		return "", colerr.NewWrappedf(nil, "expected a positive integer, \"infinite\", or \"auto\", got %s", fmt.Sprintf("%q", s))
 	}
 	if parsed <= 0 {
-		return "", fmt.Errorf("expected a positive integer, \"infinite\", or \"auto\", got %q", s)
+		return "", colerr.NewWrappedf(nil, "expected a positive integer, \"infinite\", or \"auto\", got %s", fmt.Sprintf("%q", s))
 	}
 
 	return s, nil
@@ -381,15 +382,17 @@ func parseTermWidth(s string) (string, error) {
 
 // MustrunWithArgs runs the app with a provided list of args. Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called. Any errors on an Action will be printed to stderr and os.Exit(1) will be called. This is intended to be run in example tests
 func (app *App) MustRunWithArgs(args []string, opts ...ParseOpt) {
+	// TODO: make colors optional!
+	style := styles.NewEnabledStyles()
 	pr, err := app.Parse(args, opts...)
 	if err != nil {
+		colerr.Stacktrace(os.Stderr, &style, err)
 		// https://unix.stackexchange.com/a/254747
-		fmt.Fprintln(os.Stderr, err)
 		os.Exit(64)
 	}
 	err = pr.Action(pr.Context)
 	if err != nil {
-		fmt.Fprintln(pr.Context.Stderr, err)
+		colerr.Stacktrace(os.Stderr, &style, err)
 		os.Exit(1)
 	}
 }
@@ -488,10 +491,10 @@ func validateFlags(
 	var errs []error
 	for name, count := range nameCount {
 		if !strings.HasPrefix(string(name), "-") {
-			errs = append(errs, fmt.Errorf("flag and alias names must start with '-': %#v", name))
+			errs = append(errs, colerr.NewWrappedf(nil, "flag and alias names must start with '-': %s", fmt.Sprintf("%#v", name)))
 		}
 		if count > 1 {
-			errs = append(errs, fmt.Errorf("flag or alias name exists %d times: %v", count, name))
+			errs = append(errs, colerr.NewWrappedf(nil, "flag or alias name exists %s times: %s", fmt.Sprintf("%d", count), fmt.Sprintf("%v", name)))
 		}
 	}
 	return errors.Join(errs...)
@@ -511,40 +514,40 @@ func (app *App) Validate() error {
 	}
 	helpFlag, exists := app.GlobalFlags[app.HelpFlagName]
 	if !exists {
-		return fmt.Errorf("HelpFlagName not found in GlobalFlags: %v", app.HelpFlagName)
+		return colerr.NewWrappedf(nil, "HelpFlagName not found in GlobalFlags: %s", fmt.Sprintf("%v", app.HelpFlagName))
 	}
 	helpFlagValEmpty, ok := helpFlag.EmptyValueConstructor().(value.ScalarValue)
 	if !ok {
-		return fmt.Errorf("HelpFlagName must be a scalar: %v", app.HelpFlagName)
+		return colerr.NewWrappedf(nil, "HelpFlagName must be a scalar: %s", fmt.Sprintf("%v", app.HelpFlagName))
 	}
 	if _, ok := helpFlagValEmpty.Get().(string); !ok {
-		return fmt.Errorf("HelpFlagName must be a string: %v", app.HelpFlagName)
+		return colerr.NewWrappedf(nil, "HelpFlagName must be a string: %s", fmt.Sprintf("%v", app.HelpFlagName))
 	}
 	if !helpFlagValEmpty.HasDefault() {
-		return fmt.Errorf("HelpFlagName must have a default value: %v", app.HelpFlagName)
+		return colerr.NewWrappedf(nil, "HelpFlagName must have a default value: %s", fmt.Sprintf("%v", app.HelpFlagName))
 	}
 	if !slices.Equal(helpFlagValEmpty.Choices(), app.HelpCmds.SortedNames()) {
-		return fmt.Errorf("HelpFlagName choices must match HelpCmds: %v", app.HelpFlagName)
+		return colerr.NewWrappedf(nil, "HelpFlagName choices must match HelpCmds: %s", fmt.Sprintf("%v", app.HelpFlagName))
 	}
 	if !slices.Contains(helpFlagValEmpty.Choices(), helpFlagValEmpty.DefaultString()) {
-		return fmt.Errorf("HelpFlagName default value (%v) must be in choices (%v): %v", helpFlagValEmpty.DefaultString(), helpFlagValEmpty.Choices(), app.HelpFlagName)
+		return colerr.NewWrappedf(nil, "HelpFlagName default value (%s) must be in choices (%s): %s", fmt.Sprintf("%v", helpFlagValEmpty.DefaultString()), fmt.Sprintf("%v", helpFlagValEmpty.Choices()), fmt.Sprintf("%v", app.HelpFlagName))
 	}
 
 	// validate --config flag
 	if app.ConfigFlagName != "" {
 		if app.NewConfigReader == nil {
-			return fmt.Errorf("ConfigFlagName must have a NewConfigReader: %v", app.ConfigFlagName)
+			return colerr.NewWrappedf(nil, "ConfigFlagName must have a NewConfigReader: %s", fmt.Sprintf("%v", app.ConfigFlagName))
 		}
 		configFlag, exists := app.GlobalFlags[app.ConfigFlagName]
 		if !exists {
-			return fmt.Errorf("ConfigFlagName not found in GlobalFlags: %v", app.ConfigFlagName)
+			return colerr.NewWrappedf(nil, "ConfigFlagName not found in GlobalFlags: %s", fmt.Sprintf("%v", app.ConfigFlagName))
 		}
 		configFlagValEmpty, ok := configFlag.EmptyValueConstructor().(value.ScalarValue)
 		if !ok {
-			return fmt.Errorf("ConfigFlagName must be a scalar: %v", app.ConfigFlagName)
+			return colerr.NewWrappedf(nil, "ConfigFlagName must be a scalar: %s", fmt.Sprintf("%v", app.ConfigFlagName))
 		}
 		if _, ok := configFlagValEmpty.Get().(path.Path); !ok {
-			return fmt.Errorf("ConfigFlagName must be a path: %v", app.ConfigFlagName)
+			return colerr.NewWrappedf(nil, "ConfigFlagName must be a path: %s", fmt.Sprintf("%v", app.ConfigFlagName))
 		}
 	}
 
@@ -561,12 +564,12 @@ func (app *App) Validate() error {
 		// Sections don't start with "-"
 		secName := flatSec.Path[len(flatSec.Path)-1]
 		if strings.HasPrefix(string(secName), "-") {
-			return fmt.Errorf("section names must not start with '-': %#v", secName)
+			return colerr.NewWrappedf(nil, "section names must not start with '-': %s", fmt.Sprintf("%#v", secName))
 		}
 
 		// Sections must not be leaf nodes
 		if flatSec.Sec.Sections.Empty() && flatSec.Sec.Cmds.Empty() {
-			return fmt.Errorf("sections must have either child sections or child commands: %#v", secName)
+			return colerr.NewWrappedf(nil, "sections must have either child sections or child commands: %s", fmt.Sprintf("%#v", secName))
 		}
 
 		{
@@ -581,7 +584,7 @@ func (app *App) Validate() error {
 			errs := []error{}
 			for name, count := range nameCount {
 				if count > 1 {
-					errs = append(errs, fmt.Errorf("command and section name clash: %s", name))
+					errs = append(errs, colerr.NewWrappedf(nil, "command and section name clash: %s", name))
 				}
 			}
 			err := errors.Join(errs...)
@@ -594,7 +597,7 @@ func (app *App) Validate() error {
 
 			// Commands must not start wtih "-"
 			if strings.HasPrefix(string(name), "-") {
-				return fmt.Errorf("command names must not start with '-': %#v", name)
+				return colerr.NewWrappedf(nil, "command names must not start with '-': %s", fmt.Sprintf("%#v", name))
 			}
 
 			err := validateFlags(app.GlobalFlags, com.Flags)
@@ -693,7 +696,7 @@ func (app *App) Complete(args []string, partiallyTypedArg string, opts ...ParseO
 	case ParseArgState_WantSectionOrCmd:
 		panic("unreachable state: ExpectingArg_SectionOrCommand")
 	default:
-		return nil, fmt.Errorf("unexpected ParseState: %v", parseState.ParseArgState)
+		return nil, colerr.NewWrappedf(nil, "unexpected ParseState: %s", fmt.Sprintf("%v", parseState.ParseArgState))
 	}
 }
 
@@ -782,7 +785,7 @@ func replCmdAction(cmdCtx CmdContext) error {
 
 		words, err := shellwords.Parse(lineStr)
 		if err != nil {
-			err = fmt.Errorf("could not parse args for completion: args: %v, %w", words, err)
+			err = colerr.NewWrappedf(err, "could not parse args for completion: args: %s", fmt.Sprintf("%v", words))
 			return readline.CompleteMessage(err.Error())
 		}
 
@@ -798,7 +801,7 @@ func replCmdAction(cmdCtx CmdContext) error {
 		// TODO: should I copy parseOpts from cmdCtx?
 		candidates, err := cmdCtx.App.Complete(words, partiallyTypedArg)
 		if err != nil {
-			err = fmt.Errorf("could not get completions: args: %v, %w", words, err)
+			err = colerr.NewWrappedf(err, "could not get completions: args: %s", fmt.Sprintf("%v", words))
 			return readline.CompleteMessage(err.Error())
 		}
 

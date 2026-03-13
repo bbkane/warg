@@ -41,7 +41,7 @@ func NewEmptyStyles() Styles {
 func NewEnabledStyles() Styles {
 	return Styles{
 		CommandNameCode: gocolor.Bold + gocolor.FgGreen,
-		ErrorAltCode:    gocolor.Bold + gocolor.FgWhiteBright,
+		ErrorAltCode:    gocolor.Bold + gocolor.FgYellowBright,
 		ErrorCode:       gocolor.Bold + gocolor.FgRedBright,
 		FlagAliasCode:   gocolor.Bold + gocolor.FgYellow,
 		FlagNameCode:    gocolor.Bold + gocolor.FgYellow,

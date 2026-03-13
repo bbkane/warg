@@ -13,6 +13,7 @@ linters:
   enable:
     - exhaustive
     - exhaustruct
+    - forbidigo
     - gochecknoglobals
     - gochecknoinits
     - nonamedreturns
@@ -30,6 +31,10 @@ linters:
       - legacy
       - std-error-handling
   settings:
+    forbidigo:
+      forbid:
+        - msg: use colerr instead of fmt.Errorf
+          pattern: ^fmt\.Errorf$
     paralleltest:
       ignore-missing-subtests: true
 version: '2'

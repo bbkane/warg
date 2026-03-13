@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"go.bbkane.com/warg/colerr"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/config/internal/tokenize"
 )
@@ -53,10 +54,11 @@ func (cr *jsonConfigReader) Search(path string) (*config.SearchResult, error) {
 		// outside the special case, we should be able to just index into this thing, and loop again
 		// or, if it's the last one, return
 		if token.Type != tokenize.TokenTypeKey {
-			return nil, fmt.Errorf(
-				"expected TokenTypeKey for last element: path: %v: token: %v",
-				path,
-				token,
+			return nil, colerr.NewWrappedf(
+				nil,
+				"expected TokenTypeKey for last element: path: %s: token: %s",
+				fmt.Sprintf("%v", path),
+				fmt.Sprintf("%v", token),
 			)
 		}
 
@@ -70,9 +72,10 @@ func (cr *jsonConfigReader) Search(path string) (*config.SearchResult, error) {
 		// but see ~/warg_configreader.md - I'm going to create a new package to do that
 
 		if !ok {
-			return nil, fmt.Errorf(
-				"expecting ConfigMap: \n  actual type %T\n  actual value: %#v\n  path: %v\n  token: %v",
-				current, current, path, token,
+			return nil, colerr.NewWrappedf(
+				nil,
+				"expecting ConfigMap: \n  actual type %s\n  actual value: %s\n  path: %s\n  token: %s",
+				fmt.Sprintf("%T", current), fmt.Sprintf("%#v", current), fmt.Sprintf("%v", path), fmt.Sprintf("%v", token),
 			)
 		}
 

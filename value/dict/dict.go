@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"go.bbkane.com/warg/colerr"
 	"go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/contained"
 )
@@ -116,7 +117,7 @@ func (v *dictValue[T]) update(key string, val T) error {
 func (v *dictValue[_]) Update(s string, u value.UpdatedBy) error {
 	key, strValue, found := strings.Cut(s, "=")
 	if !found {
-		return fmt.Errorf("could not parse key=value for %v", s)
+		return colerr.NewWrappedf(nil, "could not parse key=value for %s", fmt.Sprintf("%v", s))
 	}
 	val, err := v.inner.FromString(strValue)
 	if err != nil {
