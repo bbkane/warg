@@ -1,0 +1,3 @@
+wrapperf msg: with arg
+
+wrappedf err

@@ -12,6 +12,7 @@ import (
 
 type Styles struct {
 	CommandNameCode gocolor.Code
+	ErrorAltCode    gocolor.Code
 	ErrorCode       gocolor.Code
 	FlagAliasCode   gocolor.Code
 	FlagNameCode    gocolor.Code
@@ -26,6 +27,7 @@ type Styles struct {
 func NewEmptyStyles() Styles {
 	return Styles{
 		CommandNameCode: gocolor.Empty,
+		ErrorAltCode:    gocolor.Empty,
 		ErrorCode:       gocolor.Empty,
 		FlagAliasCode:   gocolor.Empty,
 		FlagNameCode:    gocolor.Empty,
@@ -39,6 +41,7 @@ func NewEmptyStyles() Styles {
 func NewEnabledStyles() Styles {
 	return Styles{
 		CommandNameCode: gocolor.Bold + gocolor.FgGreen,
+		ErrorAltCode:    gocolor.Bold + gocolor.FgWhiteBright,
 		ErrorCode:       gocolor.Bold + gocolor.FgRedBright,
 		FlagAliasCode:   gocolor.Bold + gocolor.FgYellow,
 		FlagNameCode:    gocolor.Bold + gocolor.FgYellow,
@@ -52,7 +55,9 @@ func NewEnabledStyles() Styles {
 func (s *Styles) CommandName(v string) string {
 	return string(s.CommandNameCode) + v + string(s.DefaultCode)
 }
-
+func (s *Styles) ErrorAlt(v string) string {
+	return string(s.ErrorAltCode) + v + string(s.DefaultCode)
+}
 func (s *Styles) Error(v string) string { return string(s.ErrorCode) + v + string(s.DefaultCode) }
 
 func (s *Styles) FlagAlias(v string) string {

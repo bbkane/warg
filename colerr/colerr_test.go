@@ -29,6 +29,10 @@ func TestStacktrace(t *testing.T) {
 			name: "wrapped_custom_error",
 			err:  NewWrapped(errors.New("wrapped err"), "wrapper msg"),
 		},
+		{
+			name: "wrappedf_custom_error",
+			err:  NewWrappedf(errors.New("wrappedf err"), "wrapperf msg: %s", "with arg"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -39,7 +43,7 @@ func TestStacktrace(t *testing.T) {
 				GoldenDir:     filepath.Join("testdata", t.Name()),
 				UpdateEnvVar:  "WARG_TEST_UPDATE_GOLDEN",
 				WorkFunc: func(files map[string]*os.File) {
-					Stacktrace(files["stderr.txt"], s, tt.err)
+					Stacktrace(files["stderr.txt"], &s, tt.err)
 				},
 			})
 		})
