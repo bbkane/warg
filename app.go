@@ -12,6 +12,7 @@ import (
 
 	"github.com/mattn/go-shellwords"
 	"github.com/reeflective/readline"
+	"go.bbkane.com/warg/colerr"
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/path"
@@ -506,7 +507,7 @@ func (app *App) Validate() error {
 
 	// validate --help flag
 	if app.HelpFlagName == "" {
-		return fmt.Errorf("HelpFlagName must be set")
+		return errors.New("HelpFlagName must be set")
 	}
 	helpFlag, exists := app.GlobalFlags[app.HelpFlagName]
 	if !exists {
@@ -585,7 +586,7 @@ func (app *App) Validate() error {
 			}
 			err := errors.Join(errs...)
 			if err != nil {
-				return fmt.Errorf("name collision: %w", err)
+				return colerr.NewWrapped(err, "name collision")
 			}
 		}
 
@@ -616,7 +617,7 @@ func (app *App) Complete(args []string, partiallyTypedArg string, opts ...ParseO
 	// I could to a full parse here, but that would be slower and more prone to failure than just parsing the args - we don't need a lot of info to complete section/command names
 	parseState, err := app.parseArgs(args)
 	if err != nil {
-		return nil, fmt.Errorf("unexpected parseArgs err: %w", err)
+		return nil, colerr.NewWrapped(err, "unexpected parseArgs err")
 	}
 
 	// special case if help is passed
@@ -671,7 +672,7 @@ func (app *App) Complete(args []string, partiallyTypedArg string, opts ...ParseO
 	// Finish the parse!
 	err = app.resolveFlags(parseState.CurrentCmd, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
 	if err != nil {
-		return nil, fmt.Errorf("unexpected resolveFlags err: %w", err)
+		return nil, colerr.NewWrapped(err, "unexpected resolveFlags err")
 	}
 	cmdContext := CmdContext{
 		App:           app,
@@ -765,7 +766,7 @@ func replCmdAction(cmdCtx CmdContext) error {
 	rl := readline.NewShell()
 	err := rl.Config.Set("menu-complete-display-prefix", true)
 	if err != nil {
-		return fmt.Errorf("could not set readline config: %w", err)
+		return colerr.NewWrapped(err, "could not set readline config")
 	}
 	rl.Prompt.Primary(func() string {
 		return cmdCtx.App.Name + " >>> "
@@ -835,7 +836,7 @@ func replCmdAction(cmdCtx CmdContext) error {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("could not read line: %w", err)
+			return colerr.NewWrapped(err, "could not read line")
 		}
 		words, err := shellwords.Parse(line)
 		if err != nil {

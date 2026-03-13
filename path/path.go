@@ -3,9 +3,10 @@ package path
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
+
+	"go.bbkane.com/warg/colerr"
 )
 
 type Path struct {
@@ -43,7 +44,7 @@ func (p Path) expand(homedir string) (string, error) {
 func (p Path) Expand() (string, error) {
 	homedir, err := os.UserHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("could not get home dir: %w", err)
+		return "", colerr.NewWrapped(err, "could not get home dir")
 	}
 	expanded, err := p.expand(homedir)
 	if err != nil {

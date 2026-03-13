@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"go.bbkane.com/warg/colerr"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/metadata"
 	"go.bbkane.com/warg/path"
@@ -170,7 +171,7 @@ func (app *App) parseArgs(args []string) (ParseState, error) {
 			if i == len(args)-2 {
 				err := pr.FlagValues[app.HelpFlagName].Update(args[i+1], value.UpdatedByFlag)
 				if err != nil {
-					return pr, fmt.Errorf("error updating help flag: %w", err)
+					return pr, colerr.NewWrapped(err, "error updating help flag")
 				}
 			}
 
@@ -369,7 +370,7 @@ func (app *App) Parse(args []string, opts ...ParseOpt) (*ParseResult, error) {
 
 	parseState, err := app.parseArgs(args)
 	if err != nil {
-		return nil, fmt.Errorf("Parse args error: %w", err)
+		return nil, colerr.NewWrapped(err, "Parse args error")
 	}
 
 	// --help means we don't need to do a lot of error checking

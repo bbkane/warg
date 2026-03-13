@@ -44,16 +44,16 @@ type TypeInfo[T any] struct {
 func (ti TypeInfo[T]) ValidateNonNilFuncs() error {
 	var errs []error
 	if ti.FromIFace == nil {
-		errs = append(errs, fmt.Errorf("FromIFace is nil"))
+		errs = append(errs, errors.New("FromIFace is nil"))
 	}
 	if ti.FromString == nil {
-		errs = append(errs, fmt.Errorf("FromString is nil"))
+		errs = append(errs, errors.New("FromString is nil"))
 	}
 	if ti.FromZero == nil {
-		errs = append(errs, fmt.Errorf("FromZero is nil"))
+		errs = append(errs, errors.New("FromZero is nil"))
 	}
 	if ti.Equals == nil {
-		errs = append(errs, fmt.Errorf("Equals is nil"))
+		errs = append(errs, errors.New("Equals is nil"))
 	}
 
 	if len(errs) > 0 {
@@ -234,7 +234,7 @@ func runeFromString(s string) (rune, error) {
 	}
 	var r rune
 	if rs := []rune(s); len(rs) != 1 {
-		return emptyRune, fmt.Errorf("runes shuld only be one character")
+		return emptyRune, errors.New("runes shuld only be one character")
 	} else {
 		return r, nil
 	}
