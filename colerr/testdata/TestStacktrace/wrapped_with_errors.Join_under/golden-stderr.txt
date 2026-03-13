@@ -1,0 +1,4 @@
+wrapperf msg: with arg
+
+   first error
+   second error

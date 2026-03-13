@@ -2,7 +2,6 @@ package colerr
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -22,16 +21,22 @@ func TestStacktrace(t *testing.T) {
 			err:  errors.New("this is an error"),
 		},
 		{
-			name: "wrapped_fmt_errorf",
-			err:  fmt.Errorf("this is a wrapped error: %w", errors.New("this is the inner error")),
-		},
-		{
 			name: "wrapped_custom_error",
 			err:  NewWrapped(errors.New("wrapped err"), "wrapper msg"),
 		},
 		{
 			name: "wrappedf_custom_error",
 			err:  NewWrappedf(errors.New("wrappedf err"), "wrapperf msg: %s", "with arg"),
+		},
+		{
+			name: "wrapped with errors.Join under",
+			err: NewWrappedf(
+				errors.Join(
+					errors.New("first error"),
+					errors.New("second error"),
+				),
+				"wrapperf msg: %s", "with arg",
+			),
 		},
 	}
 

@@ -11,20 +11,23 @@ import (
 func Stacktrace(w io.Writer, style *styles.Styles, err error) {
 	p := styles.NewPrinter(w)
 
-	// If the error implements ColorError, use that instead of the default Error string
-	type colorErr interface {
-		ColorError(s *styles.Styles) string
+	// check if Unwrap returns a slice. If it does, consider this errors.Join, print each error in the slice and stop here
+	if unwrapped, ok := err.(interface{ Unwrap() []error }); ok {
+		for _, e := range unwrapped.Unwrap() {
+			// Assume these are simple
+			p.Println("  ", style.Error(e.Error()))
+		}
+		return
 	}
 
-	if ce, ok := err.(colorErr); ok {
-		p.Print(ce.ColorError(style))
+	if ce, ok := err.(interface{ ColorError(s *styles.Styles) string }); ok {
+		p.Println(ce.ColorError(style))
 	} else {
-		p.Print(style.Error(err.Error()))
+		p.Println(style.Error(err.Error()))
 	}
 
 	under := errors.Unwrap(err)
 	if under != nil {
-		p.Println()
 		p.Println()
 		Stacktrace(w, style, under)
 	}
