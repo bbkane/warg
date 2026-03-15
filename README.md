@@ -61,7 +61,8 @@ By design, warg apps have the following requirements:
 - [cobra](https://github.com/spf13/cobra) is by far the most popular CLI framework for Go.
 - [cli](https://github.com/urfave/cli) is also very popular.
 - I haven't tried [ff](https://github.com/peterbourgon/ff), but it looks similar to warg, though less batteries-included
-- I've used the now unmaintained [kingpin](https://github.com/alecthomas/kingpin) fairly successfully.
+- I've used the now unmaintained [kingpin](https://github.com/alecthomas/kingpin) fairly successfully. They also wrote a successor framework named [kong](https://github.com/alecthomas/kong)
+- [go-arg](https://pkg.go.dev/github.com/alexflint/go-arg) looks quite clean too
 
 # Notes
 
