@@ -39,7 +39,7 @@ type Wrapped struct {
 }
 
 func (w Wrapped) Error() string {
-	return w.msg
+	return w.msg + ": " + w.err.Error()
 }
 
 func (w Wrapped) Unwrap() error {
@@ -64,7 +64,7 @@ func (w Wrappedf) Error() string {
 	for _, a := range w.args {
 		args = append(args, a)
 	}
-	return fmt.Sprintf(w.msg, args...)
+	return fmt.Sprintf(w.msg, args...) + ": " + w.err.Error()
 }
 
 func (w Wrappedf) ColorError(s *styles.Styles) string {
