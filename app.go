@@ -16,7 +16,6 @@ import (
 	"go.bbkane.com/warg/completion"
 	"go.bbkane.com/warg/config"
 	"go.bbkane.com/warg/path"
-	"go.bbkane.com/warg/styles"
 	"go.bbkane.com/warg/value"
 	"go.bbkane.com/warg/value/contained"
 	"go.bbkane.com/warg/value/scalar"
@@ -383,16 +382,18 @@ func parseTermWidth(s string) (string, error) {
 // MustrunWithArgs runs the app with a provided list of args. Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called. Any errors on an Action will be printed to stderr and os.Exit(1) will be called. This is intended to be run in example tests
 func (app *App) MustRunWithArgs(args []string, opts ...ParseOpt) {
 	// TODO: make colors optional!
-	style := styles.NewEnabledStyles()
 	pr, err := app.Parse(args, opts...)
 	if err != nil {
+		// TODO: right now passing nil since if there's a parsing error we don't have passed flags. I'd like to also gate this on an env var in that case.
+		style, _ := conditionallyEnableStyle(nil, os.Stderr)
 		colerr.Stacktrace(os.Stderr, &style, err)
 		// https://unix.stackexchange.com/a/254747
 		os.Exit(64)
 	}
 	err = pr.Action(pr.Context)
 	if err != nil {
-		colerr.Stacktrace(os.Stderr, &style, err)
+		// note that this is user code, so let's not impose styles
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
