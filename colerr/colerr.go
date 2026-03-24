@@ -8,34 +8,57 @@ import (
 	"go.bbkane.com/warg/styles"
 )
 
+// Colerr provides a way to create errors that can be printed with color styles. The Stacktrace function can be used to print the error and it wrapped errors with the appropriate styles.
+//
+// Types the implement ColerError should also implement Error (and optionally Unwrap) so that they can be used as normal errors in the repl
+type ColorError interface {
+	// ColorError returns a string formatted with the style.
+	//
+	// If the error is a wrapper around another error, the ColorError method should only format the message of this error, not the wrapped error. The Stacktrace function will handle printing the wrapped error separately.
+	ColorError(s *styles.Styles) string
+}
+
 func Stacktrace(w io.Writer, style *styles.Styles, err error) {
 	p := styles.NewPrinter(w)
 
-	// check if Unwrap returns a slice. If it does, consider this errors.Join, print each error in the slice and stop here
-	if unwrapped, ok := err.(interface{ Unwrap() []error }); ok {
-		for _, e := range unwrapped.Unwrap() {
-			// Assume these are simple
-			p.Println("  ", style.Error(e.Error()))
+	// loop through all color errors, printing them until we find one that's not
+	for {
+		ce, isColerError := err.(ColorError)
+		if !isColerError {
+			break
 		}
-		return
-	}
-
-	if ce, ok := err.(interface{ ColorError(s *styles.Styles) string }); ok {
 		p.Println(ce.ColorError(style))
-	} else {
-		p.Println(style.Error(err.Error()))
+
+		err = errors.Unwrap(err)
+		if err == nil {
+			return
+		}
+
+		// if the wrapped error is a slice, consider this the last error and print each error in the slice in an indented new line, then stop
+		if unwrapped, ok := err.(interface{ Unwrap() []error }); ok {
+			p.Println()
+			for _, e := range unwrapped.Unwrap() {
+				// Assume these are simple
+				p.Println("  ", style.Error(e.Error()))
+			}
+			return
+		}
+
+		p.Println()
+
 	}
 
-	under := errors.Unwrap(err)
-	if under != nil {
-		p.Println()
-		Stacktrace(w, style, under)
-	}
+	// print the last error, which is not a color error
+	p.Println(style.Error(err.Error()))
 }
 
 type Wrapped struct {
 	err error
 	msg string
+}
+
+func (w Wrapped) ColorError(s *styles.Styles) string {
+	return s.Error(w.msg)
 }
 
 func (w Wrapped) Error() string {
