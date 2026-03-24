@@ -93,9 +93,11 @@ func (w Wrappedf) Error() string {
 func (w Wrappedf) ColorError(s *styles.Styles) string {
 	var args []any
 	for _, a := range w.args {
-		args = append(args, s.ErrorAlt(a))
+		// manually apply ErrorAltCode since we need to reset it to the ErrorCode instead of the default mid-string
+		a := string(s.ErrorAltCode) + a + string(s.ErrorCode)
+		args = append(args, a)
 	}
-	return s.Error(fmt.Sprintf(w.msg, args...))
+	return fmt.Sprintf(s.Error(w.msg), args...)
 }
 
 func (w Wrappedf) Unwrap() error {

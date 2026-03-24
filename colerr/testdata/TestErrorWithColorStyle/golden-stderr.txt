@@ -1,0 +1,3 @@
+[1m[91mStart of message: [1m[93mmiddle of message[1m[91m: end of message[0m
+
+[1m[91minner error[0m

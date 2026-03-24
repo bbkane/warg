@@ -13,6 +13,10 @@ below this description) is likely unreleased.
 - Bash completion! It doesn't work with `COMPLETION_TYPE_DIRECTORIES`, but seems to work with everything else.
 - Fish completion! It ALSO doesn't work with `COMPLETION_TYPE_DIRECTORIES`, but seems to work with everything else.
 
+## Changed
+
+- Print better colored, formatted errors on parse errors
+
 # v0.0.41
 
 ## Added
