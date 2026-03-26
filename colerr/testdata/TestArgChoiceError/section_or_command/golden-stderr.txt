@@ -1,0 +1,9 @@
+Parse args error
+
+expecting section or command
+Got: bogus
+Choices:
+  config
+  create
+  delete
+

@@ -1,0 +1,10 @@
+Parse args error
+
+expecting flag name
+Got: --bogus
+Choices:
+  --color
+  --help
+  --name
+  -n
+

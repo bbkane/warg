@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 
 	"go.bbkane.com/warg/colerr"
 	"go.bbkane.com/warg/config"
@@ -125,7 +126,7 @@ type ParseState struct {
 	HelpPassed bool
 }
 
-// parseArgs parses the args into a ParseState. It does not resolve flag values from config/env/defaults, just from the command line. It should always be followed by a call to before returning from a public API so callers see fully resolved values.
+// parseArgs parses the args into a ParseState. It does not resolve flag values from config/env/defaults, only from the command line, so call resolveFlags afterwards to get a resolved ParseState.
 func (app *App) parseArgs(args []string) (ParseState, error) {
 	pr := ParseState{
 		ParseArgState: ParseArgState_WantSectionOrCmd,
@@ -200,7 +201,14 @@ func (app *App) parseArgs(args []string) (ParseState, error) {
 				}
 				pr.ParseArgState = ParseArgState_WantFlagNameOrEnd
 			} else {
-				return pr, colerr.NewWrappedf(nil, "expecting section or command, got %s", arg)
+				choices := make([]string, 0, len(pr.CurrentSection.Sections)+len(pr.CurrentSection.Cmds))
+				choices = append(choices, pr.CurrentSection.Sections.SortedNames()...)
+				choices = append(choices, pr.CurrentSection.Cmds.SortedNames()...)
+				return pr, colerr.ArgChoiceError{
+					Message: "expecting section or command",
+					Arg:     arg,
+					Choices: choices,
+				}
 			}
 
 		case ParseArgState_WantFlagNameOrEnd:
@@ -221,7 +229,21 @@ func (app *App) parseArgs(args []string) (ParseState, error) {
 			}
 			fl := findFlag(flagName, app.GlobalFlags, pr.CurrentCmd.Flags)
 			if fl == nil {
-				return pr, colerr.NewWrappedf(nil, "expecting flag name, got %s", arg)
+				choices := make([]string, 0, len(app.GlobalFlags)+len(pr.CurrentCmd.Flags))
+				choices = append(choices, app.GlobalFlags.SortedNames()...)
+				choices = append(choices, pr.CurrentCmd.Flags.SortedNames()...)
+				// Also include aliases
+				aliases := make([]string, 0)
+				for alias := range aliasToFlagName {
+					aliases = append(aliases, alias)
+				}
+				sort.Strings(aliases)
+				choices = append(choices, aliases...)
+				return pr, colerr.ArgChoiceError{
+					Message: "expecting flag name",
+					Arg:     arg,
+					Choices: choices,
+				}
 			}
 			pr.CurrentFlagName = flagName
 			pr.CurrentFlag = fl

@@ -1,0 +1,9 @@
+[1m[91mParse args error[0m
+
+[1m[91mexpecting section or command
+Got: [1m[93mbogus[1m[91m
+Choices:
+[1m[93m  config
+  create
+  delete
+[1m[91m[0m

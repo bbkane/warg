@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"go.bbkane.com/warg/styles"
 )
@@ -110,4 +111,32 @@ func NewWrappedf(err error, format string, args ...string) Wrappedf {
 		msg:  format,
 		args: args,
 	}
+}
+
+// ArgChoiceError is returned when a parsed arg doesn't match any known choices.
+type ArgChoiceError struct {
+	// Message describes what was expected (e.g., "expecting section or command")
+	Message string
+	// Arg is the actual argument that was received
+	Arg string
+	// Choices lists the valid options
+	Choices []string
+}
+
+func (e ArgChoiceError) Error() string {
+	return fmt.Sprintf("%s, got %s. Choices: %v", e.Message, e.Arg, e.Choices)
+}
+
+func (e ArgChoiceError) ColorError(s *styles.Styles) string {
+	var buf strings.Builder
+	buf.WriteString(e.Message + "\n")
+	buf.WriteString("Got: " + string(s.ErrorAltCode) + e.Arg + string(s.ErrorCode) + "\n")
+	buf.WriteString("Choices:\n")
+	buf.WriteString(string(s.ErrorAltCode))
+	for _, c := range e.Choices {
+		buf.WriteString("  " + c + "\n")
+	}
+	buf.WriteString(string(s.ErrorCode))
+
+	return s.Error(buf.String())
 }

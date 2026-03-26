@@ -15,7 +15,7 @@ below this description) is likely unreleased.
 
 ## Changed
 
-- Print better colored, formatted errors on parse errors
+- If parsing fails, print a colored error! We also now show available choices for arguments if we can.
 
 # v0.0.41
 

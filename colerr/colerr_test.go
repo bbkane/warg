@@ -72,3 +72,69 @@ func TestStacktrace(t *testing.T) {
 		})
 	}
 }
+
+func TestArgChoiceError(t *testing.T) {
+	tests := []struct {
+		name string
+		err  error
+	}{
+		{
+			name: "section_or_command",
+			err: NewWrapped(
+				ArgChoiceError{
+					Message: "expecting section or command",
+					Arg:     "bogus",
+					Choices: []string{"config", "create", "delete"},
+				},
+				"Parse args error",
+			),
+		},
+		{
+			name: "flag_name",
+			err: NewWrapped(
+				ArgChoiceError{
+					Message: "expecting flag name",
+					Arg:     "--bogus",
+					Choices: []string{"--color", "--help", "--name", "-n"},
+				},
+				"Parse args error",
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := styles.NewEmptyStyles()
+			goldenTest(t, goldenTestParams{
+				TmpFilePrefix: "colerr-argchoiceerror",
+				FileNames:     []string{"stderr.txt"},
+				GoldenDir:     filepath.Join("testdata", t.Name()),
+				UpdateEnvVar:  "WARG_TEST_UPDATE_GOLDEN",
+				WorkFunc: func(files map[string]*os.File) {
+					Stacktrace(files["stderr.txt"], &s, tt.err)
+				},
+			})
+		})
+	}
+
+	t.Run("with_color", func(t *testing.T) {
+		s := styles.NewEnabledStyles()
+		err := NewWrapped(
+			ArgChoiceError{
+				Message: "expecting section or command",
+				Arg:     "bogus",
+				Choices: []string{"config", "create", "delete"},
+			},
+			"Parse args error",
+		)
+		goldenTest(t, goldenTestParams{
+			TmpFilePrefix: "colerr-argchoiceerror-color",
+			FileNames:     []string{"stderr.txt"},
+			GoldenDir:     filepath.Join("testdata", t.Name()),
+			UpdateEnvVar:  "WARG_TEST_UPDATE_GOLDEN",
+			WorkFunc: func(files map[string]*os.File) {
+				Stacktrace(files["stderr.txt"], &s, err)
+			},
+		})
+	})
+}
