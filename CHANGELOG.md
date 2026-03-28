@@ -13,6 +13,9 @@ below this description) is likely unreleased.
 - Bash completion! It doesn't work with `COMPLETION_TYPE_DIRECTORIES`, but seems to work with everything else.
 - Fish completion! It ALSO doesn't work with `COMPLETION_TYPE_DIRECTORIES`, but seems to work with everything else.
 - `warg.FlagGroup` to group together flags in `--help`. Also see `./examples/flaggroup`
+- New contained numeric types for use in flags (`scalar`/`list`/`dict`):
+  `Int8()`, `Int16()`, `Int32()`, `Int64()` `Uint()`, `Uint8()`, `Uint16()`,
+  `Uint32()`, `Uint64()` `Float32()`, `Float64()`
 
 ## Changed
 

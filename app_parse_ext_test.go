@@ -1221,3 +1221,82 @@ func TestCmdContextStdin(t *testing.T) {
 	err = pr.Action(pr.Context)
 	require.NoError(err)
 }
+
+func TestAppParseNumericTypes(t *testing.T) {
+	require := require.New(t)
+
+	var (
+		int8Val    int8
+		int16Val   int16
+		int32Val   int32
+		int64Val   int64
+		uintVal    uint
+		uint8Val   uint8
+		uint16Val  uint16
+		uint32Val  uint32
+		uint64Val  uint64
+		float32Val float32
+		float64Val float64
+	)
+
+	app := warg.New(
+		"appName",
+		"v1.0.0",
+		warg.NewSection(
+			"test",
+			warg.NewSubCmd(
+				"command",
+				"Test numeric types",
+				func(ctx warg.CmdContext) error {
+					require.Equal(int8(8), int8Val)
+					require.Equal(int16(16), int16Val)
+					require.Equal(int32(32), int32Val)
+					require.Equal(int64(64), int64Val)
+					require.Equal(uint(1), uintVal)
+					require.Equal(uint8(8), uint8Val)
+					require.Equal(uint16(16), uint16Val)
+					require.Equal(uint32(32), uint32Val)
+					require.Equal(uint64(64), uint64Val)
+					require.Equal(float32(3.2), float32Val)
+					require.Equal(float64(6.4), float64Val)
+					return nil
+				},
+				warg.NewCmdFlag("--int8", "int8 flag", scalar.Int8(scalar.PointerTo(&int8Val))),
+				warg.NewCmdFlag("--int16", "int16 flag", scalar.Int16(scalar.PointerTo(&int16Val))),
+				warg.NewCmdFlag("--int32", "int32 flag", scalar.Int32(scalar.PointerTo(&int32Val))),
+				warg.NewCmdFlag("--int64", "int64 flag", scalar.Int64(scalar.PointerTo(&int64Val))),
+				warg.NewCmdFlag("--uint", "uint flag", scalar.Uint(scalar.PointerTo(&uintVal))),
+				warg.NewCmdFlag("--uint8", "uint8 flag", scalar.Uint8(scalar.PointerTo(&uint8Val))),
+				warg.NewCmdFlag("--uint16", "uint16 flag", scalar.Uint16(scalar.PointerTo(&uint16Val))),
+				warg.NewCmdFlag("--uint32", "uint32 flag", scalar.Uint32(scalar.PointerTo(&uint32Val))),
+				warg.NewCmdFlag("--uint64", "uint64 flag", scalar.Uint64(scalar.PointerTo(&uint64Val))),
+				warg.NewCmdFlag("--float32", "float32 flag", scalar.Float32(scalar.PointerTo(&float32Val))),
+				warg.NewCmdFlag("--float64", "float64 flag", scalar.Float64(scalar.PointerTo(&float64Val))),
+			),
+		),
+	)
+
+	err := app.Validate()
+	require.NoError(err)
+
+	pr, err := app.Parse(
+		[]string{
+			"command",
+			"--int8", "8",
+			"--int16", "16",
+			"--int32", "32",
+			"--int64", "64",
+			"--uint", "1",
+			"--uint8", "8",
+			"--uint16", "16",
+			"--uint32", "32",
+			"--uint64", "64",
+			"--float32", "3.2",
+			"--float64", "6.4",
+		},
+	)
+	require.NoError(err)
+
+	err = pr.Action(pr.Context)
+	require.NoError(err)
+}

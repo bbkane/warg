@@ -210,6 +210,432 @@ func Int() TypeInfo[int] {
 	}
 }
 
+func int8FromString(s string) (int8, error) {
+	i, err := strconv.ParseInt(s, 0, 8)
+	if err != nil {
+		return 0, err
+	}
+	return int8(i), nil
+}
+
+func Int8() TypeInfo[int8] {
+	return TypeInfo[int8]{
+		Description: "int8",
+		FromIFace: func(iFace interface{}) (int8, error) {
+			switch under := iFace.(type) {
+			case int8:
+				return under, nil
+			case int:
+				if under > math.MaxInt8 || under < math.MinInt8 {
+					return 0, colerr.NewWrappedf(nil, "int value %s out of range for int8", fmt.Sprintf("%d", under))
+				}
+				return int8(under), nil
+			case int64:
+				if under > math.MaxInt8 || under < math.MinInt8 {
+					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for int8", fmt.Sprintf("%d", under))
+				}
+				return int8(under), nil
+			case uint64:
+				if under > math.MaxInt8 {
+					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for int8", fmt.Sprintf("%d", under))
+				}
+				return int8(under), nil
+			case json.Number:
+				return int8FromString(string(under))
+			default:
+				return 0, ErrIncompatibleInterface
+			}
+		},
+		FromString: int8FromString,
+		FromZero:   FromZero[int8],
+		Equals:     Equals[int8],
+	}
+}
+
+func int16FromString(s string) (int16, error) {
+	i, err := strconv.ParseInt(s, 0, 16)
+	if err != nil {
+		return 0, err
+	}
+	return int16(i), nil
+}
+
+func Int16() TypeInfo[int16] {
+	return TypeInfo[int16]{
+		Description: "int16",
+		FromIFace: func(iFace interface{}) (int16, error) {
+			switch under := iFace.(type) {
+			case int16:
+				return under, nil
+			case int:
+				if under > math.MaxInt16 || under < math.MinInt16 {
+					return 0, colerr.NewWrappedf(nil, "int value %s out of range for int16", fmt.Sprintf("%d", under))
+				}
+				return int16(under), nil
+			case int64:
+				if under > math.MaxInt16 || under < math.MinInt16 {
+					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for int16", fmt.Sprintf("%d", under))
+				}
+				return int16(under), nil
+			case uint64:
+				if under > math.MaxInt16 {
+					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for int16", fmt.Sprintf("%d", under))
+				}
+				return int16(under), nil
+			case json.Number:
+				return int16FromString(string(under))
+			default:
+				return 0, ErrIncompatibleInterface
+			}
+		},
+		FromString: int16FromString,
+		FromZero:   FromZero[int16],
+		Equals:     Equals[int16],
+	}
+}
+
+func int32FromString(s string) (int32, error) {
+	i, err := strconv.ParseInt(s, 0, 32)
+	if err != nil {
+		return 0, err
+	}
+	return int32(i), nil
+}
+
+func Int32() TypeInfo[int32] {
+	return TypeInfo[int32]{
+		Description: "int32",
+		FromIFace: func(iFace interface{}) (int32, error) {
+			switch under := iFace.(type) {
+			case int32:
+				return under, nil
+			case int:
+				if under > math.MaxInt32 || under < math.MinInt32 {
+					return 0, colerr.NewWrappedf(nil, "int value %s out of range for int32", fmt.Sprintf("%d", under))
+				}
+				return int32(under), nil
+			case int64:
+				if under > math.MaxInt32 || under < math.MinInt32 {
+					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for int32", fmt.Sprintf("%d", under))
+				}
+				return int32(under), nil
+			case uint64:
+				if under > math.MaxInt32 {
+					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for int32", fmt.Sprintf("%d", under))
+				}
+				return int32(under), nil
+			case json.Number:
+				return int32FromString(string(under))
+			default:
+				return 0, ErrIncompatibleInterface
+			}
+		},
+		FromString: int32FromString,
+		FromZero:   FromZero[int32],
+		Equals:     Equals[int32],
+	}
+}
+
+func int64FromString(s string) (int64, error) {
+	return strconv.ParseInt(s, 0, 64)
+}
+
+func Int64() TypeInfo[int64] {
+	return TypeInfo[int64]{
+		Description: "int64",
+		FromIFace: func(iFace interface{}) (int64, error) {
+			switch under := iFace.(type) {
+			case int64:
+				return under, nil
+			case int:
+				return int64(under), nil
+			case uint64:
+				if under > math.MaxInt64 {
+					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for int64", fmt.Sprintf("%d", under))
+				}
+				return int64(under), nil
+			case json.Number:
+				return int64FromString(string(under))
+			default:
+				return 0, ErrIncompatibleInterface
+			}
+		},
+		FromString: int64FromString,
+		FromZero:   FromZero[int64],
+		Equals:     Equals[int64],
+	}
+}
+
+func uintFromString(s string) (uint, error) {
+	i, err := strconv.ParseUint(s, 0, strconv.IntSize)
+	if err != nil {
+		return 0, err
+	}
+	return uint(i), nil
+}
+
+func Uint() TypeInfo[uint] {
+	return TypeInfo[uint]{
+		Description: "uint",
+		FromIFace: func(iFace interface{}) (uint, error) {
+			switch under := iFace.(type) {
+			case uint:
+				return under, nil
+			case uint64:
+				if under > math.MaxUint {
+					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for uint", fmt.Sprintf("%d", under))
+				}
+				return uint(under), nil
+			case int:
+				if under < 0 {
+					return 0, colerr.NewWrappedf(nil, "int value %s out of range for uint", fmt.Sprintf("%d", under))
+				}
+				return uint(under), nil
+			case int64:
+				if under < 0 {
+					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for uint", fmt.Sprintf("%d", under))
+				}
+				return uint(under), nil
+			case json.Number:
+				return uintFromString(string(under))
+			default:
+				return 0, ErrIncompatibleInterface
+			}
+		},
+		FromString: uintFromString,
+		FromZero:   FromZero[uint],
+		Equals:     Equals[uint],
+	}
+}
+
+func uint8FromString(s string) (uint8, error) {
+	i, err := strconv.ParseUint(s, 0, 8)
+	if err != nil {
+		return 0, err
+	}
+	return uint8(i), nil
+}
+
+func Uint8() TypeInfo[uint8] {
+	return TypeInfo[uint8]{
+		Description: "uint8",
+		FromIFace: func(iFace interface{}) (uint8, error) {
+			switch under := iFace.(type) {
+			case uint8:
+				return under, nil
+			case uint64:
+				if under > math.MaxUint8 {
+					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for uint8", fmt.Sprintf("%d", under))
+				}
+				return uint8(under), nil
+			case int:
+				if under < 0 || under > math.MaxUint8 {
+					return 0, colerr.NewWrappedf(nil, "int value %s out of range for uint8", fmt.Sprintf("%d", under))
+				}
+				return uint8(under), nil
+			case int64:
+				if under < 0 || under > math.MaxUint8 {
+					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for uint8", fmt.Sprintf("%d", under))
+				}
+				return uint8(under), nil
+			case json.Number:
+				return uint8FromString(string(under))
+			default:
+				return 0, ErrIncompatibleInterface
+			}
+		},
+		FromString: uint8FromString,
+		FromZero:   FromZero[uint8],
+		Equals:     Equals[uint8],
+	}
+}
+
+func uint16FromString(s string) (uint16, error) {
+	i, err := strconv.ParseUint(s, 0, 16)
+	if err != nil {
+		return 0, err
+	}
+	return uint16(i), nil
+}
+
+func Uint16() TypeInfo[uint16] {
+	return TypeInfo[uint16]{
+		Description: "uint16",
+		FromIFace: func(iFace interface{}) (uint16, error) {
+			switch under := iFace.(type) {
+			case uint16:
+				return under, nil
+			case uint64:
+				if under > math.MaxUint16 {
+					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for uint16", fmt.Sprintf("%d", under))
+				}
+				return uint16(under), nil
+			case int:
+				if under < 0 || under > math.MaxUint16 {
+					return 0, colerr.NewWrappedf(nil, "int value %s out of range for uint16", fmt.Sprintf("%d", under))
+				}
+				return uint16(under), nil
+			case int64:
+				if under < 0 || under > math.MaxUint16 {
+					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for uint16", fmt.Sprintf("%d", under))
+				}
+				return uint16(under), nil
+			case json.Number:
+				return uint16FromString(string(under))
+			default:
+				return 0, ErrIncompatibleInterface
+			}
+		},
+		FromString: uint16FromString,
+		FromZero:   FromZero[uint16],
+		Equals:     Equals[uint16],
+	}
+}
+
+func uint32FromString(s string) (uint32, error) {
+	i, err := strconv.ParseUint(s, 0, 32)
+	if err != nil {
+		return 0, err
+	}
+	return uint32(i), nil
+}
+
+func Uint32() TypeInfo[uint32] {
+	return TypeInfo[uint32]{
+		Description: "uint32",
+		FromIFace: func(iFace interface{}) (uint32, error) {
+			switch under := iFace.(type) {
+			case uint32:
+				return under, nil
+			case uint64:
+				if under > math.MaxUint32 {
+					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for uint32", fmt.Sprintf("%d", under))
+				}
+				return uint32(under), nil
+			case int:
+				if under < 0 || under > math.MaxUint32 {
+					return 0, colerr.NewWrappedf(nil, "int value %s out of range for uint32", fmt.Sprintf("%d", under))
+				}
+				return uint32(under), nil
+			case int64:
+				if under < 0 || under > math.MaxUint32 {
+					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for uint32", fmt.Sprintf("%d", under))
+				}
+				return uint32(under), nil
+			case json.Number:
+				return uint32FromString(string(under))
+			default:
+				return 0, ErrIncompatibleInterface
+			}
+		},
+		FromString: uint32FromString,
+		FromZero:   FromZero[uint32],
+		Equals:     Equals[uint32],
+	}
+}
+
+func uint64FromString(s string) (uint64, error) {
+	return strconv.ParseUint(s, 0, 64)
+}
+
+func Uint64() TypeInfo[uint64] {
+	return TypeInfo[uint64]{
+		Description: "uint64",
+		FromIFace: func(iFace interface{}) (uint64, error) {
+			switch under := iFace.(type) {
+			case uint64:
+				return under, nil
+			case int:
+				if under < 0 {
+					return 0, colerr.NewWrappedf(nil, "int value %s out of range for uint64", fmt.Sprintf("%d", under))
+				}
+				return uint64(under), nil
+			case int64:
+				if under < 0 {
+					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for uint64", fmt.Sprintf("%d", under))
+				}
+				return uint64(under), nil
+			case json.Number:
+				return uint64FromString(string(under))
+			default:
+				return 0, ErrIncompatibleInterface
+			}
+		},
+		FromString: uint64FromString,
+		FromZero:   FromZero[uint64],
+		Equals:     Equals[uint64],
+	}
+}
+
+func float32FromString(s string) (float32, error) {
+	f, err := strconv.ParseFloat(s, 32)
+	if err != nil {
+		return 0, err
+	}
+	return float32(f), nil
+}
+
+func Float32() TypeInfo[float32] {
+	return TypeInfo[float32]{
+		Description: "float32",
+		FromIFace: func(iFace interface{}) (float32, error) {
+			switch under := iFace.(type) {
+			case float32:
+				return under, nil
+			case float64:
+				if under > math.MaxFloat32 || under < -math.MaxFloat32 {
+					return 0, colerr.NewWrappedf(nil, "float64 value %s out of range for float32", fmt.Sprintf("%g", under))
+				}
+				return float32(under), nil
+			case int:
+				return float32(under), nil
+			case int64:
+				return float32(under), nil
+			case uint64:
+				return float32(under), nil
+			case json.Number:
+				return float32FromString(string(under))
+			default:
+				return 0, ErrIncompatibleInterface
+			}
+		},
+		FromString: float32FromString,
+		FromZero:   FromZero[float32],
+		Equals:     Equals[float32],
+	}
+}
+
+func float64FromString(s string) (float64, error) {
+	return strconv.ParseFloat(s, 64)
+}
+
+func Float64() TypeInfo[float64] {
+	return TypeInfo[float64]{
+		Description: "float64",
+		FromIFace: func(iFace interface{}) (float64, error) {
+			switch under := iFace.(type) {
+			case float64:
+				return under, nil
+			case float32:
+				return float64(under), nil
+			case int:
+				return float64(under), nil
+			case int64:
+				return float64(under), nil
+			case uint64:
+				return float64(under), nil
+			case json.Number:
+				return float64FromString(string(under))
+			default:
+				return 0, ErrIncompatibleInterface
+			}
+		},
+		FromString: float64FromString,
+		FromZero:   FromZero[float64],
+		Equals:     Equals[float64],
+	}
+}
+
 func Path() TypeInfo[path.Path] {
 	return TypeInfo[path.Path]{
 		Description: "path",
