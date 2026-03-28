@@ -362,18 +362,18 @@ func compactSectionHelp() Action {
 			p.Println()
 		}
 
-		// Global Flags
-		var globalFlagLines []compactFlagLine
-		for _, name := range cmdCtx.App.GlobalFlags.SortedNames() {
-			fl := cmdCtx.App.GlobalFlags[name]
-			val := cmdCtx.ParseState.FlagValues[name]
-			globalFlagLines = append(globalFlagLines, compactBuildFlagLine(&s, name, &fl, val))
-		}
-		if len(globalFlagLines) > 0 {
-			p.Printf("%s:\n", s.Header("Global Flags"))
-			compactPrintFlags(p, globalFlagLines, termWidth)
-			p.Println()
-		}
+		// // Global Flags
+		// var globalFlagLines []compactFlagLine
+		// for _, name := range cmdCtx.App.GlobalFlags.SortedNames() {
+		// 	fl := cmdCtx.App.GlobalFlags[name]
+		// 	val := cmdCtx.ParseState.FlagValues[name]
+		// 	globalFlagLines = append(globalFlagLines, compactBuildFlagLine(&s, name, &fl, val))
+		// }
+		// if len(globalFlagLines) > 0 {
+		// 	p.Printf("%s:\n", s.Header("Global Flags"))
+		// 	compactPrintFlags(p, globalFlagLines, termWidth)
+		// 	p.Println()
+		// }
 
 		// Footer hint
 		p.Printf("Use \"%s [command] --help\" for more information about a command.\n", usagePath.String())

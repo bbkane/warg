@@ -4,10 +4,6 @@
 
 **warg** is an opinionated CLI (Command Line Interface) framework for Go. It provides a declarative approach to building CLI applications with nested commands, detailed help output, and flexible flag configuration from multiple sources.
 
-**Repository**: `go.bbkane.com/warg`
-**License**: MIT
-**Language**: Go
-
 ## Core Concepts
 
 ### Architecture
@@ -118,7 +114,7 @@ go test ./...
 ### Updating Golden Files
 
 ```bash
-WARG_TEST_UPDATE_GOLDEN=1 go test ./...
+./scripts/test_update_golden.sh
 ```
 
 ### Golden Test Helper
