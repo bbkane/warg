@@ -224,28 +224,57 @@ func compactCmdHelp() Action {
 		p.Println()
 
 		// Command Flags
-		var cmdFlagLines []compactFlagLine
-		for _, name := range cmdCtx.ParseState.CurrentCmd.Flags.SortedNames() {
-			fl := cmdCtx.ParseState.CurrentCmd.Flags[name]
-			val := cmdCtx.ParseState.FlagValues[name]
-			cmdFlagLines = append(cmdFlagLines, compactBuildFlagLine(&s, name, &fl, val))
+		cmdFlags := cmdCtx.ParseState.CurrentCmd.Flags
+		groups := cmdFlags.groupedNames()
+		hasAnyFlags := false
+		for _, group := range groups {
+			var lines []compactFlagLine
+			for _, name := range group.FlagNames {
+				fl := cmdFlags[name]
+				val := cmdCtx.ParseState.FlagValues[name]
+				lines = append(lines, compactBuildFlagLine(&s, name, &fl, val))
+			}
+			if len(lines) > 0 {
+				if group.Name == "" {
+					if !hasAnyFlags {
+						p.Printf("%s:\n", s.Header("Flags"))
+					}
+				} else {
+					if !hasAnyFlags {
+						p.Printf("%s:\n", s.Header("Flags"))
+					}
+					p.Printf("\n  %s:\n", s.Header(group.Name))
+				}
+				compactPrintFlags(p, lines, termWidth)
+				hasAnyFlags = true
+			}
 		}
-		if len(cmdFlagLines) > 0 {
-			p.Printf("%s:\n", s.Header("Flags"))
-			compactPrintFlags(p, cmdFlagLines, termWidth)
+		if hasAnyFlags {
 			p.Println()
 		}
 
 		// Global Flags
-		var globalFlagLines []compactFlagLine
-		for _, name := range cmdCtx.App.GlobalFlags.SortedNames() {
-			fl := cmdCtx.App.GlobalFlags[name]
-			val := cmdCtx.ParseState.FlagValues[name]
-			globalFlagLines = append(globalFlagLines, compactBuildFlagLine(&s, name, &fl, val))
+		globalGroups := cmdCtx.App.GlobalFlags.groupedNames()
+		hasAnyGlobalFlags := false
+		for _, group := range globalGroups {
+			var lines []compactFlagLine
+			for _, name := range group.FlagNames {
+				fl := cmdCtx.App.GlobalFlags[name]
+				val := cmdCtx.ParseState.FlagValues[name]
+				lines = append(lines, compactBuildFlagLine(&s, name, &fl, val))
+			}
+			if len(lines) > 0 {
+				if !hasAnyGlobalFlags {
+					p.Printf("%s:\n", s.Header("Global Flags"))
+				}
+				if group.Name != "" {
+					p.Printf("\n  %s:\n", s.Header(group.Name))
+				}
+				compactPrintFlags(p, lines, termWidth)
+				hasAnyGlobalFlags = true
+			}
 		}
-		if len(globalFlagLines) > 0 {
-			p.Printf("%s:\n", s.Header("Global Flags"))
-			compactPrintFlags(p, globalFlagLines, termWidth)
+		if hasAnyGlobalFlags {
 			p.Println()
 		}
 

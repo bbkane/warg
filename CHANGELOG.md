@@ -12,6 +12,7 @@ below this description) is likely unreleased.
 
 - Bash completion! It doesn't work with `COMPLETION_TYPE_DIRECTORIES`, but seems to work with everything else.
 - Fish completion! It ALSO doesn't work with `COMPLETION_TYPE_DIRECTORIES`, but seems to work with everything else.
+- `warg.FlagGroup` to group together flags in `--help`. Also see `./examples/flaggroup`
 
 ## Changed
 

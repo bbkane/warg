@@ -116,6 +116,14 @@ func UnsetSentinel(name string) FlagOpt {
 	}
 }
 
+// FlagGroup sets the group name for a flag.
+// Flags with the same group are displayed together in help output.
+func FlagGroup(group string) FlagOpt {
+	return func(f *Flag) {
+		f.Group = group
+	}
+}
+
 // FlagMap holds flags - used by Commands and Sections
 type FlagMap map[string]Flag
 
@@ -128,6 +136,43 @@ func (fm *FlagMap) SortedNames() []string {
 		return string(keys[i]) < string(keys[j])
 	})
 	return keys
+}
+
+// FlagNameGroup is a named group of flag names, used for grouped help output.
+type FlagNameGroup struct {
+	// Name is the group name. Empty string means ungrouped (displayed first).
+	Name string
+	// FlagNames are the sorted flag names in this group.
+	FlagNames []string
+}
+
+// groupedNames returns flag names organized by Group, with ungrouped flags first,
+// then groups in alphabetical order. Within each group, flags are sorted alphabetically.
+func (fm *FlagMap) groupedNames() []FlagNameGroup {
+	groups := make(map[string][]string)
+	for name, flag := range *fm {
+		groups[flag.Group] = append(groups[flag.Group], name)
+	}
+	for _, names := range groups {
+		sort.Strings(names)
+	}
+
+	groupNames := make([]string, 0, len(groups))
+	for g := range groups {
+		if g != "" {
+			groupNames = append(groupNames, g)
+		}
+	}
+	sort.Strings(groupNames)
+
+	var result []FlagNameGroup
+	if names, ok := groups[""]; ok {
+		result = append(result, FlagNameGroup{Name: "", FlagNames: names})
+	}
+	for _, g := range groupNames {
+		result = append(result, FlagNameGroup{Name: g, FlagNames: groups[g]})
+	}
+	return result
 }
 
 // AddFlag adds a new flag and panics if it already exists
@@ -163,6 +208,10 @@ type Flag struct {
 
 	// Envvars holds a list of environment variables to update this flag. Only the first one that exists will be used.
 	EnvVars []string
+
+	// Group is an optional group name for organizing flags in help output.
+	// Flags with an empty group are printed first, then groups are printed in alphabetical order.
+	Group string
 
 	// HelpShort is a message for the user on how to use this flag
 	HelpShort string

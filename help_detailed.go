@@ -186,16 +186,29 @@ func detailedCmdHelp() Action {
 		var commandFlagHelp bytes.Buffer
 		var sectionFlagHelp bytes.Buffer
 		{
-			for _, name := range cmdCtx.App.GlobalFlags.SortedNames() {
-				f := cmdCtx.App.GlobalFlags[name]
-				val := cmdCtx.ParseState.FlagValues[name]
-				detailedPrintFlag(styles.NewPrinter(&sectionFlagHelp), &s, name, &f, val)
+			globalGroups := cmdCtx.App.GlobalFlags.groupedNames()
+			for _, group := range globalGroups {
+				if group.Name != "" {
+					sectionFlagHelp.WriteString(fmt.Sprintf("  %s:\n\n", s.Header(group.Name)))
+				}
+				for _, name := range group.FlagNames {
+					f := cmdCtx.App.GlobalFlags[name]
+					val := cmdCtx.ParseState.FlagValues[name]
+					detailedPrintFlag(styles.NewPrinter(&sectionFlagHelp), &s, name, &f, val)
+				}
 			}
 
-			for _, name := range cmdCtx.ParseState.CurrentCmd.Flags.SortedNames() {
-				f := cmdCtx.ParseState.CurrentCmd.Flags[name]
-				val := cmdCtx.ParseState.FlagValues[name]
-				detailedPrintFlag(styles.NewPrinter(&commandFlagHelp), &s, name, &f, val)
+			cmdFlags := cmdCtx.ParseState.CurrentCmd.Flags
+			groups := cmdFlags.groupedNames()
+			for _, group := range groups {
+				if group.Name != "" {
+					commandFlagHelp.WriteString(fmt.Sprintf("  %s:\n\n", s.Header(group.Name)))
+				}
+				for _, name := range group.FlagNames {
+					f := cmdFlags[name]
+					val := cmdCtx.ParseState.FlagValues[name]
+					detailedPrintFlag(styles.NewPrinter(&commandFlagHelp), &s, name, &f, val)
+				}
 			}
 
 			if commandFlagHelp.Len() > 0 {

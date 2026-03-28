@@ -8,6 +8,7 @@ import (
 
 	"go.bbkane.com/warg"
 	"go.bbkane.com/warg/value/scalar"
+	"go.bbkane.com/warg/value/slice"
 )
 
 // A grabbitSection is a simple section to test help
@@ -220,6 +221,151 @@ func TestAppHelp(t *testing.T) {
 					Args:            tt.args,
 				},
 
+				warg.ParseWithLookupEnv(tt.lookup),
+			)
+		})
+	}
+}
+
+// flagGroupSection creates a section with flags that use groups to test grouped help output.
+func flagGroupSection() warg.Section {
+	return warg.NewSection(
+		"An app with grouped flags",
+		warg.NewSubCmd(
+			"deploy",
+			"Deploy the application",
+			warg.Unimplemented(),
+			warg.NewCmdFlag(
+				"--name",
+				"Deployment name",
+				scalar.String(),
+				warg.Required(),
+			),
+			warg.NewCmdFlag(
+				"--verbose",
+				"Enable verbose logging",
+				scalar.Bool(
+					scalar.Default(false),
+				),
+			),
+			warg.NewCmdFlag(
+				"--db-host",
+				"Database host",
+				scalar.String(
+					scalar.Default("localhost"),
+				),
+				warg.FlagGroup("Database"),
+			),
+			warg.NewCmdFlag(
+				"--db-port",
+				"Database port",
+				scalar.Int(
+					scalar.Default(5432),
+				),
+				warg.FlagGroup("Database"),
+			),
+			warg.NewCmdFlag(
+				"--db-name",
+				"Database name",
+				scalar.String(),
+				warg.FlagGroup("Database"),
+				warg.Required(),
+			),
+			warg.NewCmdFlag(
+				"--redis-url",
+				"Redis connection URL",
+				scalar.String(
+					scalar.Default("redis://localhost:6379"),
+				),
+				warg.FlagGroup("Cache"),
+			),
+			warg.NewCmdFlag(
+				"--cache-ttl",
+				"Cache TTL in seconds",
+				scalar.Int(
+					scalar.Default(300),
+				),
+				warg.FlagGroup("Cache"),
+			),
+			warg.NewCmdFlag(
+				"--replicas",
+				"Number of replicas",
+				scalar.Int(
+					scalar.Default(1),
+				),
+				warg.FlagGroup("Scaling"),
+			),
+			warg.NewCmdFlag(
+				"--regions",
+				"Regions to deploy to",
+				slice.String(),
+				warg.FlagGroup("Scaling"),
+			),
+		),
+	)
+}
+
+func TestFlagGroupHelp(t *testing.T) {
+	updateGolden := os.Getenv("WARG_TEST_UPDATE_GOLDEN") != ""
+	tests := []struct {
+		name   string
+		args   []string
+		lookup warg.LookupEnv
+	}{
+		{
+			name:   "detailedCommand",
+			args:   []string{"deploy", "--help", "detailed"},
+			lookup: warg.LookupMap(nil),
+		},
+		{
+			name:   "compactCommand",
+			args:   []string{"deploy", "--help", "compact"},
+			lookup: warg.LookupMap(nil),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			app := warg.New(
+				"myapp",
+				"v1.0.0",
+				flagGroupSection(),
+				warg.SkipValidation(),
+				warg.NewGlobalFlag(
+					"--log-level",
+					"Log level",
+					scalar.String(
+						scalar.Default("info"),
+						scalar.Choices("debug", "info", "warn", "error"),
+					),
+					warg.FlagGroup("Observability"),
+				),
+				warg.NewGlobalFlag(
+					"--log-format",
+					"Log output format",
+					scalar.String(
+						scalar.Default("text"),
+						scalar.Choices("text", "json"),
+					),
+					warg.FlagGroup("Observability"),
+				),
+				warg.NewGlobalFlag(
+					"--trace",
+					"Enable tracing",
+					scalar.Bool(
+						scalar.Default(false),
+					),
+					warg.FlagGroup("Observability"),
+				),
+			)
+			warg.GoldenTest(
+				t,
+				warg.GoldenTestArgs{
+					App:             &app,
+					UpdateGolden:    updateGolden,
+					ExpectActionErr: false,
+					Args:            tt.args,
+				},
 				warg.ParseWithLookupEnv(tt.lookup),
 			)
 		})

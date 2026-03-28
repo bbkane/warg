@@ -1,0 +1,91 @@
+Deploy the application
+
+Command Flags:
+
+  --name : Deployment name
+    type : string
+    required : true
+
+  --verbose : Enable verbose logging
+    type : bool
+    default : false
+    currentvalue (set by appdefault) : false
+
+  Cache:
+
+  --cache-ttl : Cache TTL in seconds
+    type : int
+    default : 300
+    currentvalue (set by appdefault) : 300
+
+  --redis-url : Redis connection URL
+    type : string
+    default : redis://localhost:6379
+    currentvalue (set by appdefault) : redis://localhost:6379
+
+  Database:
+
+  --db-host : Database host
+    type : string
+    default : localhost
+    currentvalue (set by appdefault) : localhost
+
+  --db-name : Database name
+    type : string
+    required : true
+
+  --db-port : Database port
+    type : int
+    default : 5432
+    currentvalue (set by appdefault) : 5432
+
+  Scaling:
+
+  --regions : Regions to deploy to
+    type : []string
+
+  --replicas : Number of replicas
+    type : int
+    default : 1
+    currentvalue (set by appdefault) : 1
+
+Global Flags:
+
+  --color : Use ANSI colors
+    type : string
+    choices : [true false auto]
+    default : auto
+    envvars : [WARG_COLOR]
+    currentvalue (set by appdefault) : auto
+
+  --help , -h : Print help
+    type : string
+    choices : [allcommands compact default detailed outline]
+    default : default
+    currentvalue (set by passedflag) : detailed
+
+  --term-width : Terminal width. Should be a positive integer, "auto", or "infinite". If "auto" the app will attempt to detect terminal width and fall back to 120 if detection fails
+    type : string
+    default : auto
+    envvars : [WARG_TERM_WIDTH]
+    currentvalue (set by appdefault) : auto
+
+  Observability:
+
+  --log-format : Log output format
+    type : string
+    choices : [text json]
+    default : text
+    currentvalue (set by appdefault) : text
+
+  --log-level : Log level
+    type : string
+    choices : [debug info warn error]
+    default : info
+    currentvalue (set by appdefault) : info
+
+  --trace : Enable tracing
+    type : bool
+    default : false
+    currentvalue (set by appdefault) : false
+
