@@ -15,7 +15,7 @@ below this description) is likely unreleased.
 
 ## Changed
 
-- If parsing fails, print a colored error! We also now show available choices for arguments if we can.
+- If parsing fails, print a colored error! We also now show available choices for arguments if we can. Colored errors are enabled by default if stderr is a terminal, but can be disabled with `WARG_COLOR=false`
 
 # v0.0.41
 

@@ -15,7 +15,7 @@ func allCmdsSectionHelp() Action {
 		f := bufio.NewWriter(file)
 		defer f.Flush()
 
-		s, err := conditionallyEnableStyle(cmdCtx.Flags, file)
+		s, err := conditionallyEnableStyle(false, cmdCtx.Flags, file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error enabling color. Continuing without: %v\n", err)
 		}

@@ -111,8 +111,11 @@ func TermWidth(file *os.File, pf PassedFlags) int {
 
 // conditionallyEnableStyle looks for a passed --color flag with an underlying string value. If
 // it exists and is set to "true", or if it exists, is set to "auto",
-// and the passed file is a TTY, an enabled Styles is returned.
-func conditionallyEnableStyle(pf PassedFlags, file *os.File) (styles.Styles, error) {
+// and the passed file is a TTY, an enabled Styles is returned. Disable with the disable param, so we can use this before parsing flags.
+func conditionallyEnableStyle(disable bool, pf PassedFlags, file *os.File) (styles.Styles, error) {
+	if disable {
+		return styles.NewEmptyStyles(), nil
+	}
 	startEnabled := ColorEnabled(pf, file)
 	if !startEnabled {
 		return styles.NewEmptyStyles(), nil

@@ -385,7 +385,8 @@ func (app *App) MustRunWithArgs(args []string, opts ...ParseOpt) {
 	pr, err := app.Parse(args, opts...)
 	if err != nil {
 		// TODO: right now passing nil since if there's a parsing error we don't have passed flags. I'd like to also gate this on an env var in that case.
-		style, _ := conditionallyEnableStyle(nil, os.Stderr)
+		disable := os.Getenv("WARG_COLOR") == "false"
+		style, _ := conditionallyEnableStyle(disable, nil, os.Stderr)
 		colerr.Stacktrace(os.Stderr, &style, err)
 		// https://unix.stackexchange.com/a/254747
 		os.Exit(64)
