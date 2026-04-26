@@ -5,6 +5,10 @@
 
 updates:
   - directory: / # Location of package manifests
+    groups:
+      all-dependencies:
+        patterns:
+          - '*'
     # temporary disable dependabot PR while I figure out how to test the server code: https://github.com/dependabot/dependabot-core/issues/7072#issuecomment-1516555997
     open-pull-requests-limit: 5
     package-ecosystem: gomod # See documentation for possible values
