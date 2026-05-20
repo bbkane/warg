@@ -58,10 +58,12 @@ func NewEnabledStyles() Styles {
 func (s *Styles) CommandName(v string) string {
 	return string(s.CommandNameCode) + v + string(s.DefaultCode)
 }
+
 // ErrorAlt wraps v with the alternate error style (used for highlighted values in errors).
 func (s *Styles) ErrorAlt(v string) string {
 	return string(s.ErrorAltCode) + v + string(s.DefaultCode)
 }
+
 // Error wraps v with the error style.
 func (s *Styles) Error(v string) string { return string(s.ErrorCode) + v + string(s.DefaultCode) }
 
@@ -69,16 +71,18 @@ func (s *Styles) Error(v string) string { return string(s.ErrorCode) + v + strin
 func (s *Styles) FlagAlias(v string) string {
 	return string(s.FlagAliasCode) + v + string(s.DefaultCode)
 }
+
 // FlagName wraps v with the flag name style.
 func (s *Styles) FlagName(v string) string { return string(s.FlagNameCode) + v + string(s.DefaultCode) }
 
 // Header wraps v with the header style.
-func (s *Styles) Header(v string) string   { return string(s.HeaderCode) + v + string(s.DefaultCode) }
+func (s *Styles) Header(v string) string { return string(s.HeaderCode) + v + string(s.DefaultCode) }
 
 // Label wraps v with the label style.
 func (s *Styles) Label(v string) string {
 	return string(s.LabelCode) + v + string(s.DefaultCode)
 }
+
 // SectionName wraps v with the section name style.
 func (s *Styles) SectionName(v string) string {
 	return string(s.SectionNameCode) + v + string(s.DefaultCode)

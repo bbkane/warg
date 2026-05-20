@@ -7,8 +7,9 @@ import (
 	"io"
 )
 
-//go:embed completion_script.zsh
 // ZshCompletionScript holds the embedded zsh completion script template.
+//
+//go:embed completion_script.zsh
 var ZshCompletionScript []byte
 
 // ZshCompletionScriptWrite writes the zsh completion script for appName to w.
@@ -20,8 +21,9 @@ func ZshCompletionScriptWrite(w io.Writer, appName string) {
 	}
 }
 
-//go:embed completion_script.bash
 // BashCompletionScript holds the embedded bash completion script template.
+//
+//go:embed completion_script.bash
 var BashCompletionScript []byte
 
 // BashCompletionScriptWrite writes the bash completion script for appName to w.
@@ -33,8 +35,9 @@ func BashCompletionScriptWrite(w io.Writer, appName string) {
 	}
 }
 
-//go:embed completion_script.fish
 // FishCompletionScript holds the embedded fish completion script template.
+//
+//go:embed completion_script.fish
 var FishCompletionScript []byte
 
 // FishCompletionScriptWrite writes the fish completion script for appName to w.
