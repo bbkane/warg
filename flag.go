@@ -19,6 +19,7 @@ func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) Fl
 		ConfigPath:            "",
 		EmptyValueConstructor: empty,
 		EnvVars:               nil,
+		Group:                 "",
 		HelpShort:             helpShort,
 		Required:              false,
 		UnsetSentinel:         nil,

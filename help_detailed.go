@@ -189,7 +189,7 @@ func detailedCmdHelp() Action {
 			globalGroups := cmdCtx.App.GlobalFlags.groupedNames()
 			for _, group := range globalGroups {
 				if group.Name != "" {
-					sectionFlagHelp.WriteString(fmt.Sprintf("  %s:\n\n", s.Header(group.Name)))
+					fmt.Fprintf(&sectionFlagHelp, "  %s:\n\n", s.Header(group.Name))
 				}
 				for _, name := range group.FlagNames {
 					f := cmdCtx.App.GlobalFlags[name]
@@ -202,7 +202,7 @@ func detailedCmdHelp() Action {
 			groups := cmdFlags.groupedNames()
 			for _, group := range groups {
 				if group.Name != "" {
-					commandFlagHelp.WriteString(fmt.Sprintf("  %s:\n\n", s.Header(group.Name)))
+					fmt.Fprintf(&commandFlagHelp, "  %s:\n\n", s.Header(group.Name))
 				}
 				for _, name := range group.FlagNames {
 					f := cmdFlags[name]
