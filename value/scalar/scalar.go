@@ -15,6 +15,7 @@ type scalarValue[T any] struct {
 	updatedBy  value.UpdatedBy
 }
 
+// ScalarOpt is a functional option for configuring a scalar value.
 type ScalarOpt[T any] func(*scalarValue[T])
 
 func newScalarValue[T any](
@@ -35,6 +36,8 @@ func newScalarValue[T any](
 	return sv
 }
 
+// New creates an [value.EmptyConstructor] for a scalar flag value of type T.
+// Use the provided [contained.TypeInfo] to define parsing and comparison behavior.
 func New[T any](hc contained.TypeInfo[T], opts ...ScalarOpt[T]) value.EmptyConstructor {
 	return func() value.Value {
 		s := newScalarValue(
@@ -45,18 +48,23 @@ func New[T any](hc contained.TypeInfo[T], opts ...ScalarOpt[T]) value.EmptyConst
 	}
 }
 
+// PointerTo makes the scalar value write directly to the given address.
+// Useful for binding a flag value to an existing variable.
 func PointerTo[T any](addr *T) ScalarOpt[T] {
 	return func(v *scalarValue[T]) {
 		v.val = addr
 	}
 }
 
+// Choices restricts the allowed values for this scalar flag.
+// Parsing fails if the provided value is not in the list.
 func Choices[T any](choices ...T) ScalarOpt[T] {
 	return func(v *scalarValue[T]) {
 		v.choices = choices
 	}
 }
 
+// Default sets the default value used when no value is provided from CLI, config, or env.
 func Default[T any](def T) ScalarOpt[T] {
 	return func(v *scalarValue[T]) {
 		v.defaultVal = &def

@@ -16,7 +16,8 @@ import (
 
 // -- moved from app_parse_cli.go
 
-// ParseOpts allows overriding the default inputs to the Parse function. Useful for tests. Create it using the [go.bbkane.com/warg/parseopt] package.
+// ParseOpts holds overrides for [App.Parse] inputs, such as custom I/O streams and
+// environment variable lookup. Useful for testing. Create with functions from the parseopt package.
 type ParseOpts struct {
 	// Args []string
 
@@ -44,8 +45,11 @@ type ParseOpts struct {
 	Stdout *os.File
 }
 
+// ParseOpt is a functional option for configuring [ParseOpts].
 type ParseOpt func(*ParseOpts)
 
+// NewParseOpts creates a [ParseOpts] with sensible defaults (os.Stderr, os.Stdin, os.Stdout,
+// os.LookupEnv, empty metadata) and applies the given options.
 func NewParseOpts(opts ...ParseOpt) ParseOpts {
 	parseOptHolder := ParseOpts{
 		ParseMetadata: metadata.Empty(),
@@ -62,18 +66,22 @@ func NewParseOpts(opts ...ParseOpt) ParseOpts {
 	return parseOptHolder
 }
 
-// ParseResult holds the result of parsing the command line.
+// ParseResult holds the action and context produced by a successful [App.Parse] call.
+// Call Action(Context) to execute the matched command.
 type ParseResult struct {
 	Context CmdContext
-	// Action holds the passed command's action to execute.
+	// Action is the matched command's handler function.
 	Action Action
 }
 
 // -- FlagValueMap
 
-// ValueMap holds flag values. If produced as part of [ParseState], it will be fully resolved (i.e., config/env/defaults applied if possible).
+// ValueMap holds flag values keyed by flag name. When produced by [App.Parse], all values are
+// fully resolved (config, env vars, and defaults applied where possible).
 type ValueMap map[string]value.Value
 
+// ToPassedFlags converts the ValueMap into a [PassedFlags] containing only flags
+// that have been set (i.e., not in their initial unset state).
 func (m ValueMap) ToPassedFlags() PassedFlags {
 	pf := make(PassedFlags)
 	for name, v := range m {
@@ -84,14 +92,15 @@ func (m ValueMap) ToPassedFlags() PassedFlags {
 	return pf
 }
 
-// IsSet returns true if the flag with the given name has been set to a non-empty value (i.e., not its empty constructor value). Assumes the flag exists in the map.
+// IsSet reports whether the named flag has been assigned a value from any source
+// (CLI, config, env var, or default). It assumes the flag exists in the map.
 func (m ValueMap) IsSet(flagName string) bool {
 	return m[flagName].UpdatedBy() != value.UpdatedByUnset
 }
 
 // -- ParseState
 
-// ParseArgState represents the current "thing" we want from the args. It transitions as we parse each incoming argument and match it to the expected application structure
+// ParseArgState represents the parser's expectation for the next argument token.
 type ParseArgState string
 
 const (
@@ -100,12 +109,13 @@ const (
 	ParseArgState_WantFlagValue     ParseArgState = "ParseArgState_WantFlagValue"
 )
 
-// ParseState holds the current state of parsing the command line arguments, as well as fully resolving all flag values (including from config/env/defaults).
+// ParseState holds the intermediate and final state of argument parsing,
+// including resolved flag values.
 //
-// See ParseArgState for which fields are valid:
+// Field validity depends on ParseArgState:
 //
-//   - [ParseArgState_WantSectionOrCmd]: only CurrentSection, SectionPath are valid
-//   - [ParseArgState_WantFlagNameOrEnd], [ParseArgState_WantFlagValue]: all fields valid!
+//   - [ParseArgState_WantSectionOrCmd]: only CurrentSection and SectionPath are valid.
+//   - [ParseArgState_WantFlagNameOrEnd], [ParseArgState_WantFlagValue]: all fields are valid.
 type ParseState struct {
 	ParseArgState ParseArgState
 
@@ -385,7 +395,9 @@ func (app *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv Loo
 	return nil
 }
 
-// Parse parses command line arguments, environment variables, and configuration files to produce a [ParseResult]. expects ParseOpts.Args to be like os.Args (i.e., first arg is app name). It returns an error if parsing fails or required flags are missing.
+// Parse parses the given args (formatted like os.Args, with the program name as the first element)
+// using command-line arguments, environment variables, and config files to produce a [ParseResult].
+// Returns an error if parsing fails or required flags are missing.
 func (app *App) Parse(args []string, opts ...ParseOpt) (*ParseResult, error) {
 
 	parseOpts := NewParseOpts(opts...)

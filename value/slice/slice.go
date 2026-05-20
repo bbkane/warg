@@ -16,8 +16,11 @@ type sliceValue[T any] struct {
 	updatedBy   value.UpdatedBy
 }
 
+// SliceOpt is a functional option for configuring a slice value.
 type SliceOpt[T any] func(*sliceValue[T])
 
+// New creates an [value.EmptyConstructor] for a slice (list) flag value of type T.
+// Each occurrence of the flag on the command line appends to the slice.
 func New[T any](hc contained.TypeInfo[T], opts ...SliceOpt[T]) value.EmptyConstructor {
 	return func() value.Value {
 		sv := sliceValue[T]{
@@ -35,6 +38,7 @@ func New[T any](hc contained.TypeInfo[T], opts ...SliceOpt[T]) value.EmptyConstr
 	}
 }
 
+// Choices restricts the allowed values for each element in the slice.
 func Choices[T any](choices ...T) SliceOpt[T] {
 	return func(v *sliceValue[T]) {
 		v.choices = choices
@@ -42,6 +46,7 @@ func Choices[T any](choices ...T) SliceOpt[T] {
 
 }
 
+// Default sets the default slice used when no values are provided.
 func Default[T any](def []T) SliceOpt[T] {
 	return func(cf *sliceValue[T]) {
 		cf.defaultVals = def

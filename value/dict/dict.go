@@ -18,8 +18,11 @@ type dictValue[T any] struct {
 	updatedBy   value.UpdatedBy
 }
 
+// DictOpt is a functional option for configuring a dict value.
 type DictOpt[T any] func(*dictValue[T])
 
+// New creates an [value.EmptyConstructor] for a dict (key=value map) flag value.
+// Each occurrence of the flag on the command line is parsed as "key=value" and inserted.
 func New[T any](inner contained.TypeInfo[T], opts ...DictOpt[T]) value.EmptyConstructor {
 	return func() value.Value {
 		dv := dictValue[T]{
@@ -37,12 +40,14 @@ func New[T any](inner contained.TypeInfo[T], opts ...DictOpt[T]) value.EmptyCons
 	}
 }
 
+// Choices restricts the allowed values for each dict entry.
 func Choices[T any](choices ...T) DictOpt[T] {
 	return func(v *dictValue[T]) {
 		v.choices = choices
 	}
 }
 
+// Default sets the default map used when no values are provided.
 func Default[T any](def map[string]T) DictOpt[T] {
 	return func(cf *dictValue[T]) {
 		cf.defaultVals = def

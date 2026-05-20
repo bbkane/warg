@@ -9,18 +9,19 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
-// A CmdOpt customizes a Cmd
+// CmdOpt is a functional option for configuring a [Cmd] during creation.
 type CmdOpt func(*Cmd)
 
-// Unimplemented() is an Action that simply returns an error.
-// Useful for prototyping
+// Unimplemented returns an [Action] that always returns an error.
+// Useful as a placeholder while prototyping commands.
 func Unimplemented() Action {
 	return func(_ CmdContext) error {
 		return errors.New("TODO: implement this command")
 	}
 }
 
-// NewCmd builds a Cmd
+// NewCmd creates a [Cmd] with the given short help text, action, and options.
+// Use [NewSubCmd] to simultaneously create and attach a command to a [Section].
 func NewCmd(helpShort string, action Action, opts ...CmdOpt) Cmd {
 	command := Cmd{
 		HelpShort:          helpShort,
@@ -36,42 +37,43 @@ func NewCmd(helpShort string, action Action, opts ...CmdOpt) Cmd {
 	return command
 }
 
-// CmdFlag adds an existing flag to a Command. It panics if a flag with the same name exists
+// CmdFlag attaches an existing [Flag] to a command. Panics if a flag with the same name exists.
 func CmdFlag(name string, value Flag) CmdOpt {
 	return func(com *Cmd) {
 		com.Flags.AddFlag(name, value)
 	}
 }
 
-// CmdFlagMap adds existing flags to a Command. It panics if a flag with the same name exists
+// CmdFlagMap attaches multiple existing flags to a command. Panics if any name already exists.
 func CmdFlagMap(flagMap FlagMap) CmdOpt {
 	return func(com *Cmd) {
 		com.Flags.AddFlags(flagMap)
 	}
 }
 
-// NewCmdFlag builds a flag and adds it to a Command. It panics if a flag with the same name exists
+// NewCmdFlag creates a new [Flag] and attaches it to a command. Panics if a flag with the same name exists.
 func NewCmdFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) CmdOpt {
 	return CmdFlag(name, NewFlag(helpShort, empty, opts...))
 }
 
-// CmdFooter adds an Help string to the command - useful from a help function
+// CmdFooter sets an optional footer text displayed at the end of help output for this command.
 func CmdFooter(footer string) CmdOpt {
 	return func(cat *Cmd) {
 		cat.Footer = footer
 	}
 }
 
-// CmdHelpLong adds an Help string to the command - useful from a help function
+// CmdHelpLong sets an optional extended description displayed in detailed help output.
 func CmdHelpLong(helpLong string) CmdOpt {
 	return func(cat *Cmd) {
 		cat.HelpLong = helpLong
 	}
 }
 
-// Allow forwarded args for a command. Useful for commands that wrap other commands.
+// AllowForwardedArgs enables passing extra arguments after "--" to this command.
+// Forwarded args are accessible via [CmdContext].ForwardedArgs.
 //
-// Example app:
+// Example usage:
 //
 //	enventory exec --env prod -- go run .
 func AllowForwardedArgs() CmdOpt {
@@ -80,10 +82,13 @@ func AllowForwardedArgs() CmdOpt {
 	}
 }
 
-// PassedFlags holds a map of flag names to flag Values
+// PassedFlags is a map of flag names to their resolved values, containing only flags
+// that were set from any source (CLI, config, env var, or default).
+// TODO: is this true?
 type PassedFlags map[string]interface{} // This can just stay a string for the convenience of the user.
 
-// CmdContext contains all information the app has parsed for the [Cmd] to pass to the [Action].
+// CmdContext holds all parsed information passed to an [Action] when a command is executed.
+// It includes resolved flags, forwarded args, I/O streams, and parse metadata.
 type CmdContext struct {
 	App           *App
 	Flags         PassedFlags
@@ -99,16 +104,19 @@ type CmdContext struct {
 	Stdout *os.File
 }
 
-// An Action is run as the result of a command
+// Action is a function executed when a [Cmd] is matched during parsing.
+// Return nil on success; return an error to signal failure.
 type Action func(CmdContext) error
 
-// A CmdMap contains strings to [Cmd]s.
+// CmdMap maps command names to [Cmd] instances within a [Section].
 type CmdMap map[string]Cmd
 
+// Empty reports whether the map contains no commands.
 func (fm CmdMap) Empty() bool {
 	return len(fm) == 0
 }
 
+// SortedNames returns the command names in alphabetical order.
 func (fm CmdMap) SortedNames() []string {
 	keys := make([]string, 0, len(fm))
 	for k := range fm {
@@ -120,9 +128,9 @@ func (fm CmdMap) SortedNames() []string {
 	return keys
 }
 
-// A Cmd will run code for you!
-// The name of a Cmd should probably be a verb - add , edit, run, ...
-// A Cmd should not be constructed directly. Use functions like [NewCmd] or [NewSubCmd] instead.
+// Cmd represents an executable command within the CLI.
+// Command names should be verbs (e.g., "add", "edit", "run").
+// Do not construct directly; use [NewCmd] or [NewSubCmd].
 type Cmd struct {
 	// Action to run when command is invoked
 	Action Action

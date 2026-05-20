@@ -8,10 +8,10 @@ import (
 	"go.bbkane.com/warg/value"
 )
 
-// FlagOpt customizes a Flag on creation
+// FlagOpt is a functional option for configuring a [Flag] during creation.
 type FlagOpt func(*Flag)
 
-// NewFlag creates a NewFlag with options!
+// NewFlag creates a [Flag] with the given short help text, value constructor, and options.
 func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) Flag {
 	flag := Flag{
 		Alias:                 "",
@@ -29,14 +29,15 @@ func NewFlag(helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) Fl
 	return flag
 }
 
-// Alias is an alternative name for a flag, usually shorter :)
+// Alias sets a short alternative name for the flag (e.g., "-n" for "--name").
 func Alias(alias string) FlagOpt {
 	return func(f *Flag) {
 		f.Alias = alias
 	}
 }
 
-// ConfigPath adds a configpath to a flag
+// ConfigPath sets the dot-separated path used to look up this flag's value in a config file
+// (e.g., "database.host").
 func ConfigPath(path string) FlagOpt {
 	return func(f *Flag) {
 		f.ConfigPath = path
@@ -79,30 +80,33 @@ func defaultFlagCompletions(cmdCtx CmdContext) (*completion.Candidates, error) {
 
 }
 
+// FlagCompletions sets a custom [CompletionsFunc] for generating tab-completion candidates.
 func FlagCompletions(CompletionsFunc CompletionsFunc) FlagOpt {
 	return func(flag *Flag) {
 		flag.Completions = CompletionsFunc
 	}
 }
 
-// EnvVars adds a list of environmental variables to search through to update this flag. The first one that exists will be used to update the flag. Further existing envvars will be ignored.
+// EnvVars sets environment variable names to read this flag's value from.
+// The first existing variable wins; subsequent ones are ignored.
 func EnvVars(name ...string) FlagOpt {
 	return func(f *Flag) {
 		f.EnvVars = name
 	}
 }
 
-// Required means the user MUST fill this flag
+// Required marks the flag as mandatory. Parsing fails if a required flag is not set
+// from any source (CLI, config, env var, or default).
 func Required() FlagOpt {
 	return func(f *Flag) {
 		f.Required = true
 	}
 }
 
-// UnsetSentinel is a bit of an advanced feature meant to allow overriding a
-// default, config, or environmental value with a command line flag.
-// When UnsetSentinel is passed as a flag value, Value is reset and SetBy is set to "".
-// It it recommended to set `name` to "UNSET" for consistency among warg apps.
+// UnsetSentinel defines a special value that, when passed on the command line, resets
+// the flag to its empty state, undoing any prior prior value from arguments / config / env vars / defaults
+// Conventionally set to "UNSET".
+//
 // Scalar example:
 //
 //	app --flag UNSET  // undoes anything that sets --flag
@@ -116,17 +120,18 @@ func UnsetSentinel(name string) FlagOpt {
 	}
 }
 
-// FlagGroup sets the group name for a flag.
-// Flags with the same group are displayed together in help output.
+// FlagGroup sets the group name for organizing this flag in help output.
+// Flags with the same group are displayed together. Empty string means ungrouped.
 func FlagGroup(group string) FlagOpt {
 	return func(f *Flag) {
 		f.Group = group
 	}
 }
 
-// FlagMap holds flags - used by Commands and Sections
+// FlagMap maps flag names (e.g., "--verbose") to [Flag] definitions.
 type FlagMap map[string]Flag
 
+// SortedNames returns the flag names in alphabetical order.
 func (fm *FlagMap) SortedNames() []string {
 	keys := make([]string, 0, len(*fm))
 	for k := range *fm {
@@ -138,7 +143,7 @@ func (fm *FlagMap) SortedNames() []string {
 	return keys
 }
 
-// FlagNameGroup is a named group of flag names, used for grouped help output.
+// FlagNameGroup pairs a group name with sorted flag names for grouped help output.
 type FlagNameGroup struct {
 	// Name is the group name. Empty string means ungrouped (displayed first).
 	Name string
@@ -175,7 +180,7 @@ func (fm *FlagMap) groupedNames() []FlagNameGroup {
 	return result
 }
 
-// AddFlag adds a new flag and panics if it already exists
+// AddFlag inserts a flag into the map. Panics if a flag with the same name already exists.
 func (fm FlagMap) AddFlag(name string, value Flag) {
 	if _, alreadyThere := (fm)[name]; !alreadyThere {
 		(fm)[name] = value
@@ -184,13 +189,15 @@ func (fm FlagMap) AddFlag(name string, value Flag) {
 	}
 }
 
-// AddFlags adds another FlagMap to this one and  and panics if a flag name already exists
+// AddFlags merges another [FlagMap] into this one. Panics if any name already exists.
 func (fm FlagMap) AddFlags(flagMap FlagMap) {
 	for name, value := range flagMap {
 		fm.AddFlag(name, value)
 	}
 }
 
+// Flag defines a single command-line flag, including its type, help text, aliases,
+// config/env bindings, and validation rules.
 type Flag struct {
 	// Alias is an alternative name for a flag, usually shorter :)
 	Alias string

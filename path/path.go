@@ -1,4 +1,5 @@
-// package path provides a simple wrapper around a string path that can expand the users home directory, a common CLI need. Might be extracted into its own library and removed from warg if I find myself needing it in other code.
+// Package path provides a file path wrapper that supports tilde (~) expansion
+// to the user's home directory.
 package path
 
 import (
@@ -9,14 +10,17 @@ import (
 	"go.bbkane.com/warg/colerr"
 )
 
+// Path wraps a file system path string, providing tilde expansion via [Path.Expand].
 type Path struct {
 	path string
 }
 
+// New creates a [Path] from the given string. No validation is performed.
 func New(path string) Path {
 	return Path{path: path}
 }
 
+// String returns the raw path string without expansion.
 func (p Path) String() string {
 	return p.path
 }
@@ -38,9 +42,9 @@ func (p Path) expand(homedir string) (string, error) {
 	return filepath.Join(homedir, p.path[1:]), nil
 }
 
-// Expand expands the path to include the home directory if the path
-// is prefixed with `~`. If it isn't prefixed with `~`, the path is
-// returned as-is.
+// Expand returns the path with a leading ~ replaced by the user's home directory.
+// If the path does not start with ~, it is returned unchanged.
+// Returns an error if the home directory cannot be determined.
 func (p Path) Expand() (string, error) {
 	homedir, err := os.UserHomeDir()
 	if err != nil {
@@ -53,7 +57,7 @@ func (p Path) Expand() (string, error) {
 	return expanded, nil
 }
 
-// MustExpand calls `Expand` and panics on any errors
+// MustExpand calls [Path.Expand] and panics on error.
 func (p Path) MustExpand() string {
 	expanded, err := p.Expand()
 	if err != nil {
@@ -62,7 +66,7 @@ func (p Path) MustExpand() string {
 	return expanded
 }
 
-// Equals returns true if the saved strings are equal. It does not attempt to expand paths
+// Equals reports whether two paths have the same raw string (no expansion).
 func (p Path) Equals(other Path) bool {
 	return p.path == other.path
 }

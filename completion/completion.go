@@ -8,8 +8,10 @@ import (
 )
 
 //go:embed completion_script.zsh
+// ZshCompletionScript holds the embedded zsh completion script template.
 var ZshCompletionScript []byte
 
+// ZshCompletionScriptWrite writes the zsh completion script for appName to w.
 func ZshCompletionScriptWrite(w io.Writer, appName string) {
 	script := bytes.ReplaceAll(ZshCompletionScript, []byte("WARG_COMPLETION_APPNAME"), []byte(appName))
 	_, err := w.Write(script)
@@ -19,8 +21,10 @@ func ZshCompletionScriptWrite(w io.Writer, appName string) {
 }
 
 //go:embed completion_script.bash
+// BashCompletionScript holds the embedded bash completion script template.
 var BashCompletionScript []byte
 
+// BashCompletionScriptWrite writes the bash completion script for appName to w.
 func BashCompletionScriptWrite(w io.Writer, appName string) {
 	script := bytes.ReplaceAll(BashCompletionScript, []byte("WARG_COMPLETION_APPNAME"), []byte(appName))
 	_, err := w.Write(script)
@@ -30,8 +34,10 @@ func BashCompletionScriptWrite(w io.Writer, appName string) {
 }
 
 //go:embed completion_script.fish
+// FishCompletionScript holds the embedded fish completion script template.
 var FishCompletionScript []byte
 
+// FishCompletionScriptWrite writes the fish completion script for appName to w.
 func FishCompletionScriptWrite(w io.Writer, appName string) {
 	script := bytes.ReplaceAll(FishCompletionScript, []byte("WARG_COMPLETION_APPNAME"), []byte(appName))
 	_, err := w.Write(script)
@@ -40,6 +46,7 @@ func FishCompletionScriptWrite(w io.Writer, appName string) {
 	}
 }
 
+// FishCompletionsWrite writes completion candidates in fish shell format to w.
 func FishCompletionsWrite(w io.Writer, c *Candidates) {
 	fmt.Fprintln(w, c.Type)
 	switch c.Type {
@@ -64,6 +71,7 @@ func FishCompletionsWrite(w io.Writer, c *Candidates) {
 	}
 }
 
+// BashCompletionsWrite writes completion candidates in bash shell format to w.
 func BashCompletionsWrite(w io.Writer, c *Candidates) {
 	fmt.Fprintln(w, c.Type)
 	switch c.Type {
@@ -80,6 +88,7 @@ func BashCompletionsWrite(w io.Writer, c *Candidates) {
 	}
 }
 
+// ZshCompletionsWrite writes completion candidates in zsh shell format to w.
 func ZshCompletionsWrite(w io.Writer, c *Candidates) {
 	fmt.Fprintln(w, c.Type)
 	switch c.Type {
@@ -105,6 +114,7 @@ func ZshCompletionsWrite(w io.Writer, c *Candidates) {
 	}
 }
 
+// Type indicates what kind of completion the shell should perform.
 type Type string
 
 const (
@@ -115,11 +125,14 @@ const (
 	Type_ValuesDescriptions Type = "COMPLETION_TYPE_VALUES_DESCRIPTIONS"
 )
 
+// Candidate is a single tab-completion suggestion with an optional description.
 type Candidate struct {
 	Name        string
 	Description string
 }
 
+// Candidates holds the completion type and a list of candidate values
+// to present to the user during tab completion.
 type Candidates struct {
 	Type   Type
 	Values []Candidate

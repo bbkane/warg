@@ -9,23 +9,26 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// GoldenTestArgs holds configuration for [GoldenTest].
 type GoldenTestArgs struct {
 	App *App
 
-	// UpdateGolden files for captured stderr/stdout
+	// UpdateGolden overwrites existing golden files with actual output when true.
 	UpdateGolden bool
 
-	// Whether the action should return an error
+	// ExpectActionErr asserts the action returns a non-nil error when true.
 	ExpectActionErr bool
 
+	// Args are the command-line arguments to parse (without program name).
 	Args []string
 }
 
-// GoldenTest runs the app and and captures stdout and stderr into files.
-// If those differ than previously captured stdout/stderr,
-// t.Fatalf will be called.
+// GoldenTest runs the app with the given args and compares stdout/stderr against
+// golden files in testdata/<TestName>/. If the output differs, t.Fatalf is called.
+// Set GoldenTestArgs.UpdateGolden to overwrite golden files with actual output.
 //
-// Passed `parseOpts` should not include OverrideStderr/OverrideStdout as GoldenTest overwrites those
+// Do not pass [ParseWithStderr] or [ParseWithStdout] in parseOpts, as GoldenTest
+// overrides those to capture output.
 func GoldenTest(
 	t *testing.T,
 	args GoldenTestArgs,

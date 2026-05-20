@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// UpdatedBy identifies the source that last set a flag's value.
 type UpdatedBy string
 
 const (
@@ -14,10 +15,9 @@ const (
 	UpdatedByConfig  UpdatedBy = "config"
 )
 
-// Value is a "generic" type to store different types into flags
-// Inspired by https://golang.org/src/flag/flag.go .
-// There are two underlying "type" families designed to fit in Value:
-// scalar types (Int, String, ...) and container types (IntSlice, StringMap, ...).
+// Value is the interface for all flag value types (scalar, slice, dict).
+// Implementations hold the current value, track how it was set, and handle
+// parsing from strings (CLI/env) and interfaces (config files).
 type Value interface {
 
 	// Choices for this value to contain (represented as strings)
@@ -48,6 +48,7 @@ type Value interface {
 	ReplaceFromDefault(u UpdatedBy) error
 }
 
+// ScalarValue extends [Value] for single-valued flags (e.g., string, int, bool).
 type ScalarValue interface {
 	Value
 
@@ -58,6 +59,7 @@ type ScalarValue interface {
 	String() string
 }
 
+// SliceValue extends [Value] for list-valued flags that accumulate multiple values.
 type SliceValue interface {
 	Value
 
@@ -68,6 +70,7 @@ type SliceValue interface {
 	StringSlice() []string
 }
 
+// DictValue extends [Value] for key=value map flags.
 type DictValue interface {
 	Value
 
@@ -78,10 +81,11 @@ type DictValue interface {
 	StringMap() map[string]string
 }
 
-// EmptyConstructur just builds a new value.
-// Useful to create new values as well as initialize them
+// EmptyConstructor creates a new zero-valued [Value] instance.
+// Used both for initialization and to produce fresh values during parsing.
 type EmptyConstructor func() Value
 
+// ErrInvalidChoice is returned when an Update value is not within the allowed choices.
 type ErrInvalidChoice[T any] struct {
 	Choices []T
 }
@@ -90,7 +94,8 @@ func (e ErrInvalidChoice[T]) Error() string {
 	return "invalid choice for value: choices: " + fmt.Sprint(e.Choices)
 }
 
-// ErrUpdatedMoreThanOnce is returned when a value is updated more than once. Only applicable to Scalar Values
+// ErrUpdatedMoreThanOnce is returned when a scalar value is set more than once
+// from the same priority level (e.g., two CLI flags for the same scalar).
 type ErrUpdatedMoreThanOnce[T any] struct {
 	CurrentValue T
 	UpdatedBy    UpdatedBy

@@ -14,19 +14,24 @@ import (
 	"go.bbkane.com/warg/path"
 )
 
+// ErrIncompatibleInterface is returned when a value cannot be decoded from an interface{}
+// (typically from a config file whose type doesn't match the expected Go type).
 var ErrIncompatibleInterface = errors.New("could not decode interface into Value")
 
-// FromZero returns the zero value for type T. Useful for contstructing [TypeInfo] instances.
+// FromZero returns the zero value for type T. Use as the FromZero field in [TypeInfo].
 func FromZero[T any]() T {
 	var zero T
 	return zero
 }
 
-// Equals returns true if a and b are equal. CUseful for contstructing [TypeInfo] instances.
+// Equals returns true if a and b are equal. Use as the Equals field in [TypeInfo]
+// for comparable types.
 func Equals[T comparable](a, b T) bool {
 	return a == b
 }
 
+// TypeInfo defines how to parse, compare, and initialize values of type T.
+// Provide one to [scalar.New], [slice.New], or [dict.New] for custom types.
 type TypeInfo[T any] struct {
 	Description string
 
@@ -41,7 +46,8 @@ type TypeInfo[T any] struct {
 	Equals func(a, b T) bool
 }
 
-// ValidateNonNilFuncs returns an error if any of the function fields are nil. Used to validate TypeInfo instances in tests
+// ValidateNonNilFuncs returns an error if any function fields are nil.
+// Useful in tests to catch incomplete [TypeInfo] definitions.
 func (ti TypeInfo[T]) ValidateNonNilFuncs() error {
 	var errs []error
 	if ti.FromIFace == nil {
@@ -64,7 +70,8 @@ func (ti TypeInfo[T]) ValidateNonNilFuncs() error {
 	return nil
 }
 
-// WithinChoices returns true if val is within choices according to equals function. Used to update values when passed as strings from flags
+// WithinChoices reports whether val is in choices using the provided equals function.
+// Returns true if choices is empty (no constraint).
 func WithinChoices[T any](val T, choices []T, equals func(a, b T) bool) bool {
 	// User didn't constrain choices
 	if len(choices) == 0 {
@@ -78,6 +85,7 @@ func WithinChoices[T any](val T, choices []T, equals func(a, b T) bool) bool {
 	return false
 }
 
+// NetIPAddr returns a [TypeInfo] for [netip.Addr] values.
 func NetIPAddr() TypeInfo[netip.Addr] {
 	return TypeInfo[netip.Addr]{
 		Description: "IP address",
@@ -104,6 +112,7 @@ func NetIPAddr() TypeInfo[netip.Addr] {
 	}
 }
 
+// AddrPort returns a [TypeInfo] for [netip.AddrPort] values (ip:port format).
 func AddrPort() TypeInfo[netip.AddrPort] {
 	return TypeInfo[netip.AddrPort]{
 		Description: "IP and Port number separated by a colon: ip:port ",
@@ -123,6 +132,7 @@ func AddrPort() TypeInfo[netip.AddrPort] {
 	}
 }
 
+// Bool returns a [TypeInfo] for boolean values. Accepts "true" or "false" strings.
 func Bool() TypeInfo[bool] {
 	return TypeInfo[bool]{
 		Description: "bool",
@@ -156,6 +166,8 @@ func durationFromString(s string) (time.Duration, error) {
 	return decoded, nil
 }
 
+// Duration returns a [TypeInfo] for [time.Duration] values.
+// Accepts Go duration strings (e.g., "1h30m") as well as extended formats like "1d2h".
 func Duration() TypeInfo[time.Duration] {
 	return TypeInfo[time.Duration]{
 		Description: "duration",
@@ -180,6 +192,7 @@ func intFromString(s string) (int, error) {
 	return int(i), nil
 }
 
+// Int returns a [TypeInfo] for int values. Accepts decimal, hex (0x), octal (0o), and binary (0b) strings.
 func Int() TypeInfo[int] {
 	return TypeInfo[int]{
 		Description: "int",
@@ -218,6 +231,7 @@ func int8FromString(s string) (int8, error) {
 	return int8(i), nil
 }
 
+// Int8 returns a [TypeInfo] for int8 values (range -128 to 127).
 func Int8() TypeInfo[int8] {
 	return TypeInfo[int8]{
 		Description: "int8",
@@ -260,6 +274,7 @@ func int16FromString(s string) (int16, error) {
 	return int16(i), nil
 }
 
+// Int16 returns a [TypeInfo] for int16 values (range -32768 to 32767).
 func Int16() TypeInfo[int16] {
 	return TypeInfo[int16]{
 		Description: "int16",
@@ -302,6 +317,7 @@ func int32FromString(s string) (int32, error) {
 	return int32(i), nil
 }
 
+// Int32 returns a [TypeInfo] for int32 values (range -2147483648 to 2147483647).
 func Int32() TypeInfo[int32] {
 	return TypeInfo[int32]{
 		Description: "int32",
@@ -340,6 +356,7 @@ func int64FromString(s string) (int64, error) {
 	return strconv.ParseInt(s, 0, 64)
 }
 
+// Int64 returns a [TypeInfo] for int64 values.
 func Int64() TypeInfo[int64] {
 	return TypeInfo[int64]{
 		Description: "int64",
@@ -374,6 +391,7 @@ func uintFromString(s string) (uint, error) {
 	return uint(i), nil
 }
 
+// Uint returns a [TypeInfo] for uint values.
 func Uint() TypeInfo[uint] {
 	return TypeInfo[uint]{
 		Description: "uint",
@@ -416,6 +434,7 @@ func uint8FromString(s string) (uint8, error) {
 	return uint8(i), nil
 }
 
+// Uint8 returns a [TypeInfo] for uint8 values (range 0 to 255).
 func Uint8() TypeInfo[uint8] {
 	return TypeInfo[uint8]{
 		Description: "uint8",
@@ -458,6 +477,7 @@ func uint16FromString(s string) (uint16, error) {
 	return uint16(i), nil
 }
 
+// Uint16 returns a [TypeInfo] for uint16 values (range 0 to 65535).
 func Uint16() TypeInfo[uint16] {
 	return TypeInfo[uint16]{
 		Description: "uint16",
@@ -500,6 +520,7 @@ func uint32FromString(s string) (uint32, error) {
 	return uint32(i), nil
 }
 
+// Uint32 returns a [TypeInfo] for uint32 values (range 0 to 4294967295).
 func Uint32() TypeInfo[uint32] {
 	return TypeInfo[uint32]{
 		Description: "uint32",
@@ -538,6 +559,7 @@ func uint64FromString(s string) (uint64, error) {
 	return strconv.ParseUint(s, 0, 64)
 }
 
+// Uint64 returns a [TypeInfo] for uint64 values.
 func Uint64() TypeInfo[uint64] {
 	return TypeInfo[uint64]{
 		Description: "uint64",
@@ -575,6 +597,7 @@ func float32FromString(s string) (float32, error) {
 	return float32(f), nil
 }
 
+// Float32 returns a [TypeInfo] for float32 values.
 func Float32() TypeInfo[float32] {
 	return TypeInfo[float32]{
 		Description: "float32",
@@ -609,6 +632,7 @@ func float64FromString(s string) (float64, error) {
 	return strconv.ParseFloat(s, 64)
 }
 
+// Float64 returns a [TypeInfo] for float64 values.
 func Float64() TypeInfo[float64] {
 	return TypeInfo[float64]{
 		Description: "float64",
@@ -636,6 +660,7 @@ func Float64() TypeInfo[float64] {
 	}
 }
 
+// Path returns a [TypeInfo] for [path.Path] values (file paths with ~ expansion support).
 func Path() TypeInfo[path.Path] {
 	return TypeInfo[path.Path]{
 		Description: "path",
@@ -667,6 +692,7 @@ func runeFromString(s string) (rune, error) {
 	}
 }
 
+// Rune returns a [TypeInfo] for single-rune values. Accepts exactly one character.
 func Rune() TypeInfo[rune] {
 	return TypeInfo[rune]{
 		Description: "rune",
@@ -686,6 +712,7 @@ func Rune() TypeInfo[rune] {
 	}
 }
 
+// String returns a [TypeInfo] for string values.
 func String() TypeInfo[string] {
 	return TypeInfo[string]{
 		Description: "string",

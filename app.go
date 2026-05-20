@@ -21,30 +21,37 @@ import (
 	"go.bbkane.com/warg/value/scalar"
 )
 
-// AppOpt let's you customize the app. Most AppOpts panic if incorrectly called
+// AppOpt is a functional option for configuring an [App] during creation via [New].
+// Most AppOpts panic if given invalid input (e.g., duplicate flag names).
 type AppOpt func(*App)
 
-// GlobalFlag adds an existing flag to a [Cmd]. It panics if a flag with the same name exists
+// GlobalFlag registers an existing [Flag] as a global flag available to all commands.
+// It panics if a flag with the same name already exists.
 func GlobalFlag(name string, value Flag) AppOpt {
 	return func(com *App) {
 		com.GlobalFlags.AddFlag(name, value)
 	}
 }
 
-// GlobalFlagMap adds existing flags to a [Cmd]. It panics if a flag with the same name exists
+// GlobalFlagMap registers multiple existing flags as global flags available to all commands.
+// It panics if any flag name already exists.
 func GlobalFlagMap(flagMap FlagMap) AppOpt {
 	return func(com *App) {
 		com.GlobalFlags.AddFlags(flagMap)
 	}
 }
 
-// NewGlobalFlag adds a flag to the app. It panics if a flag with the same name exists
+// NewGlobalFlag creates and registers a new global flag available to all commands.
+// It panics if a flag with the same name already exists.
 func NewGlobalFlag(name string, helpShort string, empty value.EmptyConstructor, opts ...FlagOpt) AppOpt {
 	return GlobalFlag(name, NewFlag(helpShort, empty, opts...))
 
 }
 
-// ConfigFlag adds a global flag that will be used to read a config file. the flagMap must contain exactly one flag. When parsed, the config flag will be parsed before other flags, any config file found will be read, and any values found will be used to update other flags. This allows users to override flag defaults with values from a config file.
+// ConfigFlag enables config file support by adding a global flag whose value is the path
+// to a config file. The flagMap must contain exactly one flag (panics otherwise).
+// During parsing, this flag is resolved first; the referenced config file is then read,
+// and its values are used to fill other unset flags before environment variables or defaults.
 func ConfigFlag(reader config.NewReader, flagMap FlagMap) AppOpt {
 	return func(app *App) {
 		if len(flagMap) != 1 {
@@ -56,13 +63,15 @@ func ConfigFlag(reader config.NewReader, flagMap FlagMap) AppOpt {
 	}
 }
 
-// HelpFlag customizes your help  This option is only needed if you're also writing a custom help function. helpFlags be either `nil` to autogenerate or a flag map with one flat that with the followng properties:
+// HelpFlag customizes the help system by providing custom help command implementations
+// and an optional flag map. Only needed if writing custom help output.
+// helpFlags may be nil (to auto-generate) or a [FlagMap] with exactly one flag that:
 //
-//   - scalar string type
-//   - choices that match the names in helpCommands
-//   - default value set to one of the choices
+//   - is a scalar string type
+//   - has choices matching the keys of helpCmds
+//   - has a default value that is one of those choices
 //
-// These properties are checked at runtime with app.Validate().
+// These constraints are validated at runtime by [App.Validate].
 func HelpFlag(helpCmds CmdMap, helpFlags FlagMap) AppOpt {
 	return func(a *App) {
 		switch len(helpFlags) {
@@ -80,14 +89,15 @@ func HelpFlag(helpCmds CmdMap, helpFlags FlagMap) AppOpt {
 	}
 }
 
-// SkipAll skips adding:
-//   - the default completion commands (<app> completion)
-//   - the default color flag map (<app> --color)
-//   - the default terminal width flag (<app> --term-width)
-//   - the default version command map (<app> version)
-//   - the default validation checks
+// SkipAll disables all automatically added features:
+//   - completion commands (<app> completion)
+//   - --color global flag
+//   - --term-width global flag
+//   - repl command
+//   - version command
+//   - startup validation
 //
-// This is inteded for tests where you just want to assert against a minimal application
+// Intended for tests that need a minimal application without auto-generated commands/flags.
 func SkipAll() AppOpt {
 	return func(a *App) {
 		a.SkipCompletionCmds = true
@@ -99,50 +109,53 @@ func SkipAll() AppOpt {
 	}
 }
 
-// SkipCompletionCmds skips adding the default completion commands (<app> completion).
+// SkipCompletionCmds disables the auto-generated "completion" section and its subcommands.
 func SkipCompletionCmds() AppOpt {
 	return func(a *App) {
 		a.SkipCompletionCmds = true
 	}
 }
 
-// SkipColorFlag skips adding the default color flag map (<app> --color).
+// SkipGlobalColorFlag disables the auto-generated --color global flag.
 func SkipGlobalColorFlag() AppOpt {
 	return func(a *App) {
 		a.SkipGlobalColorFlag = true
 	}
 }
 
-// SkipGlobalTermWidthFlag skips adding the default terminal width flag (<app> --term-width).
+// SkipGlobalTermWidthFlag disables the auto-generated --term-width global flag.
 func SkipGlobalTermWidthFlag() AppOpt {
 	return func(a *App) {
 		a.SkipGlobalTermWidthFlag = true
 	}
 }
 
-// SkipValidation skips (most of) the app's internal consistency checks when the app is created.
-// If used, make sure to call app.Validate() in a test!
+// SkipValidation disables the app's internal consistency checks during [New].
+// If used, call [App.Validate] in a test to catch configuration errors.
 func SkipValidation() AppOpt {
 	return func(a *App) {
 		a.SkipValidation = true
 	}
 }
 
-// SkipVersionCmd skips adding the default version command (<app> version).
+// SkipVersionCmd disables the auto-generated "version" command.
 func SkipVersionCmd() AppOpt {
 	return func(a *App) {
 		a.SkipVersionCmd = true
 	}
 }
 
-// SkipREPLCmd skips adding the default REPL command (<app> repl). NOTE: this command is not as polished as the rest of warg. I hope to improve it over time.
+// SkipREPLCmd disables the auto-generated "repl" command.
+// NOTE: the REPL command is experimental and may change in future versions.
 func SkipREPLCmd() AppOpt {
 	return func(a *App) {
 		a.SkipREPLCmd = true
 	}
 }
 
-// FindVersion returns the version of the app. If the version is already set (eg. via a build flag), it returns that. Otherwise, it tries to read the go module version from the runtime info, or returns "unknown" if that fails. This is called automatically when passing an empty string to [New], but can also be used if you need the version independently of the app creation.
+// FindVersion determines the application version. If version is non-empty, it is returned as-is.
+// Otherwise, it reads the Go module version from [debug.ReadBuildInfo], returning "(devel)" when
+// run via "go run" or "unknown" if build info is unavailable.
 func FindVersion(version string) string {
 	// if the version is already set (eg. via a build flag), return it
 	if version != "" {
@@ -158,6 +171,7 @@ func FindVersion(version string) string {
 	return info.Main.Version
 }
 
+// CompletionsDirectories returns a [CompletionsFunc] that suggests only directory names.
 func CompletionsDirectories() CompletionsFunc {
 	return func(cc CmdContext) (*completion.Candidates, error) {
 		return &completion.Candidates{
@@ -167,6 +181,7 @@ func CompletionsDirectories() CompletionsFunc {
 	}
 }
 
+// CompletionsDirectoriesFiles returns a [CompletionsFunc] that suggests both files and directories.
 func CompletionsDirectoriesFiles() CompletionsFunc {
 	return func(cc CmdContext) (*completion.Candidates, error) {
 		return &completion.Candidates{
@@ -176,6 +191,7 @@ func CompletionsDirectoriesFiles() CompletionsFunc {
 	}
 }
 
+// CompletionsNone returns a [CompletionsFunc] that provides no completion suggestions.
 func CompletionsNone() CompletionsFunc {
 	return func(cc CmdContext) (*completion.Candidates, error) {
 		return &completion.Candidates{
@@ -185,6 +201,7 @@ func CompletionsNone() CompletionsFunc {
 	}
 }
 
+// CompletionsValues returns a [CompletionsFunc] that suggests the given fixed string values.
 func CompletionsValues(values []string) CompletionsFunc {
 	var vals []completion.Candidate
 	for _, v := range values {
@@ -199,6 +216,8 @@ func CompletionsValues(values []string) CompletionsFunc {
 	}
 }
 
+// CompletionsValuesDescriptions returns a [CompletionsFunc] that suggests the given values
+// with descriptions shown alongside each candidate.
 func CompletionsValuesDescriptions(values []completion.Candidate) CompletionsFunc {
 	return func(ctx CmdContext) (*completion.Candidates, error) {
 		return &completion.Candidates{
@@ -208,7 +227,10 @@ func CompletionsValuesDescriptions(values []completion.Candidate) CompletionsFun
 	}
 }
 
-// New creates a warg app. name is used for help output only (though generally it should match the name of the compiled binary). version is the app version - if empty, warg will attempt to set it to the go module version, or "unknown" if that fails.
+// New creates a new CLI application. name is used for help output and should match
+// the compiled binary name. version is displayed by the auto-generated "version" command;
+// if empty, warg attempts to read it from the Go module build info.
+// [New] panics if [App.Validate] fails (disable with [SkipValidation]).
 func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 	app := App{
 		Name:                    name,
@@ -340,8 +362,8 @@ func New(name string, version string, rootSection Section, opts ...AppOpt) App {
 	return app
 }
 
-// An App contains your defined sections, commands, and flags
-// Create a new App with New()
+// App is the top-level container for a warg CLI application, holding sections,
+// commands, flags, and configuration. Create with [New].
 type App struct {
 	// Config
 	ConfigFlagName  string
@@ -379,7 +401,9 @@ func parseTermWidth(s string) (string, error) {
 	return s, nil
 }
 
-// MustrunWithArgs runs the app with a provided list of args. Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called. Any errors on an Action will be printed to stderr and os.Exit(1) will be called. This is intended to be run in example tests
+// MustRunWithArgs parses and executes the app with the given args (without the program name).
+// Parse errors are printed to stderr with exit code 64 (EX_USAGE).
+// Action errors are printed to stderr with exit code 1.
 func (app *App) MustRunWithArgs(args []string, opts ...ParseOpt) {
 	// TODO: make colors optional!
 	pr, err := app.Parse(args, opts...)
@@ -399,9 +423,9 @@ func (app *App) MustRunWithArgs(args []string, opts ...ParseOpt) {
 	}
 }
 
-// MustRun reads os.Args and runs the app or produces shell completions.
-// Any flag parsing errors will be printed to stderr and os.Exit(64) (EX_USAGE) will be called.
-// Any errors on an Action will be printed to stderr and os.Exit(1) will be called.
+// MustRun parses os.Args and executes the matched command, or produces shell completions
+// if a --completion-{bash,zsh,fish} flag is detected. Parse errors exit with code 64 (EX_USAGE);
+// action errors exit with code 1.
 func (app *App) MustRun(opts ...ParseOpt) {
 	if len(os.Args) >= 3 && os.Args[1] == "--completion-bash" {
 		// app --completion-bash <args> . Note that <args> must be something, even if it's the empty string
@@ -456,10 +480,12 @@ func (app *App) MustRun(opts ...ParseOpt) {
 	}
 }
 
-// Look up keys (meant for environment variable parsing) - fulfillable with os.LookupEnv or warg.LookupMap(map)
+// LookupEnv is a function for resolving environment variable names to values.
+// Satisfiable by [os.LookupEnv] or [LookupMap].
 type LookupEnv func(key string) (string, bool)
 
-// LookupMap loooks up keys from a provided map. Useful to mock os.LookupEnv when parsing
+// LookupMap returns a [LookupEnv] backed by a static map. Useful for mocking
+// environment variables in tests.
 func LookupMap(m map[string]string) LookupEnv {
 	return func(key string) (string, bool) {
 		val, exists := m[key]
@@ -612,10 +638,14 @@ func (app *App) Validate() error {
 	return nil
 }
 
-// CompletionsFunc is a function that returns completion candidates for a flag. See warg.Completions[Type] for convenience functions to make this
+// CompletionsFunc generates shell completion candidates for a flag value.
+// Use the Completions* convenience functions (e.g., [CompletionsValues]) to construct one.
 type CompletionsFunc func(CmdContext) (*completion.Candidates, error)
 
-// Complete generates completions from a list of args, by looking at the app structure starting at the root section. Args must start with a section, command in root section or a global flag. Pass a partial or empty string for partiallyTypedArg - it's not currently used
+// Complete generates tab-completion candidates for the given args and partially typed argument.
+// args should not include the program name. partiallyTypedArg is the in-progress token
+// the user is typing (may be empty). This is called internally by [App.MustRun] to support
+// shell completion scripts.
 func (app *App) Complete(args []string, partiallyTypedArg string, opts ...ParseOpt) (*completion.Candidates, error) {
 	parseOpts := NewParseOpts(opts...)
 

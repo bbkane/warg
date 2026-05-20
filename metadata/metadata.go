@@ -1,18 +1,17 @@
-// Package metadata provides a simple weakly-typed key/value store. Metadata must be set at creation time, and cannot be modified later.
-//
-// Intended use for warg:
-//   - Attaching metadata when parsing, and then retrieving it later. Especially useful to mock dependencies.
-//   - Attaching metadata Sections, Cmds and Flags for later retrieval. I intend to use this for TUI generation (i.e., you can set metadata on a flag that indicates the TUI should use a larger text field or a password field, etc)
+// Package metadata provides a simple immutable key/value store for attaching
+// arbitrary data during parsing. Common uses include injecting test mocks
+// and storing UI hints for flags (planned).
 package metadata
 
 import "fmt"
 
-// A simple type to hold key/value metadata pairs of type any
-
+// Metadata is an immutable key/value store. Keys and values can be any type.
+// Create with [New] or [Empty]. Values cannot be modified after creation.
 type Metadata struct {
 	data map[any]any
 }
 
+// Empty returns a [Metadata] with no entries.
 func Empty() Metadata {
 	return Metadata{
 		// Safe to use a nil map because it's not possible to modify later
@@ -20,7 +19,8 @@ func Empty() Metadata {
 	}
 }
 
-// New creates a new Metadata instance. kvs should be an even number of arguments, alternating key, value. Panics if an odd number of arguments is provided.
+// New creates a [Metadata] from alternating key/value pairs.
+// Panics if an odd number of arguments is provided.
 func New(kvs ...any) Metadata {
 	data := make(map[any]any)
 	if len(kvs)%2 != 0 {
@@ -36,11 +36,13 @@ func New(kvs ...any) Metadata {
 	}
 }
 
+// Get retrieves a value by key. Returns (value, true) if found, (nil, false) otherwise.
 func (m *Metadata) Get(key any) (any, bool) {
 	value, exists := m.data[key]
 	return value, exists
 }
 
+// MustGet retrieves a value by key, panicking if the key does not exist.
 func (m *Metadata) MustGet(key any) any {
 	value, exists := m.Get(key)
 	if !exists {

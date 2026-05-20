@@ -18,6 +18,9 @@ type jsonConfigReader struct {
 	data configMap
 }
 
+// New creates a [config.Reader] that reads flag values from a JSON file at filePath.
+// If the file does not exist, the returned reader finds no values (not an error).
+// Uses json.Number for numeric precision.
 func New(filePath string) (config.Reader, error) {
 	cr := &jsonConfigReader{
 		data: nil,

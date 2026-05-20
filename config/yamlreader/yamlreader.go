@@ -17,6 +17,9 @@ type yamlConfigReader struct {
 	data configMap
 }
 
+// New creates a [config.Reader] that reads flag values from a YAML file at filePath.
+// If the file does not exist, the returned reader finds no values (not an error).
+// Uses strict YAML parsing.
 func New(filePath string) (config.Reader, error) {
 	cr := &yamlConfigReader{
 		data: nil,

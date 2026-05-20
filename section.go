@@ -5,10 +5,11 @@ import (
 	"sort"
 )
 
-// SectionOpt customizes a Section on creation
+// SectionOpt is a functional option for configuring a [Section] during creation.
 type SectionOpt func(*Section)
 
-// NewSection creates a standalone [Section]. All section options are in the [go.bbkane.com/warg/section] package
+// NewSection creates a standalone [Section] that groups commands and child sections.
+// Attach it to a parent with [SubSection] or pass it directly to [New] as the root section.
 func NewSection(helpShort string, opts ...SectionOpt) Section {
 	section := Section{
 		HelpShort: helpShort,
@@ -23,7 +24,7 @@ func NewSection(helpShort string, opts ...SectionOpt) Section {
 	return section
 }
 
-// SubSection adds an existing SubSection as a child of this SubSection. Panics if a SubSection with the same name already exists
+// SubSection attaches an existing [Section] as a child. Panics if a section with the same name exists.
 func SubSection(name string, value Section) SectionOpt {
 	return func(app *Section) {
 		if _, alreadyThere := app.Sections[name]; !alreadyThere {
@@ -34,7 +35,7 @@ func SubSection(name string, value Section) SectionOpt {
 	}
 }
 
-// SubSectionMap adds existing Sections as a child of this Section. Panics if a Section with the same name already exists
+// SubSectionMap attaches multiple existing sections as children. Panics if any name already exists.
 func SubSectionMap(sections SectionMap) SectionOpt {
 	return func(app *Section) {
 		for name, value := range sections {
@@ -43,7 +44,7 @@ func SubSectionMap(sections SectionMap) SectionOpt {
 	}
 }
 
-// SubCmd adds an existing SubCmd as a child of this Section. Panics if a SubCmd with the same name already exists
+// SubCmd attaches an existing [Cmd] as a child of this section. Panics if a command with the same name exists.
 func SubCmd(name string, value Cmd) SectionOpt {
 	return func(app *Section) {
 		if _, alreadyThere := app.Cmds[name]; !alreadyThere {
@@ -54,7 +55,7 @@ func SubCmd(name string, value Cmd) SectionOpt {
 	}
 }
 
-// SubCmdMap adds existing Commands as a child of this Section. Panics if a Command with the same name already exists
+// SubCmdMap attaches multiple existing commands as children. Panics if any name already exists.
 func SubCmdMap(commands CmdMap) SectionOpt {
 	return func(app *Section) {
 		for name, value := range commands {
@@ -63,37 +64,41 @@ func SubCmdMap(commands CmdMap) SectionOpt {
 	}
 }
 
-// NewSubSection creates a new Section as a child of this Section. Panics if a NewSubSection with the same name already exists
+// NewSubSection creates a new child [Section] with the given name and options.
+// Panics if a section with the same name already exists.
 func NewSubSection(name string, helpShort string, opts ...SectionOpt) SectionOpt {
 	return SubSection(name, NewSection(helpShort, opts...))
 }
 
-// NewSubCmd creates a new Command as a child of this Section. Panics if a NewSubCmd with the same name already exists
+// NewSubCmd creates a new [Cmd] and attaches it as a child of this section.
+// Panics if a command with the same name already exists.
 func NewSubCmd(name string, helpShort string, action Action, opts ...CmdOpt) SectionOpt {
 	return SubCmd(name, NewCmd(helpShort, action, opts...))
 }
 
-// SectionFooter adds an optional help string to this Section
+// SectionFooter sets an optional footer text displayed at the end of help output for this section.
 func SectionFooter(footer string) SectionOpt {
 	return func(cat *Section) {
 		cat.Footer = footer
 	}
 }
 
-// SectionHelpLong adds an optional help string to this Section
+// SectionHelpLong sets an optional extended description for this section, shown in detailed help.
 func SectionHelpLong(helpLong string) SectionOpt {
 	return func(cat *Section) {
 		cat.HelpLong = helpLong
 	}
 }
 
-// SectionMap holds Sections - used by other Sections
+// SectionMap maps section names to [Section] instances.
 type SectionMap map[string]Section
 
+// Empty reports whether the map contains no sections.
 func (fm SectionMap) Empty() bool {
 	return len(fm) == 0
 }
 
+// SortedNames returns the section names in alphabetical order.
 func (fm SectionMap) SortedNames() []string {
 	keys := make([]string, 0, len(fm))
 	for k := range fm {
@@ -105,9 +110,9 @@ func (fm SectionMap) SortedNames() []string {
 	return keys
 }
 
-// Sections are like "folders" for Commmands.
-// They should usually have noun names.
-// Sections should not be be created directly, but with the APIs in [go.bbkane.com/warg/section].
+// Section groups related commands and child sections, forming the hierarchical
+// structure of a CLI app. Section names should be nouns (e.g., "config", "users").
+// Do not construct directly; use [NewSection] or [NewSubSection].
 type Section struct {
 	// Cmds holds the Cmds under this Section
 	Cmds CmdMap

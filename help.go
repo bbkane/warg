@@ -12,6 +12,8 @@ import (
 	"golang.org/x/term"
 )
 
+// DefaultHelpCmdMap returns the built-in help command implementations: "default", "detailed",
+// "outline", "allcommands", and "compact".
 func DefaultHelpCmdMap() CmdMap {
 	allCmdsHelp := NewCmd("", buildHelpAction(detailedCmdHelp(), allCmdsSectionHelp()))
 	return CmdMap{
@@ -23,6 +25,8 @@ func DefaultHelpCmdMap() CmdMap {
 	}
 }
 
+// DefaultHelpFlagMap returns a [FlagMap] containing a "--help" / "-h" flag
+// with the given default choice and available choices.
 func DefaultHelpFlagMap(defaultChoice string, choices []string) FlagMap {
 	return FlagMap{
 		"--help": NewFlag(
@@ -57,10 +61,9 @@ func leftPad(s string, pad string, plength int) string {
 	return s
 }
 
-// ColorEnabled looks for a passed --color flag with an underlying string value. If
-// ConditionallyEnableColor2 looks for a passed --color flag with an underlying string value. If
-// it exists and is set to "true", or if it exists, is set to "auto",
-// and the passed file is a TTY, an enabled Color is returned.
+// ColorEnabled reports whether ANSI color output should be enabled based on the
+// --color flag value in pf and whether file is a terminal.
+// Returns true if --color is "true", or if --color is "auto" and file is a TTY.
 func ColorEnabled(pf PassedFlags, file *os.File) bool {
 	// default to trying to use color
 	useColor := "auto"
@@ -75,11 +78,10 @@ func ColorEnabled(pf PassedFlags, file *os.File) bool {
 	return startEnabled
 }
 
-// look for a passed --term-width flag with an underlying string value.
-//   - if --term-width doesn't exist, or it's set to "infinite", return 0 (indicating infinite width)
-//   - if it's set to "auto", attempt to detect terminal width and return it, falling back to 0 if detection fails
-//   - if it's set to a positive integer, return that integer
-//   - if it's set to an invalid value (e.g. negative integer, non-integer string), return 0
+// TermWidth determines the terminal width to use for wrapping help output.
+// Returns 0 for infinite width. Respects the --term-width flag if present:
+// "auto" detects terminal size (falls back to 0), "infinite" returns 0,
+// and a positive integer is used directly.
 func TermWidth(file *os.File, pf PassedFlags) int {
 	termWidthI, exists := pf["--term-width"]
 	if !exists {

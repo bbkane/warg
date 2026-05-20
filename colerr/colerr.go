@@ -9,16 +9,22 @@ import (
 	"go.bbkane.com/warg/styles"
 )
 
-// Colerr provides a way to create errors that can be printed with color styles. The Stacktrace function can be used to print the error and it wrapped errors with the appropriate styles.
-//
-// Types the implement ColerError should also implement Error (and optionally Unwrap) so that they can be used as normal errors in the repl
+// Package colerr provides colored error types that support styled terminal output.
+// Types implementing [ColorError] can be printed with [Stacktrace] to display a
+// chain of wrapped errors with ANSI color styling.
+
+// ColorError is implemented by errors that support colored terminal output.
+// Implementations should also implement the standard error interface
+// (and optionally Unwrap) so they work as normal Go errors.
 type ColorError interface {
-	// ColorError returns a string formatted with the style.
-	//
-	// If the error is a wrapper around another error, the ColorError method should only format the message of this error, not the wrapped error. The Stacktrace function will handle printing the wrapped error separately.
+	// ColorError returns a styled string for this error's message only (not wrapped errors, unlike the standard Go convention).
+	// [Stacktrace] handles printing wrapped errors separately.
 	ColorError(s *styles.Styles) string
 }
 
+// Stacktrace prints err and all its wrapped errors to w using the given styles.
+// Each [ColorError] in the chain is printed on its own line; the final non-ColorError
+// is printed with the error style. Multi-errors (Unwrap() []error) are indented.
 func Stacktrace(w io.Writer, style *styles.Styles, err error) {
 	p := styles.NewPrinter(w)
 
@@ -53,6 +59,8 @@ func Stacktrace(w io.Writer, style *styles.Styles, err error) {
 	p.Println(style.Error(err.Error()))
 }
 
+// Wrapped is an error that wraps another error with an additional message.
+// Implements [ColorError], error, and Unwrap.
 type Wrapped struct {
 	err error
 	msg string
@@ -70,6 +78,8 @@ func (w Wrapped) Unwrap() error {
 	return w.err
 }
 
+// NewWrapped creates a [Wrapped] error wrapping err with the given message.
+// err may be nil for root-cause errors without an underlying cause.
 func NewWrapped(err error, msg string) Wrapped {
 	return Wrapped{
 		err: err,
@@ -77,6 +87,9 @@ func NewWrapped(err error, msg string) Wrapped {
 	}
 }
 
+// Wrappedf is an error that wraps another error with a formatted message.
+// Format arguments are styled with ErrorAltCode when printed via [Stacktrace].
+// Implements [ColorError], error, and Unwrap.
 type Wrappedf struct {
 	err  error
 	msg  string
@@ -105,6 +118,8 @@ func (w Wrappedf) Unwrap() error {
 	return w.err
 }
 
+// NewWrappedf creates a [Wrappedf] error wrapping err with a fmt.Sprintf-style message.
+// err may be nil for root-cause errors without an underlying cause.
 func NewWrappedf(err error, format string, args ...string) Wrappedf {
 	return Wrappedf{
 		err:  err,
@@ -113,7 +128,8 @@ func NewWrappedf(err error, format string, args ...string) Wrappedf {
 	}
 }
 
-// ArgChoiceError is returned when a parsed arg doesn't match any known choices.
+// ArgChoiceError is returned when a parsed argument does not match any valid choice.
+// Implements [ColorError] for styled output listing the valid options.
 type ArgChoiceError struct {
 	// Message describes what was expected (e.g., "expecting section or command")
 	Message string
