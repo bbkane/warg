@@ -13,7 +13,7 @@ import (
 type GoldenTestArgs struct {
 	App *App
 
-	// UpdateGolden overwrites existing golden files with actual output when true.
+	// UpdateGolden overwrites existing golden files with actual stderr/stdout when true.
 	UpdateGolden bool
 
 	// ExpectActionErr asserts the action returns a non-nil error when true.

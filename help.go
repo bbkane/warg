@@ -78,10 +78,11 @@ func ColorEnabled(pf PassedFlags, file *os.File) bool {
 	return startEnabled
 }
 
-// TermWidth determines the terminal width to use for wrapping help output.
-// Returns 0 for infinite width. Respects the --term-width flag if present:
-// "auto" detects terminal size (falls back to 0), "infinite" returns 0,
-// and a positive integer is used directly.
+// look for a passed --term-width flag with an underlying string value.
+//   - if --term-width doesn't exist, or it's set to "infinite", return 0 (indicating infinite width)
+//   - if it's set to "auto", attempt to detect terminal width and return it, falling back to 0 if detection fails
+//   - if it's set to a positive integer, return that integer
+//   - if it's set to an invalid value (e.g. negative integer, non-integer string), return 0
 func TermWidth(file *os.File, pf PassedFlags) int {
 	termWidthI, exists := pf["--term-width"]
 	if !exists {

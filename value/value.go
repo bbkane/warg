@@ -2,6 +2,10 @@ package value
 
 import (
 	"fmt"
+	"strings"
+
+	"go.bbkane.com/warg/colerr"
+	"go.bbkane.com/warg/styles"
 )
 
 // UpdatedBy identifies the source that last set a flag's value.
@@ -94,6 +98,17 @@ func (e ErrInvalidChoice[T]) Error() string {
 	return "invalid choice for value: choices: " + fmt.Sprint(e.Choices)
 }
 
+func (e ErrInvalidChoice[T]) ColorError(s *styles.Styles) string {
+	var buf strings.Builder
+
+	buf.WriteString("invalid choice for value: choices:\n")
+	for _, c := range e.Choices {
+		buf.WriteString(string(s.ErrorAltCode) + "  " + fmt.Sprint(c) + "\n")
+	}
+
+	return s.Error(buf.String())
+}
+
 // ErrUpdatedMoreThanOnce is returned when a scalar value is set more than once
 // from the same priority level (e.g., two CLI flags for the same scalar).
 type ErrUpdatedMoreThanOnce[T any] struct {
@@ -103,4 +118,9 @@ type ErrUpdatedMoreThanOnce[T any] struct {
 
 func (e ErrUpdatedMoreThanOnce[T]) Error() string {
 	return fmt.Sprintf("value already updated to %#v by %s", e.CurrentValue, e.UpdatedBy)
+}
+
+func (e ErrUpdatedMoreThanOnce[T]) ColorError(s *styles.Styles) string {
+	err := colerr.NewWrappedf(nil, "value already updated to %s by %v", fmt.Sprintf("%v", e.CurrentValue), string(e.UpdatedBy))
+	return err.ColorError(s)
 }

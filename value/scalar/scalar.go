@@ -118,7 +118,8 @@ func (v *scalarValue[_]) String() string {
 
 func (v *scalarValue[T]) Update(s string, u value.UpdatedBy) error {
 	if v.updatedBy != value.UpdatedByUnset {
-		return value.ErrUpdatedMoreThanOnce[T]{CurrentValue: *v.val, UpdatedBy: v.updatedBy}
+		inner := value.ErrUpdatedMoreThanOnce[T]{CurrentValue: *v.val, UpdatedBy: v.updatedBy}
+		return inner
 	}
 	val, err := v.inner.FromString(s)
 	if err != nil {

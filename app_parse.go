@@ -268,7 +268,7 @@ func (app *App) parseArgs(args []string) (ParseState, error) {
 			} else {
 				err := pr.FlagValues[pr.CurrentFlagName].Update(arg, value.UpdatedByFlag)
 				if err != nil {
-					return pr, err
+					return pr, colerr.NewWrappedf(err, "error updating flag %v with value %v", pr.CurrentFlagName, arg)
 				}
 				pr.UnsetFlagNames.Delete(pr.CurrentFlagName)
 			}

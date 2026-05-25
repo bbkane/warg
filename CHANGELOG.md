@@ -6,7 +6,9 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
-# v0.0.42
+# v0.42.2
+
+NOTE: this is the first release since v0.40.0/v0.0.40 without two tags!
 
 ## Added
 
@@ -21,8 +23,9 @@ below this description) is likely unreleased.
 
 - Updated doc comments for most public APIs
 - If parsing fails, print a colored error! We also now show available choices for arguments if we can. Colored errors are enabled by default if stderr is a terminal, but can be disabled with `WARG_COLOR=false`
+- Improved error when updating scalar flag twice from passed args
 
-# v0.0.41
+# v0.41.1 / v0.0.41
 
 ## Added
 
@@ -53,16 +56,11 @@ col, err := gocolor.Prepare(colorEnabled)
 - Slice flags are now prefixed with `[]` in detailed help. So, `--mylist` would have type `[]string`
 - Fix the ordering of commands in `allcommands` help
 
-# v0.0.40
+# v0.40.0 / v0.0.40
 
-NOTE: I accidentally released this as `v0.40.0`. Had to fix with:
+NOTE: I accidentally released this as `v0.40.0`. `pkg.go.dev` caches modules, so (even though I tried), I can't just change the git tags that mark versions.
 
-```bash
-git tag -d v0.40.0
-git push origin v0.0.40 :v0.40.0
-```
-
-I think I also need to retract the version for callers?
+So instead, `v0.40.0` will be the same commit as `v0.0.40` and likewise for `v0.40.1`/`v.0.0.41`. And I'll only have `v0.40.2` going forward.
 
 ## Removed
 
