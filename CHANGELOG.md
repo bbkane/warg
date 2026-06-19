@@ -8,6 +8,10 @@ below this description) is likely unreleased.
 
 # v0.42.3
 
+## Added
+
+- Add `DateTimeRFC3339` type. It's an awkward thing to type, but I intend it to be set automatically most of the time (for `enventory` for example)
+
 ## Changed
 
 - Make errors start with capital letters so they look good in stack traces.

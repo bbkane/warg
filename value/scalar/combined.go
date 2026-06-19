@@ -29,6 +29,11 @@ func Duration(opts ...ScalarOpt[time.Duration]) value.EmptyConstructor {
 	return New(contained.Duration(), opts...)
 }
 
+// DateTimeRFC3339 returns an [value.EmptyConstructor] for a scalar [time.Time] flag in RFC3339 format.
+func DateTimeRFC3339(opts ...ScalarOpt[time.Time]) value.EmptyConstructor {
+	return New(contained.DateTimeRFC3339(), opts...)
+}
+
 // Int returns an [value.EmptyConstructor] for a scalar int flag.
 func Int(opts ...ScalarOpt[int]) value.EmptyConstructor {
 	return New(contained.Int(), opts...)

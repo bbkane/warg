@@ -29,6 +29,11 @@ func Duration(opts ...SliceOpt[time.Duration]) value.EmptyConstructor {
 	return New(contained.Duration(), opts...)
 }
 
+// DateTimeRFC3339 returns an [value.EmptyConstructor] for a slice of [time.Time] values in RFC3339 format.
+func DateTimeRFC3339(opts ...SliceOpt[time.Time]) value.EmptyConstructor {
+	return New(contained.DateTimeRFC3339(), opts...)
+}
+
 // Int returns an [value.EmptyConstructor] for a slice of int values.
 func Int(opts ...SliceOpt[int]) value.EmptyConstructor {
 	return New(contained.Int(), opts...)

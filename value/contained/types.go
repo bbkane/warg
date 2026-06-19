@@ -184,6 +184,27 @@ func Duration() TypeInfo[time.Duration] {
 	}
 }
 
+// DateTimeRFC3339 returns a [TypeInfo] for [time.Time] values in RFC3339 format.
+func DateTimeRFC3339() TypeInfo[time.Time] {
+	return TypeInfo[time.Time]{
+		Description: "datetime in RFC3339 format",
+		FromZero:    FromZero[time.Time],
+		FromIFace: func(iFace interface{}) (time.Time, error) {
+			under, ok := iFace.(string)
+			if !ok {
+				return time.Time{}, ErrIncompatibleInterface
+			}
+			return time.Parse(time.RFC3339, under)
+		},
+		FromString: func(s string) (time.Time, error) {
+			return time.Parse(time.RFC3339, s)
+		},
+		Equals: func(a, b time.Time) bool {
+			return a.Equal(b)
+		},
+	}
+}
+
 func intFromString(s string) (int, error) {
 	i, err := strconv.ParseInt(s, 0, strconv.IntSize)
 	if err != nil {
