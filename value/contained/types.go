@@ -16,7 +16,7 @@ import (
 
 // ErrIncompatibleInterface is returned when a value cannot be decoded from an interface{}
 // (typically from a config file whose type doesn't match the expected Go type).
-var ErrIncompatibleInterface = errors.New("could not decode interface into Value")
+var ErrIncompatibleInterface = errors.New("Could not decode interface into Value")
 
 // FromZero returns the zero value for type T. Use as the FromZero field in [TypeInfo].
 func FromZero[T any]() T {
@@ -64,7 +64,7 @@ func (ti TypeInfo[T]) ValidateNonNilFuncs() error {
 	}
 
 	if len(errs) > 0 {
-		return colerr.NewWrapped(errors.Join(errs...), "nil fields")
+		return colerr.NewWrapped(errors.Join(errs...), "Nil fields")
 	}
 
 	return nil
@@ -97,7 +97,7 @@ func NetIPAddr() TypeInfo[netip.Addr] {
 			case []byte:
 				ip, ok := netip.AddrFromSlice(under)
 				if !ok {
-					return netip.Addr{}, colerr.NewWrappedf(nil, "could not convert %s to netip.Addr", string(under))
+					return netip.Addr{}, colerr.NewWrappedf(nil, "Could not convert %s to netip.Addr", string(under))
 				}
 				return ip, nil
 			case string:
@@ -151,7 +151,7 @@ func Bool() TypeInfo[bool] {
 			case "false":
 				return false, nil
 			default:
-				return false, colerr.NewWrappedf(nil, "expected \"true\" or \"false\", got %s", s)
+				return false, colerr.NewWrappedf(nil, "Expected \"true\" or \"false\", got %s", s)
 			}
 		},
 		Equals: Equals[bool],
@@ -203,12 +203,12 @@ func Int() TypeInfo[int] {
 			// go-yaml may decode all numbers as int64 or uint64
 			case int64:
 				if under > math.MaxInt || under < math.MinInt {
-					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for int", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int64 value %s out of range for int", fmt.Sprintf("%d", under))
 				}
 				return int(under), nil
 			case uint64:
 				if under > math.MaxInt {
-					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for int", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Uint64 value %s out of range for int", fmt.Sprintf("%d", under))
 				}
 				return int(under), nil
 			case json.Number:
@@ -241,17 +241,17 @@ func Int8() TypeInfo[int8] {
 				return under, nil
 			case int:
 				if under > math.MaxInt8 || under < math.MinInt8 {
-					return 0, colerr.NewWrappedf(nil, "int value %s out of range for int8", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int value %s out of range for int8", fmt.Sprintf("%d", under))
 				}
 				return int8(under), nil
 			case int64:
 				if under > math.MaxInt8 || under < math.MinInt8 {
-					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for int8", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int64 value %s out of range for int8", fmt.Sprintf("%d", under))
 				}
 				return int8(under), nil
 			case uint64:
 				if under > math.MaxInt8 {
-					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for int8", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Uint64 value %s out of range for int8", fmt.Sprintf("%d", under))
 				}
 				return int8(under), nil
 			case json.Number:
@@ -284,17 +284,17 @@ func Int16() TypeInfo[int16] {
 				return under, nil
 			case int:
 				if under > math.MaxInt16 || under < math.MinInt16 {
-					return 0, colerr.NewWrappedf(nil, "int value %s out of range for int16", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int value %s out of range for int16", fmt.Sprintf("%d", under))
 				}
 				return int16(under), nil
 			case int64:
 				if under > math.MaxInt16 || under < math.MinInt16 {
-					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for int16", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int64 value %s out of range for int16", fmt.Sprintf("%d", under))
 				}
 				return int16(under), nil
 			case uint64:
 				if under > math.MaxInt16 {
-					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for int16", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Uint64 value %s out of range for int16", fmt.Sprintf("%d", under))
 				}
 				return int16(under), nil
 			case json.Number:
@@ -327,17 +327,17 @@ func Int32() TypeInfo[int32] {
 				return under, nil
 			case int:
 				if under > math.MaxInt32 || under < math.MinInt32 {
-					return 0, colerr.NewWrappedf(nil, "int value %s out of range for int32", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int value %s out of range for int32", fmt.Sprintf("%d", under))
 				}
 				return int32(under), nil
 			case int64:
 				if under > math.MaxInt32 || under < math.MinInt32 {
-					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for int32", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int64 value %s out of range for int32", fmt.Sprintf("%d", under))
 				}
 				return int32(under), nil
 			case uint64:
 				if under > math.MaxInt32 {
-					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for int32", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Uint64 value %s out of range for int32", fmt.Sprintf("%d", under))
 				}
 				return int32(under), nil
 			case json.Number:
@@ -368,7 +368,7 @@ func Int64() TypeInfo[int64] {
 				return int64(under), nil
 			case uint64:
 				if under > math.MaxInt64 {
-					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for int64", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Uint64 value %s out of range for int64", fmt.Sprintf("%d", under))
 				}
 				return int64(under), nil
 			case json.Number:
@@ -401,17 +401,17 @@ func Uint() TypeInfo[uint] {
 				return under, nil
 			case uint64:
 				if under > math.MaxUint {
-					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for uint", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Uint64 value %s out of range for uint", fmt.Sprintf("%d", under))
 				}
 				return uint(under), nil
 			case int:
 				if under < 0 {
-					return 0, colerr.NewWrappedf(nil, "int value %s out of range for uint", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int value %s out of range for uint", fmt.Sprintf("%d", under))
 				}
 				return uint(under), nil
 			case int64:
 				if under < 0 {
-					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for uint", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int64 value %s out of range for uint", fmt.Sprintf("%d", under))
 				}
 				return uint(under), nil
 			case json.Number:
@@ -444,17 +444,17 @@ func Uint8() TypeInfo[uint8] {
 				return under, nil
 			case uint64:
 				if under > math.MaxUint8 {
-					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for uint8", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Uint64 value %s out of range for uint8", fmt.Sprintf("%d", under))
 				}
 				return uint8(under), nil
 			case int:
 				if under < 0 || under > math.MaxUint8 {
-					return 0, colerr.NewWrappedf(nil, "int value %s out of range for uint8", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int value %s out of range for uint8", fmt.Sprintf("%d", under))
 				}
 				return uint8(under), nil
 			case int64:
 				if under < 0 || under > math.MaxUint8 {
-					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for uint8", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int64 value %s out of range for uint8", fmt.Sprintf("%d", under))
 				}
 				return uint8(under), nil
 			case json.Number:
@@ -487,17 +487,17 @@ func Uint16() TypeInfo[uint16] {
 				return under, nil
 			case uint64:
 				if under > math.MaxUint16 {
-					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for uint16", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Uint64 value %s out of range for uint16", fmt.Sprintf("%d", under))
 				}
 				return uint16(under), nil
 			case int:
 				if under < 0 || under > math.MaxUint16 {
-					return 0, colerr.NewWrappedf(nil, "int value %s out of range for uint16", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int value %s out of range for uint16", fmt.Sprintf("%d", under))
 				}
 				return uint16(under), nil
 			case int64:
 				if under < 0 || under > math.MaxUint16 {
-					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for uint16", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int64 value %s out of range for uint16", fmt.Sprintf("%d", under))
 				}
 				return uint16(under), nil
 			case json.Number:
@@ -530,17 +530,17 @@ func Uint32() TypeInfo[uint32] {
 				return under, nil
 			case uint64:
 				if under > math.MaxUint32 {
-					return 0, colerr.NewWrappedf(nil, "uint64 value %s out of range for uint32", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Uint64 value %s out of range for uint32", fmt.Sprintf("%d", under))
 				}
 				return uint32(under), nil
 			case int:
 				if under < 0 || under > math.MaxUint32 {
-					return 0, colerr.NewWrappedf(nil, "int value %s out of range for uint32", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int value %s out of range for uint32", fmt.Sprintf("%d", under))
 				}
 				return uint32(under), nil
 			case int64:
 				if under < 0 || under > math.MaxUint32 {
-					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for uint32", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int64 value %s out of range for uint32", fmt.Sprintf("%d", under))
 				}
 				return uint32(under), nil
 			case json.Number:
@@ -569,12 +569,12 @@ func Uint64() TypeInfo[uint64] {
 				return under, nil
 			case int:
 				if under < 0 {
-					return 0, colerr.NewWrappedf(nil, "int value %s out of range for uint64", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int value %s out of range for uint64", fmt.Sprintf("%d", under))
 				}
 				return uint64(under), nil
 			case int64:
 				if under < 0 {
-					return 0, colerr.NewWrappedf(nil, "int64 value %s out of range for uint64", fmt.Sprintf("%d", under))
+					return 0, colerr.NewWrappedf(nil, "Int64 value %s out of range for uint64", fmt.Sprintf("%d", under))
 				}
 				return uint64(under), nil
 			case json.Number:
@@ -607,7 +607,7 @@ func Float32() TypeInfo[float32] {
 				return under, nil
 			case float64:
 				if under > math.MaxFloat32 || under < -math.MaxFloat32 {
-					return 0, colerr.NewWrappedf(nil, "float64 value %s out of range for float32", fmt.Sprintf("%g", under))
+					return 0, colerr.NewWrappedf(nil, "Float64 value %s out of range for float32", fmt.Sprintf("%g", under))
 				}
 				return float32(under), nil
 			case int:
@@ -682,11 +682,11 @@ const emptyRune rune = -1
 
 func runeFromString(s string) (rune, error) {
 	if s == "" {
-		return -1, errors.New("empty string passed")
+		return -1, errors.New("Empty string passed")
 	}
 	var r rune
 	if rs := []rune(s); len(rs) != 1 {
-		return emptyRune, errors.New("runes shuld only be one character")
+		return emptyRune, errors.New("Runes shuld only be one character")
 	} else {
 		return r, nil
 	}

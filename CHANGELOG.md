@@ -6,6 +6,13 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note that I update this changelog as I make changes, so the top version (right
 below this description) is likely unreleased.
 
+# v0.42.3
+
+## Changed
+
+- Make errors start with capital letters so they look good in stack traces.
+- Make the default help message compact style - because there are several default commands (repl, version, bash/fish/zsh completion), they need to be collapsed into this
+
 # v0.42.2
 
 NOTE: this is the first release since v0.40.0/v0.0.40 without two tags!

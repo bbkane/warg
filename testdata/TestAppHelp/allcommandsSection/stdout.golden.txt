@@ -1,12 +1,14 @@
+Usage:
+  grabbit config [command]
+
 Change grabbit's config
 
-All Commands (use <cmd> -h to see flag details):
+Available Commands:
+  edit   Edit the config. A default config will be created if it doesn't exist
 
-  # Edit the config. A default config will be created if it doesn't exist
-  grabbit config edit
+Use "grabbit config [command] --help" for more information about a command.
 
 Footer:
-
 Examples:
 
 	# Grab without config

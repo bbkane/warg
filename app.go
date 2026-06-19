@@ -392,10 +392,10 @@ func parseTermWidth(s string) (string, error) {
 
 	parsed, err := strconv.Atoi(s)
 	if err != nil {
-		return "", colerr.NewWrappedf(nil, "expected a positive integer, \"infinite\", or \"auto\", got %s", fmt.Sprintf("%q", s))
+		return "", colerr.NewWrappedf(nil, "Expected a positive integer, \"infinite\", or \"auto\", got %s", fmt.Sprintf("%q", s))
 	}
 	if parsed <= 0 {
-		return "", colerr.NewWrappedf(nil, "expected a positive integer, \"infinite\", or \"auto\", got %s", fmt.Sprintf("%q", s))
+		return "", colerr.NewWrappedf(nil, "Expected a positive integer, \"infinite\", or \"auto\", got %s", fmt.Sprintf("%q", s))
 	}
 
 	return s, nil
@@ -519,10 +519,10 @@ func validateFlags(
 	var errs []error
 	for name, count := range nameCount {
 		if !strings.HasPrefix(string(name), "-") {
-			errs = append(errs, colerr.NewWrappedf(nil, "flag and alias names must start with '-': %s", fmt.Sprintf("%#v", name)))
+			errs = append(errs, colerr.NewWrappedf(nil, "Flag and alias names must start with '-': %s", fmt.Sprintf("%#v", name)))
 		}
 		if count > 1 {
-			errs = append(errs, colerr.NewWrappedf(nil, "flag or alias name exists %s times: %s", fmt.Sprintf("%d", count), fmt.Sprintf("%v", name)))
+			errs = append(errs, colerr.NewWrappedf(nil, "Flag or alias name exists %s times: %s", fmt.Sprintf("%d", count), fmt.Sprintf("%v", name)))
 		}
 	}
 	return errors.Join(errs...)
@@ -592,12 +592,12 @@ func (app *App) Validate() error {
 		// Sections don't start with "-"
 		secName := flatSec.Path[len(flatSec.Path)-1]
 		if strings.HasPrefix(string(secName), "-") {
-			return colerr.NewWrappedf(nil, "section names must not start with '-': %s", fmt.Sprintf("%#v", secName))
+			return colerr.NewWrappedf(nil, "Section names must not start with '-': %s", fmt.Sprintf("%#v", secName))
 		}
 
 		// Sections must not be leaf nodes
 		if flatSec.Sec.Sections.Empty() && flatSec.Sec.Cmds.Empty() {
-			return colerr.NewWrappedf(nil, "sections must have either child sections or child commands: %s", fmt.Sprintf("%#v", secName))
+			return colerr.NewWrappedf(nil, "Sections must have either child sections or child commands: %s", fmt.Sprintf("%#v", secName))
 		}
 
 		{
@@ -612,12 +612,12 @@ func (app *App) Validate() error {
 			errs := []error{}
 			for name, count := range nameCount {
 				if count > 1 {
-					errs = append(errs, colerr.NewWrappedf(nil, "command and section name clash: %s", name))
+					errs = append(errs, colerr.NewWrappedf(nil, "Command and section name clash: %s", name))
 				}
 			}
 			err := errors.Join(errs...)
 			if err != nil {
-				return colerr.NewWrapped(err, "name collision")
+				return colerr.NewWrapped(err, "Name collision")
 			}
 		}
 
@@ -625,7 +625,7 @@ func (app *App) Validate() error {
 
 			// Commands must not start wtih "-"
 			if strings.HasPrefix(string(name), "-") {
-				return colerr.NewWrappedf(nil, "command names must not start with '-': %s", fmt.Sprintf("%#v", name))
+				return colerr.NewWrappedf(nil, "Command names must not start with '-': %s", fmt.Sprintf("%#v", name))
 			}
 
 			err := validateFlags(app.GlobalFlags, com.Flags)
@@ -652,7 +652,7 @@ func (app *App) Complete(args []string, partiallyTypedArg string, opts ...ParseO
 	// I could to a full parse here, but that would be slower and more prone to failure than just parsing the args - we don't need a lot of info to complete section/command names
 	parseState, err := app.parseArgs(args)
 	if err != nil {
-		return nil, colerr.NewWrapped(err, "unexpected parseArgs err")
+		return nil, colerr.NewWrapped(err, "Unexpected parseArgs err")
 	}
 
 	// special case if help is passed
@@ -707,7 +707,7 @@ func (app *App) Complete(args []string, partiallyTypedArg string, opts ...ParseO
 	// Finish the parse!
 	err = app.resolveFlags(parseState.CurrentCmd, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
 	if err != nil {
-		return nil, colerr.NewWrapped(err, "unexpected resolveFlags err")
+		return nil, colerr.NewWrapped(err, "Unexpected resolveFlags err")
 	}
 	cmdContext := CmdContext{
 		App:           app,
@@ -728,7 +728,7 @@ func (app *App) Complete(args []string, partiallyTypedArg string, opts ...ParseO
 	case ParseArgState_WantSectionOrCmd:
 		panic("unreachable state: ExpectingArg_SectionOrCommand")
 	default:
-		return nil, colerr.NewWrappedf(nil, "unexpected ParseState: %s", fmt.Sprintf("%v", parseState.ParseArgState))
+		return nil, colerr.NewWrappedf(nil, "Unexpected ParseState: %s", fmt.Sprintf("%v", parseState.ParseArgState))
 	}
 }
 
@@ -801,7 +801,7 @@ func replCmdAction(cmdCtx CmdContext) error {
 	rl := readline.NewShell()
 	err := rl.Config.Set("menu-complete-display-prefix", true)
 	if err != nil {
-		return colerr.NewWrapped(err, "could not set readline config")
+		return colerr.NewWrapped(err, "Could not set readline config")
 	}
 	rl.Prompt.Primary(func() string {
 		return cmdCtx.App.Name + " >>> "
@@ -817,7 +817,7 @@ func replCmdAction(cmdCtx CmdContext) error {
 
 		words, err := shellwords.Parse(lineStr)
 		if err != nil {
-			err = colerr.NewWrappedf(err, "could not parse args for completion: args: %s", fmt.Sprintf("%v", words))
+			err = colerr.NewWrappedf(err, "Could not parse args for completion: args: %s", fmt.Sprintf("%v", words))
 			return readline.CompleteMessage(err.Error())
 		}
 
@@ -833,7 +833,7 @@ func replCmdAction(cmdCtx CmdContext) error {
 		// TODO: should I copy parseOpts from cmdCtx?
 		candidates, err := cmdCtx.App.Complete(words, partiallyTypedArg)
 		if err != nil {
-			err = colerr.NewWrappedf(err, "could not get completions: args: %s", fmt.Sprintf("%v", words))
+			err = colerr.NewWrappedf(err, "Could not get completions: args: %s", fmt.Sprintf("%v", words))
 			return readline.CompleteMessage(err.Error())
 		}
 
@@ -871,7 +871,7 @@ func replCmdAction(cmdCtx CmdContext) error {
 			return nil
 		}
 		if err != nil {
-			return colerr.NewWrapped(err, "could not read line")
+			return colerr.NewWrapped(err, "Could not read line")
 		}
 		words, err := shellwords.Parse(line)
 		if err != nil {

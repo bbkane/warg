@@ -182,7 +182,7 @@ func (app *App) parseArgs(args []string) (ParseState, error) {
 			if i == len(args)-2 {
 				err := pr.FlagValues[app.HelpFlagName].Update(args[i+1], value.UpdatedByFlag)
 				if err != nil {
-					return pr, colerr.NewWrapped(err, "error updating help flag")
+					return pr, colerr.NewWrapped(err, "Error updating help flag")
 				}
 			}
 
@@ -227,7 +227,7 @@ func (app *App) parseArgs(args []string) (ParseState, error) {
 			// check if we need to handle forwarded args
 			if flagName == "--" && pr.CurrentCmd.AllowForwardedArgs {
 				if i >= len(args)-1 {
-					return pr, errors.New("expecting forwarded args after --")
+					return pr, errors.New("Expecting forwarded args after --")
 				}
 				// all remaining args are forwarded args
 				pr.CurrentCmdForwardedArgs = append(pr.CurrentCmdForwardedArgs, args[i+1:]...)
@@ -268,7 +268,7 @@ func (app *App) parseArgs(args []string) (ParseState, error) {
 			} else {
 				err := pr.FlagValues[pr.CurrentFlagName].Update(arg, value.UpdatedByFlag)
 				if err != nil {
-					return pr, colerr.NewWrappedf(err, "error updating flag %v with value %v", pr.CurrentFlagName, arg)
+					return pr, colerr.NewWrappedf(err, "Error updating flag %v with value %v", pr.CurrentFlagName, arg)
 				}
 				pr.UnsetFlagNames.Delete(pr.CurrentFlagName)
 			}
@@ -332,7 +332,7 @@ func resolveFlag(
 		if exists {
 			err := flagValues[flagName].Update(val, value.UpdatedByEnvVar)
 			if err != nil {
-				return colerr.NewWrappedf(err, "error updating flag %s from envvar %s", fmt.Sprintf("%v", flagName), fmt.Sprintf("%v", val))
+				return colerr.NewWrappedf(err, "Error updating flag %s from envvar %s", fmt.Sprintf("%v", flagName), fmt.Sprintf("%v", val))
 			}
 			// Use first env var found
 			return nil
@@ -343,7 +343,7 @@ func resolveFlag(
 	if flagValues[flagName].HasDefault() {
 		err := flagValues[flagName].ReplaceFromDefault(value.UpdatedByDefault)
 		if err != nil {
-			return colerr.NewWrappedf(err, "error updating flag %s from default", fmt.Sprintf("%v", flagName))
+			return colerr.NewWrappedf(err, "Error updating flag %s from default", fmt.Sprintf("%v", flagName))
 		}
 		return nil
 	}
@@ -358,17 +358,17 @@ func (app *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv Loo
 		err := resolveFlag(
 			app.ConfigFlagName, app.GlobalFlags[app.ConfigFlagName], flagValues, nil, lookupEnv, unsetFlagNames)
 		if err != nil {
-			return colerr.NewWrappedf(err, "resolveFlag error for flag %s", app.ConfigFlagName)
+			return colerr.NewWrappedf(err, "ResolveFlag error for flag %s", app.ConfigFlagName)
 		}
 		if flagValues[app.ConfigFlagName].UpdatedBy() != value.UpdatedByUnset {
 			configPath := flagValues[app.ConfigFlagName].Get().(path.Path)
 			configPathStr, err := configPath.Expand()
 			if err != nil {
-				return colerr.NewWrappedf(err, "error expanding config path ( %s ) ", configPath.String())
+				return colerr.NewWrappedf(err, "Error expanding config path ( %s ) ", configPath.String())
 			}
 			configReader, err = app.NewConfigReader(configPathStr)
 			if err != nil {
-				return colerr.NewWrappedf(err, "error reading config path ( %s ) ", configPath.String())
+				return colerr.NewWrappedf(err, "Error reading config path ( %s ) ", configPath.String())
 			}
 
 		}
@@ -378,7 +378,7 @@ func (app *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv Loo
 	for flagName, fl := range app.GlobalFlags {
 		err := resolveFlag(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
 		if err != nil {
-			return colerr.NewWrappedf(err, "resolveFlag error for global flag %s", flagName)
+			return colerr.NewWrappedf(err, "ResolveFlag error for global flag %s", flagName)
 		}
 	}
 
@@ -387,7 +387,7 @@ func (app *App) resolveFlags(currentCmd *Cmd, flagValues ValueMap, lookupEnv Loo
 		for flagName, fl := range currentCmd.Flags {
 			err := resolveFlag(flagName, fl, flagValues, configReader, lookupEnv, unsetFlagNames)
 			if err != nil {
-				return colerr.NewWrappedf(err, "resolveFlag error for command flag %s", flagName)
+				return colerr.NewWrappedf(err, "ResolveFlag error for command flag %s", flagName)
 			}
 		}
 	}
@@ -434,7 +434,7 @@ func (app *App) Parse(args []string, opts ...ParseOpt) (*ParseResult, error) {
 
 	// ok, we're running a real command, let's do the error checking
 	if parseState.ParseArgState != ParseArgState_WantFlagNameOrEnd {
-		return nil, colerr.NewWrappedf(nil, "unexpected parse state: %s", string(parseState.ParseArgState))
+		return nil, colerr.NewWrappedf(nil, "Unexpected parse state: %s", string(parseState.ParseArgState))
 	}
 
 	err = app.resolveFlags(parseState.CurrentCmd, parseState.FlagValues, parseOpts.LookupEnv, parseState.UnsetFlagNames)
@@ -456,7 +456,7 @@ func (app *App) Parse(args []string, opts ...ParseOpt) (*ParseResult, error) {
 	}
 
 	if len(missingRequiredFlags) > 0 {
-		return nil, colerr.NewWrappedf(nil, "missing but required flags: %s", fmt.Sprintf("%s", missingRequiredFlags))
+		return nil, colerr.NewWrappedf(nil, "Missing but required flags: %s", fmt.Sprintf("%s", missingRequiredFlags))
 	}
 
 	pr := ParseResult{

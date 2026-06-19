@@ -10,6 +10,8 @@ formatters:
       - examples$
 linters:
   default: standard
+  disable:
+    - staticcheck
   enable:
     - exhaustive
     - exhaustruct

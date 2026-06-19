@@ -36,7 +36,7 @@ func (p Path) expand(homedir string) (string, error) {
 	}
 
 	if len(p.path) > 1 && p.path[1] != '/' && p.path[1] != '\\' {
-		return "", errors.New("cannot expand user-specific home dir")
+		return "", errors.New("Cannot expand user-specific home dir")
 	}
 
 	return filepath.Join(homedir, p.path[1:]), nil
@@ -48,7 +48,7 @@ func (p Path) expand(homedir string) (string, error) {
 func (p Path) Expand() (string, error) {
 	homedir, err := os.UserHomeDir()
 	if err != nil {
-		return "", colerr.NewWrapped(err, "could not get home dir")
+		return "", colerr.NewWrapped(err, "Could not get home dir")
 	}
 	expanded, err := p.expand(homedir)
 	if err != nil {

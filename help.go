@@ -17,7 +17,7 @@ import (
 func DefaultHelpCmdMap() CmdMap {
 	allCmdsHelp := NewCmd("", buildHelpAction(detailedCmdHelp(), allCmdsSectionHelp()))
 	return CmdMap{
-		"default":     NewCmd("", buildHelpAction(compactCmdHelp(), allCmdsSectionHelp())),
+		"default":     NewCmd("", buildHelpAction(compactCmdHelp(), compactSectionHelp())),
 		"detailed":    NewCmd("", buildHelpAction(detailedCmdHelp(), detailedSectionHelp())),
 		"outline":     outlineHelp(),
 		"allcommands": allCmdsHelp,

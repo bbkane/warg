@@ -122,7 +122,7 @@ func (v *dictValue[T]) update(key string, val T) error {
 func (v *dictValue[_]) Update(s string, u value.UpdatedBy) error {
 	key, strValue, found := strings.Cut(s, "=")
 	if !found {
-		return colerr.NewWrappedf(nil, "could not parse key=value for %s", fmt.Sprintf("%v", s))
+		return colerr.NewWrappedf(nil, "Could not parse key=value for %s", fmt.Sprintf("%v", s))
 	}
 	val, err := v.inner.FromString(strValue)
 	if err != nil {

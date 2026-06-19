@@ -121,6 +121,6 @@ func (e ErrUpdatedMoreThanOnce[T]) Error() string {
 }
 
 func (e ErrUpdatedMoreThanOnce[T]) ColorError(s *styles.Styles) string {
-	err := colerr.NewWrappedf(nil, "value already updated to %s by %v", fmt.Sprintf("%v", e.CurrentValue), string(e.UpdatedBy))
+	err := colerr.NewWrappedf(nil, "Value already updated to %s by %v", fmt.Sprintf("%v", e.CurrentValue), string(e.UpdatedBy))
 	return err.ColorError(s)
 }

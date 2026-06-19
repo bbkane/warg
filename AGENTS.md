@@ -138,6 +138,13 @@ warg.GoldenTest(
 
 1. **Package imports**: Most warg types are in the main `warg` package. Value types are in `value/scalar` and `value/slice`
 2. **Error handling**: Commands return errors; `MustRun()` exits on error
+    - Error message strings in this repository should start with a capital letter.
+    - This is not directly enforced by standard golangci-lint rules. Use a regex check when needed:
+
+```bash
+rg -n 'errors\.New\("[a-z]|fmt\.Errorf\("[a-z]|colerr\.NewWrappedf?\([^,]+,\s*"[a-z]' --glob '**/*.go'
+```
+
 3. **Naming conventions**:
    - Commands use verb names (`add`, `edit`, `delete`)
    - Sections use noun names (`config`, `comments`)

@@ -12,7 +12,7 @@ import (
 func TestErrorWithColorStyle(t *testing.T) {
 	s := styles.NewEnabledStyles()
 	err := NewWrappedf(
-		errors.New("inner error"),
+		errors.New("Inner error"),
 		"Start of message: %s: end of message",
 		"middle of message",
 	)
@@ -36,22 +36,22 @@ func TestStacktrace(t *testing.T) {
 	}{
 		{
 			name: "single_error",
-			err:  errors.New("this is an error"),
+			err:  errors.New("This is an error"),
 		},
 		{
 			name: "wrapped_custom_error",
-			err:  NewWrapped(errors.New("wrapped err"), "wrapper msg"),
+			err:  NewWrapped(errors.New("Wrapped err"), "Wrapper msg"),
 		},
 		{
 			name: "wrappedf_custom_error",
-			err:  NewWrappedf(errors.New("wrappedf err"), "wrapperf msg: %s", "with arg"),
+			err:  NewWrappedf(errors.New("Wrappedf err"), "Wrapperf msg: %s", "with arg"),
 		},
 		{
 			name: "wrapped with errors.Join under",
 			err: NewWrappedf(
 				errors.Join(
-					errors.New("first error"),
-					errors.New("second error"),
+					errors.New("First error"),
+					errors.New("Second error"),
 				),
 				"wrapperf msg: %s", "with arg",
 			),

@@ -1,19 +1,13 @@
+Usage:
+  namedenv [command]
+
 Manage environmental secrets
 
-All Commands (use <cmd> -h to see flag details):
+Available Commands:
+  print-version   Print version
 
-  # Print version
-  namedenv print-version
+Additional Commands:
+  env       Manage environments
+  keyring   Manage keyring entries
 
-  # Create an environment
-  namedenv env create
-
-  # Update an environment
-  namedenv env update
-
-  # Print export script
-  namedenv env print-script export
-
-  # Create a keyring entry
-  namedenv keyring create
-
+Use "namedenv [command] --help" for more information about a command.
