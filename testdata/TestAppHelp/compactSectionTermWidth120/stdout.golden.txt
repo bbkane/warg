@@ -1,16 +1,19 @@
 Usage:
+
   grabbit [command]
 
 grab those images!
 
-Available Commands:
+Commands:
+
   command2   another command
   command3   another command
   grab       do the grabbity grabbity
   repl       Start a REPL to interactively run commands
   version    Print version
 
-Additional Commands:
+Sections:
+
   completion   Print shell completion scripts
   config       Change grabbit's config
   section2     another section

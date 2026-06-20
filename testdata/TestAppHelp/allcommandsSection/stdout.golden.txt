@@ -1,9 +1,11 @@
 Usage:
+
   grabbit config [command]
 
 Change grabbit's config
 
-Available Commands:
+Commands:
+
   edit   Edit the config. A default config will be created if it doesn't exist
 
 Use "grabbit config [command] --help" for more information about a command.

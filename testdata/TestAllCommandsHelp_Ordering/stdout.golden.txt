@@ -1,12 +1,15 @@
 Usage:
+
   namedenv [command]
 
 Manage environmental secrets
 
-Available Commands:
+Commands:
+
   print-version   Print version
 
-Additional Commands:
+Sections:
+
   env       Manage environments
   keyring   Manage keyring entries
 

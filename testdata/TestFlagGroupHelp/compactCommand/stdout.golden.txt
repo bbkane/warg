@@ -1,9 +1,11 @@
 Usage:
+
   myapp deploy [flags]
 
 Deploy the application
 
 Flags:
+
       --name string    Deployment name [required]
       --verbose bool   Enable verbose logging [default: "false"] [setby: appdefault] [current: "false"]
 
@@ -21,6 +23,7 @@ Flags:
       --replicas int       Number of replicas [default: "1"] [setby: appdefault] [current: "1"]
 
 Global Flags:
+
       --color string        Use ANSI colors [default: "auto"] [env: WARG_COLOR] [setby: appdefault] [current: "auto"]
   -h, --help string         Print help [default: "default"] [setby: passedflag] [current: "compact"]
       --term-width string   Terminal width. Should be a positive integer, "auto", or "infinite". If "auto" the app will attempt to detect terminal width and fall back to 120 if detection fails [default: "auto"] [env: WARG_TERM_WIDTH] [setby: appdefault] [current: "auto"]

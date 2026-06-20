@@ -207,7 +207,7 @@ func compactCmdHelp() Action {
 		usagePath.WriteString(cmdCtx.ParseState.CurrentCmdName)
 
 		// Usage line
-		p.Printf("%s:\n", s.Header("Usage"))
+		p.Printf("%s:\n\n", s.Header("Usage"))
 		if cur.AllowForwardedArgs {
 			p.Printf("  %s [flags] -- [args]\n", usagePath.String())
 		} else {
@@ -237,11 +237,11 @@ func compactCmdHelp() Action {
 			if len(lines) > 0 {
 				if group.Name == "" {
 					if !hasAnyFlags {
-						p.Printf("%s:\n", s.Header("Flags"))
+						p.Printf("%s:\n\n", s.Header("Flags"))
 					}
 				} else {
 					if !hasAnyFlags {
-						p.Printf("%s:\n", s.Header("Flags"))
+						p.Printf("%s:\n\n", s.Header("Flags"))
 					}
 					p.Printf("\n  %s:\n", s.Header(group.Name))
 				}
@@ -265,7 +265,7 @@ func compactCmdHelp() Action {
 			}
 			if len(lines) > 0 {
 				if !hasAnyGlobalFlags {
-					p.Printf("%s:\n", s.Header("Global Flags"))
+					p.Printf("%s:\n\n", s.Header("Global Flags"))
 				}
 				if group.Name != "" {
 					p.Printf("\n  %s:\n", s.Header(group.Name))
@@ -280,7 +280,7 @@ func compactCmdHelp() Action {
 
 		// Footer
 		if cur.Footer != "" {
-			p.Printf("%s:\n", s.Header("Footer"))
+			p.Printf("%s:\n\n", s.Header("Footer"))
 			p.Println(cur.Footer)
 		}
 
@@ -313,7 +313,7 @@ func compactSectionHelp() Action {
 		}
 
 		// Usage line
-		p.Printf("%s:\n", s.Header("Usage"))
+		p.Printf("%s:\n\n", s.Header("Usage"))
 		p.Printf("  %s [command]\n", usagePath.String())
 		p.Println()
 
@@ -327,7 +327,7 @@ func compactSectionHelp() Action {
 
 		// Available Commands
 		if len(cur.Cmds) > 0 {
-			p.Printf("%s:\n", s.Header("Available Commands"))
+			p.Printf("%s:\n\n", s.Header("Commands"))
 
 			// Compute max command name length for alignment
 			maxNameLen := 0
@@ -362,7 +362,7 @@ func compactSectionHelp() Action {
 
 		// Sections (sub-sections)
 		if len(cur.Sections) > 0 {
-			p.Printf("%s:\n", s.Header("Additional Commands"))
+			p.Printf("%s:\n\n", s.Header("Sections"))
 
 			maxNameLen := 0
 			for _, k := range cur.Sections.SortedNames() {
@@ -390,19 +390,6 @@ func compactSectionHelp() Action {
 			}
 			p.Println()
 		}
-
-		// // Global Flags
-		// var globalFlagLines []compactFlagLine
-		// for _, name := range cmdCtx.App.GlobalFlags.SortedNames() {
-		// 	fl := cmdCtx.App.GlobalFlags[name]
-		// 	val := cmdCtx.ParseState.FlagValues[name]
-		// 	globalFlagLines = append(globalFlagLines, compactBuildFlagLine(&s, name, &fl, val))
-		// }
-		// if len(globalFlagLines) > 0 {
-		// 	p.Printf("%s:\n", s.Header("Global Flags"))
-		// 	compactPrintFlags(p, globalFlagLines, termWidth)
-		// 	p.Println()
-		// }
 
 		// Footer hint
 		p.Printf("Use \"%s [command] --help\" for more information about a command.\n", usagePath.String())
