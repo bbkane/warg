@@ -16,6 +16,7 @@ below this description) is likely unreleased.
 
 - Make errors start with capital letters so they look good in stack traces.
 - Make the default help message compact style - because there are several default commands (repl, version, bash/fish/zsh completion), they need to be collapsed into this
+- Tweak compact style (don't use a separate column for flag alias, Use Commands/Sections verbiage, Add a line between headers and content)
 
 # v0.42.2
 

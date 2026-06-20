@@ -20,14 +20,12 @@ type compactFlagLine struct {
 
 // compactBuildFlagLine constructs the left and right columns for a single flag.
 func compactBuildFlagLine(s *styles.Styles, name string, f *Flag, val value.Value) compactFlagLine {
-	// Build left column: "  -a, --name type" or "      --name type"
+	// Build left column: "  -a, --name type" or "  --name type"
 	var left strings.Builder
 	left.WriteString("  ")
 	if f.Alias != "" {
 		left.WriteString(s.FlagAlias(f.Alias))
 		left.WriteString(", ")
-	} else {
-		left.WriteString("    ")
 	}
 	left.WriteString(s.FlagName(name))
 	left.WriteString(" ")
