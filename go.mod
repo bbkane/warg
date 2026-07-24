@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/goccy/go-yaml v1.19.2
-	github.com/mattn/go-isatty v0.0.23
+	github.com/mattn/go-isatty v0.0.24
 	github.com/mattn/go-shellwords v1.0.14
 	github.com/reeflective/readline v1.3.0
 	github.com/stretchr/testify v1.11.1
