@@ -14,7 +14,7 @@ linters:
     - staticcheck
   enable:
     - exhaustive
-    - exhaustruct
+    - exhaustruct_v5
     - forbidigo
     - gochecknoglobals
     - gochecknoinits
